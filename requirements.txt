@@ -1,0 +1,4 @@
+pip
+PySide6
+tomli
+tomli-w

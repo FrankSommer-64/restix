@@ -1,0 +1,26 @@
+format 224
+
+usecasecanvas 128099 usecase_ref 128995 // Jahresabschluss
+  xyzwh 360 206 3005 64 32 label_xy 338 229
+end
+classcanvas 128227 class_ref 128099 // Anwender
+  simpleclassdiagramsettings end
+  xyz 128 145 2000
+end
+usecasecanvas 128483 usecase_ref 142051 // Monatsabschluss
+  xyzwh 364 71 3005 64 32 label_xy 338 94
+end
+classcanvas 128739 class_ref 134627 // Scheduler
+  simpleclassdiagramsettings end
+  xyz 126 410 2000
+end
+usecasecanvas 128867 usecase_ref 142179 // Serversicherung
+  xyzwh 373 419 3005 64 32 label_xy 351 442
+end
+line 128355 ----
+  from ref 128227 z 3006 to ref 128099
+line 128611 ----
+  from ref 128227 z 3006 to ref 128483
+line 128995 ----
+  from ref 128739 z 3006 to ref 128867
+end

@@ -1,0 +1,74 @@
+# general
+e-invalid-hostname Der angegebene Hostname {0} ist ungültig.
+e-invalid-restix-cfg-file Die restix-Konfigurationsdatei {0} enthält Fehler: {1}.
+e-invalid-snapshot-id Die angegebene Snapshot-ID {0} ist ungültig, Hexadezimalzahl erforderlich.
+e-invalid-year Die angegebene Jahreszahl {0} ist ungültig, vier Ziffern erforderlich.
+e-internal-error Interner Fehler: {0}.
+e-restix-cfg-file-not-found restix-Konfigurationsdatei {0} nicht gefunden.
+e-restix-excludes-file-does-not-exist Exclude-Datei {0} nicht gefunden.
+e-restix-guard-file-does-not-exist Guard-Datei {0} nicht gefunden.
+e-restix-guard-file-modified Inhalt der Guard-Datei {0} entspricht nicht der Erwartung.
+e-restix-guard-text-not-defined Erwarteter Inhalt der Guard-Datei {0} wurde nicht festgelegt.
+e-restix-includes-file-does-not-exist Include-Datei {0} nicht gefunden.
+e-restix-no-scopes-defined In der Konfigurationsdatei wurden keine Umfänge definiert.
+e-restix-pw-file-does-not-exist Passwort-Datei {0} nicht gefunden.
+e-restix-pw-file-not-defined Pfad der Passwort-Datei wurde nicht definiert.
+e-restix-read-guard-file-failed Guard-Datei {0} konnte nicht gelesen werden: {1}.
+e-restix-scope-includes-missing Für Umfang {0} wurde in der Konfigurationsdatei keine Include-Datei definiert.
+e-restix-target-needs-mount-path restic-Repository {0} benötigt die Angabe eines Mount-Verzeichnisses.
+e-restix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
+e-restix-target-repo-missing Für restic-Repository-Alias {0} wurde keine Adresse definiert.
+e-restix-target-scope-missing Für restic-Repository-Alias {0} wurde kein Umfang ausgewählt.
+e-restix-target-scope-not-defined Der für restic-Repository {1} angegebene Umfang {1} ist in der Konfigurationsdatei nicht definiert.
+e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
+
+# Konfiguration
+e-cfg-invalid-elem-type Ungültiger Typ für Element {0} in der Konfigurationsdatei {2}, {1} erwartet.
+e-cfg-mandatory-elem-missing Für Element {0} wurde das notwendige Attribut {1} nicht definiert
+e-cfg-mandatory-grp-missing Notwendige Group {1} nicht definiert
+e-cfg-meta-desc-missing Beschreibung für Typ {0} nicht vorhanden
+e-cfg-read-file-failed Fehler beim Lesen der Konfigurationsdatei {0}: {1}.
+w-cfg-elem-ignored Element {0} ignoriert
+
+# CLI texts
+t-cli-backup-targets Backup-Ziele: {0}
+t-cli-confirm-backup Backup nach Repository {0}.
+t-cli-confirm-forget-snapshot Lösche Snapshot {0} von Repository {1}.
+t-cli-confirm-forget-untagged Lösche alle unmarkierten Snapshots von Repository {0}.
+t-cli-confirm-init Initialisiere Repository {0}.
+t-cli-confirm-restore Restore Snapshot {0} von Repository {1} nach {2}.
+t-cli-confirm-tag-latest Markiere letzten Snapshot in Repository {0} mit {1}.
+t-cli-confirm-tag-snapshot Markiere Snapshot {0} in Repository {1} mit {2}.
+t-cli-prompt-for-confirmation OK (j/n)?
+t-cli-usage-info Aufruf: restix [Optionen] Aktion [Backup-Ziel]\n \
+    Aktionen: backup | forget | init | restore | snapshots | tag | targets\n \
+    Optionen: -b | --batch * keine Bestätigung vor dem Ausführen des restic Befehls\n           \
+    --host Hostname * benutzerdefinierter Hostname (nur bei restore)\n           \
+    -r | --restore-path * Wurzelverzeichnis für Restore\n           \
+    -s | --snapshot * restic Snapshot-ID\n           \
+    --tags * zu setzende Tags, mit Komma getrennt (nur bei tag)\n           \
+    --target-mount-path * Mountverzeichnis bei Backup-Zielen auf Wechselmedien\n           \
+    -y Jahr | --year Jahr * benutzerdefinierte Jahreszahl, vierstellig\n \
+    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+t-cli-yes-char j
+
+# CLI messages
+e-cli-action-missing Keine Aktion angegeben.
+e-cli-dup-option Option {0} wurde mehrfach angegeben.
+e-cli-invalid-action Die Aktion {0} ist ungültig.
+e-cli-invalid-option Die Option {0} ist ungültig.
+e-cli-invalid-path-spec Ungültige Pfadangabe für Option {0}: {1}.
+e-cli-non-existing-path Pfad {0} für Option {1} existiert nicht.
+e-cli-path-is-not-dir Pfad {0} für Option {1} ist kein Verzeichnis.
+e-cli-restic-action-failed restic-Befehl {0} fehlgeschlagen: {1}.
+e-cli-restic-cmd-failed Allgemeiner restic-Fehler
+e-cli-restic-cmd-interrupted restic-Befehl wurde abgebrochen
+e-cli-restic-go-runtime-error Go-Laufzeitfehler
+e-cli-restic-read-backup-data-failed Fehler beim Lesen der Backup-Daten
+e-cli-restic-repo-does-not-exist Repository existiert nicht
+e-cli-restic-repo-lock-failed Repository konnte nicht gelockt werden
+e-cli-restic-repo-wrong-password Falsches Passwort für das Repository
+e-cli-restix-action-failed +++ Operation fehlgeschlagen +++
+e-cli-tag-options-missing Für Aktion tag werden die Optionen tags und snapshot benötigt.
+e-cli-target-missing Kein Alias für das restic-Repository angegeben.
+e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.

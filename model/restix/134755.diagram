@@ -1,0 +1,27 @@
+format 224
+
+usecasecanvas 128099 usecase_ref 128483 // Restore nach Angriff
+  xyzwh 313 385 3005 64 32 label_xy 277 417
+end
+usecasecanvas 128227 usecase_ref 128611 // Restore einzelner Dateien
+  xyzwh 316 34 3005 64 32 label_xy 262 66
+end
+usecasecanvas 128355 usecase_ref 128739 // Restore nach Rechner-Migration
+  xyzwh 316 200 3005 64 32 label_xy 241 232
+end
+classcanvas 128483 class_ref 128099 // Anwender
+  simpleclassdiagramsettings end
+  xyz 47 182 2000
+end
+usecasecanvas 128995 usecase_ref 135523 // Snapshot im Target auswaehlen
+  xyzwh 640 192 3005 64 32 label_xy 566 224
+end
+line 128611 --->
+  from ref 128483 z 3006 to ref 128227
+line 128739 --->
+  from ref 128483 z 3006 to ref 128355
+line 128867 --->
+  from ref 128483 z 3006 to ref 128099
+line 129123 ----
+  from ref 128355 z 3006 stereotype "<<Uses>>" xyz 474 210 3000 to ref 128995
+end

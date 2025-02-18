@@ -1,0 +1,50 @@
+# restix with all features
+[project]
+name = "restix"
+dynamic = ["version"]
+authors = [
+    {name="Frank Sommer", email="Frank.Sommer@sherpa-software.de"}
+]
+maintainers = [
+    {name="Frank Sommer", email="Frank.Sommer@sherpa-software.de"}
+]
+description = "Backup and restore system based on restic"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+  "toml",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: System :: Archiving",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+[project.gui-scripts]
+restix_gui = "restix.gui.restix_gui:gui_main"
+
+[project.scripts]
+restix = "restix.cli.restix_cli:cli_main"
+
+[project.urls]
+Homepage = "https://github.com/frsommer64/restix"
+Issues = "https://github.com/frsommer64/restixissues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/.venv",
+  "/.git"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/restix"]
+
+[tool.hatch.version]
+path = "src/restix/core/__init__.py"

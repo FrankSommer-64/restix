@@ -1,0 +1,20 @@
+format 224
+
+usecasecanvas 128099 usecase_ref 128099 // Installation
+  xyzwh 672 134 3005 64 32 label_xy 668 166
+end
+usecasecanvas 128227 usecase_ref 128227 // Neues Repository anlegen
+  xyzwh 434 40 3005 64 32 label_xy 378 63
+end
+usecasecanvas 128483 usecase_ref 148707 // Backup erstellen
+  xyzwh 432 279 3005 64 32 label_xy 418 290
+end
+classcanvas 128611 class_ref 128099 // Anwender
+  simpleclassdiagramsettings end
+  xyz 151 203 2000
+end
+line 128739 ----
+  from ref 128611 z 3006 to ref 128483
+line 128867 ----
+  from ref 128611 z 3006 to ref 128227
+end

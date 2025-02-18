@@ -1,0 +1,12 @@
+window_sizes 1800 896 450 1344 697 136
+cleanlooks_style
+diagrams
+  active  usecasediagram_ref 134755 // GUI Restore
+    1075 557 100 A4 0 0
+end
+show_stereotypes
+selected usecasediagram_ref 134755 // GUI Restore
+open
+  usecaseview_ref 128099 // UseCases
+end
+end

@@ -1,0 +1,448 @@
+format 224
+"restix"
+  revision 9
+  modified_by 99 "frsommer"
+
+
+  
+  // class settings
+  default_attribute_visibility private default_relation_visibility private default_operation_visibility public
+  
+  classdiagramsettings draw_all_relations yes hide_attributes no hide_operations no hide_getset_operations no hide_ports no show_members_full_definition no show_members_visibility no show_members_stereotype no show_members_context no show_members_multiplicity no show_members_initialization no show_attribute_modifiers no member_max_width 127 show_parameter_dir yes show_parameter_name yes package_name_in_tab no class_drawing_mode natural drawing_language uml show_context_mode no auto_label_position yes show_relation_modifiers no show_relation_visibility no show_infonote no shadow yes gradient none show_stereotype_properties no end
+  
+  classcompositediagramsettings auto_label_position yes draw_all_relations yes shadow yes gradient none end
+  
+  usecasediagramsettings package_name_in_tab no show_context_mode no auto_label_position yes draw_all_relations yes class_drawing_mode actor shadow yes gradient none show_stereotype_properties no end
+  
+  sequencediagramsettings show_full_operations_definition no show_class_of_operation no write_horizontally yes instances_drawing_mode natural drawing_language uml draw_all_relations yes shadow yes gradient none show_stereotype_properties no show_class_context_mode no show_msg_context_mode no end
+  
+  collaborationdiagramsettings show_full_operations_definition no show_class_of_operation no show_hierarchical_rank no write_horizontally yes instances_drawing_mode natural drawing_language uml package_name_in_tab no show_class_pack_context_mode no show_msg_context_mode no draw_all_relations yes shadow yes gradient none show_stereotype_properties no end
+  
+  objectdiagramsettings write_horizontally yes package_name_in_tab no show_class_pack_context_mode no auto_label_position yes draw_all_relations yes shadow yes gradient none show_stereotype_properties no end
+  
+  objectcompositediagramsettings auto_label_position yes draw_all_relations yes shadow yes gradient none end
+  
+  componentdiagramsettings package_name_in_tab no show_context_mode no auto_label_position yes draw_all_relations yes shadow yes gradient none
+   draw_component_as_icon no show_component_req_prov no show_component_rea no show_stereotype_properties no end
+  
+  deploymentdiagramsettings package_name_in_tab no show_context_mode no write_horizontally yes auto_label_position yes draw_all_relations yes shadow yes gradient none
+   draw_component_as_icon no show_component_req_prov no show_component_rea no show_stereotype_properties no end
+  
+  statediagramsettings package_name_in_tab no show_context_mode no auto_label_position yes write_label_horizontally yes show_trans_definition no draw_all_relations yes shadow yes gradient none
+   show_activities yes region_horizontally yes drawing_language uml show_stereotype_properties no end
+  
+  activitydiagramsettings package_name_in_tab no show_context_mode no show_opaque_action_definition no auto_label_position yes write_label_horizontally no draw_all_relations yes shadow yes gradient none
+   show_infonote yes drawing_language uml show_stereotype_properties no end
+  
+  class_color yellow duration_color transparent continuation_color gray note_color blue fragment_color transparent subject_color transparent usecase_color yellow package_color transparent component_color green artifact_color green deploymentnode_color gray state_color yellow stateaction_color transparent activity_color transparent activityregion_color transparent activitypartition_color transparent activityaction_color transparent parameterpin_color white generalization_color black 
+  dpi 96
+  font_size 9
+  diagram_format A4
+
+  image_root_dir ""
+
+
+  mark_for_import
+  
+  usecaseview 128099 "UseCases"
+    
+    usecasediagramsettings end
+    
+    sequencediagramsettings end
+    
+    collaborationdiagramsettings end
+    
+    classdiagramsettings member_max_width 0 end
+    
+    classcompositediagramsettings end
+    
+    objectdiagramsettings end
+    
+    objectcompositediagramsettings end
+    
+    statediagramsettings
+     end
+    
+    activitydiagramsettings
+     end
+    comment "Geschäftsvorfälle"
+    usecasediagram 128099 "Backup"
+      usecasediagramsettings end
+      size A4
+    end
+
+    usecasediagram 134755 "GUI Restore"
+      usecasediagramsettings end
+      comment "Zurueckholen von Daten aus der Sicherung ueber die restix GUI."
+      size A4
+    end
+
+    usecasediagram 134627 "Maintenance"
+      usecasediagramsettings end
+      comment "Wiederkehrende Aktionen am Ende eines bestimmten Zeitraums."
+      size A4
+    end
+
+    usecase 128099 "Installation"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+    end
+
+    usecase 128227 "Neues Repository anlegen"
+      stereotype "system"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+      comment "Name: Neues Repository anlegen
+Beschreibung: Der Anwender will ein neues Repository erzeugen.
+Akteure: Anwender
+Vorbedingung: Der Anwender hat Zugriffsrechte auf das Target.
+Fachlicher Ausloeser: Jahreswechsel oder neuer Rechner.
+Ergebnis: Das System hat ein neues Repository erstellt.
+Normalablauf: 1. Der Anwender waehlt das gewuenschte Target aus.
+              2. Das System ermittelt Hostname, Username und aktuelles Jahr.
+              3. Das System erzeugt ein neues Repository im Target.
+Alternativer Ablauf A3: Das System gibt eine Fehlermeldung aus, falls das Repository bereits existiert.
+"
+    end
+
+    usecase 128483 "Restore nach Angriff"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+    end
+
+    usecase 128611 "Restore einzelner Dateien"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+      comment "Name: Restore einzelner Dateien
+Beschreibung: Der Anwender moechte einzelne Dateien aus der Sicherung zurückholen.
+Akteure: Anwender
+Vorbedingung: Der Anwender hat Zugriffsrechte auf das Target.
+Fachlicher Ausloeser: Die Daten sind verloren gegangen oder wurden überschrieben.
+Ergebnis: Das System hat die Daten des Anwenders aus dem Repository zurückgeholt.
+Der Anwender wählt die Funktion zum Wiederherstellen einzelner Dateien aus.
+Das System zeigt alle verfügbaren Targets an.
+Der Anwender wählt ein Target aus.
+Das System zeigt die im Target enthaltenen Jahre an und markiert das aktuelle Jahr, sofern es im Target enthalten ist.
+Der Anwender wählt das Jahr aus.
+Das System zeigt die im Target enthaltenen Hosts für das gewählte Jahre an.
+Der Anwender wählt Host und Jahr aus.
+Das System zeigt die für Host und Jahr verfügbaren Snapshots an.
+Der Anwender wählt einen Snapshot aus.
+Das System zeigt die im Snapshot enthaltenen Elemente an.
+Der Anwender wählt die wiederherzustellenden Elemente aus.
+Der Anwender wählt das lokale Zielverzeichnis für die Wiederherstellung aus.
+Der Anwender startet die Wiederherstellung.
+Das System zeigt die Aktionen an, 
+Der Anwender bestätigt die Wiederherstellung.
+Der Anwender bricht die Wiederherstellung ab.
+"
+    end
+
+    usecase 128739 "Restore nach Rechner-Migration"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+    end
+
+    usecase 128995 "Jahresabschluss"
+      stereotype "system"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+      comment "Name: Jahresabschluss
+Beschreibung: Der Anwender bereitet ein Repository fuer die Archivierung vor.
+Akteure: Anwender
+Vorbedingung: Der Anwender hat Zugriffsrechte auf das Repository.
+Fachlicher Ausloeser: Das letzte Backup eines Jahres wurde erstellt.
+Ergebnis: Das System hat unnoetige Daten aus dem Repository entfernt.
+Normalablauf: 1. Das System vergibt den Tag YYLAST fuer den neuesten Snapshot, wobei YY dem Jahr des aeltesten Snapshots entspricht.
+              2. Das System loescht alle Snapshots ohne Tags.
+              3. Das System entfernt alle Elemente aus dem Repository, die von keinem Snapshot mehr referenziert werden.
+Alternativer Ablauf 1: Das System fuehrt keine Aktion aus, falls das Repository keine Daten enthaelt.
+"
+    end
+
+    usecase 142051 "Monatsabschluss"
+      stereotype "system"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+      comment "Name: Monatsabschluss
+Beschreibung: Der Anwender entfernt unnoetige Snapshots aus dem Repository.
+Akteure: Anwender
+Vorbedingung: Der Anwender hat Zugriffsrechte auf das Repository.
+Fachlicher Ausloeser: Das letzte Backup eines Monats wurde erstellt.
+Ergebnis: Das System hat unnoetige Daten aus dem Repository entfernt.
+Normalablauf: 1. Das System vergibt den Tag YYMM fuer den neuesten Snapshot, wobei YY und MM Jahr und Monat des neuesten Snapshots entspricht.
+              2. Das System loescht alle Snapshots ohne Tags.
+Alternativer Ablauf 1: Das System fuehrt keine Aktion aus, falls das Repository keine Daten enthaelt.
+"
+    end
+
+    class 128099 "Anwender"
+      visibility package stereotype "actor"
+      cpp_decl ""
+      java_decl ""
+      php_decl ""
+      python_2_2 python_decl ""
+      idl_decl ""
+      explicit_switch_type ""
+      mysql_decl ""
+      
+      comment "Benutzer der Applikation. Kann sowohl ein normaler Anwender als auch ein Administrator sein."
+    end
+
+    usecase 135523 "Snapshot im Target auswaehlen"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+      comment "Normalablauf: 1. Das System zeigt alle verfügbaren Targets an.
+              2. Das System ermittelt Hostname, Username und aktuelles Jahr.
+
+Der Anwender wählt ein Target aus.
+Das System zeigt die im Target enthaltenen Hosts und Jahre an.
+Der Anwender wählt Host und Jahr aus.
+Das System zeigt die für Host und Jahr verfügbaren Snapshots an.
+Der Anwender wählt einen Snapshot aus.
+"
+    end
+
+    class 134627 "Scheduler"
+      visibility package stereotype "actor"
+      cpp_decl ""
+      java_decl ""
+      php_decl ""
+      python_2_2 python_decl "class ${name}${inherit}:
+${docstring}${members}
+"
+      idl_decl ""
+      explicit_switch_type ""
+      mysql_decl ""
+      
+      comment "cron-Daemon auf einem restic-Server."
+    end
+
+    usecase 142179 "Serversicherung"
+      stereotype "system"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+    end
+
+    usecase 148707 "Backup erstellen"
+      stereotype "system"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+      comment "Name: Backup erstellen
+Beschreibung: Der Anwender moechte ein Backup durchfuehren.
+Akteure: Anwender
+Vorbedingung: Der Anwender hat Zugriffsrechte auf das Target.
+Fachlicher Ausloeser: Es soll eine Datensicherung durchgefuehrt werden.
+Ergebnis: Das System hat die Daten des Anwenders im Repository gesichert.
+Normalablauf: 1. Der Anwender waehlt das gewuenschte Target aus.
+              2. Das System ermittelt Hostname, Username und aktuelles Jahr.
+              3. Das System erzeugt einen neuen Snapshot im Repository.
+              4. Das System vergibt den Tag YYFIRST fuer den Snapshot, falls es sich um den ersten Snapshot im Repository handelt, wobei YY dem aktuellen Jahr entspricht.
+Alternativer Ablauf A3: Das System gibt eine Fehlermeldung aus, falls es kein passendes Repository im Target gibt.
+"
+    end
+
+    usecase 155235 "zu loeschen"
+      
+      usecasediagramsettings end
+      
+      sequencediagramsettings end
+      
+      collaborationdiagramsettings end
+      
+      classdiagramsettings member_max_width 0 end
+      
+      classcompositediagramsettings end
+      
+      objectdiagramsettings end
+      
+      objectcompositediagramsettings end
+      
+      statediagramsettings
+       end
+      
+      activitydiagramsettings
+       end
+    end
+  end
+end
