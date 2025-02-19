@@ -86,7 +86,8 @@ class TestConfig(unittest.TestCase):
         """
         _toml_dataset = TestConfig.unittest_toml_dataset('missing*.toml')
         for _file_name, _toml_data in _toml_dataset.items():
-            self.assertRaises(RestixException, validate_config, _toml_data, _file_name)
+            with self.assertRaises(RestixException, msg=_file_name):
+                validate_config(_toml_data, _file_name)
 
     def test_invalid_typed_elements(self):
         """
@@ -94,7 +95,8 @@ class TestConfig(unittest.TestCase):
         """
         _toml_dataset = TestConfig.unittest_toml_dataset('invalid_typed*.toml')
         for _file_name, _toml_data in _toml_dataset.items():
-            self.assertRaises(RestixException, validate_config, _toml_data, _file_name)
+            with self.assertRaises(RestixException, msg=_file_name):
+                validate_config(_toml_data, _file_name)
 
     @staticmethod
     def unittest_toml_data(file_name = 'unittest.toml'):
@@ -102,7 +104,7 @@ class TestConfig(unittest.TestCase):
         :returns: TOML-Daten für Unit-Test
         :rtype: dict
         """
-        _file_path = os.path.join(os.path.dirname(__file__), '..', 'testdata', 'config', file_name)
+        _file_path = os.path.join(TestConfig.unit_test_home(), file_name)
         with open(_file_path, 'r') as _f:
             _file_contents = _f.read()
             return tomli.loads(_file_contents)
@@ -114,8 +116,7 @@ class TestConfig(unittest.TestCase):
         :rtype: dict
         """
         _dataset = {}
-        _dir = os.path.join(os.path.dirname(__file__), '..', 'testdata', 'config')
-        for _file_path in Path(_dir).glob(pattern):
+        for _file_path in Path(TestConfig.unit_test_home()).glob(pattern):
             with open(_file_path, 'r') as _f:
                 _file_contents = _f.read()
                 _toml_data = tomli.loads(_file_contents)

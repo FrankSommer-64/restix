@@ -199,20 +199,12 @@ def validate_config(data, file_path):
     return _warnings
 
 
-def mandatory_groups():
-    """
-    :returns: Namen aller in einer restix-Konfiguration notwendigen Groups
-    :rtype: list[str]
-    """
-    return [_k for _k, _v in _META_ROOT.items() if _v[1]]
-
-
 def mandatory_parameter(group_name):
     """
     :returns: Namen aller in einer Group notwendigen Parameter
     :rtype: list[str]
     """
-    _group_meta = _META_ROOT[group_name][2]
+    _group_meta = _META_ROOT[group_name][1]
     return [_k for _k, _v in _group_meta.items() if _v[1]]
 
 
@@ -237,35 +229,48 @@ def check_element(qualified_element_name, element_value, element_desc, file_name
                 raise RestixException(E_CFG_INVALID_VARIABLE, _var)
     elif _expected_element_type == 't':
         # dict
-        for _k, _v in element_value.items():
-            _sub_element_name = f'{qualified_element_name}.{_k}'
-            _sub_element_desc = element_desc[2].get(_k)
+        for _sub_element_name, _sub_element_value in element_value.items():
+            _qualified_sub_element_name = f'{qualified_element_name}.{_sub_element_name}'
+            _sub_element_desc = element_desc[1].get(_sub_element_name)
             if _sub_element_desc is None:
                 # nicht unterstütztes Element
-                _unsupported_elements.append(_sub_element_name)
+                _unsupported_elements.append(_qualified_sub_element_name)
                 continue
-            _unsupported_elements.extend(check_element(_sub_element_name, _v, _sub_element_desc, file_name))
-            # prüfen, ob alle notwendigen Unter-Elemente definiert wurden
-            _mandatory_sub_elements = [_k for _k, _v in element_desc[2].items() if _v[1]]
-            for _k in _mandatory_sub_elements:
-                if _k not in element_value.keys():
-                    raise RestixException(E_CFG_MANDATORY_ELEM_MISSING, qualified_element_name, _k)
+            _unsupported_elements.extend(check_element(_qualified_sub_element_name, _sub_element_value,
+                                                       _sub_element_desc, file_name))
+        # prüfen, ob alle notwendigen Unter-Elemente definiert wurden
+        _mandatory_sub_elements = [_k for _k, _v in element_desc[1].items() if _v[2]]
+        for _k in _mandatory_sub_elements:
+            if _k not in element_value.keys():
+                # auf bedingte Notwendigkeit prüfen
+                _condition_desc = element_desc[1][_k][3]
+                if _condition_desc is not None:
+                    _ref_par_name = _condition_desc[0]
+                    _ref_par_values = _condition_desc[1]
+                    _actual_value = element_value.get(_ref_par_name)
+                    if _actual_value not in _ref_par_values:
+                        continue
+                raise RestixException(E_CFG_MANDATORY_ELEM_MISSING, qualified_element_name, _k)
     return _unsupported_elements
 
 
 def check_element_type(element_name, expected_type, par_value, file_name):
     """
     Prüft den Typ eines Elements (Group oder Parameter) der Konfigurationsdatei.
-    :param element_name: Qualifizierter Name des Elements
-    :param expected_type: erwarteter TOML-Typ (a für Array, s für String, t für Table)
+    :param str element_name: Qualifizierter Name des Elements
+    :param str expected_type: erwarteter TOML-Typ (a für Array, s für String, t für Table)
     :param par_value: Wert des Elements
-    :param file_name: Name der Konfigurationsdatei
-    :raises RestixException: falls das Element nicht den erwarteten Typ hat
+    :param str file_name: Name der Konfigurationsdatei
+    :raises RestixException: falls das Element nicht den erwarteten Typ oder Wert hat
     """
-    if expected_type == 's':
+    if expected_type.startswith('s'):
         # string
         if type(par_value) is not str:
             raise RestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'string', file_name)
+        if expected_type.find(':') > 0:
+            _allowed_values = expected_type[2:].split(',')
+            if par_value.lower() not in _allowed_values:
+                raise RestixException(E_CFG_INVALID_ELEM_VALUE, element_name, expected_type[2:], file_name)
         return
     if expected_type == 't':
         # table
@@ -284,32 +289,35 @@ def check_element_type(element_name, expected_type, par_value, file_name):
 # Pattern für Variablen im String-Wert von Parametern
 TOML_VAR_PATTERN = re.compile(r'\$\{(.*?)}')
 
-# Beschreibung der Parameter in der TOML-Datei: (Python-Typ, Mandatory, ggf. Beschreibung der Elemente)
-_META_ACCESS_RIGHTS = {CFG_PAR_HOST: ('s', True, None),
-                       CFG_PAR_USER: ('s', True, None),
-                       CFG_PAR_YEAR: ('s', True, None)}
-_META_CREDENTIALS = {CFG_PAR_COMMENT: ('s', False, None),
-                     CFG_PAR_NAME: ('s', True, None),
-                     CFG_PAR_TYPE: ('s', True, None),
-                     CFG_PAR_VALUE: ('s', False, None)}
-_META_SCOPE = {CFG_PAR_COMMENT: ('s', False, None),
-               CFG_PAR_EXCLUDES: ('s', False, None),
-               CFG_PAR_IGNORES: ('s', False, None),
-               CFG_PAR_INCLUDES: ('s', True, None),
-               CFG_PAR_NAME: ('s', True, None)}
-_META_TARGET = {CFG_PAR_ALIAS: ('s', True, None),
-                CFG_PAR_COMMENT: ('s', False, None),
-                CFG_PAR_CREDENTIALS: ('s', True, None),
-                CFG_PAR_LOCATION: ('s', True, None),
-                CFG_PAR_SCOPE: ('s', True, None),
-                CFG_PAR_ACCESS_RIGHTS: ('t', False, _META_ACCESS_RIGHTS)}
-_META_ROOT = {CFG_GROUP_CREDENTIALS: ('t', True, _META_CREDENTIALS),
-              CFG_GROUP_SCOPE: ('t', True, _META_SCOPE),
-              CFG_GROUP_TARGET: ('t', True, _META_TARGET)}
-
 # Erlaubte Werte für den Credentials-Typ
-_META_CREDENTIAL_TYPES = {CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTIALS_TYPE_PROMPT,
-                          CFG_VALUE_CREDENTIALS_TYPE_TEXT, CFG_VALUE_CREDENTIALS_TYPE_TOKEN}
+_ALLOWED_CREDENTIAL_TYPES = (CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTIALS_TYPE_PROMPT,
+                             CFG_VALUE_CREDENTIALS_TYPE_TEXT, CFG_VALUE_CREDENTIALS_TYPE_TOKEN)
+
+# Credentials-Typen, die einen Wert benötigen
+_VALUED_CREDENTIAL_TYPES = (CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTIALS_TYPE_TEXT)
+
+# Beschreibung der Parameter in der TOML-Datei: (Python-Typ, Mandatory, ggf. Beschreibung der Elemente)
+_META_ACCESS_RIGHTS = {CFG_PAR_HOST: ('s', None, True, None),
+                       CFG_PAR_USER: ('s', None, True, None),
+                       CFG_PAR_YEAR: ('s', None, True, None)}
+_META_CREDENTIALS = {CFG_PAR_COMMENT: ('s', None, False, None),
+                     CFG_PAR_NAME: ('s', None, True, None),
+                     CFG_PAR_TYPE: (f's:{",".join(_ALLOWED_CREDENTIAL_TYPES)}', None, True, None),
+                     CFG_PAR_VALUE: ('s', None, True, (CFG_PAR_TYPE, _VALUED_CREDENTIAL_TYPES))}
+_META_SCOPE = {CFG_PAR_COMMENT: ('s', None, False, None),
+               CFG_PAR_EXCLUDES: ('s', None, False, None),
+               CFG_PAR_IGNORES: ('s', None, False, None),
+               CFG_PAR_INCLUDES: ('s', None, True, None),
+               CFG_PAR_NAME: ('s', None, True, None)}
+_META_TARGET = {CFG_PAR_ALIAS: ('s', None, True, None),
+                CFG_PAR_COMMENT: ('s', None, False, None),
+                CFG_PAR_CREDENTIALS: ('s', None, True, None),
+                CFG_PAR_LOCATION: ('s', None, True, None),
+                CFG_PAR_SCOPE: ('s', None, True, None),
+                CFG_PAR_ACCESS_RIGHTS: ('t', _META_ACCESS_RIGHTS, False, None)}
+_META_ROOT = {CFG_GROUP_CREDENTIALS: ('t', _META_CREDENTIALS, True, None),
+              CFG_GROUP_SCOPE: ('t', _META_SCOPE, True, None),
+              CFG_GROUP_TARGET: ('t', _META_TARGET, True, None)}
 
 # Erlaubte Variablen in der Konfigurationsdatei
 CONFIG_VARIABLES = {'HOST', 'USER', 'YEAR'}

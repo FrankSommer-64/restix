@@ -1,0 +1,23 @@
+# ===============================================================
+# Unit-Test Konfigurationsdatei
+# Notwendiges target-Attribut 'scope' fehlt.
+# ===============================================================
+
+[[credentials]]
+name = "standard"
+comment = ""
+type = "file"
+value = "pw.txt"
+
+[[scope]]
+name = "minimal"
+comment = "Minimaler Backup-Umfang für Upload ins Internet"
+includes = "minimal.list"
+excludes = "minimal_excludes.list"
+ignores = "ignores.list"
+
+[[target]]
+alias = "inetsrv"
+comment = "Internet-Server"
+location = "sftp:myserver:data"
+credentials = "standard"
