@@ -1,0 +1,25 @@
+# ===============================================================
+# Unit-Test Konfigurationsdatei
+# access_rights-Attribut 'host' ist kein String.
+# ===============================================================
+
+[[credentials]]
+name = "standard"
+comment = ""
+type = "file"
+value = "pw.txt"
+
+[[scope]]
+name = "minimal"
+comment = "Minimaler Backup-Umfang für Upload ins Internet"
+includes = "minimal.list"
+excludes = "minimal_excludes.list"
+ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
+
+[[target]]
+alias = "inetsrv"
+comment = "Internet-Server"
+location = "sftp:myserver:data"
+scope = "minimal"
+credentials = "standard"
+access_rights = {year = "${USER}:sommer,770", host = false, user = "${USER}:sommer,770"}
