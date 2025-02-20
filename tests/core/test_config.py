@@ -92,6 +92,12 @@ class TestConfig(unittest.TestCase):
         """
         self._dataset_test('invalid_typed*.toml')
 
+    def test_invalid_target_references(self):
+        """
+        Prüft, ob Target-Referenzen auf nicht existierenden Scope oder Credentials erkannt werden.
+        """
+        self._dataset_test('invalid_target*.toml')
+
     def test_duplicate_group_names(self):
         """
         Prüft, ob mehrfach definierte Groups korrekt erkannt werden.

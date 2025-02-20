@@ -24,8 +24,10 @@ e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht defin
 
 # Konfiguration
 e-cfg-duplicate-group Group {0} {1} wurde in der Konfigurationsdatei {2} mehrfach definiert
+e-cfg-invalid-credentials-ref Target {0} in der Konfigurationsdatei {2} benutzt ungültigen Credentials-Namen {1}
 e-cfg-invalid-elem-type Ungültiger Typ für Element {0} in der Konfigurationsdatei {2}, {1} erwartet.
 e-cfg-invalid-elem-value Ungültiger Wert für Element {0} in der Konfigurationsdatei {2}, {1} erwartet.
+e-cfg-invalid-scope-ref Target {0} in der Konfigurationsdatei {2} benutzt ungültigen Scope-Namen {1}
 e-cfg-mandatory-elem-missing Für Element {0} wurde das notwendige Attribut {1} nicht definiert
 e-cfg-mandatory-grp-missing Notwendige Group {1} nicht definiert
 e-cfg-meta-desc-missing Beschreibung für Typ {0} nicht vorhanden

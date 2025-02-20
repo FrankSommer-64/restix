@@ -176,13 +176,19 @@ def validate_config(data, file_path):
         for _i, _elem_value in enumerate(_grp_value):
             _elem_name = f'{_grp_name}.[{_i}]'
             _unsupported_items.extend(check_element(_elem_name, _elem_value, _grp_desc, _file_name))
-    # Prüfen, ob es mehrfach definierte Groups gibt
-    check_for_duplicates(data, file_path)
     # Prüfen, ob alle notwendigen Elemente definiert wurden
     for _mandatory_grp in _META_ROOT.keys():
         if _mandatory_grp not in data.keys():
             raise RestixException(E_CFG_MANDATORY_GRP_MISSING, _mandatory_grp)
     _warnings = [localized_message(W_CFG_ELEM_IGNORED, _elem) for _elem in _unsupported_items]
+    # Prüfen, ob es mehrfach definierte Groups oder ungültige Referenzen gibt
+    _groups = extract_groups(data, file_path)
+    for _target_alias, _target_data in _groups.get(CFG_GROUP_TARGET).items():
+        if _target_data[CFG_PAR_SCOPE] not in _groups.get(CFG_GROUP_SCOPE).keys():
+            raise RestixException(E_CFG_INVALID_SCOPE_REF, _target_alias, _target_data[CFG_PAR_SCOPE], _file_name)
+        if _target_data[CFG_PAR_CREDENTIALS] not in _groups.get(CFG_GROUP_CREDENTIALS).keys():
+            raise RestixException(E_CFG_INVALID_CREDENTIALS_REF, _target_alias,
+                                  _target_data[CFG_PAR_CREDENTIALS], _file_name)
     # nicht unterstützte Elemente aus der Konfiguration entfernen
     for _item in _unsupported_items:
         _dot_pos = _item.rfind('.')
@@ -292,21 +298,22 @@ def check_element_type(element_name, expected_type, par_value, file_name):
     raise RestixException(E_INTERNAL_ERROR, _reason)
 
 
-def check_for_duplicates(data, file_path):
+def extract_groups(data, file_path) -> dict:
     """
-    Prüft, ob es mehrfach definierte Groups in der Konfigurationsdatei gibt.
+    Liest die Groups aus den übergebenen TOML-Daten.
     :param dict data: die TOML-Daten der Konfiguration
     :param str file_path: Name der Konfigurationsdatei mit vollständigem Pfad
-    :raises RestixException: falls es Groups mit gleichem gibt
+    :returns: Name und Daten aller Groups
+    :raises RestixException: falls es Groups mit gleichem Namen gibt
     """
     _file_name = os.path.basename(file_path)
-    # Name und Typ aller Elemente der Konfigurationsdatei prüfen
+    _groups = {}
     for _grp_name, _grp_value in data.items():
         _grp_desc = _META_ROOT.get(_grp_name)
         if _grp_desc is None:
-            # nicht unterstützte Group, wurde schon vom Aufrufer abgefrühstückt
             continue
         _element_names = set()
+        _groups[_grp_name] = {}
         for _grp_item in _grp_value:
             for _element_attr, _element_value in _grp_item.items():
                 _attr_desc = _grp_desc[1].get(_element_attr)
@@ -316,6 +323,8 @@ def check_for_duplicates(data, file_path):
                     if _element_value in _element_names:
                         raise RestixException(E_CFG_DUPLICATE_GROUP, _grp_name, _element_value, _file_name)
                     _element_names.add(_element_value)
+                    _groups[_grp_name][_element_value] = _grp_item
+    return _groups
 
 
 # Pattern für Variablen im String-Wert von Parametern
