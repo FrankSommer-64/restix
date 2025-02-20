@@ -1,12 +1,14 @@
 # ===============================================================
 # Unit-Test Konfigurationsdatei
-# Notwendiges credentials-Attribut 'value' für Typ 'text' fehlt.
+# Mehrfach definierte credentials.
 # ===============================================================
 
 [[credentials]]
 name = "standard"
 comment = ""
-type = "text"
+type = "file"
+value = "pw.txt"
+password = "topsecret"
 
 [[scope]]
 name = "minimal"
@@ -18,6 +20,13 @@ ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
 [[target]]
 alias = "inetsrv"
 comment = "Internet-Server"
-location = "sftp:rmyserver:data"
+location = "sftp:myserver:data"
+scope = "minimal"
+credentials = "standard"
+
+[[target]]
+alias = "inetsrv"
+comment = "Internet-Server"
+location = "sftp:myserver:data"
 scope = "minimal"
 credentials = "standard"

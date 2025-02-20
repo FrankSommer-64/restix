@@ -84,16 +84,22 @@ class TestConfig(unittest.TestCase):
         """
         Prüft, ob fehlende notwendige Elemente korrekt erkannt werden.
         """
-        _toml_dataset = TestConfig.unittest_toml_dataset('missing*.toml')
-        for _file_name, _toml_data in _toml_dataset.items():
-            with self.assertRaises(RestixException, msg=_file_name):
-                validate_config(_toml_data, _file_name)
+        self._dataset_test('missing*.toml')
 
     def test_invalid_typed_elements(self):
         """
         Prüft, ob Elemente mit falschem Typ korrekt erkannt werden.
         """
-        _toml_dataset = TestConfig.unittest_toml_dataset('invalid_typed*.toml')
+        self._dataset_test('invalid_typed*.toml')
+
+    def test_duplicate_group_names(self):
+        """
+        Prüft, ob mehrfach definierte Groups korrekt erkannt werden.
+        """
+        self._dataset_test('duplicate*.toml')
+
+    def _dataset_test(self, file_name_pattern):
+        _toml_dataset = TestConfig.unittest_toml_dataset(file_name_pattern)
         for _file_name, _toml_data in _toml_dataset.items():
             with self.assertRaises(RestixException, msg=_file_name):
                 validate_config(_toml_data, _file_name)

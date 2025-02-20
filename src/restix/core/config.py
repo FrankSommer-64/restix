@@ -172,10 +172,13 @@ def validate_config(data, file_path):
         if _grp_desc is None:
             _unsupported_items.append(_grp_name)
             continue
-        check_element_type(_grp_name, 'a', _grp_value, _file_name)
+        check_element_type(_grp_name, 'at', _grp_value, _file_name)
         for _i, _elem_value in enumerate(_grp_value):
             _elem_name = f'{_grp_name}.[{_i}]'
             _unsupported_items.extend(check_element(_elem_name, _elem_value, _grp_desc, _file_name))
+    # Prüfen, ob es mehrfach definierte Groups gibt
+    check_for_duplicates(data, file_path)
+    # Prüfen, ob alle notwendigen Elemente definiert wurden
     for _mandatory_grp in _META_ROOT.keys():
         if _mandatory_grp not in data.keys():
             raise RestixException(E_CFG_MANDATORY_GRP_MISSING, _mandatory_grp)
@@ -205,7 +208,7 @@ def mandatory_parameter(group_name):
     :rtype: list[str]
     """
     _group_meta = _META_ROOT[group_name][1]
-    return [_k for _k, _v in _group_meta.items() if _v[1]]
+    return [_k for _k, _v in _group_meta.items() if _v[3]]
 
 
 def check_element(qualified_element_name, element_value, element_desc, file_name):
@@ -239,11 +242,11 @@ def check_element(qualified_element_name, element_value, element_desc, file_name
             _unsupported_elements.extend(check_element(_qualified_sub_element_name, _sub_element_value,
                                                        _sub_element_desc, file_name))
         # prüfen, ob alle notwendigen Unter-Elemente definiert wurden
-        _mandatory_sub_elements = [_k for _k, _v in element_desc[1].items() if _v[2]]
+        _mandatory_sub_elements = [_k for _k, _v in element_desc[1].items() if _v[3]]
         for _k in _mandatory_sub_elements:
             if _k not in element_value.keys():
                 # auf bedingte Notwendigkeit prüfen
-                _condition_desc = element_desc[1][_k][3]
+                _condition_desc = element_desc[1][_k][4]
                 if _condition_desc is not None:
                     _ref_par_name = _condition_desc[0]
                     _ref_par_values = _condition_desc[1]
@@ -277,13 +280,42 @@ def check_element_type(element_name, expected_type, par_value, file_name):
         if type(par_value) is not dict:
             raise RestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'table', file_name)
         return
-    if expected_type == 'a':
+    if expected_type.startswith('a'):
         # array
         if type(par_value) is not list:
             raise RestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'array', file_name)
+        for _i, _item_value in enumerate(par_value):
+            _item_name = f'{element_name}.[{_i}]'
+            check_element_type(_item_name, expected_type[1:], _item_value, file_name)
         return
     _reason = localized_message(E_CFG_META_DESC_MISSING, expected_type)
     raise RestixException(E_INTERNAL_ERROR, _reason)
+
+
+def check_for_duplicates(data, file_path):
+    """
+    Prüft, ob es mehrfach definierte Groups in der Konfigurationsdatei gibt.
+    :param dict data: die TOML-Daten der Konfiguration
+    :param str file_path: Name der Konfigurationsdatei mit vollständigem Pfad
+    :raises RestixException: falls es Groups mit gleichem gibt
+    """
+    _file_name = os.path.basename(file_path)
+    # Name und Typ aller Elemente der Konfigurationsdatei prüfen
+    for _grp_name, _grp_value in data.items():
+        _grp_desc = _META_ROOT.get(_grp_name)
+        if _grp_desc is None:
+            # nicht unterstützte Group, wurde schon vom Aufrufer abgefrühstückt
+            continue
+        _element_names = set()
+        for _grp_item in _grp_value:
+            for _element_attr, _element_value in _grp_item.items():
+                _attr_desc = _grp_desc[1].get(_element_attr)
+                if _attr_desc is None:
+                    continue
+                if _attr_desc[2]:
+                    if _element_value in _element_names:
+                        raise RestixException(E_CFG_DUPLICATE_GROUP, _grp_name, _element_value, _file_name)
+                    _element_names.add(_element_value)
 
 
 # Pattern für Variablen im String-Wert von Parametern
@@ -296,28 +328,29 @@ _ALLOWED_CREDENTIAL_TYPES = (CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTI
 # Credentials-Typen, die einen Wert benötigen
 _VALUED_CREDENTIAL_TYPES = (CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTIALS_TYPE_TEXT)
 
-# Beschreibung der Parameter in der TOML-Datei: (Python-Typ, Mandatory, ggf. Beschreibung der Elemente)
-_META_ACCESS_RIGHTS = {CFG_PAR_HOST: ('s', None, True, None),
-                       CFG_PAR_USER: ('s', None, True, None),
-                       CFG_PAR_YEAR: ('s', None, True, None)}
-_META_CREDENTIALS = {CFG_PAR_COMMENT: ('s', None, False, None),
-                     CFG_PAR_NAME: ('s', None, True, None),
-                     CFG_PAR_TYPE: (f's:{",".join(_ALLOWED_CREDENTIAL_TYPES)}', None, True, None),
-                     CFG_PAR_VALUE: ('s', None, True, (CFG_PAR_TYPE, _VALUED_CREDENTIAL_TYPES))}
-_META_SCOPE = {CFG_PAR_COMMENT: ('s', None, False, None),
-               CFG_PAR_EXCLUDES: ('s', None, False, None),
-               CFG_PAR_IGNORES: ('s', None, False, None),
-               CFG_PAR_INCLUDES: ('s', None, True, None),
-               CFG_PAR_NAME: ('s', None, True, None)}
-_META_TARGET = {CFG_PAR_ALIAS: ('s', None, True, None),
+# Beschreibung der Parameter in der TOML-Datei:
+# ([0] Typ, [1] Beschreibung der Elemente, [2] unique, [3] mandatory, [4] Bedingung für Mandatory)
+_META_ACCESS_RIGHTS = {CFG_PAR_HOST: ('s', None, False, True, None),
+                       CFG_PAR_USER: ('s', None, False, True, None),
+                       CFG_PAR_YEAR: ('s', None, False, True, None)}
+_META_CREDENTIALS = {CFG_PAR_COMMENT: ('s', None, False, False, None),
+                     CFG_PAR_NAME: ('s', None, True, True, None),
+                     CFG_PAR_TYPE: (f's:{",".join(_ALLOWED_CREDENTIAL_TYPES)}', None, False, True, None),
+                     CFG_PAR_VALUE: ('s', None, False, True, (CFG_PAR_TYPE, _VALUED_CREDENTIAL_TYPES))}
+_META_SCOPE = {CFG_PAR_COMMENT: ('s', None, False, False, None),
+               CFG_PAR_EXCLUDES: ('s', None, False, False, None),
+               CFG_PAR_IGNORES: ('as', None, False, False, None),
+               CFG_PAR_INCLUDES: ('s', None, False, True, None),
+               CFG_PAR_NAME: ('s', None, True, True, None)}
+_META_TARGET = {CFG_PAR_ALIAS: ('s', None, True, True, None),
                 CFG_PAR_COMMENT: ('s', None, False, None),
-                CFG_PAR_CREDENTIALS: ('s', None, True, None),
-                CFG_PAR_LOCATION: ('s', None, True, None),
-                CFG_PAR_SCOPE: ('s', None, True, None),
-                CFG_PAR_ACCESS_RIGHTS: ('t', _META_ACCESS_RIGHTS, False, None)}
-_META_ROOT = {CFG_GROUP_CREDENTIALS: ('t', _META_CREDENTIALS, True, None),
-              CFG_GROUP_SCOPE: ('t', _META_SCOPE, True, None),
-              CFG_GROUP_TARGET: ('t', _META_TARGET, True, None)}
+                CFG_PAR_CREDENTIALS: ('s', None, False, True, None),
+                CFG_PAR_LOCATION: ('s', None, False, True, None),
+                CFG_PAR_SCOPE: ('s', None, False, True, None),
+                CFG_PAR_ACCESS_RIGHTS: ('t', _META_ACCESS_RIGHTS, False, False, None)}
+_META_ROOT = {CFG_GROUP_CREDENTIALS: ('t', _META_CREDENTIALS, False, True, None),
+              CFG_GROUP_SCOPE: ('t', _META_SCOPE, False, True, None),
+              CFG_GROUP_TARGET: ('t', _META_TARGET, False, True, None)}
 
 # Erlaubte Variablen in der Konfigurationsdatei
 CONFIG_VARIABLES = {'HOST', 'USER', 'YEAR'}

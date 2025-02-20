@@ -67,6 +67,7 @@ E_RESTIX_VAR_NOT_DEFINED = 'e-restix-var-not-defined'
 # Fehlermeldungen zur Konfiguration
 E_CFG_CUSTOM_CONFIG_ROOT_NOT_FOUND = 'e-cfg-custom-config-root-not-found'
 E_CFG_DEFAULT_CONFIG_ROOT_NOT_FOUND = 'e-cfg-default-config-root-not-found'
+E_CFG_DUPLICATE_GROUP = 'e-cfg-duplicate-group'
 E_CFG_INVALID_ELEM_TYPE = 'e-cfg-invalid-elem-type'
 E_CFG_INVALID_ELEM_VALUE = 'e-cfg-invalid-elem-value'
 E_CFG_INVALID_VARIABLE = 'e-cfg-invalid-variable'

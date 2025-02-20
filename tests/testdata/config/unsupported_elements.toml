@@ -1,7 +1,6 @@
 # ===============================================================
 # Unit-Test Konfigurationsdatei mit nicht unterstützten Elementen.
 # ===============================================================
-#version = 1
 
 [[credentials]]
 name = "standard"
@@ -16,7 +15,7 @@ name = "minimal"
 comment = "Minimaler Backup-Umfang für Upload ins Internet"
 includes = "minimal.list"
 excludes = "minimal_excludes.list"
-ignores = "ignores.list"
+ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
 type = true
 
 [[target]]
