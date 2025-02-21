@@ -214,7 +214,7 @@ class MessageTable(dict):
         _fmt_str = _fmt_str.replace(r'\n', os.linesep)
         try:
             return _fmt_str.format(*args)
-        except KeyError | ValueError:
+        except (KeyError, IndexError, ValueError):
             return msg_id
 
     def label_for(self, label_id):

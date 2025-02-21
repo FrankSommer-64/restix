@@ -179,7 +179,7 @@ def validate_config(data, file_path):
     # Prüfen, ob alle notwendigen Elemente definiert wurden
     for _mandatory_grp in _META_ROOT.keys():
         if _mandatory_grp not in data.keys():
-            raise RestixException(E_CFG_MANDATORY_GRP_MISSING, _mandatory_grp)
+            raise RestixException(E_CFG_MANDATORY_GRP_MISSING, _mandatory_grp, _file_name)
     _warnings = [localized_message(W_CFG_ELEM_IGNORED, _elem) for _elem in _unsupported_items]
     # Prüfen, ob es mehrfach definierte Groups oder ungültige Referenzen gibt
     _groups = extract_groups(data, file_path)

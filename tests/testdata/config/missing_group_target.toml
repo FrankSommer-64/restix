@@ -1,9 +1,7 @@
 # ===============================================================
 # Unit-Test Konfigurationsdatei
-# Root-Group 'target' ist kein Array of Table.
+# Notwendige Group 'target' fehlt.
 # ===============================================================
-
-target = 3
 
 [[credentials]]
 name = "standard"
@@ -17,4 +15,3 @@ comment = "Minimaler Backup-Umfang für Upload ins Internet"
 includes = "minimal.list"
 excludes = "minimal_excludes.list"
 ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
-

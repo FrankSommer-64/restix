@@ -54,7 +54,7 @@ class TestConfig(unittest.TestCase):
         # existierendes Default-Verzeichnis
         self.assertEqual(os.path.join(Path.home(), *RESTIX_CONFIG_SUBDIR), config_root_path())
         # existierendes benutzerdefiniertes Verzeichnis
-        _custom_root = TestConfig.custom_root_path()
+        _custom_root = TestConfig.unit_test_home()
         os.environ[ENVA_RESTIX_CONFIG_PATH] = _custom_root
         self.assertEqual(_custom_root, config_root_path())
         # nicht existierendes benutzerdefiniertes Verzeichnis
@@ -105,10 +105,16 @@ class TestConfig(unittest.TestCase):
         self._dataset_test('duplicate*.toml')
 
     def _dataset_test(self, file_name_pattern):
+        """
+        Test mit mehreren Testdaten-Dateien durchführen.
+        :param str file_name_pattern: Pattern für die Namen der Testdateien
+        :raises: falls beim Validieren der Dateien keine Exception auftritt
+        """
         _toml_dataset = TestConfig.unittest_toml_dataset(file_name_pattern)
         for _file_name, _toml_data in _toml_dataset.items():
-            with self.assertRaises(RestixException, msg=_file_name):
+            with self.assertRaises(RestixException, msg=_file_name) as _e:
                 validate_config(_toml_data, _file_name)
+            print(_e.exception)
 
     @staticmethod
     def unittest_toml_data(file_name = 'unittest.toml'):
@@ -141,22 +147,14 @@ class TestConfig(unittest.TestCase):
         :returns: restix-Konfiguration für Unit-Tests
         :rtype: LocalConfig
         """
-        _config_file_path = os.path.join(os.path.dirname(__file__), '..', 'testdata', 'config', file_name)
+        _config_file_path = os.path.join(TestConfig.unit_test_home(), file_name)
         _restix_config = LocalConfig.from_file(_config_file_path)
         return _restix_config
 
     @staticmethod
     def unit_test_home():
         """
-        :returns: "home"-Verzeichnis um Default-Konfigurationsverzeichnis zu testen
-        :rtype: str
-        """
-        return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'testdata', 'config'))
-
-    @staticmethod
-    def custom_root_path():
-        """
-        :returns: benutzerdefiniertes Verzeichnis mit der restix-Konfiguration für Unit-Tests
+        :returns: Wurzelverzeichnis für Testdaten der Unit-Tests
         :rtype: str
         """
         return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'testdata', 'config'))
