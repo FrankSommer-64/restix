@@ -43,9 +43,9 @@ During test execution, the configuration may be updated from attachment files co
 or test cases.
 """
 
+import copy
 import os.path
 import re
-
 import tomli
 
 from restix.core import *
@@ -76,6 +76,44 @@ class LocalConfig(dict):
         :rtype: list[str]
         """
         return self.__warnings
+
+    def credentials(self) -> dict:
+        """
+        :return: alle definierten Zugangsdaten, sortiert nach Name
+        """
+        return self._group(CFG_GROUP_CREDENTIALS, CFG_PAR_NAME)
+
+    def scopes(self) -> dict:
+        """
+        :return: alle definierten Backup-Umfänge, sortiert nach Name
+        """
+        return self._group(CFG_GROUP_SCOPE, CFG_PAR_NAME)
+
+    def targets(self) -> dict:
+        """
+        :return: alle definierten Backup-Ziele, sortiert nach Name
+        """
+        return self._group(CFG_GROUP_TARGET, CFG_PAR_ALIAS)
+
+    def for_restic(self, variables):
+        """
+        :param dict variables: Werte der zu ersetzenden Variablen
+        :return: Kopie der Konfiguration mit ersetzten Variablen
+        """
+        _config = copy.deepcopy(self)
+        LocalConfig.replace_variables(_config, variables)
+        return _config
+
+    def _group(self, group_name, naming_attr) -> dict:
+        """
+        :param str group_name: die gewünschte Group
+        :param str naming_attr: das Naming-Attribut der Group
+        :return: alle definierten Elemente der übergebenen Group, sortiert nach Name
+        """
+        _elements = {}
+        for _element in self[group_name]:
+            _elements[_element[naming_attr]] = _element
+        return dict(sorted(_elements.items()))
 
     @staticmethod
     def from_file(file_path):
@@ -112,6 +150,25 @@ class LocalConfig(dict):
             return _cfg
         except Exception as e:
             raise RestixException(E_CFG_READ_FILE_FAILED, file_path, e)
+
+    @staticmethod
+    def replace_variables(element, variables):
+        """
+        Ersetzt Variablen in String-Werten des Elements
+        :param element:
+        :param dict variables: die zu ersetzenden Variablen
+        """
+        if type(element) is str:
+            for _var_name, _var_value in variables.items():
+                _search_str = f'${{{_var_name}}}'
+                element = element.replace(_search_str, _var_value)
+        elif issubclass(element.__class__, dict):
+            for _item_name, _item_value in element.items():
+                element[_item_name] = LocalConfig.replace_variables(_item_value, variables)
+        elif type(element) is list:
+            for _i, _item in enumerate(element):
+                element[_i] = LocalConfig.replace_variables(_item, variables)
+        return element
 
 
 def config_root_path():
@@ -206,15 +263,6 @@ def validate_config(data, file_path):
             _element = _item[_dot_pos+1:]
             del _parent[_element]
     return _warnings
-
-
-def mandatory_parameter(group_name):
-    """
-    :returns: Namen aller in einer Group notwendigen Parameter
-    :rtype: list[str]
-    """
-    _group_meta = _META_ROOT[group_name][1]
-    return [_k for _k, _v in _group_meta.items() if _v[3]]
 
 
 def check_element(qualified_element_name, element_value, element_desc, file_name):

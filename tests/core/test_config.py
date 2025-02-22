@@ -44,6 +44,11 @@ from restix.core.config import *
 
 UNSUPPORTED_ELEMENTS = ['credentials.[0].user', 'credentials.[0].password', 'scope.[0].type',
                         'target.[0].url', 'user']
+VAR_CREDENTIALS = {'shared': [CFG_PAR_VALUE]}
+VAR_TARGETS = {'localdir': ['access_rights.year', 'access_rights.host', 'access_rights.user'],
+               'usbstick': ['location', 'access_rights.year', 'access_rights.host', 'access_rights.user'],
+               'nvme': ['location', 'access_rights.year', 'access_rights.host', 'access_rights.user'],
+               'veracrypt': ['access_rights.year', 'access_rights.host', 'access_rights.user']}
 
 
 class TestConfig(unittest.TestCase):
@@ -104,6 +109,16 @@ class TestConfig(unittest.TestCase):
         """
         self._dataset_test('duplicate*.toml')
 
+    def test_variable_replacement(self):
+        """
+        Prüft, ob Variablen in der Konfiguration korrekt ersetzt werden.
+        """
+        _config = TestConfig.unittest_configuration()
+        _clone = _config.for_restic({'USER': 'unittest'})
+        print(_clone)
+        self._replacement_test(_clone.credentials(), VAR_CREDENTIALS)
+        self._replacement_test(_clone.targets(), VAR_TARGETS)
+
     def _dataset_test(self, file_name_pattern):
         """
         Test mit mehreren Testdaten-Dateien durchführen.
@@ -115,6 +130,25 @@ class TestConfig(unittest.TestCase):
             with self.assertRaises(RestixException, msg=_file_name) as _e:
                 validate_config(_toml_data, _file_name)
             print(_e.exception)
+
+    def _replacement_test(self, group, element_desc):
+        """
+        Testet Variable-Replace für eine Group der Unittest-Konfigurationsdatei.
+        :param dict group: zu testende Group
+        :param dict element_desc: Beschreibung der zu prüfenden Elemente
+        :raises: falls nicht alle Variablen ersetzt wurden
+        """
+        for _element_name, _element_data in group.items():
+            _var_attrs = element_desc.get(_element_name)
+            if _var_attrs is None:
+                continue
+            for _var_attr in _var_attrs:
+                _item_data = _element_data
+                _items = _var_attr.split('.')
+                for _item in _items:
+                    _item_data = _item_data[_item]
+                self.assertTrue(_item_data.find('${USER}') < 0)
+                self.assertTrue(_item_data.find('unittest') >= 0)
 
     @staticmethod
     def unittest_toml_data(file_name = 'unittest.toml'):

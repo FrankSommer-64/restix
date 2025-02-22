@@ -1,30 +1,17 @@
 # ===============================================================
-# Zentrale Konfigurationsdatei für restix
-#
-# In String-Werten können folgende Variablen verwendet werden:
-# ${HOST} - Hostname
-# ${USER} - Benutzername
-# ${YEAR} - Jahr
+# Unit-Test Konfigurationsdatei für restix
 # ===============================================================
-
-# ===============================================================
-# Zugriffsdaten für restic
-# ===============================================================
-# Standard: Passwort-Abfrage
-# type = "prompt"
-# Passwort im Klartext
-# type = "text"
-# value = "geheim"
-# Passwort ist in der angegebenen Datei enthalten
-# type = "file"
-# value = "pw.txt"
-# Passwort ist auf FIDO2-Token
-# type = "token"
 [[credentials]]
 name = "standard"
 comment = ""
 type = "file"
 value = "pw.txt"
+
+[[credentials]]
+name = "shared"
+comment = ""
+type = "file"
+value = "/etc/restix/${USER}/pw.txt"
 
 [[scope]]
 name = "minimal"
@@ -43,14 +30,14 @@ ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
 [[target]]
 alias = "inetsrv"
 comment = "Internet-Server"
-location = "sftp:restic_netcup:data"
+location = "sftp:myinetsrv:data"
 scope = "minimal"
-credentials = "standard"
+credentials = "shared"
 
 [[target]]
 alias = "localsrv"
 comment = "Heim-Server"
-location = "sftp:restic_schakal:data"
+location = "sftp:mylocalsrv:data"
 scope = "vollstaendig"
 credentials = "standard"
 
@@ -60,23 +47,15 @@ comment = "lokales Verzeichnis"
 location = "/var/restix"
 scope = "minimal"
 credentials = "standard"
-access_rights = {year = "${USER}:sommer,770", host = "${USER}:sommer,770", user = "${USER}:sommer,770"}
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
 
 [[target]]
-alias = "sticka"
+alias = "usbstick"
 comment = "USB-Stick Backup-A"
 location = "/media/${USER}/BACKUP-A/restix"
 scope = "vollstaendig"
 credentials = "standard"
-access_rights = {year = "${USER}:sommer,770", host = "${USER}:sommer,770", user = "${USER}:sommer,770"}
-
-[[target]]
-alias = "stickb"
-comment = "USB-Stick Backup-B"
-location = "/media/${USER}/BACKUP-B/restix"
-scope = "vollstaendig"
-credentials = "standard"
-access_rights = {year = "${USER}:sommer,770", host = "${USER}:sommer,770", user = "${USER}:sommer,770"}
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
 
 [[target]]
 alias = "nvme"
@@ -84,15 +63,7 @@ comment = "externe SSD"
 location = "/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix"
 scope ="vollstaendig"
 credentials = "standard"
-access_rights = {year = "${USER}:sommer,770", host = "${USER}:sommer,770", user = "${USER}:sommer,770"}
-
-[[target]]
-alias = "toshiba"
-comment = "externe Festplatte"
-location = "/media/${USER}/TOSHIBA EXT/restix"
-scope = "vollstaendig"
-credentials = "standard"
-access_rights = {year = "${USER}:sommer,770", host = "${USER}:sommer,770", user = "${USER}:sommer,770"}
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
 
 [[target]]
 alias = "veracrypt"
@@ -100,4 +71,4 @@ comment = "verschlüsselte Festplatte"
 location = "/media/veracrypt1/restix"
 scope = "vollstaendig"
 credentials = "standard"
-access_rights = {year = "${USER}:sommer,770", host = "${USER}:sommer,770", user = "${USER}:sommer,770"}
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
