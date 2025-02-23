@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis
+# restix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -34,6 +34,7 @@
 
 """
 Unit tests für core.config.
+Testdateien liegen im Projektverzeichnis tests/testdata/config.
 """
 
 from pathlib import Path
@@ -42,9 +43,13 @@ import unittest
 
 from restix.core.config import *
 
+# Standard restix-Konfiguration für Unit-Tests
+STANDARD_CONFIG_FN = 'unittest.toml'
+# Namen der nicht unterstützten Elemente in Testdatei unsupported_elements.toml
 UNSUPPORTED_ELEMENTS = ['credentials.[0].user', 'credentials.[0].password', 'scope.[0].type',
                         'target.[0].url', 'user']
-VAR_CREDENTIALS = {'shared': [CFG_PAR_VALUE]}
+# Namen der Elemente in der Standard-restix-Konfiguration, deren Wert eine Variable enthält
+VAR_CREDENTIALS = {'shared': ['value']}
 VAR_TARGETS = {'localdir': ['access_rights.year', 'access_rights.host', 'access_rights.user'],
                'usbstick': ['location', 'access_rights.year', 'access_rights.host', 'access_rights.user'],
                'nvme': ['location', 'access_rights.year', 'access_rights.host', 'access_rights.user'],
@@ -115,15 +120,14 @@ class TestConfig(unittest.TestCase):
         """
         _config = TestConfig.unittest_configuration()
         _clone = _config.for_restic({'USER': 'unittest'})
-        print(_clone)
         self._replacement_test(_clone.credentials(), VAR_CREDENTIALS)
         self._replacement_test(_clone.targets(), VAR_TARGETS)
 
-    def _dataset_test(self, file_name_pattern):
+    def _dataset_test(self, file_name_pattern: str):
         """
         Test mit mehreren Testdaten-Dateien durchführen.
-        :param str file_name_pattern: Pattern für die Namen der Testdateien
-        :raises: falls beim Validieren der Dateien keine Exception auftritt
+        :param file_name_pattern: Pattern für die Namen der Testdateien.
+        :raises RestixException: falls beim Validieren der Dateien **keine** Exception auftritt
         """
         _toml_dataset = TestConfig.unittest_toml_dataset(file_name_pattern)
         for _file_name, _toml_data in _toml_dataset.items():
@@ -131,12 +135,12 @@ class TestConfig(unittest.TestCase):
                 validate_config(_toml_data, _file_name)
             print(_e.exception)
 
-    def _replacement_test(self, group, element_desc):
+    def _replacement_test(self, group: dict, element_desc: dict):
         """
-        Testet Variable-Replace für eine Group der Unittest-Konfigurationsdatei.
-        :param dict group: zu testende Group
-        :param dict element_desc: Beschreibung der zu prüfenden Elemente
-        :raises: falls nicht alle Variablen ersetzt wurden
+        Testet Variablen-Ersetzung für eine Group der Unittest-Konfigurationsdatei.
+        :param group: zu testende Group
+        :param element_desc: Beschreibung der zu prüfenden Elemente.
+        :raises AssertionError: falls nicht alle Variablen ersetzt wurden
         """
         for _element_name, _element_data in group.items():
             _var_attrs = element_desc.get(_element_name)
@@ -151,10 +155,9 @@ class TestConfig(unittest.TestCase):
                 self.assertTrue(_item_data.find('unittest') >= 0)
 
     @staticmethod
-    def unittest_toml_data(file_name = 'unittest.toml'):
+    def unittest_toml_data(file_name: str = 'unittest.toml') -> dict:
         """
-        :returns: TOML-Daten für Unit-Test
-        :rtype: dict
+        :returns: TOML-Daten einer einzelnen Datei für Unit-Test
         """
         _file_path = os.path.join(TestConfig.unit_test_home(), file_name)
         with open(_file_path, 'r') as _f:
@@ -162,10 +165,10 @@ class TestConfig(unittest.TestCase):
             return tomli.loads(_file_contents)
 
     @staticmethod
-    def unittest_toml_dataset(pattern):
+    def unittest_toml_dataset(pattern: str) -> dict:
         """
-        :returns: TOML-Daten für Unit-Test
-        :rtype: dict
+        :param pattern: das Pattern für die Dateinamen.
+        :returns: TOML-Daten mehrerer Dateien für Unit-Test; Key ist der Dateiname ohne Pfad, Value die TOML-Daten
         """
         _dataset = {}
         for _file_path in Path(TestConfig.unit_test_home()).glob(pattern):
@@ -176,20 +179,18 @@ class TestConfig(unittest.TestCase):
         return _dataset
 
     @staticmethod
-    def unittest_configuration(file_name = 'unittest.toml'):
+    def unittest_configuration() -> LocalConfig:
         """
-        :returns: restix-Konfiguration für Unit-Tests
-        :rtype: LocalConfig
+        :returns: Standard restix-Konfiguration für Unit-Tests
         """
-        _config_file_path = os.path.join(TestConfig.unit_test_home(), file_name)
+        _config_file_path = os.path.join(TestConfig.unit_test_home(), STANDARD_CONFIG_FN)
         _restix_config = LocalConfig.from_file(_config_file_path)
         return _restix_config
 
     @staticmethod
-    def unit_test_home():
+    def unit_test_home() -> str:
         """
-        :returns: Wurzelverzeichnis für Testdaten der Unit-Tests
-        :rtype: str
+        :returns: Wurzelverzeichnis für Testdateien der Unit-Tests
         """
         return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'testdata', 'config'))
 

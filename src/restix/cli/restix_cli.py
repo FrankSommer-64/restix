@@ -1,4 +1,4 @@
-# Script für Backup und Restore mit restic
+# Script für Backup und Restore mit restic.
 #
 # Die Einstellungen sind in der Konfigurationsdatei config.toml hinterlegt,
 # in $HOME/.config/restic auf Linux, in %LOCALAPPDATA%/restic auf Windows.
@@ -26,9 +26,9 @@ import re
 import shlex
 import subprocess
 import sys
-import tomli
 
 from restix.core import *
+from restix.core.config import config_root_path, LocalConfig
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 
@@ -300,18 +300,12 @@ def read_restix_config_file(restix_vars):
     Read local restix configuration file.
     :param dict restix_vars: restix variable names and values
     :return: local restix settings
-    :rtype: dict
+    :rtype: LocalConfig
     :raises RestixException: if local restix configuration file could not be read or parsed
     """
-    _config_fn = os.path.join(restix_vars[RESTIX_VAR_CONFIG], RESTIX_CONFIG_FN)
-    if not os.path.isfile(_config_fn):
-        raise RestixException(E_RESTIX_CFG_FILE_NOT_FOUND, _config_fn)
-    try:
-        with open(_config_fn, 'rb') as _f:
-            _restix_settings = tomli.load(_f)
-    except Exception as _e:
-        raise RestixException(E_INVALID_RESTIX_CFG_FILE, _config_fn, str(_e))
-    return resolve_restix_vars_in_value(_restix_settings, restix_vars)
+    _config_path = config_root_path()
+    _local_config = LocalConfig.from_file(os.path.join(_config_path, RESTIX_CONFIG_FN))
+    return _local_config.for_restic(restix_vars)
 
 
 def restic_info_for(repo_alias, restix_settings):
