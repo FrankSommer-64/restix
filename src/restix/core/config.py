@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis
+# restix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,24 +33,20 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Issai runtime configuration.
-The framework is configured by files located under Issai configuration directory. This directory
-can be specified in environment variable ISSAI_CONFIG_PATH, it defaults to $HOME/.config/issai.
-If there is a file named master.toml, it is considered as master configuration for all products.
-For each product, there must be a subdirectory with the Issai product name and inside the subdirectory
-a file product.toml containing product specific configuration.
-During test execution, the configuration may be updated from attachment files contained in test plans
-or test cases.
+Lokale restix-Konfiguration.
+Die Konfiguration erfolgt durch Dateien im Konfigurationsverzeichnis $HOME/.config/restix.
+Alternativ kann das Verzeichnis durch Umgebungsvariable RESTIX_CONFIG_PATH festgelegt werden.
 """
 
 import copy
 import os.path
 import re
 import tomli
+from typing import Self
 
 from restix.core import *
-from restix.core.restix_exception import RestixException
 from restix.core.messages import *
+from restix.core.restix_exception import RestixException
 from restix.core.util import full_path_of
 
 
@@ -58,71 +54,69 @@ class LocalConfig(dict):
     """
     Lokale restix-Konfiguration.
     """
-    def __init__(self, toml_data, file_path, warnings):
+    def __init__(self, toml_data: dict, file_path: str, warnings: list[str]):
         """
         Konstruktor.
-        :param dict toml_data: geparste Daten aus der Konfigurationsdatei
-        :param str file_path: Name der Konfigurationsdatei mit vollständigem Pfad
-        :param list[str] warnings: Warnungen aus Konsistenzprüfung
+        :param toml_data: geparste Daten aus der Konfigurationsdatei
+        :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
+        :param warnings: Warnungen aus Konsistenzprüfung
         """
         super().__init__()
         self.__file_path = file_path
         self.__warnings = warnings
         self.update(toml_data.items())
 
-    def warnings(self):
+    def warnings(self) -> list[str]:
         """
-        :returns: lokalisierte Warnungen vom Parsen der Konfigurationsdatei
-        :rtype: list[str]
+        :returns: lokalisierte Warnungen vom Auswerten der Konfigurationsdatei
         """
         return self.__warnings
 
     def credentials(self) -> dict:
         """
-        :return: alle definierten Zugangsdaten, sortiert nach Name
+        :returns: alle definierten Zugangsdaten, sortiert nach Name
         """
         return self._group(CFG_GROUP_CREDENTIALS, CFG_PAR_NAME)
 
     def scopes(self) -> dict:
         """
-        :return: alle definierten Backup-Umfänge, sortiert nach Name
+        :returns: alle definierten Backup-Umfänge, sortiert nach Name
         """
         return self._group(CFG_GROUP_SCOPE, CFG_PAR_NAME)
 
     def targets(self) -> dict:
         """
-        :return: alle definierten Backup-Ziele, sortiert nach Name
+        :returns: alle definierten Backup-Ziele, sortiert nach Name
         """
         return self._group(CFG_GROUP_TARGET, CFG_PAR_ALIAS)
 
-    def for_restic(self, variables):
+    def for_restic(self, variables: dict):
         """
-        :param dict variables: Werte der zu ersetzenden Variablen
-        :return: Kopie der Konfiguration mit ersetzten Variablen
+        :param variables: Namen und Werte der zu ersetzenden Variablen
+        :returns: Kopie der Konfiguration mit ersetzten Variablen
         """
         _config = copy.deepcopy(self)
         LocalConfig.replace_variables(_config, variables)
         return _config
 
-    def _group(self, group_name, naming_attr) -> dict:
+    def _group(self, group_name: str, naming_attr: str) -> dict:
         """
-        :param str group_name: die gewünschte Group
-        :param str naming_attr: das Naming-Attribut der Group
-        :return: alle definierten Elemente der übergebenen Group, sortiert nach Name
+        :param group_name: die gewünschte Group
+        :param naming_attr: das Naming-Attribut der Group
+        :returns: alle definierten Elemente der übergebenen Group, sortiert nach Name
         """
         _elements = {}
         for _element in self[group_name]:
             _elements[_element[naming_attr]] = _element
         return dict(sorted(_elements.items()))
 
-    @staticmethod
-    def from_file(file_path):
+    @classmethod
+    def from_file(cls: Self, file_path: str) -> Self:
         """
         Erzeugt die lokale restix-Konfiguration aus einer TOML-Datei.
-        :param str file_path: Name der Konfigurationsdatei mit vollständigem Pfad
-        :returns: lokale restix-Konfiguration
-        :rtype: LocalConfig
-        :raises RestixException: falls die Datei nicht gelesen werden kann
+        :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
+        :returns: lokale restix-Konfiguration.
+        :raises RestixException: falls die Datei nicht gelesen oder verarbeitet werden kann
         """
         _file_contents = ''
         _file_path = os.path.abspath(file_path)
@@ -133,14 +127,13 @@ class LocalConfig(dict):
             raise RestixException(E_CFG_READ_FILE_FAILED, _file_path, e)
         return LocalConfig.from_str(_file_contents, _file_path)
 
-    @staticmethod
-    def from_str(data, file_path):
+    @classmethod
+    def from_str(cls: Self, data: str, file_path: str) -> Self:
         """
         Erzeugt die lokale restix-Konfiguration aus einem TOML-String.
-        :param str data: die TOML-Daten
-        :param str file_path: Name der Konfigurationsdatei mit vollständigem Pfad
-        :returns: lokale Konfiguration
-        :rtype: LocalConfig
+        :param data: die TOML-Daten
+        :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
+        :returns: lokale restix-Konfiguration.
         :raises RestixException: falls der String nicht verarbeitet werden kann
         """
         try:
@@ -151,12 +144,13 @@ class LocalConfig(dict):
         except Exception as e:
             raise RestixException(E_CFG_READ_FILE_FAILED, file_path, e)
 
-    @staticmethod
-    def replace_variables(element, variables):
+    @classmethod
+    def replace_variables(cls: Self, element: dict|list|str, variables: dict) -> dict|list|str:
         """
         Ersetzt Variablen in String-Werten des Elements
-        :param element:
-        :param dict variables: die zu ersetzenden Variablen
+        :param element: das Element
+        :param variables: die zu ersetzenden Variablen
+        :returns: Element, in dem alle Vorkommen der Variablen durch ihre Werte ersetzt wurden
         """
         if type(element) is str:
             for _var_name, _var_value in variables.items():
@@ -171,13 +165,12 @@ class LocalConfig(dict):
         return element
 
 
-def config_root_path():
+def config_root_path() -> str:
     """
     Gibt das Wurzelverzeichnis der restix-Konfiguration zurück.
     Falls die Umgebungsvariable RESTIX_CONFIG_PATH definiert und ein Verzeichnis ist, wird dieses Verzeichnis
     zurückgegeben. Ansonsten wird das Standardverzeichnis '.config/restix' im Home-Verzeichnis des Users zurückgegeben.
     :returns: Wurzelverzeichnis der restix-Konfiguration
-    :rtype: str
     :raises RestixException: Umgebungsvariable RESTIX_CONFIG_PATH ist definiert, aber kein Verzeichnis,
                              oder Umgebungsvariable RESTIX_CONFIG_PATH ist **nicht** definiert und das
                              Standardverzeichnis existiert nicht
@@ -195,13 +188,15 @@ def config_root_path():
     return _config_path
 
 
-def create_config_root():
+def create_config_root() -> str:
     """
+    Erzeugt das restix-Konfigurationsverzeichnis.
+    Falls Umgebungsvariable RESTIX_CONFIG_PATH gesetzt ist, wird dieses als Verzeichnisname benutzt, ansonsten wird
+    das Verzeichnis $HOME/.config/restix erzeugt.
     Creates root directory for Issai configuration and a default master configuration file.
     If defined, directory path is taken from environment variable ISSAI_CONFIG_PATH,
     otherwise creates default directory $HOME/.config/issai.
-    :returns: full path of configuration root directory
-    :rtype: str
+    :returns: restix-Konfigurationsverzeichnis mit vollständigem Pfad
     """
     _config_path = os.environ.get(ENVA_RESTIX_CONFIG_PATH)
     if _config_path is None:
@@ -211,13 +206,12 @@ def create_config_root():
     return _config_path
 
 
-def validate_config(data, file_path):
+def validate_config(data: dict, file_path: str) -> list[str]:
     """
     Prüft, ob eine restix-Konfiguration gültig ist.
-    :param dict data: die TOML-Daten der Konfiguration
-    :param str file_path: Name der Konfigurationsdatei mit vollständigem Pfad
-    :returns: lokalisierte Warnungen
-    :rtype: list[str]
+    :param data: die TOML-Daten der Konfiguration
+    :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
+    :returns: lokalisierte Warnungen.
     :raises RestixException: falls in der Konfiguration ein Element mit falschem Typ definiert ist, ein notwendiges
      Element fehlt oder in einem String-Wert eine nicht unterstützte Variable verwendet wird
     """
@@ -265,16 +259,16 @@ def validate_config(data, file_path):
     return _warnings
 
 
-def check_element(qualified_element_name, element_value, element_desc, file_name):
+def check_element(qualified_element_name: str, element_value: dict|list|str, element_desc: tuple,
+                  file_name: str) -> list[str]:
     """
     Prüft ein Element der Konfigurationsdatei.
     :param qualified_element_name: Qualifizierter Name des Elements
     :param element_value: Wert des Elements
     :param element_desc: Beschreibung für alle Unter-Elemente
-    :param file_name: Name der Konfigurationsdatei
-    :return: nicht unterstützte Elemente
-    :rtype: list[str]
-    :raises RestixException: wenn das Element nicht verarbeitet werden kann
+    :param file_name: Name der Konfigurationsdatei ohne Pfadangabe
+    :returns: nicht unterstützte Elemente.
+    :raises RestixException: falls das Element nicht verarbeitet werden kann
     """
     _expected_element_type = element_desc[0]
     check_element_type(qualified_element_name, _expected_element_type, element_value, file_name)
@@ -311,13 +305,14 @@ def check_element(qualified_element_name, element_value, element_desc, file_name
     return _unsupported_elements
 
 
-def check_element_type(element_name, expected_type, par_value, file_name):
+def check_element_type(element_name: str, expected_type: str, par_value: dict|list|str,
+                       file_name: str):
     """
     Prüft den Typ eines Elements (Group oder Parameter) der Konfigurationsdatei.
-    :param str element_name: Qualifizierter Name des Elements
-    :param str expected_type: erwarteter TOML-Typ (a für Array, s für String, t für Table)
+    :param element_name: Qualifizierter Name des Elements
+    :param expected_type: erwarteter TOML-Typ (a für Array, s für String, t für Table)
     :param par_value: Wert des Elements
-    :param str file_name: Name der Konfigurationsdatei
+    :param file_name: Name der Konfigurationsdatei ohne Pfad.
     :raises RestixException: falls das Element nicht den erwarteten Typ oder Wert hat
     """
     if expected_type.startswith('s'):
@@ -346,12 +341,12 @@ def check_element_type(element_name, expected_type, par_value, file_name):
     raise RestixException(E_INTERNAL_ERROR, _reason)
 
 
-def extract_groups(data, file_path) -> dict:
+def extract_groups(data: dict, file_path: str) -> dict:
     """
     Liest die Groups aus den übergebenen TOML-Daten.
-    :param dict data: die TOML-Daten der Konfiguration
-    :param str file_path: Name der Konfigurationsdatei mit vollständigem Pfad
-    :returns: Name und Daten aller Groups
+    :param data: die TOML-Daten der Konfiguration
+    :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
+    :returns: Name und Daten aller Groups.
     :raises RestixException: falls es Groups mit gleichem Namen gibt
     """
     _file_name = os.path.basename(file_path)
