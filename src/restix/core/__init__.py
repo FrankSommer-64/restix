@@ -37,6 +37,7 @@ VERSION = '0.9snapshot'
 ENVA_RESTIX_CONFIG_PATH = 'RESTIX_CONFIG_PATH'
 
 RESTIX_ASSETS_DIR = 'assets'
+RESTIX_GUI_SETTINGS_FILE_NAME = '.restix'
 
 # Parameter in der Konfigurationsdatei
 CFG_GROUP_CREDENTIALS = 'credentials'

@@ -123,6 +123,9 @@ L_MBOX_TITLE_ERROR = 'l-mbox-title-error'
 L_MBOX_TITLE_INFO = 'l-mbox-title-info'
 L_MBOX_TITLE_WARNING = 'l-mbox-title-warning'
 
+# GUI Warnungen
+W_GUI_WRITE_GUI_SETTINGS_FAILED = 'w-gui-write-gui-settings-failed'
+
 # internal
 _MSG_FILE_NAME_FMT = 'messages_{0}.txt'
 _DEFAULT_LOCALE = 'en'

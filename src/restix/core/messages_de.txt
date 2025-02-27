@@ -76,3 +76,6 @@ e-cli-restix-action-failed +++ Operation fehlgeschlagen +++
 e-cli-tag-options-missing Für Aktion tag werden die Optionen tags und snapshot benötigt.
 e-cli-target-missing Kein Alias für das restic-Repository angegeben.
 e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.
+
+# GUI Warnungen
+w-gui-write-gui-settings-failed Fehler beim Schreiben der GUI-Einstellungen in Datei {0}: {1}.
