@@ -89,28 +89,22 @@ class GuiSettings(dict):
         self[_KEY_WIN_GEOMETRY] = (geometry.x(), geometry.y(), geometry.width(), geometry.height())
         self.__is_modified = True
 
-    def save(self):
+    def save(self, file_path: str):
         """
         Speichert die Einstellungen in einer Datei.
+        :param file_path: Dateiname inklusive Pfad.
         :raises RestixException: falls die Einstellungen nicht gespeichert werden konnten
         """
         if not self.__is_modified:
             return
-        _file_path = GuiSettings._file_path()
         try:
-            with open(_file_path, 'wb') as _f:
+            with open(file_path, 'wb') as _f:
                 tomli_w.dump(self, _f)
         except (IOError, OSError, TypeError, ValueError) as e:
-            raise RestixException(W_GUI_WRITE_GUI_SETTINGS_FAILED, _file_path, str(e))
-
-    def modified(self):
-        """
-        Markiert die Einstellungen als geändert.
-        """
-        self.__is_modified = True
+            raise RestixException(W_GUI_WRITE_GUI_SETTINGS_FAILED, file_path, str(e))
 
     @classmethod
-    def _file_path(cls: Self) -> str:
+    def file_path(cls: Self) -> str:
         """
         :returns: Name der Datei mit den persönlichen Einstellungen inklusive Pfad.
         """
@@ -126,15 +120,15 @@ class GuiSettings(dict):
         return _settings
 
     @classmethod
-    def from_file(cls: Self) -> Self:
+    def from_file(cls: Self, file_path: str) -> Self:
         """
         Liest die Einstellungen aus Datei.
         Gibt die Standard-Einstellungen zurück, falls die Datei nicht gelesen werden kann.
+        :param file_path: Dateiname inklusive Pfad.
         :returns: Einstellungen der restix-GUI.
         """
-        _file_path = GuiSettings._file_path()
         try:
-            with open(_file_path, 'rb') as _f:
+            with open(file_path, 'rb') as _f:
                 _persistent_settings = tomli.load(_f)
             _settings = GuiSettings()
             _settings.update(_persistent_settings.items())
