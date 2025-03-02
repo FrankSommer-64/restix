@@ -99,6 +99,13 @@ class LocalConfig(dict):
         LocalConfig.replace_variables(_config, variables)
         return _config
 
+    def has_warnings(self) -> bool:
+        """
+        Zeigt an, ob beim Parsen der Konfiguration aus den TOML-Daten Warnungen aufgetreten sind.
+        :returns: True, falls Warnungen vorliegen
+        """
+        return len(self.__warnings) > 0
+
     def _group(self, group_name: str, naming_attr: str) -> dict:
         """
         :param group_name: die gewünschte Group

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis
+# restix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -42,10 +42,10 @@ import sys
 from PySide6.QtCore import QDir
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from restix.core import RESTIX_ASSETS_DIR
+from restix.core import RESTIX_ASSETS_DIR, RESTIX_CONFIG_FN
 from restix.core.messages import (localized_label, localized_message, I_GUI_CONFIG_PROBLEM, I_GUI_CONFIG_WARNING,
-                                  I_GUI_CREATE_CONFIG_ROOT, L_MBOX_TITLE_INFO, L_MBOX_TITLE_WARNING)
-from restix.core.config import config_root_path, create_config_root, load_restix_config
+                                  I_GUI_CREATE_CONFIG_ROOT, L_MBOX_TITLE_INFO, L_MBOX_TITLE_ERROR)
+from restix.core.config import config_root_path, create_config_root, LocalConfig
 from restix.core.restix_exception import RestixException
 from restix.gui.mainwindow import MainWindow
 
@@ -75,16 +75,16 @@ def gui_main():
             _config_root_path = create_config_root()
 
         # lokale restix-Konfiguration einlesen
-        _restix_config, _problems, _warnings = load_restix_config(_config_root_path)
-        if len(_problems) > 0 or len(_warnings) > 0:
-            # beim Lesen der restix-Konfiguration gab es Probleme, Informationen dazu in einer Message-Box anzeigen
-            if len(_problems) > 0:
-                _text = f'{os.linesep.join(_problems)}{os.linesep}{os.linesep}{os.linesep.join(_warnings)}'
-                _show_mbox(QMessageBox.Icon.Warning, L_MBOX_TITLE_WARNING, I_GUI_CONFIG_PROBLEM,
-                           _text, QMessageBox.StandardButton.Ok)
-            else:
+        try:
+            _restix_config = LocalConfig.from_file(os.path.join(_config_root_path, RESTIX_CONFIG_FN))
+            if _restix_config.has_warnings():
+                # beim Lesen der restix-Konfiguration gab es Probleme, Informationen dazu in einer Message-Box anzeigen
                 _show_mbox(QMessageBox.Icon.Information, L_MBOX_TITLE_INFO, I_GUI_CONFIG_WARNING,
-                           os.linesep.join(_warnings), QMessageBox.StandardButton.Ok)
+                           os.linesep.join(_restix_config.warnings()), QMessageBox.StandardButton.Ok)
+        except RestixException as _e:
+            _show_mbox(QMessageBox.Icon.Critical, L_MBOX_TITLE_ERROR, I_GUI_CONFIG_PROBLEM,
+                       str(_e), QMessageBox.StandardButton.Ok)
+            sys.exit(1)
 
         # restix GUI starten
         main_win = MainWindow(_config_root_path, _restix_config)
@@ -98,14 +98,15 @@ def gui_main():
         sys.exit(1)
 
 
-def _show_mbox(icon, title_id, text_id, info_text, buttons):
+def _show_mbox(icon: QMessageBox.Icon, title_id: str, text_id: str, info_text: str,
+               buttons: QMessageBox.StandardButton):
     """
     Zeigt eine Message-Box an.
-    :param QMessageBox.Icon icon: das Icon (Error, Warning, ...)
-    :param str title_id: ID der Fenster-Überschrift des Dialogfensters
-    :param str text_id: ID des Texts
-    :param str info_text: vollständige Beschreibung
-    :param QMessageBox.StandardButton buttons: Kombination der anzuzeigenden Buttons
+    :param icon: das Icon (Error, Warning, ...)
+    :param title_id: ID der Fenster-Überschrift des Dialogfensters
+    :param text_id: ID des Texts
+    :param info_text: vollständige Beschreibung
+    :param buttons: Kombination der anzuzeigenden Buttons
     """
     _mbox = QMessageBox()
     _mbox.setIcon(icon)

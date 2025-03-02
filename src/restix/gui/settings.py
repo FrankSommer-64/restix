@@ -89,7 +89,7 @@ class GuiSettings(dict):
         self[_KEY_WIN_GEOMETRY] = (geometry.x(), geometry.y(), geometry.width(), geometry.height())
         self.__is_modified = True
 
-    def save(self, file_path: str):
+    def save(self, file_path: str = os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_NAME)):
         """
         Speichert die Einstellungen in einer Datei.
         :param file_path: Dateiname inklusive Pfad.
@@ -104,13 +104,6 @@ class GuiSettings(dict):
             raise RestixException(W_GUI_WRITE_GUI_SETTINGS_FAILED, file_path, str(e))
 
     @classmethod
-    def file_path(cls: Self) -> str:
-        """
-        :returns: Name der Datei mit den persönlichen Einstellungen inklusive Pfad.
-        """
-        return os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_NAME)
-
-    @classmethod
     def default(cls: Self) -> Self:
         """
         :returns: Standard-Einstellungen der restix-GUI.
@@ -120,7 +113,7 @@ class GuiSettings(dict):
         return _settings
 
     @classmethod
-    def from_file(cls: Self, file_path: str) -> Self:
+    def from_file(cls: Self, file_path: str = os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_NAME)) -> Self:
         """
         Liest die Einstellungen aus Datei.
         Gibt die Standard-Einstellungen zurück, falls die Datei nicht gelesen werden kann.

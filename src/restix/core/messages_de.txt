@@ -77,5 +77,28 @@ e-cli-tag-options-missing Für Aktion tag werden die Optionen tags und snapshot 
 e-cli-target-missing Kein Alias für das restic-Repository angegeben.
 e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.
 
+# GUI Ausgaben
+i-gui-about-detail-text x
+i-gui-about-info-text x
+i-gui-about-text x
+i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
+i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
+i-gui-create-config-root x
+
+# GUI Labels
+l-backup Sicherung
+l-configuration Konfiguration
+l-exit Beenden
+l-help Hilfe
+l-maintenance Wartung
+l-restore Wiederherstellung
+
+# GUI Widget Labels
+l-dlg-title-about Über restix
+l-main-win-title restix
+l-mbox-title-error Fehler
+l-mbox-title-info Information
+l-mbox-title-warning Warnung
+
 # GUI Warnungen
 w-gui-write-gui-settings-failed Fehler beim Schreiben der GUI-Einstellungen in Datei {0}: {1}.

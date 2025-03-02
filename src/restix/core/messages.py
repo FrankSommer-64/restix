@@ -114,14 +114,27 @@ E_CLI_TARGET_MISSING = 'e-cli-target-missing'
 E_CLI_TOO_MANY_ARGS = 'e-cli-too-many-args'
 
 # GUI Ausgaben
+I_GUI_ABOUT_DETAIL_TEXT = 'i-gui-about-detail-text'
+I_GUI_ABOUT_INFO_TEXT = 'i-gui-about-info-text'
+I_GUI_ABOUT_TEXT = 'i-gui-about-text'
 I_GUI_CONFIG_PROBLEM = 'i-gui-config-problem'
 I_GUI_CONFIG_WARNING = 'i-gui-config-warning'
 I_GUI_CREATE_CONFIG_ROOT = 'i-gui-create-config-root'
 
 # GUI widget labels
+L_DLG_TITLE_ABOUT = 'l-dlg-title-about'
+L_MAIN_WIN_TITLE = 'l-main-win-title'
 L_MBOX_TITLE_ERROR = 'l-mbox-title-error'
 L_MBOX_TITLE_INFO = 'l-mbox-title-info'
 L_MBOX_TITLE_WARNING = 'l-mbox-title-warning'
+
+L_BACKUP = 'l-backup'
+L_CONFIGURATION = 'l-configuration'
+L_EXIT = 'l-exit'
+L_HELP = 'l-help'
+L_MAINTENANCE = 'l-maintenance'
+L_OK = 'l-ok'
+L_RESTORE = 'l-restore'
 
 # GUI Warnungen
 W_GUI_WRITE_GUI_SETTINGS_FAILED = 'w-gui-write-gui-settings-failed'
