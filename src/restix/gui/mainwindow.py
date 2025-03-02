@@ -38,18 +38,16 @@ Hauptfenster der restix GUI.
 
 import os.path
 
-from PySide6.QtCore import QSize, Qt, QCoreApplication, Signal, QObject, QPoint
-from PySide6.QtGui import QAction, QMouseEvent
-from PySide6.QtWidgets import QApplication, QDialog, QMainWindow, QMenuBar, QMessageBox, QWidget, QVBoxLayout, \
-    QPushButton, QLabel, QHBoxLayout, QSizePolicy, QMenu
-from tomli import load
+from PySide6.QtCore import QSize, Qt, Signal, QObject, QPoint
+from PySide6.QtGui import QMouseEvent
+from PySide6.QtWidgets import (QApplication, QMainWindow, QMessageBox, QWidget, QVBoxLayout,
+                               QPushButton, QLabel, QHBoxLayout, QSizePolicy, QMenu)
 
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.restix_exception import RestixException
 from restix.core.messages import *
-from restix.gui.dialogs import (AboutDialog, PdfViewerDialog, exception_box)
-#from restix.gui.panes import ActionSelectionPane
+from restix.gui.dialogs import (AboutDialog, PdfViewerDialog)
 from restix.gui.settings import GuiSettings
 
 
@@ -170,50 +168,74 @@ class ActionSelectionPane(QWidget):
         _layout = QHBoxLayout()
         _layout.setSpacing(0)
         _layout.setContentsMargins(0, 0, 0, 0)
-        for _desc in ACTION_DESCS:
-            _layout.addWidget(ImageButtonPane(self, _desc[0], _desc[1], self._dummy))
+        # Backup
+        _backup_button_pane = ImageButtonPane(self, 'backup_icon.png', L_BACKUP, self._backup_action)
+        _layout.addWidget(_backup_button_pane)
+        # Restore
+        _restore_button_pane = ImageButtonPane(self, 'restore_icon.png', L_RESTORE, self._restore_action)
+        _layout.addWidget(_restore_button_pane)
+        # Konfiguration
+        _config_button_pane = ImageButtonPane(self, 'configuration_icon.png', L_CONFIGURATION, self._config_action)
+        _layout.addWidget(_config_button_pane)
+        # Wartung
+        _restore_button_pane = ImageButtonPane(self, 'maintenance_icon.png', L_MAINTENANCE, self._maintenance_action)
+        _layout.addWidget(_restore_button_pane)
         # Hilfe
-        _help_actions = (('Benutzerhandbuch...', self._show_manual), ('Über restix...', self._show_about))
-        self.__help_button_pane = ImageButtonPane(self, 'help_icon.png', L_HELP, self._help_menu, True)
-        _layout.addWidget(self.__help_button_pane)
+        _help_button_pane = ImageButtonPane(self, 'help_icon.png', L_HELP, self._help_action, True)
+        _layout.addWidget(_help_button_pane)
         # Beenden
         _exit_button = ImageButtonPane(self, 'exit_icon.png', L_EXIT, QApplication.instance().quit)
         _layout.addWidget(_exit_button)
         self.setLayout(_layout)
         self.setStyleSheet('background-color: white')
 
-    def _help_menu(self, mouse_x: int, mouse_y: int):
-        print('_help_menu')
+    def _help_action(self, mouse_x: int, mouse_y: int):
+        """
+        Zeigt das Hilfe-Menü an.
+        :param mouse_x: X-Position des Mausklicks
+        :param mouse_y: Y-Position des Mausklicks
+        """
         _context_menu = QMenu(self)
-        _context_menu.addAction('Benutzerhandbuch...').triggered.connect(self._show_manual)
-        _context_menu.addAction('Über restix...').triggered.connect(self._show_about)
+        _context_menu.addAction(localized_label(L_MENU_USER_MANUAL)).triggered.connect(self._show_manual)
+        _context_menu.addAction(localized_label(L_MENU_ABOUT)).triggered.connect(self._show_about)
         _context_menu.exec(QPoint(mouse_x, mouse_y))
 
     def _show_manual(self):
-        print('_show_manual')
+        """
+        Zeigt das restix-Benutzerhandbuch an.
+        """
+        _locale = platform_locale()
+        _cur_dir = str(os.path.dirname(__file__))
+        _assets_path = os.path.join(_cur_dir, RESTIX_ASSETS_DIR)
+        _manual_file_path = os.path.join(_assets_path, f'{USER_MANUAL_STEM}{_locale}.pdf')
+        if not os.path.isfile(_manual_file_path):
+            _manual_file_path = os.path.join(_assets_path, f'{USER_MANUAL_STEM}en.pdf')
+        _dlg = PdfViewerDialog(self, L_DLG_TITLE_USER_MANUAL, _manual_file_path)
+        _dlg.exec()
 
     def _show_about(self):
-        print('_show_about')
+        """
+        Zeigt ein Dialogfenster mit Informationen über die restix-Applikation an.
+        """
+        _about_dlg = AboutDialog(self)
+        _about_dlg.exec()
 
-    def _dummy(self):
-        print('dummy')
+    def _backup_action(self):
+        print('_backup_action')
+
+    def _restore_action(self):
+        print('_restore_action')
+
+    def _config_action(self):
+        print('_config_action')
+
+    def _maintenance_action(self):
+        print('_maintenance_action')
 
 
 class CentralPane(QWidget):
     """
-    # creating a push button
-    button = QPushButton("CLICK", self)
-
-    # setting geometry of button
-    button.setGeometry(200, 150, 100, 30)
-
-    # adding action to a button
-    button.clicked.connect(self.clickme)
-
-    # setting image to the button
-    button.setStyleSheet("background-image : url(image.png);")
-    oder
-    button.setStyleSheet("border-image : url(image.png);")
+    Arbeitsbereich der restix GUI.
     """
     def __init__(self, parent: QWidget):
         """
@@ -272,22 +294,6 @@ class MainWindow(QMainWindow):
         _pane = QWidget(self)
         return _pane
 
-    def _about_dialog(self):
-        """
-        Zeigt den About-Dialog an.
-        """
-        _about_dlg = AboutDialog(self)
-        _about_dlg.exec()
-
-    def _user_manual(self):
-        """
-        Zeigt das Benutzerhandbuch an.
-        """
-        pass
-
-
-ACTION_DESCS = (('backup_icon.png', L_BACKUP), ('restore_icon.png', L_RESTORE),
-                ('configuration_icon.png', L_CONFIGURATION), ('maintenance_icon.png', L_MAINTENANCE))
 
 _MAIN_WINDOW_MARGIN = 16
 _MAIN_WINDOW_STYLE = f'border-image: url({RESTIX_ASSETS_DIR}:restix-aq.jpg)'

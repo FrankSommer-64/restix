@@ -78,9 +78,9 @@ e-cli-target-missing Kein Alias für das restic-Repository angegeben.
 e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.
 
 # GUI Ausgaben
-i-gui-about-detail-text x
-i-gui-about-info-text x
-i-gui-about-text x
+i-gui-about-detail-text Version {0}\nQt-Version {1}
+i-gui-about-info-text Copyright (c) 2025 Frank Sommer
+i-gui-about-text restix - Datensicherung auf restic-Basis
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-create-config-root x
@@ -91,14 +91,18 @@ l-configuration Konfiguration
 l-exit Beenden
 l-help Hilfe
 l-maintenance Wartung
+l-ok OK
 l-restore Wiederherstellung
 
 # GUI Widget Labels
 l-dlg-title-about Über restix
+l-dlg-title-user-manual Benutzerhandbuch
 l-main-win-title restix
 l-mbox-title-error Fehler
 l-mbox-title-info Information
 l-mbox-title-warning Warnung
+l-menu-about Über restix
+l-menu-user-manual Benutzerhandbuch
 
 # GUI Warnungen
 w-gui-write-gui-settings-failed Fehler beim Schreiben der GUI-Einstellungen in Datei {0}: {1}.

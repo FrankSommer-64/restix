@@ -32,6 +32,7 @@
 
 # Package version
 VERSION = '0.9snapshot'
+USER_MANUAL_STEM = 'user_manual_'
 
 # Umgebungsvariablen
 ENVA_RESTIX_CONFIG_PATH = 'RESTIX_CONFIG_PATH'

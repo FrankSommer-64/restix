@@ -123,10 +123,13 @@ I_GUI_CREATE_CONFIG_ROOT = 'i-gui-create-config-root'
 
 # GUI widget labels
 L_DLG_TITLE_ABOUT = 'l-dlg-title-about'
+L_DLG_TITLE_USER_MANUAL = 'l-dlg-title-user-manual'
 L_MAIN_WIN_TITLE = 'l-main-win-title'
 L_MBOX_TITLE_ERROR = 'l-mbox-title-error'
 L_MBOX_TITLE_INFO = 'l-mbox-title-info'
 L_MBOX_TITLE_WARNING = 'l-mbox-title-warning'
+L_MENU_ABOUT = 'l-menu-about'
+L_MENU_USER_MANUAL = 'l-menu-user-manual'
 
 L_BACKUP = 'l-backup'
 L_CONFIGURATION = 'l-configuration'
