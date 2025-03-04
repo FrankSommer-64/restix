@@ -86,13 +86,18 @@ i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-create-config-root x
 
 # GUI Labels
+l-alias Aliasname
+l-comment Beschreibung
 l-backup Sicherung
 l-configuration Konfiguration
+l-credentials Zugangsdaten
 l-exit Beenden
 l-help Hilfe
+l-location Ort
 l-maintenance Wartung
 l-ok OK
 l-restore Wiederherstellung
+l-scope Sicherungs-Umfang
 
 # GUI Widget Labels
 l-dlg-title-about Über restix

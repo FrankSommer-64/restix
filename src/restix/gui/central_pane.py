@@ -47,7 +47,7 @@ from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.restix_exception import RestixException
 from restix.core.messages import *
-from restix.gui.panes import ActionSelectionPane
+from restix.gui.panes import ActionSelectionPane, ResticActionPane
 from restix.gui.dialogs import (AboutDialog, PdfViewerDialog)
 from restix.gui.settings import GuiSettings
 
@@ -66,21 +66,22 @@ class CentralPane(QWidget):
         """
         super().__init__(parent)
         self._local_config = local_config
-        _layout = QVBoxLayout()
-        _layout.setSpacing(10)
-        _layout.setContentsMargins(5, 5, 5, 5)
+        self._layout = QVBoxLayout()
+        self._layout.setSpacing(10)
+        self._layout.setContentsMargins(5, 5, 5, 5)
         _actions = (('backup_icon.png', L_BACKUP, self._backup_selected, False),
                     ('restore_icon.png', L_RESTORE, self._restore_selected, False),
                     ('configuration_icon.png', L_CONFIGURATION, self._config_selected, False),
                     ('maintenance_icon.png', L_MAINTENANCE, self._maintenance_selected, False),
                     ('help_icon.png', L_HELP, self._help_selected, True),
                     ('exit_icon.png', L_EXIT, QApplication.instance().quit, False))
-        _layout.addWidget(ActionSelectionPane(self, _actions))
+        self._layout.addWidget(ActionSelectionPane(self, _actions))
         _welcome_pane = QWidget(self)
         _welcome_pane.setStyleSheet(_WELCOME_PANE_STYLE)
         _welcome_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
-        _layout.addWidget(_welcome_pane)
-        self.setLayout(_layout)
+        self._layout.addWidget(_welcome_pane)
+        self._work_pane = _welcome_pane
+        self.setLayout(self._layout)
 
     def _backup_selected(self):
         """
@@ -89,6 +90,11 @@ class CentralPane(QWidget):
         :param mouse_y: Y-Position des Mausklicks
         """
         print('_backup_selected')
+        _backup_pane = ResticActionPane(self, self._local_config)
+        _backup_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        self._layout.replaceWidget(self._work_pane, _backup_pane)
+        self._work_pane = _backup_pane
+        self.repaint()
 
     def _restore_selected(self):
         print('_restore_selected')

@@ -39,11 +39,11 @@ Zusammengesetzte Bereiche der restix GUI.
 import os.path
 from typing import Callable
 
-from PySide6.QtCore import QSize, Qt, Signal, QObject, QPoint
+from PySide6.QtCore import QSize, Qt, Signal, QObject, QPoint, QAbstractListModel, QAbstractTableModel
 from PySide6.QtGui import QMouseEvent, QBrush
 from PySide6.QtWidgets import (QApplication, QMainWindow, QMessageBox, QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout, QSizePolicy, QMenu, QGridLayout, QListWidget,
-                               QListWidgetItem)
+                               QListWidgetItem, QGroupBox, QTableView)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -51,6 +51,46 @@ from restix.core.restix_exception import RestixException
 from restix.core.messages import *
 from restix.gui.dialogs import (AboutDialog, PdfViewerDialog)
 from restix.gui.settings import GuiSettings
+
+
+class TargetModel(QAbstractTableModel):
+    """
+    Model für die Backup-Ziele der restix-Konfiguration.
+    [[target]]
+        alias = "inetsrv"
+        comment = "Internet-Server"
+        location = "sftp:restic_netcup:data"
+        scope = "minimal"
+        credentials = "standard"
+    """
+    ATTR_NAMES = (CFG_PAR_ALIAS, CFG_PAR_COMMENT, CFG_PAR_LOCATION, CFG_PAR_SCOPE, CFG_PAR_CREDENTIALS)
+    HEADER_TEXTS = (L_ALIAS, L_COMMENT, L_LOCATION, L_SCOPE, L_CREDENTIALS)
+
+    def __init__(self, local_config: LocalConfig, edit: bool = False):
+        """
+        Konstruktor.
+        :param local_config: die restix-Konfiguration
+        :param edit: True, falls die Backup-Ziele bearbeitet werden sollen; False, falls sie nur angezeigt werden sollen
+        """
+        super().__init__()
+        self._targets = local_config.get(CFG_GROUP_TARGET)
+        self._edit_flag = edit
+
+    def data(self, index, /, role = ...):
+        if role == Qt.ItemDataRole.DisplayRole:
+            return self._targets[index.row()][TargetModel.ATTR_NAMES[index.column()]]
+
+    def headerData(self, section, orientation, /, role = ...):
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
+            return localized_label(TargetModel.HEADER_TEXTS[section])
+
+    def rowCount(self, /, parent= ...):
+        print(f'rowCount is {len(self._targets)}')
+        return len(self._targets)
+
+    def columnCount(self, /, parent= ...):
+        print(f'columnCount is {5 if self._edit_flag else 2}')
+        return 5 if self._edit_flag else 2
 
 
 class ImageButtonSignals(QObject):
@@ -208,12 +248,6 @@ class MessagePane(QWidget):
 class TargetSelectionPane(QWidget):
     """
     Pane zur Auswahl eines Backup-Ziels.
-    [[target]]
-alias = "inetsrv"
-comment = "Internet-Server"
-location = "sftp:restic_netcup:data"
-scope = "minimal"
-credentials = "standard"
     """
     def __init__(self, parent: QWidget, local_config: LocalConfig):
         """
@@ -223,11 +257,24 @@ credentials = "standard"
         """
         super().__init__(parent)
         self.restix_config = local_config
+        _layout = QVBoxLayout(self)
+        _group = QGroupBox('Backup-Ziele', self)
+        _group_layout = QVBoxLayout(_group)
+        _table_view = QTableView(self)
+        _table_view.horizontalHeader().setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        _table_view.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        _table_view.setModel(TargetModel(local_config))
+        _table_view.resizeColumnsToContents()
+        _group_layout.addWidget(_table_view)
+        _group.setLayout(_group_layout)
+        _layout.addWidget(_group)
+        self.setLayout(_layout)
 
     def selected_target_alias(self) -> str:
         """
         :returns: Alias des ausgewählten Backup-Ziels; None, falls nichts ausgewählt wurde
         """
+        return 'inetsrv'
 
 
 class ResticActionPane(QWidget):
@@ -248,4 +295,5 @@ class ResticActionPane(QWidget):
         self.pane_layout.addWidget(self.target_selection_pane, 0, 0)
         # unten Ausgabetexte
         self.message_pane = MessagePane(self)
-        self.pane_layout.addWidget(self.message_pane, 0, 2, 1, 2)
+        self.pane_layout.addWidget(self.message_pane, 2, 0, 1, 2)
+        self.message_pane.show_message('Hallo')
