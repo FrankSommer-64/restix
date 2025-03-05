@@ -87,17 +87,21 @@ i-gui-create-config-root x
 
 # GUI Labels
 l-alias Aliasname
+l-auto-tag Automatisch taggen
 l-comment Beschreibung
 l-backup Sicherung
 l-configuration Konfiguration
 l-credentials Zugangsdaten
+l-dry-run Dry run
 l-exit Beenden
 l-help Hilfe
 l-location Ort
 l-maintenance Wartung
 l-ok OK
+l-options Optionen
 l-restore Wiederherstellung
 l-scope Sicherungs-Umfang
+l-targets Backup-Ziele
 
 # GUI Widget Labels
 l-dlg-title-about Über restix
@@ -108,6 +112,10 @@ l-mbox-title-info Information
 l-mbox-title-warning Warnung
 l-menu-about Über restix
 l-menu-user-manual Benutzerhandbuch
+
+# GUI Tooltips
+t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
+t-opt-bak-dry-run Backup nur simulieren
 
 # GUI Warnungen
 w-gui-write-gui-settings-failed Fehler beim Schreiben der GUI-Einstellungen in Datei {0}: {1}.

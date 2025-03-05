@@ -133,17 +133,25 @@ L_MENU_USER_MANUAL = 'l-menu-user-manual'
 
 # GUI labels
 L_ALIAS = 'l-alias'
+L_AUTO_TAG = 'l-auto-tag'
 L_BACKUP = 'l-backup'
 L_COMMENT = 'l-comment'
 L_CONFIGURATION = 'l-configuration'
 L_CREDENTIALS = 'l-credentials'
+L_DRY_RUN = 'l-dry-run'
 L_EXIT = 'l-exit'
 L_HELP = 'l-help'
 L_LOCATION = 'l-location'
 L_MAINTENANCE = 'l-maintenance'
 L_OK = 'l-ok'
+L_OPTIONS = 'l-options'
 L_RESTORE = 'l-restore'
 L_SCOPE = 'l-scope'
+L_TARGETS = 'l-targets'
+
+# GUI Tooltips
+T_OPT_BAK_AUTO_TAG = 't-opt-bak-auto-tag'
+T_OPT_BAK_DRY_RUN = 't-opt-bak-dry-run'
 
 # GUI Warnungen
 W_GUI_WRITE_GUI_SETTINGS_FAILED = 'w-gui-write-gui-settings-failed'

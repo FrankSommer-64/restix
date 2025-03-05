@@ -33,48 +33,57 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Hauptfenster der restix GUI.
+GUI-Bereich für den Backup.
 """
 
-from PySide6.QtWidgets import QMainWindow, QMessageBox
+
+from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel
+from PySide6.QtGui import QMouseEvent, QBrush
+from PySide6.QtWidgets import (QWidget, QVBoxLayout,
+                               QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
+                               QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QFormLayout)
 
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.restix_exception import RestixException
 from restix.core.messages import *
-from restix.gui.central_pane import CentralPane
+from restix.gui.panes import ResticActionPane, create_option, GROUP_BOX_STYLE
 from restix.gui.settings import GuiSettings
 
 
-class MainWindow(QMainWindow):
+class BackupOptionsPane(QGroupBox):
     """
-    Hauptfenster der restix GUI.
+    Pane für die Backup-Optionen.
     """
-    def __init__(self, config_path: str, local_config: LocalConfig):
+    def __init__(self, parent: QWidget):
         """
         Konstruktor.
-        :param config_path: restix-Konfigurationsverzeichnis
+        :param parent: die übergeordnete Pane
+        """
+        super().__init__(localized_label(L_OPTIONS), parent)
+        self.setStyleSheet(GROUP_BOX_STYLE)
+        _layout = QGridLayout()
+        _layout.setColumnStretch(3, 1)
+        self.__auto_tag_option = create_option(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, False)
+        self.__dry_run_option = create_option(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
+        self.setLayout(_layout)
+
+
+class BackupPane(ResticActionPane):
+    """
+    Pane für den Backup.
+    """
+    def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
+        """
+        Konstruktor.
+        :param parent: die zentrale restix Pane
         :param local_config: lokale restix-Konfiguration
+        :param gui_settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__()
-        self.__settings = GuiSettings.from_file()
-        self.setGeometry(self.__settings.win_geometry())
-        self.setWindowTitle(localized_label(L_MAIN_WIN_TITLE))
-        # central widget
-        self.setCentralWidget(CentralPane(self, config_path, local_config, self.__settings))
-        self.layout().setContentsMargins(_MAIN_WINDOW_MARGIN, _MAIN_WINDOW_MARGIN,
-                                         _MAIN_WINDOW_MARGIN, _MAIN_WINDOW_MARGIN)
-        self.layout().update()
+        super().__init__(parent, local_config, gui_settings)
+        # option pane
+        self.pane_layout.addWidget(BackupOptionsPane(self), 0, 1)
+        # action button pane
+        self.pane_layout.addWidget(QWidget(self), 1, 0, 1, -1)
+        self.setLayout(self.pane_layout)
 
-    def save_settings(self):
-        """
-        Speichert die GUI-Einstellungen in einer Datei.
-        """
-        self.__settings.set_win_geometry(self.rect())
-        try:
-            self.__settings.save()
-        except RestixException as _e:
-            QMessageBox.warning(self, localized_label(L_MBOX_TITLE_WARNING), str(_e), QMessageBox.StandardButton.Ok)
-
-
-_MAIN_WINDOW_MARGIN = 4

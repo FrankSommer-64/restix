@@ -47,6 +47,7 @@ from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.restix_exception import RestixException
 from restix.core.messages import *
+from restix.gui.backup_pane import BackupPane
 from restix.gui.panes import ActionSelectionPane, ResticActionPane
 from restix.gui.dialogs import (AboutDialog, PdfViewerDialog)
 from restix.gui.settings import GuiSettings
@@ -66,9 +67,10 @@ class CentralPane(QWidget):
         """
         super().__init__(parent)
         self._local_config = local_config
+        self._gui_settings = gui_settings
         self._layout = QVBoxLayout()
-        self._layout.setSpacing(10)
-        self._layout.setContentsMargins(5, 5, 5, 5)
+        self._layout.setSpacing(0)
+        self._layout.setContentsMargins(0, 0, 0, 0)
         _actions = (('backup_icon.png', L_BACKUP, self._backup_selected, False),
                     ('restore_icon.png', L_RESTORE, self._restore_selected, False),
                     ('configuration_icon.png', L_CONFIGURATION, self._config_selected, False),
@@ -81,6 +83,7 @@ class CentralPane(QWidget):
         _welcome_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         self._layout.addWidget(_welcome_pane)
         self._work_pane = _welcome_pane
+        self.setStyleSheet(_STANDARD_PANE_STYLE)
         self.setLayout(self._layout)
 
     def _backup_selected(self):
@@ -89,12 +92,12 @@ class CentralPane(QWidget):
         :param mouse_x: X-Position des Mausklicks
         :param mouse_y: Y-Position des Mausklicks
         """
-        print('_backup_selected')
-        _backup_pane = ResticActionPane(self, self._local_config)
+        _backup_pane = BackupPane(self, self._local_config, self._gui_settings)
         _backup_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        _backup_pane.setStyleSheet(_STANDARD_PANE_STYLE)
         self._layout.replaceWidget(self._work_pane, _backup_pane)
+        self._layout.update()
         self._work_pane = _backup_pane
-        self.repaint()
 
     def _restore_selected(self):
         print('_restore_selected')
@@ -138,3 +141,4 @@ class CentralPane(QWidget):
 
 
 _WELCOME_PANE_STYLE = f'border-image: url({RESTIX_ASSETS_DIR}:restix-aq.jpg)'
+_STANDARD_PANE_STYLE = 'background-color: white'

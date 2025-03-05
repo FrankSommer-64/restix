@@ -36,14 +36,12 @@
 Zusammengesetzte Bereiche der restix GUI.
 """
 
-import os.path
-from typing import Callable
 
-from PySide6.QtCore import QSize, Qt, Signal, QObject, QPoint, QAbstractListModel, QAbstractTableModel
+from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel
 from PySide6.QtGui import QMouseEvent, QBrush
-from PySide6.QtWidgets import (QApplication, QMainWindow, QMessageBox, QWidget, QVBoxLayout,
-                               QPushButton, QLabel, QHBoxLayout, QSizePolicy, QMenu, QGridLayout, QListWidget,
-                               QListWidgetItem, QGroupBox, QTableView)
+from PySide6.QtWidgets import (QWidget, QVBoxLayout,
+                               QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
+                               QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -51,6 +49,10 @@ from restix.core.restix_exception import RestixException
 from restix.core.messages import *
 from restix.gui.dialogs import (AboutDialog, PdfViewerDialog)
 from restix.gui.settings import GuiSettings
+
+
+GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius: 6px; margin-top: 6px} ' \
+                  'QGroupBox::title {color: blue; subcontrol-origin: margin; left: 7px; padding: 0 5px 0 5px;}'
 
 
 class TargetModel(QAbstractTableModel):
@@ -78,19 +80,44 @@ class TargetModel(QAbstractTableModel):
 
     def data(self, index, /, role = ...):
         if role == Qt.ItemDataRole.DisplayRole:
-            return self._targets[index.row()][TargetModel.ATTR_NAMES[index.column()]]
+            return self.target(index)[TargetModel.ATTR_NAMES[index.column()]]
 
     def headerData(self, section, orientation, /, role = ...):
         if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
             return localized_label(TargetModel.HEADER_TEXTS[section])
 
     def rowCount(self, /, parent= ...):
-        print(f'rowCount is {len(self._targets)}')
         return len(self._targets)
 
     def columnCount(self, /, parent= ...):
-        print(f'columnCount is {5 if self._edit_flag else 2}')
         return 5 if self._edit_flag else 2
+
+    def target(self, index) -> dict:
+        return self._targets[index.row()]
+
+
+class TargetTableView(QTableView):
+    """
+    View zur Auswahl oder Bearbeitung der Backup-Ziele.
+    """
+    def __init__(self, parent, local_config):
+        super().__init__(parent)
+        self._model = TargetModel(local_config)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.horizontalHeader().setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        self.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.setModel(self._model)
+        self.resizeColumnsToContents()
+
+    def selected_target(self) -> dict | None:
+        """
+        :returns: ausgewähltes Backup-Ziel; None, falls nichts ausgewählt wurde
+        """
+        _selection = self.selectedIndexes()
+        if len(_selection) > 0:
+            return self.model().target(_selection[0])
+        return None
 
 
 class ImageButtonSignals(QObject):
@@ -245,55 +272,79 @@ class MessagePane(QWidget):
         self.__messages.scrollToBottom()
 
 
-class TargetSelectionPane(QWidget):
+class TargetSelectionPane(QGroupBox):
     """
     Pane zur Auswahl eines Backup-Ziels.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig):
+    def __init__(self, parent: QWidget, local_config: LocalConfig, settings: GuiSettings):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
         :param local_config: lokale restix-Konfiguration
+        :param settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__(parent)
+        super().__init__(localized_label(L_TARGETS), parent)
         self.restix_config = local_config
-        _layout = QVBoxLayout(self)
-        _group = QGroupBox('Backup-Ziele', self)
-        _group_layout = QVBoxLayout(_group)
-        _table_view = QTableView(self)
-        _table_view.horizontalHeader().setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
-        _table_view.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
-        _table_view.setModel(TargetModel(local_config))
-        _table_view.resizeColumnsToContents()
-        _group_layout.addWidget(_table_view)
-        _group.setLayout(_group_layout)
-        _layout.addWidget(_group)
+        _layout = QGridLayout(self)
+        self._table_view = TargetTableView(self, local_config)
+        _layout.addWidget(self._table_view)
         self.setLayout(_layout)
+        self.setStyleSheet(GROUP_BOX_STYLE)
 
     def selected_target_alias(self) -> str:
         """
         :returns: Alias des ausgewählten Backup-Ziels; None, falls nichts ausgewählt wurde
         """
-        return 'inetsrv'
+        return self._table_view.selected_target()
 
 
 class ResticActionPane(QWidget):
     """
     Basisklasse für die Panes aller Aktionen, die einen restic-Befehl auslösen.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig):
+    def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
         :param parent: die zentrale restix Pane
         :param local_config: lokale restix-Konfiguration
+        :param gui_settings: die GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)
         self.restix_config = local_config
         self.pane_layout = QGridLayout(self)
+        self.pane_layout.setSpacing(0)
+        self.pane_layout.setContentsMargins(0, 0, 0, 0)
+        self.pane_layout.setColumnStretch(1, 1)
         # links oben Backup-Ziel-Auswahl
-        self.target_selection_pane = TargetSelectionPane(self, local_config)
+        self.target_selection_pane = TargetSelectionPane(self, local_config, gui_settings)
         self.pane_layout.addWidget(self.target_selection_pane, 0, 0)
         # unten Ausgabetexte
         self.message_pane = MessagePane(self)
-        self.pane_layout.addWidget(self.message_pane, 2, 0, 1, 2)
+        self.pane_layout.addWidget(self.message_pane, 2, 0, 1, -1)
         self.message_pane.show_message('Hallo')
+
+
+
+def create_option(layout: QGridLayout, caption_id: str, tooltip_id: str, initial_state:bool) -> QCheckBox:
+    """
+    Erzeugt Label und Checkbox für eine Option.
+    :param layout: das Layout, in dem die Option enthalten sein soll.
+    :param caption_id: die Label-ID für die Beschreibung.
+    :param tooltip_id: die Label-ID für den Tooltip-Text.
+    :param initial_state: der initiale Zustand der Checkbox.
+    :returns: the checkbox widget
+    """
+    _row_nr = layout.rowCount()
+    _tooltip = localized_label(tooltip_id)
+    _caption = QLabel(localized_label(caption_id))
+    _caption.setToolTip(_tooltip)
+    _caption.setStyleSheet(_CHECKBOX_CAPTION_STYLE)
+    layout.addWidget(_caption, _row_nr, 0)
+    _check_box = QCheckBox()
+    _check_box.setToolTip(_tooltip)
+    _check_box.setChecked(initial_state)
+    layout.addWidget(_check_box, _row_nr, 1)
+    return _check_box
+
+
+_CHECKBOX_CAPTION_STYLE = 'color: black; font-weight: bold'
