@@ -37,17 +37,15 @@ Zusammengesetzte Bereiche der restix GUI.
 """
 
 
-from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel
-from PySide6.QtGui import QMouseEvent, QBrush
+from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel, QModelIndex
+from PySide6.QtGui import QMouseEvent, QBrush, QFont
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
                                QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox)
 
 from restix.core import *
 from restix.core.config import LocalConfig
-from restix.core.restix_exception import RestixException
 from restix.core.messages import *
-from restix.gui.dialogs import (AboutDialog, PdfViewerDialog)
 from restix.gui.settings import GuiSettings
 
 
@@ -58,12 +56,6 @@ GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius:
 class TargetModel(QAbstractTableModel):
     """
     Model für die Backup-Ziele der restix-Konfiguration.
-    [[target]]
-        alias = "inetsrv"
-        comment = "Internet-Server"
-        location = "sftp:restic_netcup:data"
-        scope = "minimal"
-        credentials = "standard"
     """
     ATTR_NAMES = (CFG_PAR_ALIAS, CFG_PAR_COMMENT, CFG_PAR_LOCATION, CFG_PAR_SCOPE, CFG_PAR_CREDENTIALS)
     HEADER_TEXTS = (L_ALIAS, L_COMMENT, L_LOCATION, L_SCOPE, L_CREDENTIALS)
@@ -77,22 +69,47 @@ class TargetModel(QAbstractTableModel):
         super().__init__()
         self._targets = local_config.get(CFG_GROUP_TARGET)
         self._edit_flag = edit
+        self.__bold_font = QFont()
+        self.__bold_font.setBold(True)
 
-    def data(self, index, /, role = ...):
+    def data(self, index: QModelIndex, /, role = ...) -> str|QFont|None:
+        """
+        :param index: Zelle in der TableView
+        :param role: Typ der gewünschten Information (Text oder Style)
+        :returns: Inhalt oder Style einer Zelle
+        """
         if role == Qt.ItemDataRole.DisplayRole:
             return self.target(index)[TargetModel.ATTR_NAMES[index.column()]]
+        if role == Qt.ItemDataRole.FontRole and index.column() == 0:
+            return self.__bold_font
 
-    def headerData(self, section, orientation, /, role = ...):
+    def headerData(self, section: int, orientation: Qt.Orientation, /, role = ...) -> str|None:
+        """
+        :param section: Spalte der TableView
+        :param orientation: Orientierung der Überschriften (horizontal oder vertikal)
+        :param role: Typ der gewünschten Information (Text oder Style)
+        :returns: Text für die Überschrift der angegebenen Spalte
+        """
         if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
             return localized_label(TargetModel.HEADER_TEXTS[section])
 
-    def rowCount(self, /, parent= ...):
+    def rowCount(self, /, parent= ...) -> int:
+        """
+        :returns: Anzahl der Zeilen im Model
+        """
         return len(self._targets)
 
-    def columnCount(self, /, parent= ...):
+    def columnCount(self, /, parent= ...) -> int:
+        """
+        :returns: Anzahl der Spalten im Model
+        """
         return 5 if self._edit_flag else 2
 
-    def target(self, index) -> dict:
+    def target(self, index: QModelIndex) -> dict:
+        """
+        :param index: die Zelle im Model
+        :returns: Daten hinter der angegebenen Zelle
+        """
         return self._targets[index.row()]
 
 
@@ -100,7 +117,12 @@ class TargetTableView(QTableView):
     """
     View zur Auswahl oder Bearbeitung der Backup-Ziele.
     """
-    def __init__(self, parent, local_config):
+    def __init__(self, parent: QWidget, local_config: LocalConfig):
+        """
+        Konstruktor.
+        :param parent: das übergeordnete Widget
+        :param local_config: die restix-Konfiguration
+        """
         super().__init__(parent)
         self._model = TargetModel(local_config)
         self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
@@ -109,6 +131,7 @@ class TargetTableView(QTableView):
         self.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
         self.setModel(self._model)
         self.resizeColumnsToContents()
+        self.setStyleSheet(_TARGET_TABLE_STYLE)
 
     def selected_target(self) -> dict | None:
         """
@@ -116,7 +139,7 @@ class TargetTableView(QTableView):
         """
         _selection = self.selectedIndexes()
         if len(_selection) > 0:
-            return self.model().target(_selection[0])
+            return self._model.target(_selection[0])
         return None
 
 
@@ -257,6 +280,7 @@ class MessagePane(QWidget):
         super().__init__(parent)
         _layout = QVBoxLayout(self)
         self.__messages = QListWidget(self)
+        self.__messages.setStyleSheet(_MESSAGE_PANE_STYLE)
         self.__messages.setMinimumHeight(250)
         _layout.addWidget(self.__messages)
         self.setLayout(_layout)
@@ -270,6 +294,26 @@ class MessagePane(QWidget):
         _text_item.setForeground(QBrush(Qt.GlobalColor.black))
         self.__messages.addItem(_text_item)
         self.__messages.scrollToBottom()
+
+
+class ActionButtonPane(QWidget):
+    """
+    Pane zur Ausgabe von Nachrichten.
+    """
+    def __init__(self, parent: QWidget, ok_button_label_id: str, ok_handler, cancel_handler):
+        """
+        Konstruktor.
+        :param parent: die übergeordnete Pane
+        """
+        super().__init__(parent)
+        _layout = QHBoxLayout(self)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        _ok_button = QPushButton(localized_label(ok_button_label_id))
+        _ok_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        _ok_button.setStyleSheet(_OK_BUTTON_STYLE)
+        _ok_button.clicked.connect(ok_handler)
+        _layout.addWidget(_ok_button)
+        self.setLayout(_layout)
 
 
 class TargetSelectionPane(QGroupBox):
@@ -291,7 +335,7 @@ class TargetSelectionPane(QGroupBox):
         self.setLayout(_layout)
         self.setStyleSheet(GROUP_BOX_STYLE)
 
-    def selected_target_alias(self) -> str:
+    def selected_target_alias(self) -> dict:
         """
         :returns: Alias des ausgewählten Backup-Ziels; None, falls nichts ausgewählt wurde
         """
@@ -312,12 +356,11 @@ class ResticActionPane(QWidget):
         super().__init__(parent)
         self.restix_config = local_config
         self.pane_layout = QGridLayout(self)
-        self.pane_layout.setSpacing(0)
-        self.pane_layout.setContentsMargins(0, 0, 0, 0)
+        self.pane_layout.setSpacing(5)
         self.pane_layout.setColumnStretch(1, 1)
         # links oben Backup-Ziel-Auswahl
         self.target_selection_pane = TargetSelectionPane(self, local_config, gui_settings)
-        self.pane_layout.addWidget(self.target_selection_pane, 0, 0)
+        self.pane_layout.addWidget(self.target_selection_pane, 0, 0, 2, 1)
         # unten Ausgabetexte
         self.message_pane = MessagePane(self)
         self.pane_layout.addWidget(self.message_pane, 2, 0, 1, -1)
@@ -348,3 +391,6 @@ def create_option(layout: QGridLayout, caption_id: str, tooltip_id: str, initial
 
 
 _CHECKBOX_CAPTION_STYLE = 'color: black; font-weight: bold'
+_MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style: solid; border-width: 1px'
+_OK_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
+_TARGET_TABLE_STYLE = 'background-color: white'

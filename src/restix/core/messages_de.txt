@@ -84,6 +84,7 @@ i-gui-about-text restix - Datensicherung auf restic-Basis
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-create-config-root x
+i-gui-no-target-selected Kein Backup-Ziel ausgewählt
 
 # GUI Labels
 l-alias Aliasname
@@ -92,6 +93,7 @@ l-comment Beschreibung
 l-backup Sicherung
 l-configuration Konfiguration
 l-credentials Zugangsdaten
+l-do-backup Sicherung starten
 l-dry-run Dry run
 l-exit Beenden
 l-help Hilfe

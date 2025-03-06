@@ -70,7 +70,7 @@ class CentralPane(QWidget):
         self._gui_settings = gui_settings
         self._layout = QVBoxLayout()
         self._layout.setSpacing(0)
-        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setContentsMargins(5, 5, 5, 5)
         _actions = (('backup_icon.png', L_BACKUP, self._backup_selected, False),
                     ('restore_icon.png', L_RESTORE, self._restore_selected, False),
                     ('configuration_icon.png', L_CONFIGURATION, self._config_selected, False),
@@ -88,13 +88,12 @@ class CentralPane(QWidget):
 
     def _backup_selected(self):
         """
-        Zeigt das Hilfe-Menü an.
-        :param mouse_x: X-Position des Mausklicks
-        :param mouse_y: Y-Position des Mausklicks
+        Zeigt die GUI-Bereiche für Backup an.
         """
         _backup_pane = BackupPane(self, self._local_config, self._gui_settings)
         _backup_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         _backup_pane.setStyleSheet(_STANDARD_PANE_STYLE)
+        self._work_pane.setStyleSheet(_STANDARD_PANE_STYLE)
         self._layout.replaceWidget(self._work_pane, _backup_pane)
         self._layout.update()
         self._work_pane = _backup_pane
@@ -141,4 +140,4 @@ class CentralPane(QWidget):
 
 
 _WELCOME_PANE_STYLE = f'border-image: url({RESTIX_ASSETS_DIR}:restix-aq.jpg)'
-_STANDARD_PANE_STYLE = 'background-color: white'
+_STANDARD_PANE_STYLE = 'background-color: #eeeeee'

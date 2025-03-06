@@ -37,17 +37,13 @@ GUI-Bereich für den Backup.
 """
 
 
-from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel
-from PySide6.QtGui import QMouseEvent, QBrush
-from PySide6.QtWidgets import (QWidget, QVBoxLayout,
-                               QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
-                               QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QFormLayout)
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox
 
 from restix.core import *
 from restix.core.config import LocalConfig
-from restix.core.restix_exception import RestixException
 from restix.core.messages import *
-from restix.gui.panes import ResticActionPane, create_option, GROUP_BOX_STYLE
+from restix.gui.panes import ResticActionPane, create_option, GROUP_BOX_STYLE, ActionButtonPane
 from restix.gui.settings import GuiSettings
 
 
@@ -64,6 +60,8 @@ class BackupOptionsPane(QGroupBox):
         self.setStyleSheet(GROUP_BOX_STYLE)
         _layout = QGridLayout()
         _layout.setColumnStretch(3, 1)
+        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__auto_tag_option = create_option(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, False)
         self.__dry_run_option = create_option(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
         self.setLayout(_layout)
@@ -84,6 +82,20 @@ class BackupPane(ResticActionPane):
         # option pane
         self.pane_layout.addWidget(BackupOptionsPane(self), 0, 1)
         # action button pane
-        self.pane_layout.addWidget(QWidget(self), 1, 0, 1, -1)
+        self.pane_layout.addWidget(ActionButtonPane(self, L_DO_BACKUP, self._ok_button_clicked, self._cancel_button_clicked), 1, 1)
         self.setLayout(self.pane_layout)
 
+    def _ok_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der 'Start Backup'-Button geklickt wurde.
+        """
+        _selected_target = self.target_selection_pane.selected_target_alias()
+        if _selected_target is None:
+            _rc = QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                          localized_message(I_GUI_NO_TARGET_SELECTED),
+                                          QMessageBox.StandardButton.Ok)
+            return
+        print(f'Starte Backup zu Ziel {_selected_target[CFG_PAR_ALIAS]}')
+
+    def _cancel_button_clicked(self):
+        print('_cancel_button_clicked')
