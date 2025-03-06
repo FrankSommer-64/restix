@@ -38,6 +38,7 @@ restix utility functions.
 
 import os
 import platform
+import pwd
 import re
 import subprocess
 
@@ -103,6 +104,15 @@ def platform_locale():
     except Exception:
         pass
     return None
+
+def current_user() -> str:
+    """
+    :returns: Name des aktuell angemeldeten Benutzers
+    """
+    _operating_system = platform.system().lower()
+    if _operating_system == 'linux':
+        return pwd.getpwuid(os.getuid()).pw_name
+    raise RuntimeError('OS wird nicht unterstützt')
 
 def is_valid_hostname(hostname):
     if hostname[-1] == ".":

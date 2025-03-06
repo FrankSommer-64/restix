@@ -84,6 +84,22 @@ class LocalConfig(dict):
         """
         return self._group(CFG_GROUP_SCOPE, CFG_PAR_NAME)
 
+    def credentials_for_target(self, alias: str) -> dict:
+        """
+        :param alias: der Aliasname des Backup-Ziels
+        :returns: Zugangsdaten für das angegebene Backup-Ziel
+        """
+        _target = self.targets().get(alias)
+        return self.credentials().get(_target.get(CFG_PAR_CREDENTIALS))
+
+    def scope_for_target(self, alias: str) -> dict:
+        """
+        :param alias: der Aliasname des Backup-Ziels
+        :returns: Backup-Umfang für das angegebene Backup-Ziel
+        """
+        _target = self.targets().get(alias)
+        return self.scopes().get(_target.get(CFG_PAR_SCOPE))
+
     def targets(self) -> dict:
         """
         :returns: alle definierten Backup-Ziele, sortiert nach Name

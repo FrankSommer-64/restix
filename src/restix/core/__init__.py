@@ -76,6 +76,21 @@ CLI_ACTION_TARGETS = 'targets'
 ALL_CLI_ACTIONS = (CLI_ACTION_BACKUP, CLI_ACTION_FORGET, CLI_ACTION_INIT, CLI_ACTION_RESTORE, CLI_ACTION_SNAPSHOTS,
                    CLI_ACTION_TAG, CLI_ACTION_TARGETS)
 
+# Aktionen
+ACTION_BACKUP = 'backup'
+
+# Optionen
+OPTION_DRY_RUN = '--dry-run'
+OPTION_EXCLUDE_FILE = '--exclude-file'
+OPTION_HOST= 'host'
+OPTION_INCLUDE_FILE = '--files-from-file'
+OPTION_PASSWORD = 'password'
+OPTION_PASSWORD_FILE = '--password-file'
+OPTION_REPO = '--repo'
+OPTION_TAG = '--tag'
+OPTION_USER = 'user'
+OPTION_YEAR = 'year'
+
 # restix CLI options
 CLI_OPTION_BATCH = 'batch'
 CLI_OPTION_DRY_RUN = 'dry-run'
