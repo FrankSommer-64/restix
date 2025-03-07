@@ -192,7 +192,7 @@ class TestConfig(unittest.TestCase):
         """
         :returns: Wurzelverzeichnis für Testdateien der Unit-Tests
         """
-        return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'testdata', 'config'))
+        return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'testdata', 'core', 'config'))
 
 
 if __name__ == '__main__':

@@ -66,6 +66,12 @@ class LocalConfig(dict):
         self.__warnings = warnings
         self.update(toml_data.items())
 
+    def path(self) -> str:
+        """
+        :returns: Verzeichnis der restix-Konfiguration inklusive Pfad
+        """
+        return os.path.dirname(self.__file_path)
+
     def warnings(self) -> list[str]:
         """
         :returns: lokalisierte Warnungen vom Auswerten der Konfigurationsdatei

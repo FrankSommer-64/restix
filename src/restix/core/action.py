@@ -36,7 +36,9 @@
 Daten für alle restix-Aktionen.
 """
 
+from typing import Self
 import datetime
+import os.path
 import platform
 import re
 import shlex
@@ -54,14 +56,16 @@ class RestixAction:
     """
     Datenklasse mit allen Informationen, die zum Ausführen einer restix-Aktion benötigt werden.
     """
-    def __init__(self, action_id: str, target_alias: str):
+    def __init__(self, action_id: str, target_alias: str, config_path: str):
         """
         Konstruktor.
         :param action_id: die ID der Aktion (backup, forget, init, ...)
         :param target_alias: der Aliasname des Backup-Ziels
+        :param config_path: das Verzeichnis der restix-Konfiguration inklusive Pfad
         """
         self.__action_id = action_id
         self.__target_alias = target_alias
+        self.__config_path = config_path
         self.__options = {OPTION_HOST: platform.node(), OPTION_YEAR: str(datetime.date.today().year),
                           OPTION_USER: current_user(), OPTION_DRY_RUN: False, OPTION_BATCH: False}
 
@@ -83,45 +87,39 @@ class RestixAction:
         :returns: Wert der angegebenen Option; None, falls die Option nicht gesetzt wurde
         """
         _value = self.__options.get(option_name)
-        if isinstance(_value, str):
-            # ggf. Variablen ersetzen
-            for _var_name in RESTIX_CFG_VARS:
-                _var_value = self.option(_var_name.lower())
-                if _var_value is None:
-                    raise RestixException(E_RESTIX_VAR_NOT_DEFINED, _var_name)
-                _value = _value.replace(f'${{{_var_name}}}', str(_var_value))
         return _value
 
     def set_option(self, option_name: str, option_value: bool | str):
         """
         Setzt die angegebene Option.
-OPTION_DRY_RUN = '--dry-run'
-OPTION_EXCLUDE_FILE = '--exclude-file'
-OPTION_HOST= 'host'
-OPTION_INCLUDE_FILE = '--files-from-file'
-OPTION_PASSWORD_FILE = '--password-file'
-OPTION_REPO = '--repo'
-OPTION_TAG = '--tag'
-OPTION_YEAR = 'year'
+        Dateinamen müssen mit vollständigem Pfad angegeben werden.
+        Bei benutzerdefinierten Angaben für Host und Jahr müssen diese als erste Optionen gesetzt werden.
         :param option_name: der Name der Option
         :param option_value: der Wert der Option
         """
         if option_value is None: return
-        if option_name == OPTION_REPO:
-            _repo_path = os.path.join(option_value, self.option(OPTION_YEAR),
-                                      self.option(OPTION_HOST), self.option(OPTION_USER))
-            self.__options[option_name] = _repo_path
-            return
         if option_name == OPTION_PASSWORD:
             _f = tempfile.NamedTemporaryFile('w', delete=False)
             _f.write(option_value)
             _f.close()
             self.__options[OPTION_PASSWORD_FILE] = _f.name
             return
+        if isinstance(option_value, str):
+            # ggf. Variablen ersetzen
+            for _var_name in RESTIX_CFG_VARS:
+                _var_value = self.option(_var_name.lower())
+                if _var_value is None:
+                    raise RestixException(E_RESTIX_VAR_NOT_DEFINED, _var_name)
+                option_value = option_value.replace(f'${{{_var_name}}}', str(_var_value))
+        if option_name == OPTION_REPO:
+            _repo_path = os.path.join(option_value, self.option(OPTION_YEAR),
+                                      self.option(OPTION_HOST), self.option(OPTION_USER))
+            self.__options[option_name] = _repo_path
+            return
         if option_name == OPTION_BATCH or option_name == OPTION_DRY_RUN:
             if not isinstance(option_value, bool):
                 raise RestixException(E_BOOL_OPT_REQUIRED, option_name)
-        elif option_name == OPTION_PASSWORD_FILE:
+        elif option_name == OPTION_PASSWORD_FILE or option_name == OPTION_INCLUDE_FILE or option_name == OPTION_EXCLUDE_FILE:
             if not os.path.isfile(option_value):
                 raise RestixException(E_FILE_OPT_REQUIRED, option_value, option_name)
         elif option_name == CLI_OPTION_RESTORE_PATH or option_name == CLI_OPTION_TARGET_MOUNT_PATH:
@@ -150,8 +148,7 @@ OPTION_YEAR = 'year'
             if not re.match(r'^[0-9]{4}$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_YEAR, option_value)
         else:
-            # TODO raise unsupported option error
-            pass
+            raise RestixException(E_INVALID_OPTION, option_name)
         self.__options[option_name] = option_value
 
     def to_restic_command(self) -> list[str]:
@@ -181,7 +178,14 @@ OPTION_YEAR = 'year'
         :param options: ggf. zusätzliche Optionen
         """
         # restic-Repository setzen
-        self.set_option(OPTION_REPO, local_config.targets().get(self.target_alias()).get(CFG_PAR_LOCATION))
+        _target = local_config.targets().get(self.target_alias())
+        if _target is None:
+            raise RestixException(E_RESTIX_TARGET_NOT_DEFINED, self.target_alias())
+        self.set_option(OPTION_REPO, _target.get(CFG_PAR_LOCATION))
+        # Zugangsdaten setzen
+        _credentials = local_config.credentials_for_target(self.target_alias())
+        if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_FILE:
+            self.set_option(OPTION_PASSWORD_FILE, self._full_filename_of(_credentials.get(CFG_PAR_VALUE)))
         # eventuell die angegebenen Optionen übernehmen
         if options is not None:
             for _k, _v in options.items():
@@ -192,29 +196,40 @@ OPTION_YEAR = 'year'
         Setzt die Optionen für die zu sichernden und zu ignorierenden Daten.
         :param scope: der Backup-Umfang aus der restix-Konfiguration
         """
-        self.set_option(OPTION_INCLUDE_FILE, scope.get(CFG_PAR_INCLUDES))
+        _includes_file_path = self._full_filename_of(scope.get(CFG_PAR_INCLUDES))
+        self.set_option(OPTION_INCLUDE_FILE, _includes_file_path)
+        _excludes_file_name = scope.get(CFG_PAR_EXCLUDES)
         _ignores = scope.get(CFG_PAR_IGNORES)
         if _ignores is None or len(_ignores) == 0:
-            # keine Patterns für zu ignorierende Daten, Excludes-Datei 1:1 übernehmen
-            self.set_option(OPTION_EXCLUDE_FILE, scope.get(CFG_PAR_EXCLUDES))
+            # keine Patterns für zu ignorierende Daten, Excludes-Datei 1:1 übernehmen, falls eine definiert ist
+            if _excludes_file_name is not None:
+                self.set_option(OPTION_EXCLUDE_FILE, self._full_filename_of(_excludes_file_name))
         else:
-            # Patterns für zu ignorierende Daten in die Excludes-Datei eintragen
-            with open(scope.get(CFG_PAR_EXCLUDES), 'r') as _exclude_file:
-                _excludes = _exclude_file.readlines()
-            _f = tempfile.NamedTemporaryFile()
+            # Patterns für zu ignorierende Daten in die Excludes-Datei eintragen, falls eine definiert ist
+            _f = tempfile.NamedTemporaryFile(delete=False)
             _f.writelines(_ignores)
-            _f.writelines(_excludes)
+            if _excludes_file_name is not None:
+                with open(self._full_filename_of(_excludes_file_name), 'r') as _exclude_file:
+                    _excludes = _exclude_file.readlines()
+                _f.writelines(_excludes)
             self.set_option(OPTION_EXCLUDE_FILE, _f.name)
 
+    def _full_filename_of(self, file_name: str) -> str:
+        """
+        :param file_name: Dateiname aus der Konfigurationsdatei
+        :returns: Dateiname mit vollständigem Pfad
+        """
+        return file_name if os.path.isabs(file_name) else os.path.join(self.__config_path, file_name)
+
     @classmethod
-    def for_backup(cls, target_alias: str, local_config: LocalConfig, options:dict = None):
+    def for_backup(cls: Self, target_alias: str, local_config: LocalConfig, options: dict = None) -> Self:
         """
         :param target_alias: der Aliasname des Backup-Ziels
         :param local_config: die restix-Konfiguration
         :param options: ggf. zusätzliche Optionen
         :returns: vollständige Beschreibung einer Backup-Aktion
         """
-        _action = RestixAction(ACTION_BACKUP, target_alias)
+        _action = RestixAction(ACTION_BACKUP, target_alias, local_config.path())
         # Standard-Optionen setzen
         _action._set_basic_options(local_config, options)
         # ein- und auszuschliessende Daten setzen
@@ -222,14 +237,14 @@ OPTION_YEAR = 'year'
         return _action
 
     @classmethod
-    def for_init(cls, target_alias: str, local_config: LocalConfig, options:dict = None):
+    def for_init(cls: Self, target_alias: str, local_config: LocalConfig, options: dict = None) -> Self:
         """
         :param target_alias: der Aliasname des Backup-Ziels
         :param local_config: die restix-Konfiguration
         :param options: ggf. zusätzliche Optionen
         :returns: vollständige Beschreibung einer Init-Aktion
         """
-        _action = RestixAction(ACTION_INIT, target_alias)
+        _action = RestixAction(ACTION_INIT, target_alias, local_config.path())
         # Standard-Optionen setzen
         _action._set_basic_options(local_config, options)
         return _action
@@ -293,7 +308,7 @@ OPTION_YEAR = 'year'
                     _option_values[CLI_OPTION_DRY_RUN] = True
                     continue
                 if p == '--help':
-                    return RestixAction(CLI_ACTION_HELP, '')
+                    return RestixAction(CLI_ACTION_HELP, '', '')
                 if p == '--host':
                     if _host_value_expected > 0:
                         raise RestixException(E_CLI_DUP_OPTION, p)
@@ -343,7 +358,7 @@ OPTION_YEAR = 'year'
         if _base_action == CLI_ACTION_TAG and (_option_values[CLI_OPTION_TAGS] is None or
                                                _option_values[CLI_OPTION_SNAPSHOT] is None):
             raise RestixException(E_CLI_TAG_OPTIONS_MISSING)
-        _action = RestixAction(_base_action, _target)
+        _action = RestixAction(_base_action, _target, '')
         for _k, _v in _option_values.items():
             if _v is not None:
                 _action.set_option(_k, _v)
@@ -523,41 +538,3 @@ def do_action(restix_action, restic_info):
     # create and execute restic command from restix action
     _restic_cmd = build_restic_cmd(restix_action, restic_info)
     execute_restic_command(_restic_cmd)
-
-
-def prompt_confirmation(restix_action, repo_alias):
-    """
-    Prompts user to confirm desired action. Confirmation is skipped if --batch option was specified or the action will
-    not change data.
-    :param DetailAction restix_action: restix action including options
-    :param str repo_alias: the repository alias
-    :return: True if the command may be executed; otherwise False
-    :rtype: bool
-    """
-    _base_action = restix_action.base_action()
-    if _base_action == RESTIC_ACTION_SNAPSHOTS or restix_action.option(CLI_OPTION_BATCH): return True
-    if _base_action == RESTIC_ACTION_BACKUP:
-        print(localized_message(T_CLI_CONFIRM_BACKUP, repo_alias))
-    elif _base_action == RESTIC_ACTION_INIT:
-        print(localized_message(T_CLI_CONFIRM_INIT, repo_alias))
-    elif _base_action == RESTIC_ACTION_TAG:
-        _tags = restix_action.option(CLI_OPTION_TAGS)
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
-        print(localized_message(T_CLI_CONFIRM_TAG_SNAPSHOT, _snapshot_id, repo_alias, _tags))
-    elif _base_action == RESTIC_ACTION_FORGET:
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
-        if _snapshot_id is None:
-            print(localized_message(T_CLI_CONFIRM_FORGET_UNTAGGED, repo_alias))
-        else:
-            print(localized_message(T_CLI_CONFIRM_FORGET_SNAPSHOT, _snapshot_id, repo_alias))
-    else:
-        # RESTORE
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
-        if _snapshot_id is None:
-            _snapshot_id = 'latest'
-        _restore_path = restix_action.option(CLI_OPTION_RESTORE_PATH)
-        if _restore_path is None:
-            _restore_path = os.sep
-        print(localized_message(T_CLI_CONFIRM_RESTORE, _snapshot_id, _restore_path, repo_alias))
-    ch = input(localized_label(T_CLI_PROMPT_FOR_CONFIRMATION))
-    return ch.lower() == localized_label(T_CLI_YES_CHAR)
