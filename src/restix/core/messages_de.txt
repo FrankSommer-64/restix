@@ -1,4 +1,6 @@
 # general
+e-bool-opt-required Für Option {0} muss True oder False angegeben werden.
+e-file-opt-required Datei {0} für Option {1} nicht gefunden.
 e-invalid-hostname Der angegebene Hostname {0} ist ungültig.
 e-invalid-restix-cfg-file Die restix-Konfigurationsdatei {0} enthält Fehler: {1}.
 e-invalid-snapshot-id Die angegebene Snapshot-ID {0} ist ungültig, Hexadezimalzahl erforderlich.

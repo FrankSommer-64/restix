@@ -63,7 +63,7 @@ class RestixAction:
         self.__action_id = action_id
         self.__target_alias = target_alias
         self.__options = {OPTION_HOST: platform.node(), OPTION_YEAR: str(datetime.date.today().year),
-                          OPTION_USER: current_user()}
+                          OPTION_USER: current_user(), OPTION_DRY_RUN: False, OPTION_BATCH: False}
 
     def action_id(self) -> str:
         """
@@ -77,12 +77,20 @@ class RestixAction:
         """
         return self.__target_alias
 
-    def option(self, option_name: str) -> str | None:
+    def option(self, option_name: str) -> str | bool | None:
         """
         :param option_name: der Name der gewünschten Option
         :returns: Wert der angegebenen Option; None, falls die Option nicht gesetzt wurde
         """
-        return self.__options.get(option_name)
+        _value = self.__options.get(option_name)
+        if isinstance(_value, str):
+            # ggf. Variablen ersetzen
+            for _var_name in RESTIX_CFG_VARS:
+                _var_value = self.option(_var_name.lower())
+                if _var_value is None:
+                    raise RestixException(E_RESTIX_VAR_NOT_DEFINED, _var_name)
+                _value = _value.replace(f'${{{_var_name}}}', str(_var_value))
+        return _value
 
     def set_option(self, option_name: str, option_value: bool | str):
         """
@@ -99,11 +107,24 @@ OPTION_YEAR = 'year'
         :param option_value: der Wert der Option
         """
         if option_value is None: return
-        if option_name == CLI_OPTION_BATCH:
-            # batch option has no parameter
-            self.__options[option_name] = True
+        if option_name == OPTION_REPO:
+            _repo_path = os.path.join(option_value, self.option(OPTION_YEAR),
+                                      self.option(OPTION_HOST), self.option(OPTION_USER))
+            self.__options[option_name] = _repo_path
             return
-        if option_name == CLI_OPTION_RESTORE_PATH or option_name == CLI_OPTION_TARGET_MOUNT_PATH:
+        if option_name == OPTION_PASSWORD:
+            _f = tempfile.NamedTemporaryFile('w', delete=False)
+            _f.write(option_value)
+            _f.close()
+            self.__options[OPTION_PASSWORD_FILE] = _f.name
+            return
+        if option_name == OPTION_BATCH or option_name == OPTION_DRY_RUN:
+            if not isinstance(option_value, bool):
+                raise RestixException(E_BOOL_OPT_REQUIRED, option_name)
+        elif option_name == OPTION_PASSWORD_FILE:
+            if not os.path.isfile(option_value):
+                raise RestixException(E_FILE_OPT_REQUIRED, option_value, option_name)
+        elif option_name == CLI_OPTION_RESTORE_PATH or option_name == CLI_OPTION_TARGET_MOUNT_PATH:
             # restore or target mount path must refer to an existing directory
             try:
                 _path = os.path.abspath(option_value)
@@ -115,7 +136,7 @@ OPTION_YEAR = 'year'
                 return
             except Exception as _e:
                 raise RestixException(E_CLI_INVALID_PATH_SPEC, option_name, _e)
-        if option_name == CLI_OPTION_HOST:
+        elif option_name == CLI_OPTION_HOST:
             # generous hostname check, but enough to prevent malicious values, as hostname is
             # part of the restic repository path
             if not re.match(r'^[a-z0-9\-_.]+$', option_value, re.IGNORECASE):
@@ -128,9 +149,45 @@ OPTION_YEAR = 'year'
             # year must be 4 digits
             if not re.match(r'^[0-9]{4}$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_YEAR, option_value)
+        else:
+            # TODO raise unsupported option error
+            pass
         self.__options[option_name] = option_value
 
-    def set_scope_options(self, scope: dict):
+    def to_restic_command(self) -> list[str]:
+        """
+        :returns: restic-Kommando für die Daten dieser Aktion.
+        """
+        _cmd = ['restic', OPTION_REPO, self.option(OPTION_REPO), OPTION_PASSWORD_FILE, self.option(OPTION_PASSWORD_FILE)]
+        if self.option(OPTION_DRY_RUN):
+            _cmd.append(OPTION_DRY_RUN)
+        if self.__action_id == ACTION_BACKUP:
+            _cmd.extend((OPTION_INCLUDE_FILE, self.option(OPTION_INCLUDE_FILE)))
+            if OPTION_EXCLUDE_FILE in self.__options:
+                _cmd.extend((OPTION_EXCLUDE_FILE, self.option(OPTION_EXCLUDE_FILE)))
+            if OPTION_TAG in self.__options:
+                _cmd.extend((OPTION_TAG, self.option(OPTION_TAG)))
+            _cmd.append(self.__action_id)
+            return _cmd
+        if self.__action_id == ACTION_INIT or self.__action_id == ACTION_SNAPSHOTS:
+            _cmd.append(self.__action_id)
+            return _cmd
+        return _cmd
+
+    def _set_basic_options(self, local_config: LocalConfig, options: dict | None):
+        """
+        Setzt die Optionen, die restic immer benötigt sowie die angegebenen benutzerdefinierten Optionen.
+        :param local_config: die restix-Konfiguration
+        :param options: ggf. zusätzliche Optionen
+        """
+        # restic-Repository setzen
+        self.set_option(OPTION_REPO, local_config.targets().get(self.target_alias()).get(CFG_PAR_LOCATION))
+        # eventuell die angegebenen Optionen übernehmen
+        if options is not None:
+            for _k, _v in options.items():
+                self.set_option(_k, _v)
+
+    def _set_scope_options(self, scope: dict):
         """
         Setzt die Optionen für die zu sichernden und zu ignorierenden Daten.
         :param scope: der Backup-Umfang aus der restix-Konfiguration
@@ -152,21 +209,29 @@ OPTION_YEAR = 'year'
     @classmethod
     def for_backup(cls, target_alias: str, local_config: LocalConfig, options:dict = None):
         """
-        Setzt die Optionen für die zu sichernden und zu ignorierenden Daten.
         :param target_alias: der Aliasname des Backup-Ziels
         :param local_config: die restix-Konfiguration
         :param options: ggf. zusätzliche Optionen
         :returns: vollständige Beschreibung einer Backup-Aktion
         """
         _action = RestixAction(ACTION_BACKUP, target_alias)
-        # restic-Repository setzen
-        _action.set_option(OPTION_REPO, local_config.targets().get(target_alias).get(CFG_PAR_LOCATION))
+        # Standard-Optionen setzen
+        _action._set_basic_options(local_config, options)
         # ein- und auszuschliessende Daten setzen
-        _action.set_scope_options(local_config.scope_for_target(target_alias))
-        # eventuell die angegebenen Optionen übernehmen
-        if options is not None:
-            for _k, _v in options.items():
-                _action.set_option(_k, _v)
+        _action._set_scope_options(local_config.scope_for_target(target_alias))
+        return _action
+
+    @classmethod
+    def for_init(cls, target_alias: str, local_config: LocalConfig, options:dict = None):
+        """
+        :param target_alias: der Aliasname des Backup-Ziels
+        :param local_config: die restix-Konfiguration
+        :param options: ggf. zusätzliche Optionen
+        :returns: vollständige Beschreibung einer Init-Aktion
+        """
+        _action = RestixAction(ACTION_INIT, target_alias)
+        # Standard-Optionen setzen
+        _action._set_basic_options(local_config, options)
         return _action
 
     @staticmethod
@@ -228,7 +293,7 @@ OPTION_YEAR = 'year'
                     _option_values[CLI_OPTION_DRY_RUN] = True
                     continue
                 if p == '--help':
-                    return RestixAction(CLI_ACTION_HELP)
+                    return RestixAction(CLI_ACTION_HELP, '')
                 if p == '--host':
                     if _host_value_expected > 0:
                         raise RestixException(E_CLI_DUP_OPTION, p)
@@ -283,42 +348,6 @@ OPTION_YEAR = 'year'
             if _v is not None:
                 _action.set_option(_k, _v)
         return _action
-
-
-def resolve_restix_vars_in_str(str_value, restix_vars):
-    """
-    Replaces all references to restix variables (${variable}) with actual values.
-    :param str str_value: the string where variable references shall be replaced
-    :param dict restix_vars: dictionary containing restix variable names and values
-    :return: string with all variable references replaced by actual values
-    :rtype: str
-    :raises RestixException: if a referenced variable doesn't have an actual value (internal error)
-    """
-    _plain_value = str_value
-    for _var_name in RESTIX_CFG_VARS:
-        _var_value = restix_vars.get(_var_name)
-        if _var_value is None:
-            raise RestixException(E_RESTIX_VAR_NOT_DEFINED, _var_name)
-        _plain_value = _plain_value.replace(f'${{{_var_name}}}', str(_var_value))
-    return _plain_value
-
-
-def resolve_restix_vars_in_value(value, restix_vars):
-    """
-    Replaces all references to restix variables (${variable}) with actual values.
-    :param value: the Python value where variable references shall be replaced
-    :param dict restix_vars: dictionary containing restix variable names and values
-    :return: python value with all variable references replaced by actual values
-    :raises RestixException: if a referenced variable doesn't have an actual value (internal error)
-    """
-    if isinstance(value, str):
-        return resolve_restix_vars_in_str(value, restix_vars)
-    if isinstance(value, list or tuple):
-        return [resolve_restix_vars_in_value(_v, restix_vars) for _v in value]
-    if isinstance(value, dict):
-        for _k, _v in value.items():
-            value[_k] = resolve_restix_vars_in_value(_v, restix_vars)
-    return value
 
 
 def restic_info_for(repo_alias, restix_settings):

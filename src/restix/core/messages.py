@@ -41,6 +41,8 @@ import os
 from restix.core.util import platform_locale
 
 # General messages
+E_BOOL_OPT_REQUIRED = 'e-bool-opt-required'
+E_FILE_OPT_REQUIRED = 'e-file-opt-required'
 E_INTERNAL_ERROR = 'e-internal-error'
 E_INVALID_HOSTNAME = 'e-invalid-hostname'
 E_INVALID_RESTIX_CFG_FILE = 'e-invalid-restix-cfg-file'
