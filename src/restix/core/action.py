@@ -98,12 +98,8 @@ class RestixAction:
         :param option_value: der Wert der Option
         """
         if option_value is None: return
-        if option_name == OPTION_PASSWORD:
-            _f = tempfile.NamedTemporaryFile('w', delete=False)
-            _f.write(option_value)
-            _f.close()
-            self.__options[OPTION_PASSWORD_FILE] = _f.name
-            return
+        if option_name not in _STD_OPTIONS and option_name not in _ACTION_OPTIONS.get(self.__action_id):
+            raise RestixException(E_INVALID_OPTION, option_name)
         if isinstance(option_value, str):
             # ggf. Variablen ersetzen
             for _var_name in RESTIX_CFG_VARS:
@@ -147,8 +143,6 @@ class RestixAction:
             # year must be 4 digits
             if not re.match(r'^[0-9]{4}$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_YEAR, option_value)
-        else:
-            raise RestixException(E_INVALID_OPTION, option_name)
         self.__options[option_name] = option_value
 
     def to_restic_command(self) -> list[str]:
@@ -206,8 +200,9 @@ class RestixAction:
                 self.set_option(OPTION_EXCLUDE_FILE, self._full_filename_of(_excludes_file_name))
         else:
             # Patterns für zu ignorierende Daten in die Excludes-Datei eintragen, falls eine definiert ist
-            _f = tempfile.NamedTemporaryFile(delete=False)
-            _f.writelines(_ignores)
+            _f = tempfile.NamedTemporaryFile('wt', delete=False)
+            for _item in _ignores:
+                _f.write(f'{_item}{os.linesep}')
             if _excludes_file_name is not None:
                 with open(self._full_filename_of(_excludes_file_name), 'r') as _exclude_file:
                     _excludes = _exclude_file.readlines()
@@ -538,3 +533,7 @@ def do_action(restix_action, restic_info):
     # create and execute restic command from restix action
     _restic_cmd = build_restic_cmd(restix_action, restic_info)
     execute_restic_command(_restic_cmd)
+
+_STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE, OPTION_BATCH}
+_ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_DRY_RUN, OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_INCLUDE_FILE,
+                                   OPTION_PASSWORD_FILE, OPTION_TAG, OPTION_YEAR}}

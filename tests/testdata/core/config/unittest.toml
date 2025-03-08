@@ -1,0 +1,74 @@
+# ===============================================================
+# Unit-Test Konfigurationsdatei für restix
+# ===============================================================
+[[credentials]]
+name = "standard"
+comment = ""
+type = "file"
+value = "pw.txt"
+
+[[credentials]]
+name = "shared"
+comment = ""
+type = "file"
+value = "/etc/restix/${USER}/pw.txt"
+
+[[scope]]
+name = "minimal"
+comment = "Minimaler Backup-Umfang für Upload ins Internet"
+includes = "minimal.list"
+excludes = "minimal_excludes.list"
+ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
+
+[[scope]]
+name = "vollstaendig"
+comment = "Vollständiger Backup-Umfang für lokale Ziele"
+includes = "full.list"
+excludes = "full_excludes.list"
+ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
+
+[[target]]
+alias = "inetsrv"
+comment = "Internet-Server"
+location = "sftp:myinetsrv:data"
+scope = "minimal"
+credentials = "shared"
+
+[[target]]
+alias = "localsrv"
+comment = "Heim-Server"
+location = "sftp:mylocalsrv:data"
+scope = "vollstaendig"
+credentials = "standard"
+
+[[target]]
+alias = "localdir"
+comment = "lokales Verzeichnis"
+location = "/var/restix"
+scope = "minimal"
+credentials = "standard"
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
+
+[[target]]
+alias = "usbstick"
+comment = "USB-Stick Backup-A"
+location = "/media/${USER}/BACKUP-A/restix"
+scope = "vollstaendig"
+credentials = "standard"
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
+
+[[target]]
+alias = "nvme"
+comment = "externe SSD"
+location = "/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix"
+scope ="vollstaendig"
+credentials = "standard"
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
+
+[[target]]
+alias = "veracrypt"
+comment = "verschlüsselte Festplatte"
+location = "/media/veracrypt1/restix"
+scope = "vollstaendig"
+credentials = "standard"
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}

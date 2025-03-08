@@ -1,0 +1,55 @@
+# ===============================================================
+# Unit-Test Konfigurationsdatei für restix
+# ===============================================================
+[[credentials]]
+name = "standard"
+comment = ""
+type = "file"
+value = "pw.txt"
+
+[[scope]]
+name = "minimal"
+includes = "minimal.list"
+
+[[scope]]
+name = "excludes-only"
+includes = "full.list"
+excludes = "full_excludes.list"
+
+[[scope]]
+name = "ignores-only"
+includes = "full.list"
+ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
+
+[[scope]]
+name = "full"
+includes = "full.list"
+excludes = "full_excludes.list"
+ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
+
+[[target]]
+alias = "target-srv"
+location = "sftp:myserver:data"
+scope = "minimal"
+credentials = "standard"
+
+[[target]]
+alias = "target-dir"
+location = "/var/restix"
+scope = "full"
+credentials = "standard"
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
+
+[[target]]
+alias = "target-usbstick"
+location = "/media/${USER}/USBSAVE/restix"
+scope = "excludes-only"
+credentials = "standard"
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
+
+[[target]]
+alias = "target-exthdd"
+location = "/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix"
+scope = "ignores-only"
+credentials = "standard"
+access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}

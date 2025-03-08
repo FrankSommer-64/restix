@@ -1,0 +1,23 @@
+# ===============================================================
+# Unit-Test Konfigurationsdatei
+# Notwendiges scope-Attribut 'name' fehlt.
+# ===============================================================
+
+[[credentials]]
+name = "standard"
+comment = ""
+type = "file"
+value = "pw.txt"
+
+[[scope]]
+comment = "Minimaler Backup-Umfang für Upload ins Internet"
+includes = "minimal.list"
+excludes = "minimal_excludes.list"
+ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
+
+[[target]]
+alias = "inetsrv"
+comment = "Internet-Server"
+location = "sftp:myserver:data"
+scope = "minimal"
+credentials = "standard"
