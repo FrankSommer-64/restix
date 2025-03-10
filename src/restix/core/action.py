@@ -46,7 +46,7 @@ import subprocess
 import tempfile
 
 from restix.core import *
-from restix.core.config import LocalConfig
+from restix.core.config import LocalConfig, config_root_path
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.util import current_user
@@ -56,16 +56,15 @@ class RestixAction:
     """
     Datenklasse mit allen Informationen, die zum Ausführen einer restix-Aktion benötigt werden.
     """
-    def __init__(self, action_id: str, target_alias: str, config_path: str):
+    def __init__(self, action_id: str, target_alias: str):
         """
         Konstruktor.
         :param action_id: die ID der Aktion (backup, forget, init, ...)
         :param target_alias: der Aliasname des Backup-Ziels
-        :param config_path: das Verzeichnis der restix-Konfiguration inklusive Pfad
         """
         self.__action_id = action_id
         self.__target_alias = target_alias
-        self.__config_path = config_path
+        self.__config_path = config_root_path()
         self.__options = {OPTION_HOST: platform.node(), OPTION_YEAR: str(datetime.date.today().year),
                           OPTION_USER: current_user(), OPTION_DRY_RUN: False, OPTION_BATCH: False}
 
@@ -102,8 +101,8 @@ class RestixAction:
             raise RestixException(E_INVALID_OPTION, option_name)
         if isinstance(option_value, str):
             # ggf. Variablen ersetzen
-            for _var_name in RESTIX_CFG_VARS:
-                _var_value = self.option(_var_name.lower())
+            for _var_name in CFG_VARS:
+                _var_value = self.option(f'--{_var_name.lower()}')
                 if _var_value is None:
                     raise RestixException(E_RESTIX_VAR_NOT_DEFINED, _var_name)
                 option_value = option_value.replace(f'${{{_var_name}}}', str(_var_value))
@@ -118,8 +117,8 @@ class RestixAction:
         elif option_name == OPTION_PASSWORD_FILE or option_name == OPTION_INCLUDE_FILE or option_name == OPTION_EXCLUDE_FILE:
             if not os.path.isfile(option_value):
                 raise RestixException(E_FILE_OPT_REQUIRED, option_value, option_name)
-        elif option_name == CLI_OPTION_RESTORE_PATH or option_name == CLI_OPTION_TARGET_MOUNT_PATH:
-            # restore or target mount path must refer to an existing directory
+        elif option_name == OPTION_TARGET:
+            # restore path must refer to an existing directory
             try:
                 _path = os.path.abspath(option_value)
                 if not os.path.exists(_path):
@@ -130,16 +129,16 @@ class RestixAction:
                 return
             except Exception as _e:
                 raise RestixException(E_CLI_INVALID_PATH_SPEC, option_name, _e)
-        elif option_name == CLI_OPTION_HOST:
+        elif option_name == OPTION_HOST:
             # generous hostname check, but enough to prevent malicious values, as hostname is
             # part of the restic repository path
             if not re.match(r'^[a-z0-9\-_.]+$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_HOSTNAME, option_value)
-        elif option_name == CLI_OPTION_SNAPSHOT:
+        elif option_name == OPTION_SNAPSHOT:
             # restic snapshot IDs must be hex numbers
             if not re.match(r'^[a-f0-9]+$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_SNAPSHOT_ID, option_value)
-        elif option_name == CLI_OPTION_YEAR:
+        elif option_name == OPTION_YEAR:
             # year must be 4 digits
             if not re.match(r'^[0-9]{4}$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_YEAR, option_value)
@@ -222,9 +221,10 @@ class RestixAction:
         :param target_alias: der Aliasname des Backup-Ziels
         :param local_config: die restix-Konfiguration
         :param options: ggf. zusätzliche Optionen
-        :returns: vollständige Beschreibung einer Backup-Aktion
+        :returns: vollständige Beschreibung einer Backup-Aktion.
+        :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
-        _action = RestixAction(ACTION_BACKUP, target_alias, local_config.path())
+        _action = RestixAction(ACTION_BACKUP, target_alias)
         # Standard-Optionen setzen
         _action._set_basic_options(local_config, options)
         # ein- und auszuschliessende Daten setzen
@@ -237,189 +237,124 @@ class RestixAction:
         :param target_alias: der Aliasname des Backup-Ziels
         :param local_config: die restix-Konfiguration
         :param options: ggf. zusätzliche Optionen
-        :returns: vollständige Beschreibung einer Init-Aktion
+        :returns: vollständige Beschreibung einer Init-Aktion.
+        :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
-        _action = RestixAction(ACTION_INIT, target_alias, local_config.path())
+        _action = RestixAction(ACTION_INIT, target_alias)
         # Standard-Optionen setzen
         _action._set_basic_options(local_config, options)
         return _action
 
-    @staticmethod
-    def from_command_line(cmd_line):
+    @classmethod
+    def from_command_line(cls, cmd_line: list[str]) -> Self:
         """
-        Creates DetailAction objects from command line.
-        :param list[str] cmd_line: the command line
-        :returns: detail action
-        :rtype: DetailAction
-        :raises RestixException: if detail action cannot be created from command line
+        :param list[str] cmd_line: die Kommandozeile
+        :returns: vollständige Beschreibung einer Aktion aus den Angaben der Kommandozeile.
+        :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
-        _option_values = {CLI_OPTION_BATCH: None, CLI_OPTION_HOST: None, CLI_OPTION_RESTORE_PATH: None,
-                          CLI_OPTION_SNAPSHOT: None, CLI_OPTION_TAGS: None, CLI_OPTION_TARGET_MOUNT_PATH: None,
-                          CLI_OPTION_YEAR: None}
-        _base_action = ''
+        _option_values = {}
+        _action_id = ''
         _target = ''
         _host_value_expected = 0
         _restore_path_value_expected = 0
         _snapshot_value_expected = 0
-        _target_mount_path_value_expected = 0
-        _tags_value_expected = 0
+        _tag_value_expected = 0
         _year_value_expected = 0
         _action_processed = False
         _target_processed = False
         _cmd_line = shlex.split(cmd_line[0]) if len(cmd_line) == 1 else cmd_line
-        for p in _cmd_line:
-            p = p.strip()
-            # option values
+        for _arg in _cmd_line:
+            _arg = _arg.strip()
+            # Optionswerte verarbeiten
             if _host_value_expected == 1:
-                _option_values[CLI_OPTION_HOST] = p
+                # vorangegangenes Argument war --host
+                _option_values[OPTION_HOST] = _arg
                 _host_value_expected = 2
                 continue
             if _restore_path_value_expected == 1:
-                _option_values[CLI_OPTION_RESTORE_PATH] = p
+                # vorangegangenes Argument war --restore-path
+                _option_values[OPTION_TARGET] = _arg
                 _restore_path_value_expected = 2
                 continue
             if _snapshot_value_expected == 1:
-                _option_values[CLI_OPTION_SNAPSHOT] = p
+                # vorangegangenes Argument verlangt die Angabe einer Snapshot-ID
+                _option_values[OPTION_SNAPSHOT] = _arg
                 _snapshot_value_expected = 2
                 continue
-            if _tags_value_expected == 1:
-                _option_values[CLI_OPTION_TAGS] = p
+            if _tag_value_expected == 1:
+                # vorangegangenes Argument verlangt die Angabe eines Tag-Namens
+                _option_values[OPTION_TAG] = _arg
                 _tags_value_expected = 2
                 continue
-            if _target_mount_path_value_expected == 1:
-                _option_values[CLI_OPTION_TARGET_MOUNT_PATH] = p
-                _target_mount_path_value_expected = 2
-                continue
             if _year_value_expected == 1:
-                _option_values[CLI_OPTION_YEAR] = p
+                # vorangegangenes Argument war --year
+                _option_values[OPTION_YEAR] = _arg
                 _year_value_expected = 2
                 continue
-            if p.startswith('-'):
-                # options
-                if p == '-b' or p == '--batch':
-                    _option_values[CLI_OPTION_BATCH] = True
+            if _arg.startswith('-'):
+                # Option
+                if _arg == OPTION_BATCH:
+                    _option_values[OPTION_BATCH] = True
                     continue
-                if p == '--dry-run':
-                    _option_values[CLI_OPTION_DRY_RUN] = True
+                if _arg == OPTION_DRY_RUN:
+                    _option_values[OPTION_DRY_RUN] = True
                     continue
-                if p == '--help':
-                    return RestixAction(CLI_ACTION_HELP, '', '')
-                if p == '--host':
+                if _arg == OPTION_HELP:
+                    _option_values[OPTION_HELP] = True
+                    continue
+                if _arg == OPTION_HOST:
                     if _host_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, p)
+                        raise RestixException(E_CLI_DUP_OPTION, _arg)
                     _host_value_expected = 1
                     continue
-                if p == '-r' or p == '--restore-path':
+                if _arg == OPTION_RESTORE_PATH:
                     if _restore_path_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, p)
+                        raise RestixException(E_CLI_DUP_OPTION, _arg)
                     _restore_path_value_expected = 1
                     continue
-                if p == '-s' or p == '--snapshot':
+                if _arg == OPTION_SNAPSHOT:
                     if _snapshot_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, p)
+                        raise RestixException(E_CLI_DUP_OPTION, _arg)
                     _snapshot_value_expected = 1
                     continue
-                if p == '--tags':
-                    if _tags_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, p)
-                    _tags_value_expected = 1
+                if _arg == OPTION_TAG:
+                    if _tag_value_expected > 0:
+                        raise RestixException(E_CLI_DUP_OPTION, _arg)
+                    _tag_value_expected = 1
                     continue
-                if p == '--target-mount-path':
-                    if _target_mount_path_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, p)
-                    _target_mount_path_value_expected = 1
-                    continue
-                if p == '-y' or p == '--year':
+                if _arg == OPTION_YEAR:
                     if _year_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, p)
+                        raise RestixException(E_CLI_DUP_OPTION, _arg)
                     _year_value_expected = 1
                     continue
-                raise RestixException(E_CLI_INVALID_OPTION, p)
+                raise RestixException(E_CLI_INVALID_OPTION, _arg)
             if not _action_processed:
-                if p not in ALL_CLI_ACTIONS:
-                    raise RestixException(E_CLI_INVALID_ACTION, p)
-                _base_action = p
+                if _option_values.get(OPTION_HELP):
+                    # bei help kommt hier der Befehl, zu dem Hilfe angezeigt werden soll
+                    _action = RestixAction(ACTION_HELP, '')
+                    _action.set_option(OPTION_HELP, _arg)
+                    return _action
+                if _arg not in ALL_CLI_COMMANDS:
+                    raise RestixException(E_CLI_INVALID_ACTION, _arg)
+                _action_id = _arg
                 _action_processed = True
                 continue
             if not _target_processed:
-                _target = p
+                _target = _arg
                 _target_processed = True
                 continue
-            raise RestixException(E_CLI_TOO_MANY_ARGS, p)
+            raise RestixException(E_CLI_TOO_MANY_ARGS, _arg)
         if not _action_processed:
             raise RestixException(E_CLI_ACTION_MISSING)
-        if _target is None and _base_action != CLI_ACTION_TARGETS:
-            raise RestixException(E_CLI_TARGET_MISSING, _base_action)
-        if _base_action == CLI_ACTION_TAG and (_option_values[CLI_OPTION_TAGS] is None or
-                                               _option_values[CLI_OPTION_SNAPSHOT] is None):
+        if _target is None and _action_id != CLI_COMMAND_TARGETS:
+            raise RestixException(E_CLI_TARGET_MISSING, _action_id)
+        if _action_id == CLI_COMMAND_TAG and (_option_values[OPTION_TAG] is None or
+                                              _option_values[OPTION_SNAPSHOT] is None):
             raise RestixException(E_CLI_TAG_OPTIONS_MISSING)
-        _action = RestixAction(_base_action, _target, '')
+        _action = RestixAction(_action_id, _target)
         for _k, _v in _option_values.items():
-            if _v is not None:
-                _action.set_option(_k, _v)
+            _action.set_option(_k, _v)
         return _action
-
-
-def restic_info_for(repo_alias, restix_settings):
-    """
-    Creates all information needed to execute restic command for desired restix action.
-    :param str repo_alias: restix repository alias name
-    :param dict restix_settings: local restix settings
-    :return: all data needed to execute restic command
-    :rtype: dict
-    :raise RestixException: if repository alias is not defined or mandatory options are missing
-    """
-    # restic password file must be defined and exist
-    _password_fn = restix_settings.get(RESTIX_TOML_KEY_PW_FILE)
-    if _password_fn is None:
-        raise RestixException(E_RESTIX_PW_FILE_NOT_DEFINED)
-    if not os.path.isfile(_password_fn):
-        raise RestixException(E_RESTIX_PW_FILE_DOES_NOT_EXIST, _password_fn)
-    _restic_info = {RESTIX_TOML_KEY_PW_FILE: _password_fn, RESTIX_TOML_KEY_GUARD_FILE: None,
-                    RESTIX_TOML_KEY_GUARD_TEXT: None}
-    _guard_fn = restix_settings.get(RESTIX_TOML_KEY_GUARD_FILE)
-    if _guard_fn is not None:
-        # guard file name is defined, then the file must exist and an expected value for the contents must be defined
-        if not os.path.isfile(_guard_fn):
-            raise RestixException(E_RESTIX_GUARD_FILE_DOES_NOT_EXIST, _guard_fn)
-        _guard_text = restix_settings.get(RESTIX_TOML_KEY_GUARD_TEXT)
-        if _guard_text is None:
-            raise RestixException(E_RESTIX_GUARD_TEXT_NOT_DEFINED, _guard_fn)
-        _restic_info[RESTIX_TOML_KEY_GUARD_FILE] = _guard_fn
-        _restic_info[RESTIX_TOML_KEY_GUARD_TEXT] = _guard_text
-    for _target in restix_settings[RESTIX_TOML_KEY_TARGET]:
-        if _target[RESTIX_TOML_KEY_ALIAS] != repo_alias:
-            continue
-        _restic_info[RESTIX_TOML_KEY_ALIAS] = repo_alias
-        # make sure restic repository can be resolved from repository alias
-        _repo = _target.get(RESTIX_TOML_KEY_REPO)
-        if _repo is None:
-            raise RestixException(E_RESTIX_TARGET_REPO_MISSING, repo_alias)
-        _restic_info[RESTIX_TOML_KEY_REPO] = _repo
-        # make sure backup scope is defined and referenced by repository alias
-        _scope_name = _target.get(RESTIX_TOML_KEY_SCOPE)
-        if _scope_name is None:
-            raise RestixException(E_RESTIX_TARGET_SCOPE_MISSING, repo_alias)
-        _scopes = restix_settings.get(RESTIX_TOML_KEY_SCOPE)
-        if _scopes is None:
-            raise RestixException(E_RESTIX_NO_SCOPES_DEFINED)
-        for _scope in _scopes:
-            if _scope_name != _scope[RESTIX_TOML_KEY_NAME]:
-                continue
-            _includes_fn = _scope.get(RESTIX_TOML_KEY_INCLUDES)
-            if _includes_fn is None:
-                raise RestixException(E_RESTIX_SCOPE_INCLUDES_MISSING, _scope_name)
-            if not os.path.isfile(_includes_fn):
-                raise RestixException(E_RESTIX_INCLUDES_FILE_DOES_NOT_EXIST, _includes_fn)
-            _restic_info[RESTIX_TOML_KEY_INCLUDES] = _includes_fn
-            _excludes_fn = _scope.get(RESTIX_TOML_KEY_EXCLUDES)
-            if _excludes_fn is not None:
-                if not os.path.isfile(_excludes_fn):
-                    raise RestixException(E_RESTIX_EXCLUDES_FILE_DOES_NOT_EXIST, _excludes_fn)
-            _restic_info[RESTIX_TOML_KEY_EXCLUDES] = _excludes_fn
-            return _restic_info
-        raise RestixException(E_RESTIX_TARGET_SCOPE_NOT_DEFINED, _scope_name, repo_alias)
-    raise RestixException(E_RESTIX_TARGET_NOT_DEFINED, repo_alias)
 
 
 def execute_restic_command(cmd):
@@ -459,6 +394,8 @@ def build_restic_cmd(restix_action, restic_info):
     :rtype: list[str]
     :raises RestixException: if desired action is not implemented
     """
+    pass
+    '''
     _restic_cmd = ['restic', '-r', restic_info[RESTIX_TOML_KEY_REPO], '-p', restic_info[RESTIX_TOML_KEY_PW_FILE]]
     if restix_action.option(CLI_OPTION_DRY_RUN):
         _restic_cmd.append('--dry-run')
@@ -506,34 +443,9 @@ def build_restic_cmd(restix_action, restic_info):
         _restic_cmd.append(restix_action.option(CLI_OPTION_SNAPSHOT))
         return _restic_cmd
     raise RestixException(E_CLI_INVALID_ACTION, _base_action)
+    '''
 
-
-def do_action(restix_action, restic_info):
-    """
-    Executes an action.
-    :param DetailAction restix_action: restix action including options
-    :param dict restic_info: additional information
-    :raises RestixException: if command execution results in an error
-    """
-    # eventually check guard file first
-    _base_action = restix_action.base_action()
-    _guard_fn = restic_info.get(RESTIX_TOML_KEY_GUARD_FILE)
-    if _guard_fn is not None and _base_action == RESTIC_ACTION_BACKUP:
-        _expected_text = restic_info.get(RESTIX_TOML_KEY_GUARD_TEXT)
-        try:
-            with open(_guard_fn, 'r') as _f:
-                _actual_text = _f.read().strip()
-                _f.close()
-                if _expected_text != _actual_text:
-                    raise RestixException(E_RESTIX_GUARD_FILE_MODIFIED, _guard_fn)
-        except RestixException as _e:
-            raise _e
-        except Exception as _e:
-            raise RestixException(E_RESTIX_READ_GUARD_FILE_FAILED, _guard_fn, str(_e))
-    # create and execute restic command from restix action
-    _restic_cmd = build_restic_cmd(restix_action, restic_info)
-    execute_restic_command(_restic_cmd)
 
 _STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE, OPTION_BATCH}
-_ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_DRY_RUN, OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_INCLUDE_FILE,
+_ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_DRY_RUN, OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM,
                                    OPTION_PASSWORD_FILE, OPTION_TAG, OPTION_YEAR}}

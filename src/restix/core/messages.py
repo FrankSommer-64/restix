@@ -83,7 +83,8 @@ E_CFG_READ_FILE_FAILED = 'e-cfg-read-file-failed'
 W_CFG_ELEM_IGNORED = 'w-cfg-elem-ignored'
 
 # CLI texts
-T_CLI_BACKUP_TARGETS = 't-cli-backup-targets'
+T_CLI_BACKUP_TARGETS_HEADER = 't-cli-backup-targets-header'
+T_CLI_BACKUP_TARGET_INFO = 't-cli-backup-target-info'
 T_CLI_CONFIRM_BACKUP = 't-cli-confirm-backup'
 T_CLI_CONFIRM_FORGET_SNAPSHOT = 't-cli-confirm-forget-snapshot'
 T_CLI_CONFIRM_FORGET_UNTAGGED = 't-cli-confirm-forget-untagged'

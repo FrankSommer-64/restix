@@ -112,7 +112,7 @@ class LocalConfig(dict):
         """
         return self._group(CFG_GROUP_TARGET, CFG_PAR_ALIAS)
 
-    def for_restic(self, variables: dict):
+    def for_cli(self, variables: dict):
         """
         :param variables: Namen und Werte der zu ersetzenden Variablen
         :returns: Kopie der Konfiguration mit ersetzten Variablen
@@ -305,7 +305,7 @@ def check_element(qualified_element_name: str, element_value: dict|list|str, ele
     if _expected_element_type == 's':
         _vars = re.findall(r'\$\{([A-Z_])}', element_value.upper())
         for _var in _vars:
-            if _var not in CONFIG_VARIABLES:
+            if _var not in CFG_VARS:
                 raise RestixException(E_CFG_INVALID_VARIABLE, _var)
     elif _expected_element_type == 't':
         # dict
@@ -432,6 +432,3 @@ _META_TARGET = {CFG_PAR_ALIAS: ('s', None, True, True, None),
 _META_ROOT = {CFG_GROUP_CREDENTIALS: ('t', _META_CREDENTIALS, False, True, None),
               CFG_GROUP_SCOPE: ('t', _META_SCOPE, False, True, None),
               CFG_GROUP_TARGET: ('t', _META_TARGET, False, True, None)}
-
-# Erlaubte Variablen in der Konfigurationsdatei
-CONFIG_VARIABLES = {'HOST', 'USER', 'YEAR'}

@@ -38,7 +38,8 @@ e-cfg-read-file-failed Fehler beim Lesen der Konfigurationsdatei {0}: {1}.
 w-cfg-elem-ignored Element {0} ignoriert
 
 # CLI texts
-t-cli-backup-targets Backup-Ziele: {0}
+t-cli-backup-targets-header Backup-Ziele:
+t-cli-backup-target-info {0} - {1}
 t-cli-confirm-backup Backup nach Repository {0}.
 t-cli-confirm-forget-snapshot Lösche Snapshot {0} von Repository {1}.
 t-cli-confirm-forget-untagged Lösche alle unmarkierten Snapshots von Repository {0}.
@@ -49,13 +50,13 @@ t-cli-confirm-tag-snapshot Markiere Snapshot {0} in Repository {1} mit {2}.
 t-cli-prompt-for-confirmation OK (j/n)?
 t-cli-usage-info Aufruf: restix [Optionen] Aktion [Backup-Ziel]\n \
     Aktionen: backup | forget | init | restore | snapshots | tag | targets\n \
-    Optionen: -b | --batch * keine Bestätigung vor dem Ausführen des restic Befehls\n           \
+    Optionen: --batch * keine Bestätigung vor dem Ausführen des restic Befehls\n           \
+    --dry-run * simulierter Lauf, keine tatsächlichen Aktionen\n           \
     --host Hostname * benutzerdefinierter Hostname (nur bei restore)\n           \
-    -r | --restore-path * Wurzelverzeichnis für Restore\n           \
-    -s | --snapshot * restic Snapshot-ID\n           \
-    --tags * zu setzende Tags, mit Komma getrennt (nur bei tag)\n           \
-    --target-mount-path * Mountverzeichnis bei Backup-Zielen auf Wechselmedien\n           \
-    -y Jahr | --year Jahr * benutzerdefinierte Jahreszahl, vierstellig\n \
+    --restore-path Verzeichnis * Wurzelverzeichnis für Restore\n           \
+    --snapshot Snapshot-ID * restic Snapshot-ID (ggf. latest)\n           \
+    --tag Tag * zu setzender Tag\n           \
+    --year Jahr * benutzerdefinierte Jahreszahl, vierstellig\n \
     Backup-Ziel: Alias aus der restix-Konfigurationsdatei
 t-cli-yes-char j
 

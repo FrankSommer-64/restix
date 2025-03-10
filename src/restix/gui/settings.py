@@ -44,7 +44,7 @@ from typing import Self
 from PySide6 import QtGui
 from PySide6.QtCore import QRect
 
-from restix.core import RESTIX_GUI_SETTINGS_FILE_NAME
+from restix.core import RESTIX_GUI_SETTINGS_FILE_PATH
 from restix.core.restix_exception import RestixException
 from restix.core.messages import W_GUI_WRITE_GUI_SETTINGS_FAILED
 
@@ -89,7 +89,7 @@ class GuiSettings(dict):
         self[_KEY_WIN_GEOMETRY] = (geometry.x(), geometry.y(), geometry.width(), geometry.height())
         self.__is_modified = True
 
-    def save(self, file_path: str = os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_NAME)):
+    def save(self, file_path: str = os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_PATH)):
         """
         Speichert die Einstellungen in einer Datei.
         :param file_path: Dateiname inklusive Pfad.
@@ -113,7 +113,7 @@ class GuiSettings(dict):
         return _settings
 
     @classmethod
-    def from_file(cls: Self, file_path: str = os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_NAME)) -> Self:
+    def from_file(cls: Self, file_path: str = os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_PATH)) -> Self:
         """
         Liest die Einstellungen aus Datei.
         Gibt die Standard-Einstellungen zurück, falls die Datei nicht gelesen werden kann.

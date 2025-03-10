@@ -305,7 +305,7 @@ def read_restix_config_file(restix_vars):
     """
     _config_path = config_root_path()
     _local_config = LocalConfig.from_file(os.path.join(_config_path, RESTIX_CONFIG_FN))
-    return _local_config.for_restic(restix_vars)
+    return _local_config.for_cli(restix_vars)
 
 
 def restic_info_for(repo_alias, restix_settings):

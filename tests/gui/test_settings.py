@@ -41,14 +41,14 @@ import unittest
 
 from PySide6.QtCore import QRect
 
-from restix.core import RESTIX_GUI_SETTINGS_FILE_NAME
+from restix.core import RESTIX_GUI_SETTINGS_FILE_PATH
 from restix.gui.settings import GuiSettings
 
 # Standard restix-Konfiguration für Unit-Tests
 STANDARD_TARGET = 'mytarget'
 
 # Name der Einstellungsdatei für Unit-Tests
-TEST_FILE_PATH = os.path.join(tempfile.gettempdir(), RESTIX_GUI_SETTINGS_FILE_NAME)
+TEST_FILE_PATH = os.path.join(tempfile.gettempdir(), RESTIX_GUI_SETTINGS_FILE_PATH)
 
 
 class TestSettings(unittest.TestCase):

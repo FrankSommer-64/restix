@@ -119,7 +119,7 @@ class TestConfig(unittest.TestCase):
         Prüft, ob Variablen in der Konfiguration korrekt ersetzt werden.
         """
         _config = TestConfig.unittest_configuration()
-        _clone = _config.for_restic({'USER': 'unittest'})
+        _clone = _config.for_cli({'USER': 'unittest'})
         self._replacement_test(_clone.credentials(), VAR_CREDENTIALS)
         self._replacement_test(_clone.targets(), VAR_TARGETS)
 
