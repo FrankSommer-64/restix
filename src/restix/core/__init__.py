@@ -118,6 +118,8 @@ ACTION_SNAPSHOTS = 'snapshots'
 ACTION_TAG = 'tag'
 
 # Optionen
+OPTION_AUTO_CREATE = '--auto-create'
+OPTION_AUTO_TAG = '--auto-tag'
 OPTION_BATCH = '--batch'
 OPTION_COMPACT = '--compact'
 OPTION_DRY_RUN = '--dry-run'
@@ -135,6 +137,7 @@ OPTION_SET = '--set'
 OPTION_SNAPSHOT = '--snapshot'
 OPTION_TAG = '--tag'
 OPTION_TARGET = '--target'
+OPTION_UNTAGGED = '--untagged'
 OPTION_USER = '--user'
 OPTION_YEAR = '--year'
 

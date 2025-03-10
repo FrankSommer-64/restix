@@ -43,8 +43,6 @@ import unittest
 
 from restix.core.config import *
 
-# Standard restix-Konfiguration für Unit-Tests
-STANDARD_CONFIG_FN = 'unittest.toml'
 # Namen der nicht unterstützten Elemente in Testdatei unsupported_elements.toml
 UNSUPPORTED_ELEMENTS = ['credentials.[0].user', 'credentials.[0].password', 'scope.[0].type',
                         'target.[0].url', 'user']
@@ -183,7 +181,7 @@ class TestConfig(unittest.TestCase):
         """
         :returns: Standard restix-Konfiguration für Unit-Tests
         """
-        _config_file_path = os.path.join(TestConfig.unit_test_home(), STANDARD_CONFIG_FN)
+        _config_file_path = os.path.join(TestConfig.unit_test_home(), RESTIX_CONFIG_FN)
         _restix_config = LocalConfig.from_file(_config_file_path)
         return _restix_config
 

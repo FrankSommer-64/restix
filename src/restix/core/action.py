@@ -114,7 +114,8 @@ class RestixAction:
         if option_name == OPTION_BATCH or option_name == OPTION_DRY_RUN:
             if not isinstance(option_value, bool):
                 raise RestixException(E_BOOL_OPT_REQUIRED, option_name)
-        elif option_name == OPTION_PASSWORD_FILE or option_name == OPTION_INCLUDE_FILE or option_name == OPTION_EXCLUDE_FILE:
+        elif (option_name == OPTION_PASSWORD_FILE or option_name == OPTION_FILES_FROM or
+              option_name == OPTION_INCLUDE_FILE or option_name == OPTION_EXCLUDE_FILE):
             if not os.path.isfile(option_value):
                 raise RestixException(E_FILE_OPT_REQUIRED, option_value, option_name)
         elif option_name == OPTION_TARGET:
@@ -152,7 +153,7 @@ class RestixAction:
         if self.option(OPTION_DRY_RUN):
             _cmd.append(OPTION_DRY_RUN)
         if self.__action_id == ACTION_BACKUP:
-            _cmd.extend((OPTION_INCLUDE_FILE, self.option(OPTION_INCLUDE_FILE)))
+            _cmd.extend((OPTION_FILES_FROM, self.option(OPTION_FILES_FROM)))
             if OPTION_EXCLUDE_FILE in self.__options:
                 _cmd.extend((OPTION_EXCLUDE_FILE, self.option(OPTION_EXCLUDE_FILE)))
             if OPTION_TAG in self.__options:
@@ -190,7 +191,7 @@ class RestixAction:
         :param scope: der Backup-Umfang aus der restix-Konfiguration
         """
         _includes_file_path = self._full_filename_of(scope.get(CFG_PAR_INCLUDES))
-        self.set_option(OPTION_INCLUDE_FILE, _includes_file_path)
+        self.set_option(OPTION_FILES_FROM, _includes_file_path)
         _excludes_file_name = scope.get(CFG_PAR_EXCLUDES)
         _ignores = scope.get(CFG_PAR_IGNORES)
         if _ignores is None or len(_ignores) == 0:
@@ -448,4 +449,5 @@ def build_restic_cmd(restix_action, restic_info):
 
 _STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE, OPTION_BATCH}
 _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_DRY_RUN, OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM,
-                                   OPTION_PASSWORD_FILE, OPTION_TAG, OPTION_YEAR}}
+                                   OPTION_PASSWORD_FILE, OPTION_TAG, OPTION_YEAR},
+                   ACTION_HELP: {OPTION_HELP}}

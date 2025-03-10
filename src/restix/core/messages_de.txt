@@ -47,16 +47,50 @@ t-cli-confirm-init Initialisiere Repository {0}.
 t-cli-confirm-restore Restore Snapshot {0} von Repository {1} nach {2}.
 t-cli-confirm-tag-latest Markiere letzten Snapshot in Repository {0} mit {1}.
 t-cli-confirm-tag-snapshot Markiere Snapshot {0} in Repository {1} mit {2}.
+t-cli-help-backup Lokale Daten in restic-Repository sichern\n \
+    Befehl: restix backup [Optionen] Backup-Ziel\n \
+    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
+    --dry-run * simulierter Lauf, keine Datenübertragung ins Repository\n           \
+    --auto-create * Repository automatisch anlegen, falls es nicht existiert\n           \
+    --auto-tag * Snapshot automatisch taggen\n \
+    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+t-cli-help-forget Snapshots aus restic-Repository entfernen\n \
+    Befehl: restix forget [Optionen] Backup-Ziel\n \
+    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
+    --dry-run * simulierter Lauf, kein Löschen von Daten im Repository\n           \
+    --snapshot Snapshot - zu löschender Snapshot (ID oder latest)\n           \
+    --untagged - alle Snapshots bis auf den neuesten löschen, die keinen Tag besitzen\n \
+    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+t-cli-help-init Neues restic-Repository anlegen\n \
+    Befehl: restix init [Optionen] Backup-Ziel\n \
+    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n \
+    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+t-cli-help-restore Daten aus restic-Repository wiederherstellen\n \
+    Befehl: restix restore [Optionen] Backup-Ziel\n \
+    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
+    --dry-run * simulierter Lauf, keine Änderungen am Repository und im lokalen Dateisystem\n           \
+    --snapshot Snapshot - Snapshot (ID oder latest)\n           \
+    --restore-path Verzeichnis * Verzeichnis, in das die wiederhergestellten Daten geschrieben werden sollen\n           \
+    --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
+    --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
+    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
+    Befehl: restix snapshots [Optionen] Backup-Ziel\n \
+    Optionen: --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
+    --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
+    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+t-cli-help-tag Snapshots eines restic-Repositories taggen\n \
+    Befehl: restix tag [Optionen] Backup-Ziel\n \
+    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
+    --snapshot Snapshot - Snapshot (ID oder latest)\n           \
+    --tag Tag - zu setzender Tag\n \
+    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
 t-cli-prompt-for-confirmation OK (j/n)?
 t-cli-usage-info Aufruf: restix [Optionen] Aktion [Backup-Ziel]\n \
     Aktionen: backup | forget | init | restore | snapshots | tag | targets\n \
     Optionen: --batch * keine Bestätigung vor dem Ausführen des restic Befehls\n           \
-    --dry-run * simulierter Lauf, keine tatsächlichen Aktionen\n           \
-    --host Hostname * benutzerdefinierter Hostname (nur bei restore)\n           \
-    --restore-path Verzeichnis * Wurzelverzeichnis für Restore\n           \
-    --snapshot Snapshot-ID * restic Snapshot-ID (ggf. latest)\n           \
-    --tag Tag * zu setzender Tag\n           \
-    --year Jahr * benutzerdefinierte Jahreszahl, vierstellig\n \
+    --dry-run * simulierter Lauf, keine Sicherung der Daten im Repository\n           \
+    --tag Tag * zu setzender Tag\n \
     Backup-Ziel: Alias aus der restix-Konfigurationsdatei
 t-cli-yes-char j
 

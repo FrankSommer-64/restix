@@ -61,6 +61,19 @@ EXPECTED_BACKUP_CMD_DIR = ['restic', '--repo', '/var/restix/*', '--password-file
 
 
 class TestAction(unittest.TestCase):
+
+    original_config_path = ''
+
+    @classmethod
+    def setUpClass(cls):
+        cls.original_config_path = os.environ.get(ENVA_RESTIX_CONFIG_PATH)
+        os.environ[ENVA_RESTIX_CONFIG_PATH] = cls.unit_test_home()
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.original_config_path is not None:
+            os.environ[ENVA_RESTIX_CONFIG_PATH] = cls.original_config_path
+
     def test_backup_action(self):
         """
         Testet die Backup-Aktion.
@@ -103,7 +116,7 @@ class TestAction(unittest.TestCase):
         """
         :returns: Standard restix-Konfiguration für Unit-Tests
         """
-        _config_file_path = os.path.join(TestAction.unit_test_home(), STANDARD_CONFIG_FN)
+        _config_file_path = os.path.join(TestAction.unit_test_home(), RESTIX_CONFIG_FN)
         _restix_config = LocalConfig.from_file(_config_file_path)
         return _restix_config
 
