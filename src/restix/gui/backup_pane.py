@@ -37,14 +37,18 @@ GUI-Bereich für den Backup.
 """
 
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox
+import time
 
 from restix.core import *
+from restix.core.action import RestixAction
 from restix.core.config import LocalConfig
 from restix.core.messages import *
+from restix.core.task import TaskProgress
 from restix.gui.panes import ResticActionPane, create_option, GROUP_BOX_STYLE, ActionButtonPane
 from restix.gui.settings import GuiSettings
+from restix.gui.worker import Worker
 
 
 class BackupOptionsPane(QGroupBox):
@@ -66,6 +70,9 @@ class BackupOptionsPane(QGroupBox):
         self.__dry_run_option = create_option(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
         self.setLayout(_layout)
 
+    def selected_options(self):
+        return {OPTION_AUTO_TAG: self.__auto_tag_option.isChecked(), OPTION_DRY_RUN: self.__dry_run_option.isChecked()}
+
 
 class BackupPane(ResticActionPane):
     """
@@ -80,9 +87,11 @@ class BackupPane(ResticActionPane):
         """
         super().__init__(parent, local_config, gui_settings)
         # option pane
-        self.pane_layout.addWidget(BackupOptionsPane(self), 0, 1)
+        self.__options_pane = BackupOptionsPane(self)
+        self.pane_layout.addWidget(self.__options_pane, 0, 1)
         # action button pane
-        self.pane_layout.addWidget(ActionButtonPane(self, L_DO_BACKUP, self._ok_button_clicked, self._cancel_button_clicked), 1, 1)
+        self.__button_pane = ActionButtonPane(self, L_DO_BACKUP, self._ok_button_clicked, self._cancel_button_clicked)
+        self.pane_layout.addWidget(self.__button_pane, 1, 1)
         self.setLayout(self.pane_layout)
 
     def _ok_button_clicked(self):
@@ -95,7 +104,45 @@ class BackupPane(ResticActionPane):
                                           localized_message(I_GUI_NO_TARGET_SELECTED),
                                           QMessageBox.StandardButton.Ok)
             return
+        self.__button_pane.action_started()
         print(f'Starte Backup zu Ziel {_selected_target[CFG_PAR_ALIAS]}')
+        _options = self.__options_pane.selected_options()
+        _backup_action = RestixAction.for_backup(_selected_target[CFG_PAR_ALIAS], self.restix_config, _options)
+        _worker = Worker.for_action(_backup_action)
+        _worker.connect_signals(self._handle_progress, self._handle_finish,
+                                self._handle_result, self._handle_error)
+        QThreadPool.globalInstance().start(_worker)
 
     def _cancel_button_clicked(self):
         print('_cancel_button_clicked')
+        self.__button_pane.action_stopped()
+
+    def _handle_progress(self, progress_info: TaskProgress):
+        """
+        Displays a progress message issued by asynchronous task.
+        :param progress_info: progress value, message severity, localized message
+        """
+        self.message_pane.show_message(progress_info.message_severity(), progress_info.message_text())
+
+    def _handle_finish(self):
+        """
+        Informs the user that the asynchronous task succeeded and updates the button statuses.
+        """
+        _info = localized_message(I_GUI_TASK_FINISHED, time.strftime('%X', time.localtime()))
+        self.message_pane.show_message(SEVERITY_INFO, _info)
+        self.__button_pane.action_stopped()
+
+    def _handle_result(self, result):
+        """
+        Displays summary of asynchronous task.
+        :param TaskResult result: the task result
+        """
+        pass
+
+    def _handle_error(self, exception):
+        """
+        Informs the user that the asynchronous task fails and updates the button statuses.
+        :param Exception exception: the exception causing task failure
+        """
+        self.message_pane.show_message(SEVERITY_ERROR, str(exception))
+        self.__button_pane.action_stopped()

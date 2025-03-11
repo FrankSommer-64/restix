@@ -139,17 +139,17 @@ class Worker(QRunnable):
         """
         _action_id = action.action_id()
         _restic_cmd = action.to_restic_command()
-        if action == ACTION_BACKUP:
+        if _action_id == ACTION_BACKUP:
             return Worker(backup, _restic_cmd)
-        elif action == ACTION_FORGET:
+        elif _action_id == ACTION_FORGET:
             return Worker(backup, _restic_cmd)
-        elif action == ACTION_INIT:
+        elif _action_id == ACTION_INIT:
             return Worker(backup, _restic_cmd)
-        elif action == ACTION_RESTORE:
+        elif _action_id == ACTION_RESTORE:
             return Worker(backup, _restic_cmd)
-        elif action == ACTION_SNAPSHOTS:
+        elif _action_id == ACTION_SNAPSHOTS:
             return Worker(backup, _restic_cmd)
-        elif action == ACTION_TAG:
+        elif _action_id == ACTION_TAG:
             return Worker(backup, _restic_cmd)
         _emsg = localized_message(E_INVALID_ACTION, _action_id)
         raise RestixException(E_INTERNAL_ERROR, _emsg)

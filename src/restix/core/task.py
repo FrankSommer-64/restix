@@ -218,7 +218,7 @@ class TaskMonitor:
             print(msg)
         else:
             _progress_value = int(self.__operations_processed * self.__operation_share)
-            self.__progress_receiver.emit_progress((_progress_value, severity, msg))
+            self.__progress_receiver.emit_progress(TaskProgress(_progress_value, severity, msg))
         if self.abort_requested():
             raise RestixException(E_BACKGROUND_TASK_ABORTED)
 

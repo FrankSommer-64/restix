@@ -127,10 +127,12 @@ i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-create-config-root x
 i-gui-no-target-selected Kein Backup-Ziel ausgewählt
+i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels
 l-alias Aliasname
 l-auto-tag Automatisch taggen
+l-cancel Abbrechen
 l-comment Beschreibung
 l-backup Sicherung
 l-configuration Konfiguration

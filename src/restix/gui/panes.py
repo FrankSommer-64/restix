@@ -285,14 +285,20 @@ class MessagePane(QWidget):
         _layout.addWidget(self.__messages)
         self.setLayout(_layout)
 
-    def show_message(self, text: str):
+    def show_message(self, severity: str, text: str):
         """
         Gibt eine Nachricht aus.
+        :param severity: der Schweregrad der Nachricht (Info, Warnung, Fehler).
         :param text: der Nachrichtentext
         """
-        _text_item = QListWidgetItem(text)
-        _text_item.setForeground(QBrush(Qt.GlobalColor.black))
-        self.__messages.addItem(_text_item)
+        _info = QListWidgetItem(text)
+        if severity == SEVERITY_ERROR:
+            _info.setForeground(QBrush(Qt.GlobalColor.red))
+        elif severity == SEVERITY_WARNING:
+            _info.setForeground(QBrush(Qt.GlobalColor.blue))
+        else:
+            _info.setForeground(QBrush(Qt.GlobalColor.black))
+        self.__messages.addItem(_info)
         self.__messages.scrollToBottom()
 
 
@@ -306,14 +312,33 @@ class ActionButtonPane(QWidget):
         :param parent: die übergeordnete Pane
         """
         super().__init__(parent)
-        _layout = QHBoxLayout(self)
-        _layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        _ok_button = QPushButton(localized_label(ok_button_label_id))
-        _ok_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-        _ok_button.setStyleSheet(_OK_BUTTON_STYLE)
-        _ok_button.clicked.connect(ok_handler)
-        _layout.addWidget(_ok_button)
+        _layout = QGridLayout(self)
+        self.__ok_button = QPushButton(localized_label(ok_button_label_id))
+        self.__ok_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        self.__ok_button.setStyleSheet(_OK_BUTTON_STYLE)
+        self.__ok_button.clicked.connect(ok_handler)
+        _layout.addWidget(self.__ok_button, 0, 0)
+        self.__cancel_button = QPushButton(localized_label(L_CANCEL))
+        self.__cancel_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        self.__cancel_button.setStyleSheet(_CANCEL_BUTTON_STYLE)
+        self.__cancel_button.setEnabled(False)
+        self.__cancel_button.clicked.connect(cancel_handler)
+        _layout.addWidget(self.__cancel_button, 0, 1)
         self.setLayout(_layout)
+
+    def action_started(self):
+        """
+        Deaktiviert den OK-Button, aktiviert den Cancel-Button.
+        """
+        self.__ok_button.setEnabled(False)
+        self.__cancel_button.setEnabled(True)
+
+    def action_stopped(self):
+        """
+        Aktiviert den OK-Button, deaktiviert den Cancel-Button.
+        """
+        self.__ok_button.setEnabled(True)
+        self.__cancel_button.setEnabled(False)
 
 
 class TargetSelectionPane(QGroupBox):
@@ -364,7 +389,7 @@ class ResticActionPane(QWidget):
         # unten Ausgabetexte
         self.message_pane = MessagePane(self)
         self.pane_layout.addWidget(self.message_pane, 2, 0, 1, -1)
-        self.message_pane.show_message('Hallo')
+        self.message_pane.show_message(SEVERITY_INFO, 'Hallo')
 
 
 
@@ -393,4 +418,5 @@ def create_option(layout: QGridLayout, caption_id: str, tooltip_id: str, initial
 _CHECKBOX_CAPTION_STYLE = 'color: black; font-weight: bold'
 _MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style: solid; border-width: 1px'
 _OK_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
+_CANCEL_BUTTON_STYLE = 'background-color: red; color: white'
 _TARGET_TABLE_STYLE = 'background-color: white'
