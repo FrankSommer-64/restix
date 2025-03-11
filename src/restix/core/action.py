@@ -46,6 +46,7 @@ import subprocess
 import tempfile
 
 from restix.core import *
+from restix.core import OPTION_AUTO_CREATE
 from restix.core.config import LocalConfig, config_root_path
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
@@ -447,7 +448,13 @@ def build_restic_cmd(restix_action, restic_info):
     '''
 
 
-_STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE, OPTION_BATCH}
-_ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_DRY_RUN, OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM,
-                                   OPTION_PASSWORD_FILE, OPTION_TAG, OPTION_YEAR},
+_STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE}
+_ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_AUTO_TAG, OPTION_BATCH, OPTION_DRY_RUN,
+                                   OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM, OPTION_YEAR},
+                   ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_SNAPSHOT, OPTION_UNTAGGED},
+                   ACTION_INIT: {OPTION_BATCH},
+                   ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_RESTORE_PATH, OPTION_SNAPSHOT,
+                                    OPTION_YEAR},
+                   ACTION_SNAPSHOTS: {OPTION_HOST, OPTION_YEAR},
+                   ACTION_TAG: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_SNAPSHOT, OPTION_TAG},
                    ACTION_HELP: {OPTION_HELP}}

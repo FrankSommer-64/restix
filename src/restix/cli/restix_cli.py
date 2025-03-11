@@ -1,24 +1,40 @@
-# Script für Backup und Restore mit restic.
+# -*- coding: utf-8 -*-
+
+# -----------------------------------------------------------------------------------------------
+# restix - Datensicherung auf restic-Basis.
 #
-# Die Einstellungen sind in der Konfigurationsdatei config.toml hinterlegt,
-# in $HOME/.config/restic auf Linux, in %LOCALAPPDATA%/restic auf Windows.
-# In der Konfigurationsdatei werden Umfänge (Scopes) definiert, die die
-# zu sichernden Verzeichnisse und Dateien enthalten.
-# Dort werden auch die Ziele (Targets) fürs Backup definiert, wie z.B.
-# externe Festplatte oder Remote-Server.
+# Copyright (c) 2025, Frank Sommer.
+# All rights reserved.
 #
-# Bei Remote-Servern erfolgt die Übertragung per sftp, hier muss ein passender
-# Alias in die ssh-Client-Konfigurationsdatei eingetragen werden.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
 #
-# Aufruf: restix.py [options] action [target]
-#           Options: -b | --batch
-#                    -d Verzeichnis | --dest Verzeichnis (nur Restore)
-#                    --host Hostname (nur Restore)
-#                    -s Snapshot-Nummer | --snapshot Snapshot-Nummer (nur Restore)
-#                    -y Jahr | --year Jahr
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
 #
-#           Actions: backup | init | restore | snapshots | targets
-#           Target: Alias aus der Konfigurationsdatei
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# -----------------------------------------------------------------------------------------------
+
+"""
+Command line interface für restix.
+"""
 
 import datetime
 import platform

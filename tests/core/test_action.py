@@ -51,13 +51,10 @@ TARGET_EXTHDD = 'target-exthdd'
 TARGET_USBSTICK = 'target-usbstick'
 TARGET_DIR = 'target-dir'
 
-# Tag
-TAG_STD = '25-03'
-
 EXPECTED_BACKUP_CMD_SRV = ['restic', '--repo', 'sftp:myserver:data*', '--password-file', '*/pw.txt', '--files-from', '*/minimal.list', 'backup']
 EXPECTED_BACKUP_CMD_EXTHDD = ['restic', '--repo', '/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '/tmp/*', 'backup']
-EXPECTED_BACKUP_CMD_USBSTICK = ['restic', '--repo', '/media/${USER}/USBSAVE/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '*/full_excludes.list', '--tag', TAG_STD, 'backup']
-EXPECTED_BACKUP_CMD_DIR = ['restic', '--repo', '/var/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '/tmp/*', '--tag', TAG_STD, 'backup']
+EXPECTED_BACKUP_CMD_USBSTICK = ['restic', '--repo', '/media/${USER}/USBSAVE/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '*/full_excludes.list', 'backup']
+EXPECTED_BACKUP_CMD_DIR = ['restic', '--repo', '/var/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '/tmp/*', 'backup']
 
 
 class TestAction(unittest.TestCase):
@@ -87,11 +84,9 @@ class TestAction(unittest.TestCase):
         self.verify_restic_command(EXPECTED_BACKUP_CMD_EXTHDD, _backup_action.to_restic_command())
         # Test nur Excludes
         _backup_action = RestixAction.for_backup(TARGET_USBSTICK, _config, None)
-        _backup_action.set_option(OPTION_TAG, TAG_STD)
         self.verify_restic_command(EXPECTED_BACKUP_CMD_USBSTICK, _backup_action.to_restic_command())
         # Test Ignores und Excludes
         _backup_action = RestixAction.for_backup(TARGET_DIR, _config, None)
-        _backup_action.set_option(OPTION_TAG, TAG_STD)
         self.verify_restic_command(EXPECTED_BACKUP_CMD_DIR, _backup_action.to_restic_command())
 
     def verify_restic_command(self, expected_command: list[str], actual_command: list[str]):

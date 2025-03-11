@@ -1,7 +1,10 @@
 # general
+e-background-task-aborted Hintergrund-Task abgebrochen.
+e-background-task-failed Hintergrund-Task fehlgeschlagen: {0}
 e-bool-opt-required Für Option {0} muss True oder False angegeben werden.
 e-file-opt-required Datei {0} für Option {1} nicht gefunden.
 e-invalid-hostname Der angegebene Hostname {0} ist ungültig.
+e-invalid-action Ungültige Aktion {0}.
 e-invalid-option Die Option {0} wird nicht unterstützt.
 e-invalid-restix-cfg-file Die restix-Konfigurationsdatei {0} enthält Fehler: {1}.
 e-invalid-snapshot-id Die angegebene Snapshot-ID {0} ist ungültig, Hexadezimalzahl erforderlich.
@@ -69,9 +72,9 @@ t-cli-help-restore Daten aus restic-Repository wiederherstellen\n \
     Befehl: restix restore [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
     --dry-run * simulierter Lauf, keine Änderungen am Repository und im lokalen Dateisystem\n           \
-    --snapshot Snapshot - Snapshot (ID oder latest)\n           \
-    --restore-path Verzeichnis * Verzeichnis, in das die wiederhergestellten Daten geschrieben werden sollen\n           \
     --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
+    --restore-path Verzeichnis * Verzeichnis, in das die wiederhergestellten Daten geschrieben werden sollen\n           \
+    --snapshot Snapshot - Snapshot (ID oder latest)\n           \
     --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
     Backup-Ziel: Alias aus der restix-Konfigurationsdatei
 t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
@@ -82,6 +85,7 @@ t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
 t-cli-help-tag Snapshots eines restic-Repositories taggen\n \
     Befehl: restix tag [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
+    --dry-run * simulierter Lauf, kein Taggen von Daten im Repository\n           \
     --snapshot Snapshot - Snapshot (ID oder latest)\n           \
     --tag Tag - zu setzender Tag\n \
     Backup-Ziel: Alias aus der restix-Konfigurationsdatei

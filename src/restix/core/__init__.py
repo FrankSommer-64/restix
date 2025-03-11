@@ -143,3 +143,10 @@ OPTION_YEAR = '--year'
 
 # restic Sondervariablen
 RESTIC_SNAPSHOT_LATEST = 'latest'
+
+# Asynchrone Verarbeitung
+SEVERITY_ERROR = 'e'
+SEVERITY_INFO = 'i'
+SEVERITY_WARNING = 'w'
+TASK_SUCCEEDED = 0
+TASK_FAILED = 1
