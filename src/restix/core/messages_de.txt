@@ -123,10 +123,14 @@ e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet wer
 i-gui-about-detail-text Version {0}\nQt-Version {1}
 i-gui-about-info-text Copyright (c) 2025 Frank Sommer
 i-gui-about-text restix - Datensicherung auf restic-Basis
+i-gui-backing-up-data Sichere Daten in Repository {0}.
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-create-config-root x
+i-gui-creating-repo Erzeuge restic-Repository {0}.
+i-gui-data-backed-up Daten in Repository {0} gesichert.
 i-gui-no-target-selected Kein Backup-Ziel ausgewählt
+i-gui-repo-created restic-Repository {0} erfolgreich angelegt.
 i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels

@@ -44,7 +44,7 @@ from restix.core import *
 from restix.core.action import RestixAction
 from restix.core.restix_exception import RestixException
 from restix.core.messages import E_BACKGROUND_TASK_FAILED, E_INTERNAL_ERROR, E_INVALID_ACTION, localized_message
-from restix.core.restic_interface import backup
+from restix.core.restic_interface import *
 from restix.core.task import TaskExecutor, TaskMonitor, TaskProgress, TaskResult
 
 
@@ -138,18 +138,17 @@ class Worker(QRunnable, TaskExecutor):
         :returns: Worker für die gewünschte Aktion
         """
         _action_id = action.action_id()
-        _restic_cmd = action.to_restic_command()
         if _action_id == ACTION_BACKUP:
-            return Worker(backup, _restic_cmd)
+            return Worker(backup, action)
         elif _action_id == ACTION_FORGET:
-            return Worker(backup, _restic_cmd)
+            return Worker(backup, action)
         elif _action_id == ACTION_INIT:
-            return Worker(backup, _restic_cmd)
+            return Worker(init, action)
         elif _action_id == ACTION_RESTORE:
-            return Worker(backup, _restic_cmd)
+            return Worker(backup, action)
         elif _action_id == ACTION_SNAPSHOTS:
-            return Worker(backup, _restic_cmd)
+            return Worker(backup, action)
         elif _action_id == ACTION_TAG:
-            return Worker(backup, _restic_cmd)
+            return Worker(backup, action)
         _emsg = localized_message(E_INVALID_ACTION, _action_id)
         raise RestixException(E_INTERNAL_ERROR, _emsg)

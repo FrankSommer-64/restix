@@ -42,7 +42,6 @@ import os.path
 import platform
 import re
 import shlex
-import subprocess
 import tempfile
 
 from restix.core import *
@@ -150,7 +149,7 @@ class RestixAction:
         """
         :returns: restic-Kommando für die Daten dieser Aktion.
         """
-        _cmd = ['restic', OPTION_REPO, self.option(OPTION_REPO), OPTION_PASSWORD_FILE, self.option(OPTION_PASSWORD_FILE)]
+        _cmd = ['restic', self.__action_id, OPTION_REPO, self.option(OPTION_REPO), OPTION_PASSWORD_FILE, self.option(OPTION_PASSWORD_FILE)]
         if self.option(OPTION_DRY_RUN):
             _cmd.append(OPTION_DRY_RUN)
         if self.__action_id == ACTION_BACKUP:
@@ -159,10 +158,8 @@ class RestixAction:
                 _cmd.extend((OPTION_EXCLUDE_FILE, self.option(OPTION_EXCLUDE_FILE)))
             if OPTION_TAG in self.__options:
                 _cmd.extend((OPTION_TAG, self.option(OPTION_TAG)))
-            _cmd.append(self.__action_id)
             return _cmd
         if self.__action_id == ACTION_INIT or self.__action_id == ACTION_SNAPSHOTS:
-            _cmd.append(self.__action_id)
             return _cmd
         return _cmd
 
@@ -365,34 +362,6 @@ class RestixAction:
         return _action
 
 
-def execute_restic_command(cmd):
-    """
-    Executes a restic command.
-    Standard output and error are written to console.
-    :param list[str] cmd: the restic command to execute
-    :raises RestixException: if command execution returns an error
-    """
-    res = subprocess.run(cmd, capture_output=True, encoding='utf-8')
-    if len(res.stderr) > 0: print(res.stderr)
-    if len(res.stdout) > 0: print(res.stdout)
-    if res.returncode == 0:
-        return
-    _reason = E_CLI_RESTIC_CMD_FAILED
-    if res.returncode == 2:
-        _reason = E_CLI_RESTIC_GO_RUNTIME_ERROR
-    elif res.returncode == 3:
-        _reason = E_CLI_RESTIC_READ_BACKUP_DATA_FAILED
-    elif res.returncode == 10:
-        _reason = E_CLI_RESTIC_REPO_DOES_NOT_EXIST
-    elif res.returncode == 11:
-        _reason = E_CLI_RESTIC_REPO_LOCK_FAILED
-    elif res.returncode == 12:
-        _reason = E_CLI_RESTIC_REPO_WRONG_PASSWORD
-    elif res.returncode == 130:
-        _reason = E_CLI_RESTIC_CMD_INTERRUPTED
-    raise RestixException(E_CLI_RESTIC_ACTION_FAILED, ' '.join(cmd), localized_label(_reason))
-
-
 def build_restic_cmd(restix_action, restic_info):
     """
     Creates restic command for specified restix action.
@@ -408,16 +377,7 @@ def build_restic_cmd(restix_action, restic_info):
     if restix_action.option(CLI_OPTION_DRY_RUN):
         _restic_cmd.append('--dry-run')
     _base_action = restix_action.base_action()
-    if _base_action == RESTIC_ACTION_BACKUP:
-        _restic_cmd.append('--files-from')
-        _restic_cmd.append(restic_info[RESTIX_TOML_KEY_INCLUDES])
-        excl_fn = restic_info[RESTIX_TOML_KEY_EXCLUDES]
-        if excl_fn:
-            _restic_cmd.append('--exclude-file')
-            _restic_cmd.append(excl_fn)
-        _restic_cmd.append(_base_action)
-        return _restic_cmd
-    if _base_action == RESTIC_ACTION_INIT or _base_action == RESTIC_ACTION_SNAPSHOTS:
+    if _base_action == RESTIC_ACTION_SNAPSHOTS:
         _restic_cmd.append(_base_action)
         return _restic_cmd
     if _base_action == RESTIC_ACTION_RESTORE:

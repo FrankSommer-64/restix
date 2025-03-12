@@ -51,11 +51,12 @@ TARGET_EXTHDD = 'target-exthdd'
 TARGET_USBSTICK = 'target-usbstick'
 TARGET_DIR = 'target-dir'
 
-EXPECTED_BACKUP_CMD_SRV = ['restic', '--repo', 'sftp:myserver:data*', '--password-file', '*/pw.txt', '--files-from', '*/minimal.list', 'backup']
-EXPECTED_BACKUP_CMD_EXTHDD = ['restic', '--repo', '/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '/tmp/*', 'backup']
-EXPECTED_BACKUP_CMD_USBSTICK = ['restic', '--repo', '/media/${USER}/USBSAVE/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '*/full_excludes.list', 'backup']
-EXPECTED_BACKUP_CMD_DIR = ['restic', '--repo', '/var/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '/tmp/*', 'backup']
+EXPECTED_BACKUP_CMD_SRV = ['restic', 'backup', '--repo', 'sftp:myserver:data*', '--password-file', '*/pw.txt', '--files-from', '*/minimal.list']
+EXPECTED_BACKUP_CMD_EXTHDD = ['restic', 'backup', '--repo', '/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '/tmp/*']
+EXPECTED_BACKUP_CMD_USBSTICK = ['restic', 'backup', '--repo', '/media/${USER}/USBSAVE/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '*/full_excludes.list']
+EXPECTED_BACKUP_CMD_DIR = ['restic', 'backup', '--repo', '/var/restix/*', '--password-file', '*/pw.txt', '--files-from', '*/full.list', '--exclude-file', '/tmp/*']
 
+EXPECTED_INIT_CMD_DIR = ['restic', 'init', '--repo', '/var/restix/*', '--password-file', '*/pw.txt']
 
 class TestAction(unittest.TestCase):
 
@@ -88,6 +89,15 @@ class TestAction(unittest.TestCase):
         # Test Ignores und Excludes
         _backup_action = RestixAction.for_backup(TARGET_DIR, _config, None)
         self.verify_restic_command(EXPECTED_BACKUP_CMD_DIR, _backup_action.to_restic_command())
+
+    def test_init_action(self):
+        """
+        Testet die Init-Aktion.
+        """
+        _config = TestAction.unittest_configuration()
+        # Test keine Excludes und keine Ignores
+        _init_action = RestixAction.for_init(TARGET_DIR, _config, None)
+        self.verify_restic_command(EXPECTED_INIT_CMD_DIR, _init_action.to_restic_command())
 
     def verify_restic_command(self, expected_command: list[str], actual_command: list[str]):
         """
