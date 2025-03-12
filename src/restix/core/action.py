@@ -217,6 +217,12 @@ class RestixAction:
         """
         return file_name if os.path.isabs(file_name) else os.path.join(self.__config_path, file_name)
 
+    def __str__(self) -> str:
+        """
+        :returns: Inhalt der Aktion in lesbarer Form.
+        """
+        return f'ID:{self.__action_id}/ALIAS:{self.target_alias()}/OPTIONS:{self.__options}'
+
     @classmethod
     def for_backup(cls: Self, target_alias: str, local_config: LocalConfig, options: dict = None) -> Self:
         """

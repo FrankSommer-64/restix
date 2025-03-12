@@ -33,12 +33,14 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Classes associated with asynchronous task execution.
+Informationen und Ergebnis einer asynchron ausgeführten Task.
 """
 
+from abc import abstractmethod
+from typing import Any
 import threading
 
-from restix.core import SEVERITY_ERROR, SEVERITY_INFO, TASK_SUCCEEDED
+from restix.core import SEVERITY_INFO, TASK_SUCCEEDED
 from restix.core.restix_exception import RestixException
 from restix.core.messages import localized_message, E_BACKGROUND_TASK_ABORTED
 
@@ -80,103 +82,75 @@ class TaskProgress:
 
 class TaskResult:
     """
-    Result of an asynchronous task.
+    Ergebnis einer asynchronen Task.
     """
-    def __init__(self, code, summary):
+    def __init__(self, code: int, summary: str):
         """
-        Constructor.
-        :param int code: the task result code
-        :param str summary: the localized task result summary
+        Konstruktor.
+        :param code: Ergebnis-Code (0 für ok, 1 für fehlgeschlagen)
+        :param summary: Zusammenfassung des Ergebnisses
         """
         super().__init__()
         self.__code = code
         self.__summary = summary
 
-    def task_succeeded(self):
+    def task_succeeded(self) -> bool:
         """
-        :returns: True, if background task finished successfully
-        :rtype: bool
+        :returns: True, falls die Task erfolgreich ausgeführt wurde.
         """
         return self.__code == TASK_SUCCEEDED
 
-    def summary(self):
+    def summary(self) -> str:
         """
-        :returns : localized task result summary
-        :rtype: str
+        :returns : lokalisierte Zusammenfassung des Ergebnisses
         """
         return self.__summary
 
 
-class TaskMonitor:
+class TaskExecutor:
     """
-    Handles monitoring of asynchronous task progress.
+    Abstrakte Basisklasse für asynchrone Worker, die per TasḱMonitor überwacht werden können.
     """
-    def __init__(self, progress_receiver=None):
+    def __init__(self):
         """
-        Constructor.
-        :param Slot progress_receiver: the GUI element handling progress; None for command line script
+        Konstruktor.
         """
         super().__init__()
-        self.__progress_receiver = progress_receiver
-        self.__error_count = 0
-        self.__operation_count = 1
-        self.__operations_processed = 0
-        self.__operation_share = 100.0
+
+    @abstractmethod
+    def emit_progress(self, progress_data: TaskProgress):
+        """
+        Sendet ein Progress-Signal an den zugeordneten Slot.
+        :param progress_data: Informationen über den Fortschritt der Task.
+        """
+        pass
+
+
+class TaskMonitor:
+    """
+    Überwacht die Ausführung einer asynchronen Task.
+    """
+    def __init__(self, progress_handler: TaskExecutor=None):
+        """
+        Konstruktor.
+        :param progress_handler: Slot, der Fortschritts-Events entgegennimmt.
+        """
+        super().__init__()
+        self.__progress_handler = progress_handler
         self.__abort_requested = False
-        self.__dry_run = False
         self.__lock = threading.Lock()
-
-    def errors_detected(self):
-        """
-        :returns: True, if at least one error message has been issued
-        :rtype: bool
-        """
-        return self.__error_count > 0
-
-    def set_operation_count(self, no_of_operations):
-        """
-        :param int no_of_operations: the total number of operations to process
-        :rtype: None
-        """
-        self.__operation_count = 1 if no_of_operations <= 0 else no_of_operations
-        self.__operations_processed = 0
-        self.__operation_share = 100.0 / self.__operation_count
-
-    def operations_processed(self, no_of_operations):
-        """
-        Increases internal counter of processed operations.
-        :param int no_of_operations: the number of operations processed
-        :rtype: None
-        """
-        self.__operations_processed += no_of_operations
-
-    def is_dry_run(self):
-        """
-        :returns: True, if dry run mode is set; otherwise False
-        :rtype: bool
-        """
-        return self.__dry_run
-
-    def set_dry_run(self, mode):
-        """
-        Sets dry run mode.
-        :param bool mode: True for dry run mode; otherwise False
-        """
-        self.__dry_run = mode is not None and mode
 
     def request_abort(self):
         """
-        Sets internal flag to abort the task.
-        :rtype: None
+        Setzt das interne Flag zum Abbrechen der Task.
         """
         self.__lock.acquire()
         self.__abort_requested = True
         self.__lock.release()
 
-    def abort_requested(self):
+    def abort_requested(self) -> bool:
         """
-        :returns: True, if task shall be aborted
-        :rtype: bool
+        :returns: True, falls die Task abgebrochen werden soll.
         """
         self.__lock.acquire()
         _abort_requested = self.__abort_requested
@@ -185,42 +159,34 @@ class TaskMonitor:
 
     def check_abort(self):
         """
-        Raise exception if abort was requested.
+        :raises RestixException: falls die Task abgebrochen werden soll.
         """
         if self.abort_requested():
             raise RestixException(E_BACKGROUND_TASK_ABORTED)
 
-    def log(self, msg_id, *msg_args):
+    def log(self, msg_id: str, *msg_args: Any):
         """
-        Issues a localized progress message.
-        Messages are shown in progress dialog window in Issai GUI, and on console in scripts.
-        :param str msg_id: the message ID
-        :param Any msg_args: the message arguments
-        :rtype: None
-        :raises IssaiException: if the user requested task abortion
+        Sendet eine Fortschritt-Nachricht an den registrierten Handler. Falls kein Handler registriert
+        wurde, wird die Nachricht auf der Konsole ausgegeben.
+        :param msg_id: die ID der Nachricht
+        :param msg_args: die Argumente für die Nachricht.
+        :raises RestixException: falls die Task abgebrochen werden soll.
         """
         _severity = msg_id[0]
         _msg = localized_message(msg_id, *msg_args)
         self.log_text(_msg, _severity)
 
-    def log_text(self, msg, severity=SEVERITY_INFO):
+    def log_text(self, msg: str, severity: str = SEVERITY_INFO):
         """
-        Issues an already localized progress message.
-        Messages are shown in progress dialog window in Issai GUI, and on console in scripts.
-        :param str msg: the localized message
-        :param str severity: the optional message severity
-        :rtype: None
-        :raises IssaiException: if the user requested task abortion
+        Sendet eine lokalisierte Fortschritt-Nachricht an den registrierten Handler. Falls kein Handler registriert
+        wurde, wird die Nachricht auf der Konsole ausgegeben.
+        :param msg: lokalisierte Nachricht
+        :param severity: Schweregrad der Nachricht.
+        :raises RestixException: falls die Task abgebrochen werden soll.
         """
-        if severity == SEVERITY_ERROR:
-            self.__error_count += 1
-        if self.__progress_receiver is None:
+        if self.__progress_handler is None:
             print(msg)
         else:
-            _progress_value = int(self.__operations_processed * self.__operation_share)
-            self.__progress_receiver.emit_progress(TaskProgress(_progress_value, severity, msg))
+            self.__progress_handler.emit_progress(TaskProgress(50, severity, msg))
         if self.abort_requested():
             raise RestixException(E_BACKGROUND_TASK_ABORTED)
-
-
-_DRY_RUN_INFIX = 'dry-run-'

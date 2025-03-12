@@ -148,6 +148,7 @@ L_MENU_USER_MANUAL = 'l-menu-user-manual'
 
 # GUI labels
 L_ALIAS = 'l-alias'
+L_AUTO_CREATE = 'l-auto-create'
 L_AUTO_TAG = 'l-auto-tag'
 L_BACKUP = 'l-backup'
 L_CANCEL = 'l-cancel'
@@ -167,6 +168,7 @@ L_SCOPE = 'l-scope'
 L_TARGETS = 'l-targets'
 
 # GUI Tooltips
+T_OPT_BAK_AUTO_CREATE = 't-opt-bak-auto-create'
 T_OPT_BAK_AUTO_TAG = 't-opt-bak-auto-tag'
 T_OPT_BAK_DRY_RUN = 't-opt-bak-dry-run'
 

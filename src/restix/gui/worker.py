@@ -45,7 +45,7 @@ from restix.core.action import RestixAction
 from restix.core.restix_exception import RestixException
 from restix.core.messages import E_BACKGROUND_TASK_FAILED, E_INTERNAL_ERROR, E_INVALID_ACTION, localized_message
 from restix.core.restic_interface import backup
-from restix.core.task import TaskMonitor, TaskProgress, TaskResult
+from restix.core.task import TaskExecutor, TaskMonitor, TaskProgress, TaskResult
 
 
 class WorkerSignals(QObject):
@@ -69,7 +69,7 @@ class WorkerSignals(QObject):
         super().__init__()
 
 
-class Worker(QRunnable):
+class Worker(QRunnable, TaskExecutor):
     """
     Worker zur Ausführung einer Hintergrund-Task.
     """

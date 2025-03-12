@@ -131,6 +131,7 @@ i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels
 l-alias Aliasname
+l-auto-create Repository automatisch anlegen
 l-auto-tag Automatisch taggen
 l-cancel Abbrechen
 l-comment Beschreibung
@@ -160,6 +161,7 @@ l-menu-about Über restix
 l-menu-user-manual Benutzerhandbuch
 
 # GUI Tooltips
+t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
 t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
 t-opt-bak-dry-run Backup nur simulieren
 

@@ -37,15 +37,18 @@ Zusammengesetzte Bereiche der restix GUI.
 """
 
 
+import time
+
 from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel, QModelIndex
 from PySide6.QtGui import QMouseEvent, QBrush, QFont
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
-                               QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox)
+                               QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox)
 
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
+from restix.core.task import TaskProgress
 from restix.gui.settings import GuiSettings
 
 
@@ -354,6 +357,7 @@ class TargetSelectionPane(QGroupBox):
         """
         super().__init__(localized_label(L_TARGETS), parent)
         self.restix_config = local_config
+        self.gui_settings = settings
         _layout = QGridLayout(self)
         self._table_view = TargetTableView(self, local_config)
         _layout.addWidget(self._table_view)
@@ -364,32 +368,90 @@ class TargetSelectionPane(QGroupBox):
         """
         :returns: Alias des ausgewählten Backup-Ziels; None, falls nichts ausgewählt wurde
         """
-        return self._table_view.selected_target()
+        _selected_target = self._table_view.selected_target()
+        if _selected_target is not None:
+            self.gui_settings.set_latest_target(_selected_target[CFG_PAR_ALIAS])
+        return _selected_target
 
 
 class ResticActionPane(QWidget):
     """
     Basisklasse für die Panes aller Aktionen, die einen restic-Befehl auslösen.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
+    def __init__(self, parent: QWidget, start_button_label_id: str,
+                 local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
         :param parent: die zentrale restix Pane
+        :param start_button_label_id: ID für die Beschriftung des Start-Buttons
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)
         self.restix_config = local_config
+        self.selected_target = None
         self.pane_layout = QGridLayout(self)
         self.pane_layout.setSpacing(5)
         self.pane_layout.setColumnStretch(1, 1)
         # links oben Backup-Ziel-Auswahl
         self.target_selection_pane = TargetSelectionPane(self, local_config, gui_settings)
         self.pane_layout.addWidget(self.target_selection_pane, 0, 0, 2, 1)
+        # rechts mittig Buttons
+        self.button_pane = ActionButtonPane(self, start_button_label_id,
+                                            self.start_button_clicked, self.cancel_button_clicked)
+        self.pane_layout.addWidget(self.button_pane, 1, 1)
         # unten Ausgabetexte
         self.message_pane = MessagePane(self)
         self.pane_layout.addWidget(self.message_pane, 2, 0, 1, -1)
-        self.message_pane.show_message(SEVERITY_INFO, 'Hallo')
+
+    def start_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der 'Start'-Button geklickt wurde.
+        """
+        self.selected_target = self.target_selection_pane.selected_target_alias()
+        if self.selected_target is None:
+            _rc = QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                          localized_message(I_GUI_NO_TARGET_SELECTED),
+                                          QMessageBox.StandardButton.Ok)
+            return
+        self.button_pane.action_started()
+
+    def cancel_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der 'Cancel'-Button geklickt wurde.
+        """
+        print('_cancel_button_clicked')
+        self.button_pane.action_stopped()
+
+    def handle_progress(self, progress_info: TaskProgress):
+        """
+        Zeigt eine Fortschritt-Nachricht in der MessagePane an.
+        :param progress_info: Daten der Fortschritt-Nachricht.
+        """
+        self.message_pane.show_message(progress_info.message_severity(), progress_info.message_text())
+
+    def handle_finish(self):
+        """
+        Informs the user that the asynchronous task succeeded and updates the button statuses.
+        """
+        _info = localized_message(I_GUI_TASK_FINISHED, time.strftime('%X', time.localtime()))
+        self.message_pane.show_message(SEVERITY_INFO, _info)
+        self.button_pane.action_stopped()
+
+    def handle_result(self, result):
+        """
+        Displays summary of asynchronous task.
+        :param TaskResult result: the task result
+        """
+        pass
+
+    def handle_error(self, exception):
+        """
+        Informs the user that the asynchronous task fails and updates the button statuses.
+        :param Exception exception: the exception causing task failure
+        """
+        self.message_pane.show_message(SEVERITY_ERROR, str(exception))
+        self.button_pane.action_stopped()
 
 
 
