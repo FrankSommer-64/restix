@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - wrapper around restic archiving
+# restix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,34 +33,35 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Custom class for exceptions related to restix
+restix-spezifische Exceptions.
 """
 
-from .messages import localized_message
+from typing import Any
+
+from restix.core.messages import localized_message
 
 
 class RestixException(Exception):
     """
-    Custom class for exceptions related to restix
+    restix-Exception.
     """
-    def __init__(self, exception_id, *args):
+    def __init__(self, exception_id: str, *args: Any):
         """
-        Constructor
-        :param str exception_id: the exception ID
-        :param args: the optional additional arguments
+        Konstruktor
+        :param exception_id: Exception-ID
+        :param args: optionale Argumente
         """
         super().__init__(exception_id, args)
 
-    def id(self):
+    def id(self) -> str:
         """
-        :returns: exception ID
-        :rtype: str
+        :returns: Exception-ID
         """
         return self.args[0]
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
-        Converts this exception to a localized string.
+        :returns: Daten dieser Exception in lokalisierter Form.
         """
         if len(self.args) > 1:
             return localized_message(self.args[0], *self.args[1])
