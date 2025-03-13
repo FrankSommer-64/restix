@@ -411,9 +411,6 @@ _VALUED_CREDENTIAL_TYPES = (CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTIA
 
 # Beschreibung der Parameter in der TOML-Datei:
 # ([0] Typ, [1] Beschreibung der Elemente, [2] unique, [3] mandatory, [4] Bedingung für Mandatory)
-_META_ACCESS_RIGHTS = {CFG_PAR_HOST: ('s', None, False, True, None),
-                       CFG_PAR_USER: ('s', None, False, True, None),
-                       CFG_PAR_YEAR: ('s', None, False, True, None)}
 _META_CREDENTIALS = {CFG_PAR_COMMENT: ('s', None, False, False, None),
                      CFG_PAR_NAME: ('s', None, True, True, None),
                      CFG_PAR_TYPE: (f's:{",".join(_ALLOWED_CREDENTIAL_TYPES)}', None, False, True, None),
@@ -427,8 +424,7 @@ _META_TARGET = {CFG_PAR_ALIAS: ('s', None, True, True, None),
                 CFG_PAR_COMMENT: ('s', None, False, None),
                 CFG_PAR_CREDENTIALS: ('s', None, False, True, None),
                 CFG_PAR_LOCATION: ('s', None, False, True, None),
-                CFG_PAR_SCOPE: ('s', None, False, True, None),
-                CFG_PAR_ACCESS_RIGHTS: ('t', _META_ACCESS_RIGHTS, False, False, None)}
+                CFG_PAR_SCOPE: ('s', None, False, True, None)}
 _META_ROOT = {CFG_GROUP_CREDENTIALS: ('t', _META_CREDENTIALS, False, True, None),
               CFG_GROUP_SCOPE: ('t', _META_SCOPE, False, True, None),
               CFG_GROUP_TARGET: ('t', _META_TARGET, False, True, None)}

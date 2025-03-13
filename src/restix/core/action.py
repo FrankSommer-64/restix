@@ -107,8 +107,8 @@ class RestixAction:
                     raise RestixException(E_RESTIX_VAR_NOT_DEFINED, _var_name)
                 option_value = option_value.replace(f'${{{_var_name}}}', str(_var_value))
         if option_name == OPTION_REPO:
-            _repo_path = os.path.join(option_value, self.option(OPTION_YEAR),
-                                      self.option(OPTION_HOST), self.option(OPTION_USER))
+            _repo_path = os.path.join(option_value, self.option(OPTION_USER), self.option(OPTION_HOST),
+                                      self.option(OPTION_YEAR))
             self.__options[option_name] = _repo_path
             return
         if option_name == OPTION_BATCH or option_name == OPTION_DRY_RUN:

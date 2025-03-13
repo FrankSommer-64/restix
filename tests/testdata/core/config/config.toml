@@ -47,7 +47,6 @@ comment = "lokales Verzeichnis"
 location = "/var/restix"
 scope = "minimal"
 credentials = "standard"
-access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
 
 [[target]]
 alias = "usbstick"
@@ -55,7 +54,6 @@ comment = "USB-Stick Backup-A"
 location = "/media/${USER}/BACKUP-A/restix"
 scope = "vollstaendig"
 credentials = "standard"
-access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
 
 [[target]]
 alias = "nvme"
@@ -63,7 +61,6 @@ comment = "externe SSD"
 location = "/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix"
 scope ="vollstaendig"
 credentials = "standard"
-access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
 
 [[target]]
 alias = "veracrypt"
@@ -71,4 +68,3 @@ comment = "verschlüsselte Festplatte"
 location = "/media/veracrypt1/restix"
 scope = "vollstaendig"
 credentials = "standard"
-access_rights = {year = "${USER}:mygroup,770", host = "${USER}:mygroup,770", user = "${USER}:mygroup,770"}
