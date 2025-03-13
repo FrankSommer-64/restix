@@ -130,13 +130,14 @@ class TaskMonitor:
     """
     Überwacht die Ausführung einer asynchronen Task.
     """
-    def __init__(self, progress_handler: TaskExecutor=None):
+    def __init__(self, progress_handler: TaskExecutor = None, silent: bool = False):
         """
         Konstruktor.
         :param progress_handler: Slot, der Fortschritts-Events entgegennimmt.
         """
         super().__init__()
         self.__progress_handler = progress_handler
+        self.__silent = silent
         self.__abort_requested = False
         self.__lock = threading.Lock()
 
@@ -184,9 +185,10 @@ class TaskMonitor:
         :param severity: Schweregrad der Nachricht.
         :raises RestixException: falls die Task abgebrochen werden soll.
         """
-        if self.__progress_handler is None:
-            print(msg)
-        else:
-            self.__progress_handler.emit_progress(TaskProgress(50, severity, msg))
+        if not self.__silent:
+            if self.__progress_handler is None:
+                print(msg)
+            else:
+                self.__progress_handler.emit_progress(TaskProgress(50, severity, msg))
         if self.abort_requested():
             raise RestixException(E_BACKGROUND_TASK_ABORTED)

@@ -304,6 +304,12 @@ class MessagePane(QWidget):
         self.__messages.addItem(_info)
         self.__messages.scrollToBottom()
 
+    def clear(self):
+        """
+        Löscht alle Nachrichten aus der Pane.
+        """
+        self.__messages.clear()
+
 
 class ActionButtonPane(QWidget):
     """
@@ -414,6 +420,7 @@ class ResticActionPane(QWidget):
                                           localized_message(I_GUI_NO_TARGET_SELECTED),
                                           QMessageBox.StandardButton.Ok)
             return
+        self.message_pane.clear()
         self.button_pane.action_started()
 
     def cancel_button_clicked(self):

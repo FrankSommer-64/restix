@@ -159,9 +159,57 @@ class RestixAction:
             if OPTION_TAG in self.__options:
                 _cmd.extend((OPTION_TAG, self.option(OPTION_TAG)))
             return _cmd
-        if self.__action_id == ACTION_INIT or self.__action_id == ACTION_SNAPSHOTS:
+        if self.__action_id == ACTION_TAG:
+            _cmd.append('--add')
+            _cmd.append(self.option(OPTION_TAG))
+            _cmd.append(self.option(OPTION_SNAPSHOT))
+            return _cmd
+        if self.__action_id == ACTION_SNAPSHOTS:
+            _cmd.append(OPTION_COMPACT)
+            return _cmd
+        if self.__action_id == ACTION_INIT:
             return _cmd
         return _cmd
+
+    def init_action(self) -> Self:
+        """
+        :returns: Init-Aktion aus dieser Aktion.
+        :raises RestixException: falls diese Aktion kein Backup ist
+        """
+        if self.__action_id != ACTION_BACKUP:
+            raise RestixException(E_INTERNAL_ERROR, 'Geht nur für Backup-Aktion')
+        _init_action = RestixAction(ACTION_INIT, self.target_alias())
+        _init_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
+        _init_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
+        return _init_action
+
+    def snapshots_action(self) -> Self:
+        """
+        :returns: Snapshots-Aktion aus dieser Aktion.
+        :raises RestixException: falls diese Aktion kein Backup ist
+        """
+        if self.__action_id != ACTION_BACKUP:
+            raise RestixException(E_INTERNAL_ERROR, 'Geht nur für Backup-Aktion')
+        _snapshots_action = RestixAction(ACTION_SNAPSHOTS, self.target_alias())
+        _snapshots_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
+        _snapshots_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
+        return _snapshots_action
+
+    def tag_action(self, snapshot_id: str, tag: str) -> Self:
+        """
+        :param snapshot_id: ID des zu taggenden Snapshots.
+        :param tag: Tag
+        :returns: Tag-Aktion aus dieser Aktion.
+        :raises RestixException: falls diese Aktion kein Backup ist
+        """
+        if self.__action_id != ACTION_BACKUP:
+            raise RestixException(E_INTERNAL_ERROR, 'Geht nur für Backup-Aktion')
+        _tag_action = RestixAction(ACTION_TAG, self.target_alias())
+        _tag_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
+        _tag_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
+        _tag_action.__options[OPTION_SNAPSHOT] = snapshot_id
+        _tag_action.__options[OPTION_TAG] = tag
+        return _tag_action
 
     def _set_basic_options(self, local_config: LocalConfig, options: dict | None):
         """
@@ -246,6 +294,20 @@ class RestixAction:
         :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
         _action = RestixAction(ACTION_INIT, target_alias)
+        # Standard-Optionen setzen
+        _action._set_basic_options(local_config, options)
+        return _action
+
+    @classmethod
+    def for_tag(cls: Self, target_alias: str, local_config: LocalConfig, options: dict = None) -> Self:
+        """
+        :param target_alias: der Aliasname des Backup-Ziels
+        :param local_config: die restix-Konfiguration
+        :param options: ggf. zusätzliche Optionen
+        :returns: vollständige Beschreibung einer Tag-Aktion.
+        :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
+        """
+        _action = RestixAction(ACTION_TAG, target_alias)
         # Standard-Optionen setzen
         _action._set_basic_options(local_config, options)
         return _action

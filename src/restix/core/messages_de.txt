@@ -27,6 +27,10 @@ e-restix-target-repo-missing Für restic-Repository-Alias {0} wurde keine Adress
 e-restix-target-scope-missing Für restic-Repository-Alias {0} wurde kein Umfang ausgewählt.
 e-restix-target-scope-not-defined Der für restic-Repository {1} angegebene Umfang {1} ist in der Konfigurationsdatei nicht definiert.
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
+i-dry-run-tagging-first-snapshot Würde ersten Snapshot mit Tag {0} versehen.
+i-dry-run-tagging-snapshot Würde Snapshot {0} mit Tag {1} versehen.
+i-tagged-snapshot Snapshot {0} wurde mit {1} getagged.
+w-tag-snapshot-failed Fehler beim Taggen von Snapshot {0} mit {1}.
 
 # Konfiguration
 e-cfg-duplicate-group Group {0} {1} wurde in der Konfigurationsdatei {2} mehrfach definiert
@@ -107,17 +111,19 @@ e-cli-invalid-path-spec Ungültige Pfadangabe für Option {0}: {1}.
 e-cli-non-existing-path Pfad {0} für Option {1} existiert nicht.
 e-cli-path-is-not-dir Pfad {0} für Option {1} ist kein Verzeichnis.
 e-cli-restic-action-failed restic-Befehl {0} fehlgeschlagen: {1}.
-e-cli-restic-cmd-failed Allgemeiner restic-Fehler
-e-cli-restic-cmd-interrupted restic-Befehl wurde abgebrochen
-e-cli-restic-go-runtime-error Go-Laufzeitfehler
-e-cli-restic-read-backup-data-failed Fehler beim Lesen der Backup-Daten
-e-cli-restic-repo-does-not-exist Repository existiert nicht
-e-cli-restic-repo-lock-failed Repository konnte nicht gelockt werden
-e-cli-restic-repo-wrong-password Falsches Passwort für das Repository
 e-cli-restix-action-failed +++ Operation fehlgeschlagen +++
 e-cli-tag-options-missing Für Aktion tag werden die Optionen tags und snapshot benötigt.
 e-cli-target-missing Kein Alias für das restic-Repository angegeben.
 e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.
+
+# restic Fehler
+e-restic-cmd-failed restic-Befehl {0} fehlgeschlagen: Allgemeiner restic-Fehler.
+e-restic-cmd-interrupted restic-Befehl {0} fehlgeschlagen: restic-Befehl wurde abgebrochen.
+e-restic-go-runtime-error restic-Befehl {0} fehlgeschlagen: Go-Laufzeitfehler.
+e-restic-read-backup-data-failed restic-Befehl {0} fehlgeschlagen: Fehler beim Lesen der Backup-Daten.
+e-restic-repo-does-not-exist restic-Befehl {0} fehlgeschlagen: Repository existiert nicht.
+e-restic-repo-lock-failed restic-Befehl {0} fehlgeschlagen: Repository konnte nicht gelockt werden.
+e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort für das Repository.
 
 # GUI Ausgaben
 i-gui-about-detail-text Version {0}\nQt-Version {1}

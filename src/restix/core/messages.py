@@ -33,14 +33,14 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Localized message support.
+Lokalisierte Nachrichten.
 """
 
 import os
 
 from restix.core.util import platform_locale
 
-# General messages
+# Allgemeine Nachrichten
 E_BACKGROUND_TASK_ABORTED = 'e-background-task-aborted'
 E_BACKGROUND_TASK_FAILED = 'e-background-task-failed'
 E_BOOL_OPT_REQUIRED = 'e-bool-opt-required'
@@ -69,6 +69,10 @@ E_RESTIX_TARGET_REPO_MISSING = 'e-restix-target-repo-missing'
 E_RESTIX_TARGET_SCOPE_MISSING = 'e-restix-target-scope-missing'
 E_RESTIX_TARGET_SCOPE_NOT_DEFINED = 'e-restix-target-scope-not-defined'
 E_RESTIX_VAR_NOT_DEFINED = 'e-restix-var-not-defined'
+I_DRY_RUN_TAGGING_FIRST_SNAPSHOT = 'i-dry-run-tagging-first-snapshot'
+I_DRY_RUN_TAGGING_SNAPSHOT = 'i-dry-run-tagging-snapshot'
+I_TAGGED_SNAPSHOT = 'i-tagged-snapshot'
+W_TAG_SNAPSHOT_FAILED = 'w-tag-snapshot-failed'
 
 # Fehlermeldungen zur Konfiguration
 E_CFG_CUSTOM_CONFIG_ROOT_NOT_FOUND = 'e-cfg-custom-config-root-not-found'
@@ -113,18 +117,19 @@ E_CLI_INVALID_OPTION = 'e-cli-invalid-option'
 E_CLI_INVALID_PATH_SPEC = 'e-cli-invalid-path-spec'
 E_CLI_NON_EXISTING_PATH = 'e-cli-non-existing-path'
 E_CLI_PATH_IS_NOT_DIR = 'e-cli-path-is-not-dir'
-E_CLI_RESTIC_ACTION_FAILED = 'e-cli-restic-action-failed'
-E_CLI_RESTIC_CMD_FAILED = 'e-cli-restic-cmd-failed'
-E_CLI_RESTIC_CMD_INTERRUPTED = 'e-cli-restic-cmd-interrupted'
-E_CLI_RESTIC_GO_RUNTIME_ERROR = 'e-cli-restic-go-runtime-error'
-E_CLI_RESTIC_READ_BACKUP_DATA_FAILED = 'e-cli-restic-read-backup-data-failed'
-E_CLI_RESTIC_REPO_DOES_NOT_EXIST = 'e-cli-restic-repo-does-not-exist'
-E_CLI_RESTIC_REPO_LOCK_FAILED = 'e-cli-restic-repo-lock-failed'
-E_CLI_RESTIC_REPO_WRONG_PASSWORD = 'e-cli-restic-repo-wrong-password'
-E_CLI_RESTIX_ACTION_FAILED = 'e-cli-restix-action-failed'
 E_CLI_TAG_OPTIONS_MISSING = 'e-cli-tag-options-missing'
 E_CLI_TARGET_MISSING = 'e-cli-target-missing'
 E_CLI_TOO_MANY_ARGS = 'e-cli-too-many-args'
+E_CLI_RESTIX_ACTION_FAILED = 'e-cli-restix-action-failed'
+
+# restic Fehler
+E_RESTIC_CMD_FAILED = 'e-restic-cmd-failed'
+E_RESTIC_CMD_INTERRUPTED = 'e-restic-cmd-interrupted'
+E_RESTIC_GO_RUNTIME_ERROR = 'e-restic-go-runtime-error'
+E_RESTIC_READ_BACKUP_DATA_FAILED = 'e-restic-read-backup-data-failed'
+E_RESTIC_REPO_DOES_NOT_EXIST = 'e-restic-repo-does-not-exist'
+E_RESTIC_REPO_LOCK_FAILED = 'e-restic-repo-lock-failed'
+E_RESTIC_REPO_WRONG_PASSWORD = 'e-restic-repo-wrong-password'
 
 # GUI Ausgaben
 I_GUI_ABOUT_DETAIL_TEXT = 'i-gui-about-detail-text'

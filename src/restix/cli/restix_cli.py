@@ -38,7 +38,6 @@ Command line interface für restix.
 
 import datetime
 import platform
-import subprocess
 import sys
 
 from restix.core import *
@@ -46,6 +45,8 @@ from restix.core.action import RestixAction
 from restix.core.config import config_root_path, LocalConfig
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
+from restix.core.restic_interface import execute_restic_command
+from restix.core.task import TaskMonitor
 from restix.core.util import current_user
 
 
@@ -71,35 +72,6 @@ def read_restix_config_file(action: RestixAction) -> LocalConfig:
         _vars[CFG_VAR_YEAR] = _year_opt
     _local_config = LocalConfig.from_file(os.path.join(config_root_path(), RESTIX_CONFIG_FN))
     return _local_config.for_cli(_vars)
-
-
-def execute_restic_command(cmd):
-    """
-    Executes a restic command.
-    Standard output and error are written to console.
-    :param list[str] cmd: the restic command to execute
-    :raises RestixException: if command execution returns an error
-    """
-    res = subprocess.run(cmd, capture_output=True, encoding='utf-8')
-    if len(res.stderr) > 0: print(res.stderr)
-    if len(res.stdout) > 0: print(res.stdout)
-    if res.returncode == 0:
-        return
-    if res.returncode == 2:
-        _reason = E_CLI_RESTIC_GO_RUNTIME_ERROR
-    elif res.returncode == 3:
-        _reason = E_CLI_RESTIC_READ_BACKUP_DATA_FAILED
-    elif res.returncode == 10:
-        _reason = E_CLI_RESTIC_REPO_DOES_NOT_EXIST
-    elif res.returncode == 11:
-        _reason = E_CLI_RESTIC_REPO_LOCK_FAILED
-    elif res.returncode == 12:
-        _reason = E_CLI_RESTIC_REPO_WRONG_PASSWORD
-    elif res.returncode == 130:
-        _reason = E_CLI_RESTIC_CMD_INTERRUPTED
-    else:
-        _reason = E_CLI_RESTIC_CMD_FAILED
-    raise RestixException(E_CLI_RESTIC_CMD_FAILED, ' '.join(cmd), localized_label(_reason))
 
 
 def prompt_confirmation(action: RestixAction) -> bool:
@@ -188,7 +160,7 @@ def cli_main():
             sys.exit(0)
         # Aktion ausführen
         if prompt_confirmation(_action):
-            execute_restic_command(_action.to_restic_command())
+            execute_restic_command(_action.to_restic_command(), TaskMonitor())
     except Exception as _e:
         print(localized_message(E_CLI_RESTIX_ACTION_FAILED))
         print(f'> {_e}')
