@@ -50,16 +50,22 @@ class Snapshot:
     """
     Daten eines restic Snapshots.
     """
-    def __init__(self, snapshot_id: str, time_stamp: datetime, tags: str):
+    def __init__(self, snapshot_id: str, time_stamp: datetime, tag: str):
         """
         Konstruktor.
         :param snapshot_id: Snapshot-ID
         :param time_stamp: Zeitstempel des Snapshots
-        :param tags: Tags des Snapshots
+        :param tag: erster Tag des Snapshots; Leerstring, falls kein Tag
         """
         self.__snapshot_id = snapshot_id
         self.__time_stamp = time_stamp
-        self.__tags = tags
+        self.__tags = [] if tag is None or len(tag) == 0 else [tag]
+
+    def add_tag(self, tag: str):
+        """
+        :param tag: hinzuzufügender Tag
+        """
+        self.__tags.append(tag)
 
     def snapshot_id(self) -> str:
         """
@@ -73,7 +79,7 @@ class Snapshot:
         """
         return self.__time_stamp
 
-    def tags(self) -> str:
+    def tags(self) -> list[str]:
         """
         :returns: Tags des Snapshots
         """
@@ -85,17 +91,18 @@ class Snapshot:
         """
         return self.__time_stamp.month
 
-    def is_tagged(self) -> bool:
+    def is_tagged_with(self, tag: str) -> bool:
         """
-        :returns: True, falls der Snapshot mindestens einen Tag besitzt
+        :param tag: zu prüfender Tag
+        :returns: True, falls der Snapshot den angegebenen Tag besitzt
         """
-        return len(self.__tags) > 0
+        return tag in self.__tags
 
     def __str__(self) -> str:
         """
         :returns: Inhalt des Snapshots in lesbarer Form.
         """
-        return f'ID:{self.__snapshot_id}/TIME:{self.__time_stamp}/TAGS:{self.__tags}'
+        return f'ID:{self.__snapshot_id}/TIME:{self.__time_stamp}/TAGS:{','.join(self.__tags)}'
 
 
 def backup(action: RestixAction, task_monitor: TaskMonitor):
@@ -198,7 +205,7 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
 
 def _auto_tag(action: RestixAction, task_monitor: TaskMonitor):
     """
-    Tagged einen Snapshot, falls die Option auto-tag gesetzt wurde.
+    Tagged Snapshots, falls die Option auto-tag gesetzt wurde.
     :param action: die Daten des auszuführenden Backups.
     :param task_monitor: der Fortschritt-Handler.
     """
@@ -206,38 +213,31 @@ def _auto_tag(action: RestixAction, task_monitor: TaskMonitor):
         return
     # Snapshots des Repositories holen
     _snapshots = determine_snapshots(action.snapshots_action(), task_monitor)
-    if len(_snapshots) == 0:
-        # ohne Snapshots gibt's auch nichts zu taggen
-        return
     _current_year = datetime.now().year
     _current_month = datetime.now().month
-    if len(_snapshots) == 0 and action.option(OPTION_DRY_RUN):
-        # Bei dry-run wird kein Snapshot angelegt, d.h. Backup war der erste des Jahres
-        _tag = f'{_current_year}_FIRST'
-        task_monitor.log(I_DRY_RUN_TAGGING_FIRST_SNAPSHOT, _tag)
+    _first_tag = f'{_current_year}_FIRST'
+    if len(_snapshots) == 0:
+        # Bei dry-run wurde kein Snapshot angelegt, d.h. Backup war der erste des Jahres, dann würde mit
+        # Jahresanfangskennung getaggt. Ohne dry-run ist was schiefgegangen, dann tun wir hier nichts.
+        if action.option(OPTION_DRY_RUN):
+            task_monitor.log(I_DRY_RUN_TAGGING_FIRST_SNAPSHOT, _first_tag)
         return
+    # ersten Snapshot des Jahres ggf. mit Jahresanfangskennung taggen
+    _first_snapshot = _snapshots[0]
+    if not _first_snapshot.is_tagged_with(_first_tag):
+        # erster Snapshot hat noch keine Jahresanfangskennung
+        if _tag_snapshot(action, _first_snapshot.snapshot_id(), _first_tag, task_monitor) != RESTIC_RC_OK:
+            # Taggen hat nicht funktioniert, dann sparen wir uns auch die möglichen weiteren
+            return
     if len(_snapshots) == 1:
-        _tag = f'{_current_year}_FIRST'
-        if not _snapshots[0].is_tagged():
-            # einziger Snapshot hat noch keinen Tag für den ersten des Jahres
-            if action.option(OPTION_DRY_RUN):
-                task_monitor.log(I_DRY_RUN_TAGGING_SNAPSHOT, _snapshots[0].snapshot_id(), _tag)
-                return
-            _tag_action = action.tag_action(_snapshots[0].snapshot_id(), _tag)
-            _rc, _stdout, _stderr = _execute_restic_command(_tag_action.to_restic_command(), task_monitor)
-            if _rc == RESTIC_RC_OK:
-                task_monitor.log(I_TAGGED_SNAPSHOT, _snapshots[0].snapshot_id(), _tag)
-                return
-            task_monitor.log(W_TAG_SNAPSHOT_FAILED, _snapshots[0].snapshot_id(), _tag)
-            task_monitor.log(_stdout, SEVERITY_WARNING)
-            task_monitor.log(_stderr, SEVERITY_WARNING)
+        # bei nur einem Snapshot sind wir fertig
         return
-    _last_snapshot = _snapshots[-1] if action.option(OPTION_DRY_RUN) else _snapshots[-2]
-    if _last_snapshot.month() < _current_month and not _last_snapshot.is_tagged():
-        # letzter Snapshot eines Monats bekommt Tag 'YYYY_MM'
-        _tag = f'{_current_year}_{_current_month:02}'
-        _tag_action = action.tag_action(_last_snapshot.snapshot_id(), _tag)
-        print(_tag_action)
+    _last_snapshot = _first_snapshot
+    for _snapshot in _snapshots[1:]:
+        if _last_snapshot.month() < _snapshot.month():
+            # letzter Snapshot eines Monats bekommt Tag 'YYYY_MM'
+            _tag = f'{_current_year}_{_last_snapshot.month():02}'
+            _tag_snapshot(action, _last_snapshot.snapshot_id(), _tag, task_monitor)
 
 
 def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list[Snapshot]:
@@ -252,11 +252,11 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
     if _rc != RESTIC_RC_OK:
         task_monitor.log_text(_stdout, SEVERITY_INFO)
         task_monitor.log_text(_stderr, SEVERITY_ERROR)
-        raise RestixException(E_RESTIC_CMD_FAILED, 'snapshots')
+        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id())
     _snapshots = []
     _stdout_lines = _stdout.split(os.linesep)
     _snapshot_expected = False
-    _header_processed = False
+    _last_snapshot = None
     _id_index = -1
     _time_index = -1
     _host_index = -1
@@ -264,24 +264,53 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
     _size_index = -1
     for _line in _stdout_lines:
         if _SNAPSHOTS_HEADER_PATTERN.match(_line):
-            _id_index = _line.find('ID')
-            _time_index = _line.find('Time')
-            _host_index = _line.find('Host')
-            _tags_index = _line.find('Tags')
-            _size_index = _line.find('Size')
-            _header_processed = True
+            _id_index = _line.find(_SNAPSHOT_COLUMN_ID)
+            _time_index = _line.find(_SNAPSHOT_COLUMN_TIME)
+            _host_index = _line.find(_SNAPSHOT_COLUMN_HOST)
+            _tags_index = _line.find(_SNAPSHOT_COLUMN_TAGS)
+            _size_index = _line.find(_SNAPSHOT_COLUMN_SIZE)
             continue
-        if _line.startswith('-'):
+        if _line.startswith(_SNAPSHOT_SEP_LINE_CHAR):
             if _snapshot_expected:
                 break
             _snapshot_expected = True
             continue
-        if _snapshot_expected and _header_processed:
+        if _line.startswith(_SNAPSHOT_CONTINUATION_LINE_CHAR) and _snapshot_expected:
+            _last_snapshot.add_tag(_line[_tags_index:_size_index].strip())
+            continue
+        if _snapshot_expected and _id_index >= 0:
             _id = _line[_id_index:_time_index].strip()
             _time = _line[_time_index:_host_index].strip()
-            _tags = _line[_tags_index:_size_index].strip()
-            _snapshots.append(Snapshot(_id, datetime.fromisoformat(_time), _tags))
+            _tag = _line[_tags_index:_size_index].strip()
+            _last_snapshot = Snapshot(_id, datetime.fromisoformat(_time), _tag)
+            _snapshots.append(_last_snapshot)
     return _snapshots
+
+
+def _tag_snapshot(action: RestixAction, snapshot_id: str, tag: str, task_monitor: TaskMonitor) -> int:
+    """
+    Markiert einen Snapshot mit dem angegebenen Tag.
+    :param action: Backup-Aktion
+    :param snapshot_id: ID des zu markierenden Snapshots
+    :param tag: zu setzender Tag
+    :param task_monitor: Fortschritt-Handler
+    :return: Return code von restic
+    """
+    if action.option(OPTION_DRY_RUN):
+        # bei dry-run nur Meldung ausgeben, was getaggt würde
+        task_monitor.log(I_DRY_RUN_TAGGING_SNAPSHOT, snapshot_id, tag)
+        return RESTIC_RC_OK
+    _tag_action = action.tag_action(snapshot_id, tag)
+    _rc, _stdout, _stderr = _execute_restic_command(_tag_action.to_restic_command(), task_monitor)
+    if _rc == RESTIC_RC_OK:
+        # restic-Befehl war erfolgreich, Meldung ausgeben
+        task_monitor.log(I_TAGGED_SNAPSHOT, snapshot_id, tag)
+    else:
+        # restic-Befehl ist fehlgeschlagen, Warnung und restic-Ausgaben an den Fortschritt-Handler weiterreichen
+        task_monitor.log(W_TAG_SNAPSHOT_FAILED, snapshot_id, tag)
+        task_monitor.log(_stdout, SEVERITY_WARNING)
+        task_monitor.log(_stderr, SEVERITY_WARNING)
+    return _rc
 
 
 def _execute_restic_command(cmd: list[str], task_monitor: TaskMonitor,
@@ -320,4 +349,11 @@ def _execute_restic_command(cmd: list[str], task_monitor: TaskMonitor,
     return _rc, _stdout, _stderr
 
 
+_SNAPSHOT_COLUMN_HOST = 'Host'
+_SNAPSHOT_COLUMN_ID = 'ID'
+_SNAPSHOT_COLUMN_SIZE = 'Size'
+_SNAPSHOT_COLUMN_TAGS = 'Tags'
+_SNAPSHOT_COLUMN_TIME = 'Time'
 _SNAPSHOTS_HEADER_PATTERN = re.compile(r'ID\s+Time\s+Host\s+Tags\s+Size')
+_SNAPSHOT_SEP_LINE_CHAR = '-'
+_SNAPSHOT_CONTINUATION_LINE_CHAR = ' '
