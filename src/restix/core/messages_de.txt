@@ -153,6 +153,7 @@ l-do-restore Wiederherstellung starten
 l-dry-run Dry run
 l-exit Beenden
 l-help Hilfe
+l-host Hostname
 l-location Ort
 l-maintenance Wartung
 l-ok OK
@@ -161,6 +162,7 @@ l-restore Wiederherstellung
 l-scope Sicherungs-Umfang
 l-snapshot * Snapshot
 l-targets Backup-Ziele
+l-year Jahr
 
 # GUI Widget Labels
 l-dlg-title-about Über restix
@@ -176,7 +178,12 @@ l-menu-user-manual Benutzerhandbuch
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
 t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
 t-opt-bak-dry-run Backup nur simulieren
+t-opt-rst-host Bitte ggf. den Hostnamen angeben, falls die Wiederherstellung aus Daten eines anderen Rechners erfolgen soll
 t-opt-rst-snapshot Snapshot auswählen, aus dem die Dateien wiederhergestellt werden sollen
+t-opt-rst-year Bitte ggf. das Jahr auswählen, aus dem die Dateien wiederhergestellt werden sollen
+
+# GUI Fehler
+e-gui-no-snapshot-selected Kein Snapshot ausgewählt
 
 # GUI Warnungen
 w-gui-write-gui-settings-failed Fehler beim Schreiben der GUI-Einstellungen in Datei {0}: {1}.

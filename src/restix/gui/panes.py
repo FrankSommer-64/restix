@@ -45,7 +45,7 @@ from PySide6.QtGui import QMouseEvent, QBrush, QFont
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
                                QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox,
-                               QComboBox)
+                               QComboBox, QLineEdit)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -510,8 +510,31 @@ def create_option(layout: QGridLayout, caption_id: str, tooltip_id: str, initial
     return _check_box
 
 
+def create_text(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QLineEdit:
+    """
+    Erzeugt Label und Texteingabefeld für eine Option.
+    :param layout: Layout, in dem die Option enthalten sein soll.
+    :param caption_id: Label-ID für die Beschreibung.
+    :param tooltip_id: Label-ID für den Tooltip-Text.
+    :returns: Combo-Box
+    """
+    _row_nr = layout.rowCount()
+    _tooltip = localized_label(tooltip_id)
+    _caption = QLabel(localized_label(caption_id))
+    _caption.setToolTip(_tooltip)
+    _caption.setStyleSheet(_CAPTION_STYLE)
+    layout.addWidget(_caption, _row_nr, 0)
+    _input_field = QLineEdit()
+    _input_field.setStyleSheet(_INPUT_FIELD_STYLE)
+    _input_field.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+    _input_field.setToolTip(_tooltip)
+    layout.addWidget(_input_field, _row_nr, 1)
+    return _input_field
+
+
+_CANCEL_BUTTON_STYLE = 'background-color: red; color: white'
 _CAPTION_STYLE = 'color: black; font-weight: bold'
+_INPUT_FIELD_STYLE = 'background-color: #ffffcc'
 _MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style: solid; border-width: 1px'
 _OK_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
-_CANCEL_BUTTON_STYLE = 'background-color: red; color: white'
 _TARGET_TABLE_STYLE = 'background-color: white'

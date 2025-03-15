@@ -105,7 +105,7 @@ class Snapshot:
         return f'ID:{self.__snapshot_id}/TIME:{self.__time_stamp}/TAGS:{','.join(self.__tags)}'
 
 
-def backup(action: RestixAction, task_monitor: TaskMonitor):
+def run_backup(action: RestixAction, task_monitor: TaskMonitor):
     """
     Sichert lokale Daten in einem restic-Repository.
     :param action: die Daten des auszuführenden Backups.
@@ -139,7 +139,17 @@ def backup(action: RestixAction, task_monitor: TaskMonitor):
     return TaskResult(TASK_FAILED, '')
 
 
-def init(action: RestixAction, task_monitor: TaskMonitor):
+def run_forget(action: RestixAction, task_monitor: TaskMonitor):
+    """
+    Löscht einen Snapshot aus einem Repository.
+    :param action: die Daten des auszuführenden Forget-Befehls.
+    :param task_monitor: der Fortschritt-Handler.
+    :raises RestixException: falls die Ausführung fehlschlägt
+    """
+    return TaskResult(TASK_FAILED, 'Noch nicht implementiert')
+
+
+def run_init(action: RestixAction, task_monitor: TaskMonitor):
     """
     Legt ein neues restic-Repository an.
     :param action: die Daten für die Initialisierung.
@@ -155,6 +165,36 @@ def init(action: RestixAction, task_monitor: TaskMonitor):
         task_monitor.log(E_BACKGROUND_TASK_FAILED, str(_e))
         return TaskResult(TASK_FAILED, str(_e))
 
+
+def run_restore(action: RestixAction, task_monitor: TaskMonitor):
+    """
+    Stellt lokale Daten aus einem restic-Repository wieder her.
+    :param action: die Daten des auszuführenden Restores.
+    :param task_monitor: der Fortschritt-Handler.
+    :raises RestixException: falls die Ausführung fehlschlägt
+    """
+    task_monitor.log_text('Noch nicht implementiert', SEVERITY_ERROR)
+    return TaskResult(TASK_FAILED, '')
+
+
+def run_snapshots(action: RestixAction, task_monitor: TaskMonitor):
+    """
+    Gibt alle Snapshots in einem Repository zurück.
+    :param action: die Daten des auszuführenden Snapshot-Befehls.
+    :param task_monitor: der Fortschritt-Handler.
+    :raises RestixException: falls die Ausführung fehlschlägt
+    """
+    return TaskResult(TASK_FAILED, 'Noch nicht implementiert')
+
+
+def run_tag(action: RestixAction, task_monitor: TaskMonitor):
+    """
+    Tagged einen Snapshot in einem Repository.
+    :param action: die Daten des auszuführenden Tags.
+    :param task_monitor: der Fortschritt-Handler.
+    :raises RestixException: falls die Ausführung fehlschlägt
+    """
+    return TaskResult(TASK_FAILED, 'Noch nicht implementiert')
 
 def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_long_runner: bool = False) -> str:
     """

@@ -35,10 +35,10 @@
 """
 GUI-Bereich für den Restore.
 """
-
+import datetime
 
 from PySide6.QtCore import Qt, QThreadPool
-from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox
 
 from restix.core import *
 from restix.core.action import RestixAction
@@ -47,7 +47,7 @@ from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.restic_interface import determine_snapshots
 from restix.core.task import TaskMonitor
-from restix.gui.panes import (ResticActionPane, create_combo, create_option,
+from restix.gui.panes import (ResticActionPane, create_combo, create_option, create_text,
                               GROUP_BOX_STYLE)
 from restix.gui.settings import GuiSettings
 from restix.gui.worker import Worker
@@ -70,8 +70,11 @@ class RestoreOptionsPane(QGroupBox):
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__snapshot_combo = create_combo(_layout, L_SNAPSHOT, T_OPT_RST_SNAPSHOT)
         #self.__restore_path_selector = create_dir_selector(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, False)
-        #self.__host_text = create_text(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, False)
-        #self.__year_text = create_text(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, False)
+        self.__host_text = create_text(_layout, L_HOST, T_OPT_RST_HOST)
+        _current_year = datetime.datetime.now().year
+        self.__year_combo = create_combo(_layout, L_YEAR, T_OPT_RST_YEAR)
+        self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year-10, -1)])
+        self.__year_combo.setCurrentIndex(0)
         self.__dry_run_option = create_option(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
         self.setLayout(_layout)
 
@@ -93,13 +96,17 @@ class RestoreOptionsPane(QGroupBox):
 
     def selected_options(self) -> dict:
         """
-        :return: Status der unterstützten Restore-Optionen (auto-create, auto-tag und dry-run)
+        :return: Status der unterstützten Restore-Optionen (snapshot, restore-path, host, jahr und dry-run)
         """
-        return {OPTION_SNAPSHOT: self.__snapshot_combo.currentText(),
-                #OPTION_RESTORE_PATH: self.__restore_path_selector.isChecked(),
-                #OPTION_HOST: self.__host_text.isChecked(),
-                #OPTION_YEAR: self.__year_text.isChecked(),
-                OPTION_DRY_RUN: self.__dry_run_option.isChecked()}
+        _snapshot = self.__snapshot_combo.currentData()
+        if _snapshot is None or len(_snapshot) == 0:
+            raise RestixException(E_GUI_NO_SNAPSHOT_SELECTED)
+        _options = {OPTION_SNAPSHOT: _snapshot, OPTION_YEAR: self.__year_combo.currentText(),
+                    OPTION_DRY_RUN: self.__dry_run_option.isChecked()}
+        _host = self.__host_text.text()
+        if len(_host) > 0:
+            _options[OPTION_HOST] = _host
+        return _options
 
 
 class RestorePane(ResticActionPane):
@@ -125,11 +132,15 @@ class RestorePane(ResticActionPane):
         Wird aufgerufen, wenn der 'Start Restore'-Button geklickt wurde.
         """
         super().start_button_clicked()
-        _options = self.__options_pane.selected_options()
-        _restore_action = RestixAction.for_action_id(ACTION_RESTORE, self.selected_target[CFG_PAR_ALIAS],
-                                                     self.restix_config, _options)
-        self.__worker = Worker.for_action(_restore_action)
-        self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
+        try:
+            _options = self.__options_pane.selected_options()
+            _restore_action = RestixAction.for_action_id(ACTION_RESTORE, self.selected_target[CFG_PAR_ALIAS],
+                                                         self.restix_config, _options)
+            self.__worker = Worker.for_action(_restore_action)
+            self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
+        except RestixException as _e:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
+            return
         QThreadPool.globalInstance().start(self.__worker)
 
     def cancel_button_clicked(self):

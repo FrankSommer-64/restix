@@ -131,6 +131,9 @@ E_RESTIC_REPO_DOES_NOT_EXIST = 'e-restic-repo-does-not-exist'
 E_RESTIC_REPO_LOCK_FAILED = 'e-restic-repo-lock-failed'
 E_RESTIC_REPO_WRONG_PASSWORD = 'e-restic-repo-wrong-password'
 
+# GUI Fehler
+E_GUI_NO_SNAPSHOT_SELECTED = 'e-gui-no-snapshot-selected'
+
 # GUI Ausgaben
 I_GUI_ABOUT_DETAIL_TEXT = 'i-gui-about-detail-text'
 I_GUI_ABOUT_INFO_TEXT = 'i-gui-about-info-text'
@@ -169,6 +172,7 @@ L_DO_RESTORE = 'l-do-restore'
 L_DRY_RUN = 'l-dry-run'
 L_EXIT = 'l-exit'
 L_HELP = 'l-help'
+L_HOST = 'l-host'
 L_LOCATION = 'l-location'
 L_MAINTENANCE = 'l-maintenance'
 L_OK = 'l-ok'
@@ -177,12 +181,15 @@ L_RESTORE = 'l-restore'
 L_SCOPE = 'l-scope'
 L_SNAPSHOT = 'l-snapshot'
 L_TARGETS = 'l-targets'
+L_YEAR = 'l-year'
 
 # GUI Tooltips
 T_OPT_BAK_AUTO_CREATE = 't-opt-bak-auto-create'
 T_OPT_BAK_AUTO_TAG = 't-opt-bak-auto-tag'
 T_OPT_BAK_DRY_RUN = 't-opt-bak-dry-run'
+T_OPT_RST_HOST = 't-opt-rst-host'
 T_OPT_RST_SNAPSHOT = 't-opt-rst-snapshot'
+T_OPT_RST_YEAR = 't-opt-rst-year'
 
 # GUI Warnungen
 W_GUI_WRITE_GUI_SETTINGS_FAILED = 'w-gui-write-gui-settings-failed'

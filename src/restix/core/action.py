@@ -119,7 +119,7 @@ class RestixAction:
             if not os.path.isfile(option_value):
                 raise RestixException(E_FILE_OPT_REQUIRED, option_value, option_name)
         elif option_name == OPTION_TARGET:
-            # restore path must refer to an existing directory
+            # restore path muss ein existierendes Verzeichnis sein
             try:
                 _path = os.path.abspath(option_value)
                 if not os.path.exists(_path):
@@ -131,16 +131,15 @@ class RestixAction:
             except Exception as _e:
                 raise RestixException(E_CLI_INVALID_PATH_SPEC, option_name, _e)
         elif option_name == OPTION_HOST:
-            # generous hostname check, but enough to prevent malicious values, as hostname is
-            # part of the restic repository path
+            # grosszügiger Check, aber genug um bösartige Werte zu verhindern
             if not re.match(r'^[a-z0-9\-_.]+$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_HOSTNAME, option_value)
         elif option_name == OPTION_SNAPSHOT:
-            # restic snapshot IDs must be hex numbers
-            if not re.match(r'^[a-f0-9]+$', option_value, re.IGNORECASE):
+            # Snapshot-IDs ist entweder 'latest' oder eine Hexadezimalzahl
+            if option_value != 'latest' and not re.match(r'^[a-f0-9]+$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_SNAPSHOT_ID, option_value)
         elif option_name == OPTION_YEAR:
-            # year must be 4 digits
+            # Jahr muss aus vier Ziffern bestehen
             if not re.match(r'^[0-9]{4}$', option_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_YEAR, option_value)
         self.__options[option_name] = option_value

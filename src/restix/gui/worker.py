@@ -139,16 +139,16 @@ class Worker(QRunnable, TaskExecutor):
         """
         _action_id = action.action_id()
         if _action_id == ACTION_BACKUP:
-            return Worker(backup, action)
+            return Worker(run_backup, action)
         elif _action_id == ACTION_FORGET:
-            return Worker(backup, action)
+            return Worker(run_forget, action)
         elif _action_id == ACTION_INIT:
-            return Worker(init, action)
+            return Worker(run_init, action)
         elif _action_id == ACTION_RESTORE:
-            return Worker(backup, action)
+            return Worker(run_restore, action)
         elif _action_id == ACTION_SNAPSHOTS:
-            return Worker(backup, action)
+            return Worker(run_snapshots, action)
         elif _action_id == ACTION_TAG:
-            return Worker(backup, action)
+            return Worker(run_tag, action)
         _emsg = localized_message(E_INVALID_ACTION, _action_id)
         raise RestixException(E_INTERNAL_ERROR, _emsg)
