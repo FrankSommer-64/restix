@@ -38,18 +38,16 @@ Zentraler Arbeitsbereich der restix GUI.
 
 import os.path
 
-from PySide6.QtCore import QSize, Qt, Signal, QObject, QPoint
-from PySide6.QtGui import QMouseEvent
-from PySide6.QtWidgets import (QApplication, QMainWindow, QMessageBox, QWidget, QVBoxLayout,
-                               QPushButton, QLabel, QHBoxLayout, QSizePolicy, QMenu)
+from PySide6.QtCore import QPoint
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizePolicy, QMenu
 
 from restix.core import *
 from restix.core.config import LocalConfig
-from restix.core.restix_exception import RestixException
 from restix.core.messages import *
 from restix.gui.backup_pane import BackupPane
-from restix.gui.panes import ActionSelectionPane, ResticActionPane
-from restix.gui.dialogs import (AboutDialog, PdfViewerDialog)
+from restix.gui.panes import ActionSelectionPane
+from restix.gui.dialogs import AboutDialog, PdfViewerDialog
+from restix.gui.restore_pane import RestorePane
 from restix.gui.settings import GuiSettings
 
 
@@ -73,8 +71,8 @@ class CentralPane(QWidget):
         self._layout.setContentsMargins(5, 5, 5, 5)
         _actions = (('backup_icon.png', L_BACKUP, self._backup_selected, False),
                     ('restore_icon.png', L_RESTORE, self._restore_selected, False),
-                    ('configuration_icon.png', L_CONFIGURATION, self._config_selected, False),
                     ('maintenance_icon.png', L_MAINTENANCE, self._maintenance_selected, False),
+                    ('configuration_icon.png', L_CONFIGURATION, self._config_selected, False),
                     ('help_icon.png', L_HELP, self._help_selected, True),
                     ('exit_icon.png', L_EXIT, QApplication.instance().quit, False))
         self._layout.addWidget(ActionSelectionPane(self, _actions))
@@ -90,22 +88,19 @@ class CentralPane(QWidget):
         """
         Zeigt die GUI-Bereiche für Backup an.
         """
-        _backup_pane = BackupPane(self, self._local_config, self._gui_settings)
-        _backup_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
-        _backup_pane.setStyleSheet(_STANDARD_PANE_STYLE)
-        self._work_pane.setStyleSheet(_STANDARD_PANE_STYLE)
-        self._layout.replaceWidget(self._work_pane, _backup_pane)
-        self._layout.update()
-        self._work_pane = _backup_pane
+        self._activate_pane(BackupPane(self, self._local_config, self._gui_settings))
 
     def _restore_selected(self):
-        print('_restore_selected')
-
-    def _config_selected(self):
-        print('_config_selected')
+        """
+        Zeigt die GUI-Bereiche für Restore an.
+        """
+        self._activate_pane(RestorePane(self, self._local_config, self._gui_settings))
 
     def _maintenance_selected(self):
         print('_maintenance_selected')
+
+    def _config_selected(self):
+        print('_config_selected')
 
     def _help_selected(self, mouse_x: int, mouse_y: int):
         """
@@ -117,6 +112,18 @@ class CentralPane(QWidget):
         _context_menu.addAction(localized_label(L_MENU_USER_MANUAL)).triggered.connect(self._show_manual)
         _context_menu.addAction(localized_label(L_MENU_ABOUT)).triggered.connect(self._show_about)
         _context_menu.exec(QPoint(mouse_x, mouse_y))
+
+    def _activate_pane(self, pane: QWidget):
+        """
+        Zeigt die übergebene Pane als Work-Pane an.
+        :param pane: die neue Work-Pane
+        """
+        pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        pane.setStyleSheet(_STANDARD_PANE_STYLE)
+        self._work_pane.setStyleSheet(_STANDARD_PANE_STYLE)
+        self._layout.replaceWidget(self._work_pane, pane)
+        self._layout.update()
+        self._work_pane = pane
 
     def _show_manual(self):
         """

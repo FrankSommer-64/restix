@@ -269,47 +269,22 @@ class RestixAction:
         return f'ID:{self.__action_id}/ALIAS:{self.target_alias()}/OPTIONS:{self.__options}'
 
     @classmethod
-    def for_backup(cls: Self, target_alias: str, local_config: LocalConfig, options: dict = None) -> Self:
+    def for_action_id(cls: Self, action_id: str, target_alias: str, local_config: LocalConfig,
+                      options: dict = None) -> Self:
         """
-        :param target_alias: der Aliasname des Backup-Ziels
-        :param local_config: die restix-Konfiguration
+        :param action_id: ID der Aktion
+        :param target_alias: Aliasname des Backup-Ziels
+        :param local_config: restix-Konfiguration
         :param options: ggf. zusätzliche Optionen
-        :returns: vollständige Beschreibung einer Backup-Aktion.
+        :returns: vollständige Beschreibung der Aktion zur Ausführung mit restic.
         :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
-        _action = RestixAction(ACTION_BACKUP, target_alias)
+        _action = RestixAction(action_id, target_alias)
         # Standard-Optionen setzen
         _action._set_basic_options(local_config, options)
-        # ein- und auszuschliessende Daten setzen
-        _action._set_scope_options(local_config.scope_for_target(target_alias))
-        return _action
-
-    @classmethod
-    def for_init(cls: Self, target_alias: str, local_config: LocalConfig, options: dict = None) -> Self:
-        """
-        :param target_alias: der Aliasname des Backup-Ziels
-        :param local_config: die restix-Konfiguration
-        :param options: ggf. zusätzliche Optionen
-        :returns: vollständige Beschreibung einer Init-Aktion.
-        :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
-        """
-        _action = RestixAction(ACTION_INIT, target_alias)
-        # Standard-Optionen setzen
-        _action._set_basic_options(local_config, options)
-        return _action
-
-    @classmethod
-    def for_tag(cls: Self, target_alias: str, local_config: LocalConfig, options: dict = None) -> Self:
-        """
-        :param target_alias: der Aliasname des Backup-Ziels
-        :param local_config: die restix-Konfiguration
-        :param options: ggf. zusätzliche Optionen
-        :returns: vollständige Beschreibung einer Tag-Aktion.
-        :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
-        """
-        _action = RestixAction(ACTION_TAG, target_alias)
-        # Standard-Optionen setzen
-        _action._set_basic_options(local_config, options)
+        if action_id == ACTION_BACKUP:
+            # ein- und auszuschliessende Daten setzen
+            _action._set_scope_options(local_config.scope_for_target(target_alias))
         return _action
 
     @classmethod

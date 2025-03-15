@@ -205,7 +205,7 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
 
 def _auto_tag(action: RestixAction, task_monitor: TaskMonitor):
     """
-    Tagged Snapshots, falls die Option auto-tag gesetzt wurde.
+    Versieht Snapshots mit Tags, falls die Option auto-tag gesetzt wurde.
     :param action: die Daten des auszuführenden Backups.
     :param task_monitor: der Fortschritt-Handler.
     """

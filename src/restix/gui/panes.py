@@ -38,12 +38,14 @@ Zusammengesetzte Bereiche der restix GUI.
 
 
 import time
+from collections.abc import Callable
 
 from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel, QModelIndex
 from PySide6.QtGui import QMouseEvent, QBrush, QFont
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
-                               QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox)
+                               QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox,
+                               QComboBox)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -120,7 +122,7 @@ class TargetTableView(QTableView):
     """
     View zur Auswahl oder Bearbeitung der Backup-Ziele.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig):
+    def __init__(self, parent: QWidget, local_config: LocalConfig, selection_handler: Callable):
         """
         Konstruktor.
         :param parent: das übergeordnete Widget
@@ -134,6 +136,7 @@ class TargetTableView(QTableView):
         self.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
         self.setModel(self._model)
         self.resizeColumnsToContents()
+        self.pressed.connect(selection_handler)
         self.setStyleSheet(_TARGET_TABLE_STYLE)
 
     def selected_target(self) -> dict | None:
@@ -354,23 +357,25 @@ class TargetSelectionPane(QGroupBox):
     """
     Pane zur Auswahl eines Backup-Ziels.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig, settings: GuiSettings):
+    def __init__(self, parent: QWidget, local_config: LocalConfig, settings: GuiSettings,
+                 target_selected_handler: Callable):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
         :param local_config: lokale restix-Konfiguration
         :param settings: die GUI-Einstellungen des Benutzers
+        :param target_selected_handler: Handler für die Auswahl eines Backup-Ziels
         """
         super().__init__(localized_label(L_TARGETS), parent)
         self.restix_config = local_config
         self.gui_settings = settings
         _layout = QGridLayout(self)
-        self._table_view = TargetTableView(self, local_config)
+        self._table_view = TargetTableView(self, local_config, target_selected_handler)
         _layout.addWidget(self._table_view)
         self.setLayout(_layout)
         self.setStyleSheet(GROUP_BOX_STYLE)
 
-    def selected_target_alias(self) -> dict:
+    def selected_target(self) -> dict:
         """
         :returns: Alias des ausgewählten Backup-Ziels; None, falls nichts ausgewählt wurde
         """
@@ -384,14 +389,15 @@ class ResticActionPane(QWidget):
     """
     Basisklasse für die Panes aller Aktionen, die einen restic-Befehl auslösen.
     """
-    def __init__(self, parent: QWidget, start_button_label_id: str,
-                 local_config: LocalConfig, gui_settings: GuiSettings):
+    def __init__(self, parent: QWidget, start_button_label_id: str, local_config: LocalConfig,
+                 gui_settings: GuiSettings, target_selected_handler: Callable):
         """
         Konstruktor.
         :param parent: die zentrale restix Pane
         :param start_button_label_id: ID für die Beschriftung des Start-Buttons
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
+        :param target_selected_handler: Handler für die Auswahl eines Backup-Ziels
         """
         super().__init__(parent)
         self.restix_config = local_config
@@ -400,7 +406,7 @@ class ResticActionPane(QWidget):
         self.pane_layout.setSpacing(5)
         self.pane_layout.setColumnStretch(1, 1)
         # links oben Backup-Ziel-Auswahl
-        self.target_selection_pane = TargetSelectionPane(self, local_config, gui_settings)
+        self.target_selection_pane = TargetSelectionPane(self, local_config, gui_settings, target_selected_handler)
         self.pane_layout.addWidget(self.target_selection_pane, 0, 0, 2, 1)
         # rechts mittig Buttons
         self.button_pane = ActionButtonPane(self, start_button_label_id,
@@ -414,7 +420,7 @@ class ResticActionPane(QWidget):
         """
         Wird aufgerufen, wenn der 'Start'-Button geklickt wurde.
         """
-        self.selected_target = self.target_selection_pane.selected_target_alias()
+        self.selected_target = self.target_selection_pane.selected_target()
         if self.selected_target is None:
             _rc = QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                           localized_message(I_GUI_NO_TARGET_SELECTED),
@@ -461,6 +467,26 @@ class ResticActionPane(QWidget):
         self.button_pane.action_stopped()
 
 
+def create_combo(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QComboBox:
+    """
+    Erzeugt Label und Combo-Box für eine Option.
+    :param layout: Layout, in dem die Option enthalten sein soll.
+    :param caption_id: Label-ID für die Beschreibung.
+    :param tooltip_id: Label-ID für den Tooltip-Text.
+    :returns: Combo-Box
+    """
+    _row_nr = layout.rowCount()
+    _tooltip = localized_label(tooltip_id)
+    _caption = QLabel(localized_label(caption_id))
+    _caption.setToolTip(_tooltip)
+    _caption.setStyleSheet(_CAPTION_STYLE)
+    layout.addWidget(_caption, _row_nr, 0)
+    _combo_box = QComboBox()
+    _combo_box.setMinimumWidth(240)
+    _combo_box.setToolTip(_tooltip)
+    layout.addWidget(_combo_box, _row_nr, 1)
+    return _combo_box
+
 
 def create_option(layout: QGridLayout, caption_id: str, tooltip_id: str, initial_state:bool) -> QCheckBox:
     """
@@ -475,7 +501,7 @@ def create_option(layout: QGridLayout, caption_id: str, tooltip_id: str, initial
     _tooltip = localized_label(tooltip_id)
     _caption = QLabel(localized_label(caption_id))
     _caption.setToolTip(_tooltip)
-    _caption.setStyleSheet(_CHECKBOX_CAPTION_STYLE)
+    _caption.setStyleSheet(_CAPTION_STYLE)
     layout.addWidget(_caption, _row_nr, 0)
     _check_box = QCheckBox()
     _check_box.setToolTip(_tooltip)
@@ -484,7 +510,7 @@ def create_option(layout: QGridLayout, caption_id: str, tooltip_id: str, initial
     return _check_box
 
 
-_CHECKBOX_CAPTION_STYLE = 'color: black; font-weight: bold'
+_CAPTION_STYLE = 'color: black; font-weight: bold'
 _MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style: solid; border-width: 1px'
 _OK_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
 _CANCEL_BUTTON_STYLE = 'background-color: red; color: white'

@@ -78,16 +78,16 @@ class TestAction(unittest.TestCase):
         """
         _config = TestAction.unittest_configuration()
         # Test keine Excludes und keine Ignores
-        _backup_action = RestixAction.for_backup(TARGET_SRV, _config, None)
+        _backup_action = RestixAction.for_action_id(ACTION_BACKUP, TARGET_SRV, _config, None)
         self.verify_restic_command(EXPECTED_BACKUP_CMD_SRV, _backup_action.to_restic_command())
         # Test nur Ignores
-        _backup_action = RestixAction.for_backup(TARGET_EXTHDD, _config, None)
+        _backup_action = RestixAction.for_action_id(ACTION_BACKUP, TARGET_EXTHDD, _config, None)
         self.verify_restic_command(EXPECTED_BACKUP_CMD_EXTHDD, _backup_action.to_restic_command())
         # Test nur Excludes
-        _backup_action = RestixAction.for_backup(TARGET_USBSTICK, _config, None)
+        _backup_action = RestixAction.for_action_id(ACTION_BACKUP, TARGET_USBSTICK, _config, None)
         self.verify_restic_command(EXPECTED_BACKUP_CMD_USBSTICK, _backup_action.to_restic_command())
         # Test Ignores und Excludes
-        _backup_action = RestixAction.for_backup(TARGET_DIR, _config, None)
+        _backup_action = RestixAction.for_action_id(ACTION_BACKUP, TARGET_DIR, _config, None)
         self.verify_restic_command(EXPECTED_BACKUP_CMD_DIR, _backup_action.to_restic_command())
 
     def test_init_action(self):
@@ -96,7 +96,7 @@ class TestAction(unittest.TestCase):
         """
         _config = TestAction.unittest_configuration()
         # Test keine Excludes und keine Ignores
-        _init_action = RestixAction.for_init(TARGET_DIR, _config, None)
+        _init_action = RestixAction.for_action_id(ACTION_INIT, TARGET_DIR, _config, None)
         self.verify_restic_command(EXPECTED_INIT_CMD_DIR, _init_action.to_restic_command())
 
     def verify_restic_command(self, expected_command: list[str], actual_command: list[str]):

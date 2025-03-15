@@ -165,6 +165,7 @@ L_COMMENT = 'l-comment'
 L_CONFIGURATION = 'l-configuration'
 L_CREDENTIALS = 'l-credentials'
 L_DO_BACKUP = 'l-do-backup'
+L_DO_RESTORE = 'l-do-restore'
 L_DRY_RUN = 'l-dry-run'
 L_EXIT = 'l-exit'
 L_HELP = 'l-help'
@@ -174,12 +175,14 @@ L_OK = 'l-ok'
 L_OPTIONS = 'l-options'
 L_RESTORE = 'l-restore'
 L_SCOPE = 'l-scope'
+L_SNAPSHOT = 'l-snapshot'
 L_TARGETS = 'l-targets'
 
 # GUI Tooltips
 T_OPT_BAK_AUTO_CREATE = 't-opt-bak-auto-create'
 T_OPT_BAK_AUTO_TAG = 't-opt-bak-auto-tag'
 T_OPT_BAK_DRY_RUN = 't-opt-bak-dry-run'
+T_OPT_RST_SNAPSHOT = 't-opt-rst-snapshot'
 
 # GUI Warnungen
 W_GUI_WRITE_GUI_SETTINGS_FAILED = 'w-gui-write-gui-settings-failed'

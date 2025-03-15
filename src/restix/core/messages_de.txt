@@ -149,6 +149,7 @@ l-backup Sicherung
 l-configuration Konfiguration
 l-credentials Zugangsdaten
 l-do-backup Sicherung starten
+l-do-restore Wiederherstellung starten
 l-dry-run Dry run
 l-exit Beenden
 l-help Hilfe
@@ -158,6 +159,7 @@ l-ok OK
 l-options Optionen
 l-restore Wiederherstellung
 l-scope Sicherungs-Umfang
+l-snapshot * Snapshot
 l-targets Backup-Ziele
 
 # GUI Widget Labels
@@ -174,6 +176,7 @@ l-menu-user-manual Benutzerhandbuch
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
 t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
 t-opt-bak-dry-run Backup nur simulieren
+t-opt-rst-snapshot Snapshot auswählen, aus dem die Dateien wiederhergestellt werden sollen
 
 # GUI Warnungen
 w-gui-write-gui-settings-failed Fehler beim Schreiben der GUI-Einstellungen in Datei {0}: {1}.
