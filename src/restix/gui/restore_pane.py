@@ -38,7 +38,7 @@ GUI-Bereich für den Restore.
 import datetime
 
 from PySide6.QtCore import Qt, QThreadPool
-from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox, QRadioButton, QPushButton
 
 from restix.core import *
 from restix.core.action import RestixAction
@@ -47,8 +47,8 @@ from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.restic_interface import determine_snapshots
 from restix.core.task import TaskMonitor
-from restix.gui.panes import (ResticActionPane, create_combo, create_option, create_text,
-                              GROUP_BOX_STYLE)
+from restix.gui.panes import (ResticActionPane, create_combo, create_dir_selector, create_checkbox, create_text,
+                              GROUP_BOX_STYLE, option_label)
 from restix.gui.settings import GuiSettings
 from restix.gui.worker import Worker
 
@@ -69,13 +69,24 @@ class RestoreOptionsPane(QGroupBox):
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__snapshot_combo = create_combo(_layout, L_SNAPSHOT, T_OPT_RST_SNAPSHOT)
-        #self.__restore_path_selector = create_dir_selector(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, False)
+        self.__restore_path_selector = create_dir_selector(_layout, L_RESTORE_PATH, T_OPT_RST_RESTORE_PATH)
+        _layout.addWidget(option_label(L_RESTORE_SCOPE, localized_label(T_OPT_RST_RESTORE_SCOPE)), 3, 0)
+        self.__full_radio = QRadioButton(localized_label(L_FULL))
+        self.__full_radio.setToolTip(T_OPT_RST_RESTORE_SCOPE_FULL)
+        self.__full_radio.setChecked(True)
+        _layout.addWidget(self.__full_radio, 3, 1)
+        self.__some_radio = QRadioButton(localized_label(L_SOME))
+        self.__some_radio.setToolTip(T_OPT_RST_RESTORE_SCOPE_SOME)
+        _layout.addWidget(self.__some_radio, 4, 1)
+        _select_some_button = QPushButton(localized_label(L_SELECT))
+        _select_some_button.clicked.connect(self._scope_button_clicked)
+        _layout.addWidget(_select_some_button, 4, 2)
         self.__host_text = create_text(_layout, L_HOST, T_OPT_RST_HOST)
         _current_year = datetime.datetime.now().year
         self.__year_combo = create_combo(_layout, L_YEAR, T_OPT_RST_YEAR)
         self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year-10, -1)])
         self.__year_combo.setCurrentIndex(0)
-        self.__dry_run_option = create_option(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
+        self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
         self.setLayout(_layout)
 
     def clear_snapshot_combo(self):
@@ -107,6 +118,14 @@ class RestoreOptionsPane(QGroupBox):
         if len(_host) > 0:
             _options[OPTION_HOST] = _host
         return _options
+
+    def _scope_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den Button zur Auswahl einzelner Dateien für die Wiederherstellung geklickt
+        :return:
+        """
+        self.__some_radio.setChecked(True)
+        print('Auswahl-Dialog')
 
 
 class RestorePane(ResticActionPane):
@@ -165,7 +184,7 @@ class RestorePane(ResticActionPane):
                                                            self.restix_config)
             _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
             _combo_data = [f'{_s.time_stamp()} - {_s.snapshot_id()}' for _s in _snapshots]
-            _combo_data.insert(0, 'latest')
+            _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
             self.__options_pane.fill_snapshot_combo(_combo_data)
         except RestixException as _e:
             pass

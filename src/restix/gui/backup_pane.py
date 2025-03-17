@@ -44,7 +44,7 @@ from restix.core import *
 from restix.core.action import RestixAction
 from restix.core.config import LocalConfig
 from restix.core.messages import *
-from restix.gui.panes import ResticActionPane, create_option, GROUP_BOX_STYLE
+from restix.gui.panes import ResticActionPane, create_checkbox, GROUP_BOX_STYLE
 from restix.gui.settings import GuiSettings
 from restix.gui.worker import Worker
 
@@ -64,9 +64,9 @@ class BackupOptionsPane(QGroupBox):
         _layout.setColumnStretch(3, 1)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__auto_create_option = create_option(_layout, L_AUTO_CREATE, T_OPT_BAK_AUTO_CREATE, True)
-        self.__auto_tag_option = create_option(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, True)
-        self.__dry_run_option = create_option(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
+        self.__auto_create_option = create_checkbox(_layout, L_AUTO_CREATE, T_OPT_BAK_AUTO_CREATE, True)
+        self.__auto_tag_option = create_checkbox(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, True)
+        self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
         self.setLayout(_layout)
 
     def selected_options(self) -> dict:

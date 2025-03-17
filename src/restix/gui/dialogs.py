@@ -33,37 +33,32 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Dialog windows for the Issai GUI.
+Dialogfenster für die restix GUI.
 """
 
 import math
-import os.path
-from pathlib import Path
-import time
 
-from PySide6.QtCore import qVersion, QDir, QThreadPool, Qt, QPoint
+from PySide6.QtCore import qVersion, Qt, QPoint
 from PySide6.QtGui import QPainter, QBrush, QColor, QColorConstants, QPen, QRadialGradient, QPixmap
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import (QWidget, QLabel, QComboBox, QProgressBar, QListWidget, QDialog, QFileDialog, QPushButton,
-                               QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QListWidgetItem, QLineEdit,
-                               QDialogButtonBox, QSizePolicy)
+from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
+                               QMessageBox, QGridLayout, QVBoxLayout)
 
 from restix.core import VERSION
 from restix.core.messages import *
-# from restix.gui.workers import Worker
 
 
 class PdfViewerDialog(QDialog):
     """
-    Dialog window to show a PDF file.
+    Zeigt eine PDF-Datei an.
     """
-    def __init__(self, parent, title_id, file_path):
+    def __init__(self, parent: QWidget, title_id: str, file_path: str):
         """
-        Constructor
-        :param QWidget parent: the parent widget
-        :param str title_id: the window title resource ID
-        :param str file_path: the PDF file name including full path
+        Konstruktor.
+        :param parent: das übergeordnete Widget
+        :param title_id: Resource-ID für die Fensterüberschrift
+        :param file_path: Name und Pfad der anzuzeigenden PDF-Datei
         """
         super().__init__(parent)
         self.setWindowTitle(localized_label(title_id))
@@ -83,12 +78,12 @@ class PdfViewerDialog(QDialog):
 
 class AboutDialog(QDialog):
     """
-    About Issai dialog.
+    Zeigt Informationen über restix an.
     """
-    def __init__(self, parent):
+    def __init__(self, parent: QWidget):
         """
-        Constructor
-        :param QWidget parent: the parent widget
+        Konstruktor.
+        :param parent: das übergeordnete Widget
         """
         super().__init__(parent)
         self.setWindowTitle(localized_label(L_DLG_TITLE_ABOUT))

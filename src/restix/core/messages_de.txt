@@ -152,6 +152,7 @@ l-do-backup Sicherung starten
 l-do-restore Wiederherstellung starten
 l-dry-run Dry run
 l-exit Beenden
+l-full vollständig
 l-help Hilfe
 l-host Hostname
 l-location Ort
@@ -159,8 +160,12 @@ l-maintenance Wartung
 l-ok OK
 l-options Optionen
 l-restore Wiederherstellung
+l-restore-path Zielverzeichnis
+l-restore-scope Restore-Umfang
 l-scope Sicherungs-Umfang
+l-select Auswählen
 l-snapshot * Snapshot
+l-some einzelne Datei(en)
 l-targets Backup-Ziele
 l-year Jahr
 
@@ -179,6 +184,10 @@ t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existi
 t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
 t-opt-bak-dry-run Backup nur simulieren
 t-opt-rst-host Bitte ggf. den Hostnamen angeben, falls die Wiederherstellung aus Daten eines anderen Rechners erfolgen soll
+t-opt-rst-restore-path Ggf. Zielverzeichnis für die wiederhergestellten Daten angeben
+t-opt-rst-restore-scope Umfang der Wiederherstellung auswählen
+t-opt-rst-restore-scope-full alle gesicherten Daten wiederherstellen
+t-opt-rst-restore-scope-some ausgewählte Daten wiederherstellen
 t-opt-rst-snapshot Snapshot auswählen, aus dem die Dateien wiederhergestellt werden sollen
 t-opt-rst-year Bitte ggf. das Jahr auswählen, aus dem die Dateien wiederhergestellt werden sollen
 

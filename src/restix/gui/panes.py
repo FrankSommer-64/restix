@@ -45,7 +45,7 @@ from PySide6.QtGui import QMouseEvent, QBrush, QFont
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
                                QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox,
-                               QComboBox, QLineEdit)
+                               QComboBox, QLineEdit, QFileDialog, QRadioButton, QButtonGroup)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -251,6 +251,32 @@ class ImageButtonPane(QWidget):
             # bei normalem Button wird nur Links-Klick akzeptiert
             if event.button() == Qt.MouseButton.LeftButton:
                 self.__signals.clicked.emit()
+
+class DirectorySelector(QPushButton):
+    """
+    Button zur Auswahl eines Verzeichnisses.
+    """
+    def __init__(self, tooltip: str):
+        """
+        Konstruktor.
+        :param tooltip: der lokalisierte Tooltip-Text
+        """
+        super().__init__(localized_label(L_SELECT))
+        self.setToolTip(tooltip)
+        self.__selected_path = None
+        self.clicked.connect(self._clicked)
+
+    def _clicked(self):
+        """
+        Wird aufgerufen, wenn der Button geklickt wurde.
+        """
+        _dir = QFileDialog.getExistingDirectory(self, localized_label(L_SELECT))
+        if len(_dir) > 0:
+            self.__selected_path = _dir
+            self.setText(_dir)
+        else:
+            self.__selected_path = None
+            self.setText(localized_label(L_SELECT))
 
 
 class ActionSelectionPane(QWidget):
@@ -467,6 +493,25 @@ class ResticActionPane(QWidget):
         self.button_pane.action_stopped()
 
 
+def create_checkbox(layout: QGridLayout, caption_id: str, tooltip_id: str, initial_state:bool) -> QCheckBox:
+    """
+    Erzeugt Label und Checkbox für eine Option.
+    :param layout: das Layout, in dem die Option enthalten sein soll.
+    :param caption_id: die Label-ID für die Beschreibung.
+    :param tooltip_id: die Label-ID für den Tooltip-Text.
+    :param initial_state: der initiale Zustand der Checkbox.
+    :returns: checkbox widget
+    """
+    _row_nr = layout.rowCount()
+    _tooltip = localized_label(tooltip_id)
+    layout.addWidget(option_label(caption_id, _tooltip), _row_nr, 0)
+    _check_box = QCheckBox()
+    _check_box.setToolTip(_tooltip)
+    _check_box.setChecked(initial_state)
+    layout.addWidget(_check_box, _row_nr, 1, 1, 2)
+    return _check_box
+
+
 def create_combo(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QComboBox:
     """
     Erzeugt Label und Combo-Box für eine Option.
@@ -477,37 +522,28 @@ def create_combo(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QComb
     """
     _row_nr = layout.rowCount()
     _tooltip = localized_label(tooltip_id)
-    _caption = QLabel(localized_label(caption_id))
-    _caption.setToolTip(_tooltip)
-    _caption.setStyleSheet(_CAPTION_STYLE)
-    layout.addWidget(_caption, _row_nr, 0)
+    layout.addWidget(option_label(caption_id, _tooltip), _row_nr, 0)
     _combo_box = QComboBox()
     _combo_box.setMinimumWidth(240)
     _combo_box.setToolTip(_tooltip)
-    layout.addWidget(_combo_box, _row_nr, 1)
+    layout.addWidget(_combo_box, _row_nr, 1, 1, 2)
     return _combo_box
 
 
-def create_option(layout: QGridLayout, caption_id: str, tooltip_id: str, initial_state:bool) -> QCheckBox:
+def create_dir_selector(layout: QGridLayout, caption_id: str, tooltip_id: str) -> DirectorySelector:
     """
-    Erzeugt Label und Checkbox für eine Option.
-    :param layout: das Layout, in dem die Option enthalten sein soll.
-    :param caption_id: die Label-ID für die Beschreibung.
-    :param tooltip_id: die Label-ID für den Tooltip-Text.
-    :param initial_state: der initiale Zustand der Checkbox.
-    :returns: the checkbox widget
+    Erzeugt Label und Button zur Auswahl eines Verzeichnisses.
+    :param layout: Layout, in dem die Option enthalten sein soll.
+    :param caption_id: Label-ID für die Beschreibung.
+    :param tooltip_id: Label-ID für den Tooltip-Text.
+    :returns: Button zur Auswahl eines Verzeichnisses
     """
     _row_nr = layout.rowCount()
     _tooltip = localized_label(tooltip_id)
-    _caption = QLabel(localized_label(caption_id))
-    _caption.setToolTip(_tooltip)
-    _caption.setStyleSheet(_CAPTION_STYLE)
-    layout.addWidget(_caption, _row_nr, 0)
-    _check_box = QCheckBox()
-    _check_box.setToolTip(_tooltip)
-    _check_box.setChecked(initial_state)
-    layout.addWidget(_check_box, _row_nr, 1)
-    return _check_box
+    layout.addWidget(option_label(caption_id, _tooltip), _row_nr, 0)
+    _dir_selector = DirectorySelector(_tooltip)
+    layout.addWidget(_dir_selector, _row_nr, 1, 1, 2)
+    return _dir_selector
 
 
 def create_text(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QLineEdit:
@@ -520,16 +556,26 @@ def create_text(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QLineE
     """
     _row_nr = layout.rowCount()
     _tooltip = localized_label(tooltip_id)
-    _caption = QLabel(localized_label(caption_id))
-    _caption.setToolTip(_tooltip)
-    _caption.setStyleSheet(_CAPTION_STYLE)
-    layout.addWidget(_caption, _row_nr, 0)
+    layout.addWidget(option_label(caption_id, _tooltip), _row_nr, 0)
     _input_field = QLineEdit()
     _input_field.setStyleSheet(_INPUT_FIELD_STYLE)
     _input_field.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
     _input_field.setToolTip(_tooltip)
-    layout.addWidget(_input_field, _row_nr, 1)
+    layout.addWidget(_input_field, _row_nr, 1, 1, 2)
     return _input_field
+
+
+def option_label(caption_id: str, tooltip_text: str) -> QLabel:
+    """
+    Erzeugt das Label für eine Option.
+    :param caption_id: Label-ID für die Beschreibung.
+    :param tooltip_text: lokalisierter Tooltip-Text.
+    :returns: Label widget
+    """
+    _label = QLabel(localized_label(caption_id))
+    _label.setToolTip(tooltip_text)
+    _label.setStyleSheet(_CAPTION_STYLE)
+    return _label
 
 
 _CANCEL_BUTTON_STYLE = 'background-color: red; color: white'
