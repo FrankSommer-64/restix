@@ -36,6 +36,7 @@
 GUI-Bereich für den Restore.
 """
 import datetime
+import platform
 
 from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox, QRadioButton, QPushButton
@@ -47,6 +48,7 @@ from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.restic_interface import determine_snapshots
 from restix.core.task import TaskMonitor
+from restix.gui.dialogs import SnapshotViewerDialog
 from restix.gui.panes import (ResticActionPane, create_combo, create_dir_selector, create_checkbox, create_text,
                               GROUP_BOX_STYLE, option_label)
 from restix.gui.settings import GuiSettings
@@ -72,16 +74,17 @@ class RestoreOptionsPane(QGroupBox):
         self.__restore_path_selector = create_dir_selector(_layout, L_RESTORE_PATH, T_OPT_RST_RESTORE_PATH)
         _layout.addWidget(option_label(L_RESTORE_SCOPE, localized_label(T_OPT_RST_RESTORE_SCOPE)), 3, 0)
         self.__full_radio = QRadioButton(localized_label(L_FULL))
-        self.__full_radio.setToolTip(T_OPT_RST_RESTORE_SCOPE_FULL)
+        self.__full_radio.setToolTip(localized_label(T_OPT_RST_RESTORE_SCOPE_FULL))
         self.__full_radio.setChecked(True)
         _layout.addWidget(self.__full_radio, 3, 1)
         self.__some_radio = QRadioButton(localized_label(L_SOME))
-        self.__some_radio.setToolTip(T_OPT_RST_RESTORE_SCOPE_SOME)
+        self.__some_radio.setToolTip(localized_label(T_OPT_RST_RESTORE_SCOPE_SOME))
         _layout.addWidget(self.__some_radio, 4, 1)
         _select_some_button = QPushButton(localized_label(L_SELECT))
         _select_some_button.clicked.connect(self._scope_button_clicked)
         _layout.addWidget(_select_some_button, 4, 2)
         self.__host_text = create_text(_layout, L_HOST, T_OPT_RST_HOST)
+        self.__host_text.setText(platform.node())
         _current_year = datetime.datetime.now().year
         self.__year_combo = create_combo(_layout, L_YEAR, T_OPT_RST_YEAR)
         self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year-10, -1)])
@@ -125,7 +128,9 @@ class RestoreOptionsPane(QGroupBox):
         :return:
         """
         self.__some_radio.setChecked(True)
-        print('Auswahl-Dialog')
+        _snapshot_viewer = SnapshotViewerDialog(self, 'latest', [],
+                                                self.__host_text.text(), self.__year_combo.currentText())
+        _rc = _snapshot_viewer.exec_()
 
 
 class RestorePane(ResticActionPane):

@@ -43,10 +43,86 @@ from PySide6.QtGui import QPainter, QBrush, QColor, QColorConstants, QPen, QRadi
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
-                               QMessageBox, QGridLayout, QVBoxLayout)
+                               QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit)
 
 from restix.core import VERSION
 from restix.core.messages import *
+
+
+class SnapshotViewerDialog(QDialog):
+    """
+    Zeigt den Inhalt eines Snapshots an.
+    Bietet die Möglichkeit, nach gesicherten Elementen zu suchen.
+    Ermöglicht die Auswahl einzelner Elemente für die Wiederherstellung.
+    """
+    def __init__(self, parent: QWidget, snapshot_id: str, snapshot_elements: list[str],
+                 hostname: str, year: str):
+        """
+        Konstruktor.
+        :param parent: übergeordnetes Widget
+        :param snapshot_id: ID des restic Snapshots.
+        :param snapshot_elements: alle Dateien und Verzeichnisse im restic Snapshot.
+        :param hostname: Hostname, für den der Snapshot angelegt wurde.
+        :param year: Jahr des restic Snapshots.
+        """
+        super().__init__(parent)
+        self.setWindowTitle(localized_message(L_DLG_TITLE_SNAPSHOT_VIEWER, snapshot_id, hostname, year))
+        _parent_rect = parent.contentsRect()
+        self.setGeometry(_parent_rect.x() + _SNAPSHOT_VIEWER_OFFSET, _parent_rect.y() + _SNAPSHOT_VIEWER_OFFSET,
+                         _SNAPSHOT_VIEWER_WIDTH, _SNAPSHOT_VIEWER_HEIGHT)
+        self.setStyleSheet(_STYLE_WHITE_BG)
+        _layout = QVBoxLayout()
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        _viewer_pane = self._create_viewer_pane()
+        _viewer_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        _layout.addWidget(_viewer_pane)
+        _action_pane = self._create_action_pane()
+        _layout.addWidget(_action_pane)
+        self.setLayout(_layout)
+
+    def _create_viewer_pane(self) -> QGroupBox:
+        """
+        Erzeugt den oberen Bereich mit den Buttons zum Suchen oder Anzeigen des gesamten Snapshot-Inhalts.
+        :return: oberer Bereich des Dialogfensters
+        """
+        _group = QGroupBox(localized_label(L_SELECT_ELEMENTS))
+        _group_layout = QHBoxLayout()
+        _group_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        _show_all_button = QPushButton(localized_label(L_SHOW_ALL_ELEMENTS))
+        _group_layout.addWidget(_show_all_button)
+        _search_button = QPushButton(localized_label(L_SEARCH))
+        _group_layout.addWidget(_search_button)
+        _search_field = QLineEdit()
+        _search_field.setStyleSheet(_STYLE_INPUT_FIELD)
+        _search_field.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        #_search_field.setToolTip(_tooltip)
+        _group_layout.addWidget(_search_field)
+        _group.setLayout(_group_layout)
+        return _group
+
+    def _create_action_pane(self) -> QWidget:
+        """
+        Erzeugt den unteren Bereich mit den Buttons zum Übernehmen der Selektion und zum Abbrechen des Dialogs.
+        :return: unterer Bereich des Dialogfensters
+        """
+        _button_pane = QWidget(self)
+        _button_pane_layout = QHBoxLayout()
+        _button_pane_layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        _apply_button = QPushButton(localized_label(L_ADOPT_SELECTION))
+        _apply_button.clicked.connect(self._adopt_selection)
+        _button_pane_layout.addWidget(_apply_button)
+        _cancel_button = QPushButton(localized_label(L_CANCEL))
+        _cancel_button.clicked.connect(self.close)
+        _button_pane_layout.addWidget(_cancel_button)
+        _button_pane.setLayout(_button_pane_layout)
+        return _button_pane
+
+    def _adopt_selection(self):
+        """
+        Übernimmt die im Viewer ausgewählten Elemente in eine interne Variable und schließt das Dialogfenster.
+        """
+        print('_adopt_selection')
+        self.close()
 
 
 class PdfViewerDialog(QDialog):
@@ -210,6 +286,9 @@ _RESTIX_IMAGE_SPACING = 16
 _PDF_VIEWER_HEIGHT = 720
 _PDF_VIEWER_OFFSET = 10
 _PDF_VIEWER_WIDTH = 640
+_SNAPSHOT_VIEWER_HEIGHT = 720
+_SNAPSHOT_VIEWER_OFFSET = 10
+_SNAPSHOT_VIEWER_WIDTH = 640
 
 _STYLE_INPUT_FIELD = 'background-color: #ffffcc'
 _STYLE_WHITE_BG = 'background-color: white'
