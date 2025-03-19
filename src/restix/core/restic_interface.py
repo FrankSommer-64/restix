@@ -327,6 +327,20 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
     return _snapshots
 
 
+def list_snapshot_elements(action: RestixAction) -> list[str]:
+    """
+    :param action: ls-Aktion
+    :returns: alle Elemente im Snapshot.
+    :raises RestixException: falls das Lesen des Snapshots fehlschlägt
+    """
+    _silent_monitor = TaskMonitor(None, True)
+    _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
+    if _rc != RESTIC_RC_OK:
+        _result = f'{_stderr}{os.linesep}{_stdout}'
+        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
+    return [_line for _line in _stdout.split(os.linesep) if os.path.isabs(_line)]
+
+
 def _tag_snapshot(action: RestixAction, snapshot_id: str, tag: str, task_monitor: TaskMonitor) -> int:
     """
     Markiert einen Snapshot mit dem angegebenen Tag.

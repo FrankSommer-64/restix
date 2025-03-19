@@ -45,7 +45,7 @@ import shlex
 import tempfile
 
 from restix.core import *
-from restix.core import OPTION_AUTO_CREATE
+from restix.core import OPTION_AUTO_CREATE, OPTION_FIND_PATTERN
 from restix.core.config import LocalConfig, config_root_path
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
@@ -157,6 +157,13 @@ class RestixAction:
                 _cmd.extend((OPTION_EXCLUDE_FILE, self.option(OPTION_EXCLUDE_FILE)))
             if OPTION_TAG in self.__options:
                 _cmd.extend((OPTION_TAG, self.option(OPTION_TAG)))
+            return _cmd
+        if self.__action_id == ACTION_FIND:
+            _cmd.extend((OPTION_SNAPSHOT, self.option(OPTION_SNAPSHOT)))
+            _cmd.append(self.option(OPTION_FIND_PATTERN))
+            return _cmd
+        if self.__action_id == ACTION_LS:
+            _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
         if self.__action_id == ACTION_TAG:
             _cmd.append('--add')
@@ -453,8 +460,10 @@ def build_restic_cmd(restix_action, restic_info):
 _STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE}
 _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_AUTO_TAG, OPTION_BATCH, OPTION_DRY_RUN,
                                    OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM, OPTION_YEAR},
+                   ACTION_FIND: {OPTION_HOST, OPTION_FIND_PATTERN, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_SNAPSHOT, OPTION_UNTAGGED},
                    ACTION_INIT: {OPTION_BATCH},
+                   ACTION_LS: {OPTION_HOST, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_RESTORE_PATH, OPTION_SNAPSHOT,
                                     OPTION_YEAR},
                    ACTION_SNAPSHOTS: {OPTION_HOST, OPTION_YEAR},

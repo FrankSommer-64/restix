@@ -59,12 +59,15 @@ class RestoreOptionsPane(QGroupBox):
     """
     Pane für die Restore-Optionen.
     """
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, local_config: LocalConfig):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
+        :param local_config: lokale restix-Konfiguration
         """
         super().__init__(localized_label(L_OPTIONS), parent)
+        self.__local_config = local_config
+        self.__target_alias = None
         self.setStyleSheet(GROUP_BOX_STYLE)
         _layout = QGridLayout()
         _layout.setColumnStretch(3, 1)
@@ -128,7 +131,9 @@ class RestoreOptionsPane(QGroupBox):
         :return:
         """
         self.__some_radio.setChecked(True)
-        _snapshot_viewer = SnapshotViewerDialog(self, 'latest', [],
+        _snapshot_id = 'latest'
+        self.__target_alias = 'localdir'
+        _snapshot_viewer = SnapshotViewerDialog(self, _snapshot_id, self.__target_alias, self.__local_config,
                                                 self.__host_text.text(), self.__year_combo.currentText())
         _rc = _snapshot_viewer.exec_()
 
@@ -147,7 +152,7 @@ class RestorePane(ResticActionPane):
         super().__init__(parent, L_DO_RESTORE, local_config, gui_settings, self._target_selected)
         self.__worker = None
         # option pane
-        self.__options_pane = RestoreOptionsPane(self)
+        self.__options_pane = RestoreOptionsPane(self, local_config)
         self.pane_layout.addWidget(self.__options_pane, 0, 1)
         self.setLayout(self.pane_layout)
 

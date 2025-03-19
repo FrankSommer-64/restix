@@ -45,8 +45,11 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
                                QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit)
 
-from restix.core import VERSION
+from restix.core import *
+from restix.core.action import RestixAction
+from restix.core.config import LocalConfig
 from restix.core.messages import *
+from restix.core.restic_interface import list_snapshot_elements
 
 
 class SnapshotViewerDialog(QDialog):
@@ -55,17 +58,23 @@ class SnapshotViewerDialog(QDialog):
     Bietet die Möglichkeit, nach gesicherten Elementen zu suchen.
     Ermöglicht die Auswahl einzelner Elemente für die Wiederherstellung.
     """
-    def __init__(self, parent: QWidget, snapshot_id: str, snapshot_elements: list[str],
-                 hostname: str, year: str):
+    def __init__(self, parent: QWidget, snapshot_id: str, target_alias: str,
+                 local_config: LocalConfig, hostname: str, year: str):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
         :param snapshot_id: ID des restic Snapshots.
-        :param snapshot_elements: alle Dateien und Verzeichnisse im restic Snapshot.
+        :param target_alias: Alias des Backup-Ziels.
+        :param local_config: lokale restix-Konfiguration.
         :param hostname: Hostname, für den der Snapshot angelegt wurde.
         :param year: Jahr des restic Snapshots.
         """
         super().__init__(parent)
+        self.__snapshot_id = snapshot_id
+        self.__target_alias = target_alias
+        self.__local_config = local_config
+        self.__hostname = hostname
+        self.__year = year
         self.setWindowTitle(localized_message(L_DLG_TITLE_SNAPSHOT_VIEWER, snapshot_id, hostname, year))
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _SNAPSHOT_VIEWER_OFFSET, _parent_rect.y() + _SNAPSHOT_VIEWER_OFFSET,
@@ -89,8 +98,10 @@ class SnapshotViewerDialog(QDialog):
         _group_layout = QHBoxLayout()
         _group_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _show_all_button = QPushButton(localized_label(L_SHOW_ALL_ELEMENTS))
+        _show_all_button.clicked.connect(self._show_full_snapshot)
         _group_layout.addWidget(_show_all_button)
         _search_button = QPushButton(localized_label(L_SEARCH))
+        _search_button.clicked.connect(self._show_full_snapshot)
         _group_layout.addWidget(_search_button)
         _search_field = QLineEdit()
         _search_field.setStyleSheet(_STYLE_INPUT_FIELD)
@@ -116,6 +127,15 @@ class SnapshotViewerDialog(QDialog):
         _button_pane_layout.addWidget(_cancel_button)
         _button_pane.setLayout(_button_pane_layout)
         return _button_pane
+
+    def _show_full_snapshot(self):
+        """
+        Zeigt alle Elemente des Snapshots im Viewer an.
+        """
+        _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id}
+        _action = RestixAction.for_action_id(ACTION_LS, self.__target_alias, self.__local_config, _options)
+        _elements = list_snapshot_elements(_action)
+        print(_elements)
 
     def _adopt_selection(self):
         """
