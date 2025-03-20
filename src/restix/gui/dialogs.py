@@ -37,13 +37,16 @@ Dialogfenster für die restix GUI.
 """
 
 import math
+import os
 
+from PySide6 import QtCore
 from PySide6.QtCore import qVersion, Qt, QPoint
-from PySide6.QtGui import QPainter, QBrush, QColor, QColorConstants, QPen, QRadialGradient, QPixmap
+from PySide6.QtGui import QPainter, QBrush, QColor, QColorConstants, QPen, QRadialGradient, QPixmap, QIcon
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
-                               QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit)
+                               QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit,
+                               QTreeWidget, QTreeWidgetItem, QStyle)
 
 from restix.core import *
 from restix.core.action import RestixAction
@@ -95,19 +98,25 @@ class SnapshotViewerDialog(QDialog):
         :return: oberer Bereich des Dialogfensters
         """
         _group = QGroupBox(localized_label(L_SELECT_ELEMENTS))
-        _group_layout = QHBoxLayout()
+        _group_layout = QVBoxLayout()
         _group_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        _viewer_buttons_layout = QHBoxLayout()
         _show_all_button = QPushButton(localized_label(L_SHOW_ALL_ELEMENTS))
         _show_all_button.clicked.connect(self._show_full_snapshot)
-        _group_layout.addWidget(_show_all_button)
+        _viewer_buttons_layout.addWidget(_show_all_button)
         _search_button = QPushButton(localized_label(L_SEARCH))
         _search_button.clicked.connect(self._show_full_snapshot)
-        _group_layout.addWidget(_search_button)
+        _viewer_buttons_layout.addWidget(_search_button)
         _search_field = QLineEdit()
         _search_field.setStyleSheet(_STYLE_INPUT_FIELD)
         _search_field.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         #_search_field.setToolTip(_tooltip)
-        _group_layout.addWidget(_search_field)
+        _viewer_buttons_layout.addWidget(_search_field)
+        _group_layout.addLayout(_viewer_buttons_layout)
+        self.__tree_viewer = QTreeWidget(self)
+        self.__tree_viewer.setColumnCount(1)
+        self.__tree_viewer.setHeaderLabels([localized_label(L_ELEMENT)])
+        _group_layout.addWidget(self.__tree_viewer)
         _group.setLayout(_group_layout)
         return _group
 
@@ -134,8 +143,10 @@ class SnapshotViewerDialog(QDialog):
         """
         _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id}
         _action = RestixAction.for_action_id(ACTION_LS, self.__target_alias, self.__local_config, _options)
-        _elements = list_snapshot_elements(_action)
-        print(_elements)
+        _snapshot = list_snapshot_elements(_action)
+        _element_tree = _snapshot.element_tree()
+        _tree_items = self._tree_items_for(_element_tree)
+        self.__tree_viewer.addTopLevelItems(_tree_items)
 
     def _adopt_selection(self):
         """
@@ -143,6 +154,28 @@ class SnapshotViewerDialog(QDialog):
         """
         print('_adopt_selection')
         self.close()
+
+    def _tree_items_for(self, node) -> list[QTreeWidgetItem]:
+        """
+        Erzeugt rekursiv für alle Nachkommen des übergebenen Snapshot-Elements ein Widget für den Tree-Viewer.
+        :param node: Name des Elements ohne Pfad
+        :return: Widgets für alle untergeordneten Elemente
+        """
+        _children = []
+        for _k, _v in node.items():
+            _child = QTreeWidgetItem()
+            _child.setText(0, _k)
+            _child.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
+            if _v.get('type') == 'dir':
+                _icon_pixmap = QStyle.StandardPixmap.SP_DirIcon
+                _child.setIcon(0, self.style().standardIcon(_icon_pixmap))
+            else:
+                _icon_pixmap = QStyle.StandardPixmap.SP_FileIcon
+                _child.setIcon(0, self.style().standardIcon(_icon_pixmap))
+            _children.append(_child)
+            if len(_v.get('children')) > 0:
+                _child.addChildren(self._tree_items_for(_v.get('children')))
+        return _children
 
 
 class PdfViewerDialog(QDialog):

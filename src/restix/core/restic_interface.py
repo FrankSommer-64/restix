@@ -35,74 +35,17 @@
 """
 Functions to export entities from TCMS to files.
 """
-import re
 from datetime import datetime
+import json
+import re
 import subprocess
 
 from restix.core import *
 from restix.core.action import RestixAction
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
+from restix.core.snapshot import Snapshot, SnapshotElement
 from restix.core.task import TaskMonitor, TaskResult
-
-
-class Snapshot:
-    """
-    Daten eines restic Snapshots.
-    """
-    def __init__(self, snapshot_id: str, time_stamp: datetime, tag: str):
-        """
-        Konstruktor.
-        :param snapshot_id: Snapshot-ID
-        :param time_stamp: Zeitstempel des Snapshots
-        :param tag: erster Tag des Snapshots; Leerstring, falls kein Tag
-        """
-        self.__snapshot_id = snapshot_id
-        self.__time_stamp = time_stamp
-        self.__tags = [] if tag is None or len(tag) == 0 else [tag]
-
-    def add_tag(self, tag: str):
-        """
-        :param tag: hinzuzufügender Tag
-        """
-        self.__tags.append(tag)
-
-    def snapshot_id(self) -> str:
-        """
-        :returns: Snapshot-ID
-        """
-        return self.__snapshot_id
-
-    def time_stamp(self) -> datetime:
-        """
-        :returns: Zeitstempel des Snapshots
-        """
-        return self.__time_stamp
-
-    def tags(self) -> list[str]:
-        """
-        :returns: Tags des Snapshots
-        """
-        return self.__tags
-
-    def month(self) -> int:
-        """
-        :returns: Monat des Snapshot-Zeitstempels
-        """
-        return self.__time_stamp.month
-
-    def is_tagged_with(self, tag: str) -> bool:
-        """
-        :param tag: zu prüfender Tag
-        :returns: True, falls der Snapshot den angegebenen Tag besitzt
-        """
-        return tag in self.__tags
-
-    def __str__(self) -> str:
-        """
-        :returns: Inhalt des Snapshots in lesbarer Form.
-        """
-        return f'ID:{self.__snapshot_id}/TIME:{self.__time_stamp}/TAGS:{','.join(self.__tags)}'
 
 
 def run_backup(action: RestixAction, task_monitor: TaskMonitor):
@@ -327,10 +270,10 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
     return _snapshots
 
 
-def list_snapshot_elements(action: RestixAction) -> list[str]:
+def list_snapshot_elements(action: RestixAction) -> Snapshot:
     """
     :param action: ls-Aktion
-    :returns: alle Elemente im Snapshot.
+    :returns: Snapshot mit allen Elementen.
     :raises RestixException: falls das Lesen des Snapshots fehlschlägt
     """
     _silent_monitor = TaskMonitor(None, True)
@@ -338,7 +281,26 @@ def list_snapshot_elements(action: RestixAction) -> list[str]:
     if _rc != RESTIC_RC_OK:
         _result = f'{_stderr}{os.linesep}{_stdout}'
         raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
-    return [_line for _line in _stdout.split(os.linesep) if os.path.isabs(_line)]
+    _elements = []
+    _snapshot = None
+    for _line in _stdout.split(os.linesep):
+        _line = _line.strip()
+        if len(_line) == 0:
+            continue
+        _element = json.loads(_line)
+        if _element.get('struct_type') == 'snapshot':
+            _snapshot = Snapshot(_element['short_id'], datetime.fromisoformat(_element['time']), '')
+            _tags = _element.get('tags')
+            if _tags is not None:
+                for _tag in _tags:
+                    _snapshot.add_tag(_tag)
+        elif _element.get('struct_type') == 'node':
+            if _snapshot is None:
+                raise RestixException(E_RESTIC_CMD_FAILED, 'keine Snapshot-Beschreibung')
+            _snapshot.add_element(SnapshotElement(_element['path'], _element['type']))
+        else:
+            continue
+    return _snapshot
 
 
 def _tag_snapshot(action: RestixAction, snapshot_id: str, tag: str, task_monitor: TaskMonitor) -> int:

@@ -38,7 +38,7 @@ GUI-Bereich für den Restore.
 import datetime
 import platform
 
-from PySide6.QtCore import Qt, QThreadPool
+from PySide6.QtCore import Qt, QThreadPool, QAbstractItemModel
 from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox, QRadioButton, QPushButton
 
 from restix.core import *

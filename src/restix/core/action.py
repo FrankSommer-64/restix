@@ -163,6 +163,7 @@ class RestixAction:
             _cmd.append(self.option(OPTION_FIND_PATTERN))
             return _cmd
         if self.__action_id == ACTION_LS:
+            _cmd.append(OPTION_JSON)
             _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
         if self.__action_id == ACTION_TAG:
