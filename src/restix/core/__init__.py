@@ -117,6 +117,21 @@ ACTION_RESTORE = 'restore'
 ACTION_SNAPSHOTS = 'snapshots'
 ACTION_TAG = 'tag'
 
+# interne Attribute
+ATTR_CHILDREN = 'children'
+ATTR_NAME = 'name'
+ATTR_TYPE = 'type'
+ELEMENT_TYPE_DIR = 'dir'
+ELEMENT_TYPE_FILE = 'file'
+JSON_ATTR_PATH = 'path'
+JSON_ATTR_SHORT_ID = 'short_id'
+JSON_ATTR_STRUCT_TYPE = 'struct_type'
+JSON_ATTR_TAGS = 'tags'
+JSON_ATTR_TIME = 'time'
+JSON_ATTR_TYPE = 'type'
+JSON_STRUCT_TYPE_NODE = 'node'
+JSON_STRUCT_TYPE_SNAPSHOT = 'snapshot'
+
 # Optionen
 OPTION_AUTO_CREATE = '--auto-create'
 OPTION_AUTO_TAG = '--auto-tag'

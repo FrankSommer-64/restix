@@ -37,11 +37,10 @@ Dialogfenster für die restix GUI.
 """
 
 import math
-import os
 
 from PySide6 import QtCore
 from PySide6.QtCore import qVersion, Qt, QPoint
-from PySide6.QtGui import QPainter, QBrush, QColor, QColorConstants, QPen, QRadialGradient, QPixmap, QIcon
+from PySide6.QtGui import QPainter, QBrush, QColor, QColorConstants, QPen, QRadialGradient, QPixmap
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
@@ -78,6 +77,7 @@ class SnapshotViewerDialog(QDialog):
         self.__local_config = local_config
         self.__hostname = hostname
         self.__year = year
+        self.__selected_elements = []
         self.setWindowTitle(localized_message(L_DLG_TITLE_SNAPSHOT_VIEWER, snapshot_id, hostname, year))
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _SNAPSHOT_VIEWER_OFFSET, _parent_rect.y() + _SNAPSHOT_VIEWER_OFFSET,
@@ -116,9 +116,34 @@ class SnapshotViewerDialog(QDialog):
         self.__tree_viewer = QTreeWidget(self)
         self.__tree_viewer.setColumnCount(1)
         self.__tree_viewer.setHeaderLabels([localized_label(L_ELEMENT)])
+        self.__tree_viewer.itemChanged.connect(SnapshotViewerDialog._item_changed)
         _group_layout.addWidget(self.__tree_viewer)
         _group.setLayout(_group_layout)
         return _group
+
+    @classmethod
+    def _item_changed(cls, item: QTreeWidgetItem, column: int):
+        """
+        Wird aufgerufen, wenn der Benutzer die Checkbox eines Elements ändert. Setzt automatisch alle untergeordneten
+        Elemente auf den gleichen Check-Status.
+        :param item: das Element-Widget
+        :param column: immer Spalte 0
+        """
+        _check_status = item.checkState(column)
+        SnapshotViewerDialog._propagate_check_status(item, column, _check_status)
+
+    @classmethod
+    def _propagate_check_status(cls, item: QTreeWidgetItem, column: int, check_status: QtCore.Qt.CheckState):
+        """
+        Setzt den Checkbox-Status aller Nachkommen eines Snapshot-Elements auf den angegebenen Wert.
+        :param item: Element-Widget
+        :param column: immer Spalte 0
+        :param check_status: Checkbox-Status
+        """
+        for _i in range(0, item.childCount()):
+            _child = item.child(_i)
+            _child.setCheckState(column, check_status)
+            SnapshotViewerDialog._propagate_check_status(_child, column, check_status)
 
     def _create_action_pane(self) -> QWidget:
         """
@@ -145,36 +170,58 @@ class SnapshotViewerDialog(QDialog):
         _action = RestixAction.for_action_id(ACTION_LS, self.__target_alias, self.__local_config, _options)
         _snapshot = list_snapshot_elements(_action)
         _element_tree = _snapshot.element_tree()
-        _tree_items = self._tree_items_for(_element_tree)
+        _tree_items = self._tree_items_for(_element_tree, os.sep)
+        self.__tree_viewer.clear()
         self.__tree_viewer.addTopLevelItems(_tree_items)
 
     def _adopt_selection(self):
         """
         Übernimmt die im Viewer ausgewählten Elemente in eine interne Variable und schließt das Dialogfenster.
         """
-        print('_adopt_selection')
+        self.__selected_elements = [_item.data(0, Qt.ItemDataRole.UserRole) for _item in self._checked_items()]
         self.close()
 
-    def _tree_items_for(self, node) -> list[QTreeWidgetItem]:
+    def _checked_items(self, parent: QTreeWidgetItem = None) -> list[QTreeWidgetItem]:
+        """
+        :returns: Widgets aller Elemente, die vom Benutzer ausgewählt wurden
+        """
+        _items = []
+        if parent is None:
+            for _i in range(0, self.__tree_viewer.topLevelItemCount()):
+                _item = self.__tree_viewer.topLevelItem(_i)
+                if _item.checkState(0) == QtCore.Qt.CheckState.Checked:
+                    _items.append(_item)
+                _items.extend(self._checked_items(_item))
+        else:
+            for _i in range(0, parent.childCount()):
+                _item = parent.child(_i)
+                if _item.checkState(0) == QtCore.Qt.CheckState.Checked:
+                    _items.append(_item)
+                _items.extend(self._checked_items(_item))
+        return _items
+
+    def _tree_items_for(self, node: dict, parent_path: str) -> list[QTreeWidgetItem]:
         """
         Erzeugt rekursiv für alle Nachkommen des übergebenen Snapshot-Elements ein Widget für den Tree-Viewer.
-        :param node: Name des Elements ohne Pfad
+        :param node: Daten des Elements
         :return: Widgets für alle untergeordneten Elemente
         """
         _children = []
         for _k, _v in node.items():
+            _child_path = os.path.join(parent_path, _k)
             _child = QTreeWidgetItem()
             _child.setText(0, _k)
             _child.setCheckState(0, QtCore.Qt.CheckState.Unchecked)
-            if _v.get('type') == 'dir':
+            _child.setData(0, Qt.ItemDataRole.UserRole, _child_path)
+            if _v.get(ATTR_TYPE) == ELEMENT_TYPE_DIR:
                 _icon_pixmap = QStyle.StandardPixmap.SP_DirIcon
                 _child.setIcon(0, self.style().standardIcon(_icon_pixmap))
             else:
                 _icon_pixmap = QStyle.StandardPixmap.SP_FileIcon
                 _child.setIcon(0, self.style().standardIcon(_icon_pixmap))
             _children.append(_child)
-            if len(_v.get('children')) > 0:
-                _child.addChildren(self._tree_items_for(_v.get('children')))
+            if len(_v.get(ATTR_CHILDREN)) > 0:
+                _child.addChildren(self._tree_items_for(_v.get(ATTR_CHILDREN), _child_path))
         return _children
 
 

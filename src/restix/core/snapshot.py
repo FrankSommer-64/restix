@@ -88,7 +88,7 @@ class SnapshotElement:
         """
         :returns: True, falls das Element ein Verzeichnis ist
         """
-        return self.__type == 'd'
+        return self.__type == ELEMENT_TYPE_DIR
 
     def __str__(self) -> str:
         """
@@ -171,10 +171,10 @@ class Snapshot:
                 if _node.get(_p) is None:
                     if _i == _no_of_path_parts - 1:
                         # letzter Teil des Element-Pfads
-                        _node[_p] = {'name': _p, 'type': _element.type(), 'children': {}}
+                        _node[_p] = {ATTR_NAME: _p, ATTR_TYPE: _element.type(), ATTR_CHILDREN: {}}
                     else:
-                        _node[_p] = {'name': _p, 'type': 'd', 'children': {}}
-                _node = _node.get(_p).get('children')
+                        _node[_p] = {ATTR_NAME: _p, ATTR_TYPE: ELEMENT_TYPE_DIR, ATTR_CHILDREN: {}}
+                _node = _node.get(_p).get(ATTR_CHILDREN)
         return _nodes
 
     def __str__(self) -> str:

@@ -288,16 +288,16 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
         if len(_line) == 0:
             continue
         _element = json.loads(_line)
-        if _element.get('struct_type') == 'snapshot':
-            _snapshot = Snapshot(_element['short_id'], datetime.fromisoformat(_element['time']), '')
-            _tags = _element.get('tags')
+        if _element.get(JSON_ATTR_STRUCT_TYPE) == JSON_STRUCT_TYPE_SNAPSHOT:
+            _snapshot = Snapshot(_element[JSON_ATTR_SHORT_ID], datetime.fromisoformat(_element[JSON_ATTR_TIME]), '')
+            _tags = _element.get(JSON_ATTR_TAGS)
             if _tags is not None:
                 for _tag in _tags:
                     _snapshot.add_tag(_tag)
-        elif _element.get('struct_type') == 'node':
+        elif _element.get(JSON_ATTR_STRUCT_TYPE) == JSON_STRUCT_TYPE_NODE:
             if _snapshot is None:
                 raise RestixException(E_RESTIC_CMD_FAILED, 'keine Snapshot-Beschreibung')
-            _snapshot.add_element(SnapshotElement(_element['path'], _element['type']))
+            _snapshot.add_element(SnapshotElement(_element[JSON_ATTR_PATH], _element[JSON_ATTR_TYPE]))
         else:
             continue
     return _snapshot
