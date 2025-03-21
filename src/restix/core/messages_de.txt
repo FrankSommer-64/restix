@@ -135,8 +135,14 @@ i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-create-config-root x
 i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-data-backed-up Daten in Repository {0} gesichert.
+i-gui-data-restored Daten aus Repository {0} wiederhergestellt.
+i-gui-no-snapshot-selected Kein Snapshot ausgewählt
 i-gui-no-target-selected Kein Backup-Ziel ausgewählt
 i-gui-repo-created restic-Repository {0} erfolgreich angelegt.
+i-gui-restoring-all-data Stelle alle Daten aus Repository {0} wieder her.
+i-gui-restoring-all-data-to-path Kopiere alle Daten aus Repository {0} in Verzeichnis {1}.
+i-gui-restoring-some-data Stelle ausgewählte Daten aus Repository {0} wieder her.
+i-gui-restoring-some-data-to-path Kopiere alle ausgewählte aus Repository {0} in Verzeichnis {1}.
 i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels

@@ -35,7 +35,7 @@
 """
 Dialogfenster für die restix GUI.
 """
-
+import datetime
 import math
 
 from PySide6 import QtCore
@@ -51,7 +51,8 @@ from restix.core import *
 from restix.core.action import RestixAction
 from restix.core.config import LocalConfig
 from restix.core.messages import *
-from restix.core.restic_interface import list_snapshot_elements
+from restix.core.restic_interface import find_snapshot_elements, list_snapshot_elements
+from restix.core.snapshot import Snapshot
 
 
 class SnapshotViewerDialog(QDialog):
@@ -92,6 +93,12 @@ class SnapshotViewerDialog(QDialog):
         _layout.addWidget(_action_pane)
         self.setLayout(_layout)
 
+    def selected_elements(self) -> list[str]:
+        """
+        :returns: Name und Pfad aller vom Benutzer ausgewählten Elemente
+        """
+        return self.__selected_elements
+
     def _create_viewer_pane(self) -> QGroupBox:
         """
         Erzeugt den oberen Bereich mit den Buttons zum Suchen oder Anzeigen des gesamten Snapshot-Inhalts.
@@ -105,13 +112,13 @@ class SnapshotViewerDialog(QDialog):
         _show_all_button.clicked.connect(self._show_full_snapshot)
         _viewer_buttons_layout.addWidget(_show_all_button)
         _search_button = QPushButton(localized_label(L_SEARCH))
-        _search_button.clicked.connect(self._show_full_snapshot)
+        _search_button.clicked.connect(self._show_filtered_snapshot)
         _viewer_buttons_layout.addWidget(_search_button)
-        _search_field = QLineEdit()
-        _search_field.setStyleSheet(_STYLE_INPUT_FIELD)
-        _search_field.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.__search_field = QLineEdit()
+        self.__search_field.setStyleSheet(_STYLE_INPUT_FIELD)
+        self.__search_field.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         #_search_field.setToolTip(_tooltip)
-        _viewer_buttons_layout.addWidget(_search_field)
+        _viewer_buttons_layout.addWidget(self.__search_field)
         _group_layout.addLayout(_viewer_buttons_layout)
         self.__tree_viewer = QTreeWidget(self)
         self.__tree_viewer.setColumnCount(1)
@@ -157,7 +164,7 @@ class SnapshotViewerDialog(QDialog):
         _apply_button.clicked.connect(self._adopt_selection)
         _button_pane_layout.addWidget(_apply_button)
         _cancel_button = QPushButton(localized_label(L_CANCEL))
-        _cancel_button.clicked.connect(self.close)
+        _cancel_button.clicked.connect(self.reject)
         _button_pane_layout.addWidget(_cancel_button)
         _button_pane.setLayout(_button_pane_layout)
         return _button_pane
@@ -166,9 +173,25 @@ class SnapshotViewerDialog(QDialog):
         """
         Zeigt alle Elemente des Snapshots im Viewer an.
         """
-        _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id}
+        _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id,
+                    OPTION_JSON: True}
         _action = RestixAction.for_action_id(ACTION_LS, self.__target_alias, self.__local_config, _options)
         _snapshot = list_snapshot_elements(_action)
+        _element_tree = _snapshot.element_tree()
+        _tree_items = self._tree_items_for(_element_tree, os.sep)
+        self.__tree_viewer.clear()
+        self.__tree_viewer.addTopLevelItems(_tree_items)
+
+    def _show_filtered_snapshot(self):
+        """
+        Zeigt die Elemente des Snapshots, die auf den eingegebenen Filter passen im Viewer an.
+        """
+        _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id,
+                    OPTION_JSON: True, OPTION_FIND_PATTERN: self.__search_field.text()}
+        _action = RestixAction.for_action_id(ACTION_FIND, self.__target_alias, self.__local_config, _options)
+        _elements = find_snapshot_elements(_action)
+        _snapshot = Snapshot(self.__snapshot_id, datetime.datetime.now(), '')
+        _snapshot.add_elements(_elements)
         _element_tree = _snapshot.element_tree()
         _tree_items = self._tree_items_for(_element_tree, os.sep)
         self.__tree_viewer.clear()
@@ -179,20 +202,23 @@ class SnapshotViewerDialog(QDialog):
         Übernimmt die im Viewer ausgewählten Elemente in eine interne Variable und schließt das Dialogfenster.
         """
         self.__selected_elements = [_item.data(0, Qt.ItemDataRole.UserRole) for _item in self._checked_items()]
-        self.close()
+        self.accept()
 
     def _checked_items(self, parent: QTreeWidgetItem = None) -> list[QTreeWidgetItem]:
         """
-        :returns: Widgets aller Elemente, die vom Benutzer ausgewählt wurden
+        :param parent: Widget des Parent-Elements; None für oberste Ebene
+        :returns: Widgets aller ausgewählten Elemente unterhalb des angegebenen Parents
         """
         _items = []
         if parent is None:
+            # gesamten Tree prüfen
             for _i in range(0, self.__tree_viewer.topLevelItemCount()):
                 _item = self.__tree_viewer.topLevelItem(_i)
                 if _item.checkState(0) == QtCore.Qt.CheckState.Checked:
                     _items.append(_item)
                 _items.extend(self._checked_items(_item))
         else:
+            # Elemente unterhalb des Parent-Widgets prüfen
             for _i in range(0, parent.childCount()):
                 _item = parent.child(_i)
                 if _item.checkState(0) == QtCore.Qt.CheckState.Checked:

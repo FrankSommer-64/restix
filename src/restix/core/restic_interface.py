@@ -116,8 +116,25 @@ def run_restore(action: RestixAction, task_monitor: TaskMonitor):
     :param task_monitor: der Fortschritt-Handler.
     :raises RestixException: falls die Ausführung fehlschlägt
     """
-    task_monitor.log_text('Noch nicht implementiert', SEVERITY_ERROR)
-    return TaskResult(TASK_FAILED, '')
+    _repo = action.option(OPTION_REPO)
+    _snapshot_id = action.option(OPTION_SNAPSHOT)
+    _restore_path = action.option(OPTION_RESTORE_PATH)
+    _included_files = action.option(OPTION_INCLUDE_FILE)
+    if _restore_path is None and _included_files is None:
+        _msg = localized_message(I_GUI_RESTORING_ALL_DATA, _repo)
+    elif _restore_path is None:
+        _msg = localized_message(I_GUI_RESTORING_SOME_DATA, _repo)
+    elif _included_files is None:
+        _msg = localized_message(I_GUI_RESTORING_ALL_DATA_TO_PATH, _repo, _restore_path)
+    else:
+        _msg = localized_message(I_GUI_RESTORING_SOME_DATA_TO_PATH, _repo, _restore_path)
+    task_monitor.log_text(_msg)
+    try:
+        execute_restic_command(action.to_restic_command(), task_monitor)
+        return TaskResult(TASK_SUCCEEDED, localized_message(I_GUI_DATA_RESTORED, _repo))
+    except Exception as _e:
+        task_monitor.log(E_BACKGROUND_TASK_FAILED, str(_e))
+        return TaskResult(TASK_FAILED, str(_e))
 
 
 def run_snapshots(action: RestixAction, task_monitor: TaskMonitor):
@@ -268,6 +285,26 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
             _last_snapshot = Snapshot(_id, datetime.fromisoformat(_time), _tag)
             _snapshots.append(_last_snapshot)
     return _snapshots
+
+
+def find_snapshot_elements(action: RestixAction) -> list[SnapshotElement]:
+    """
+    :param action: find-Aktion
+    :returns: gefundene Elemente im Snapshot.
+    :raises RestixException: falls das Lesen des Snapshots fehlschlägt
+    """
+    _silent_monitor = TaskMonitor(None, True)
+    _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
+    if _rc != RESTIC_RC_OK:
+        _result = f'{_stderr}{os.linesep}{_stdout}'
+        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
+    _elements = []
+    _result = json.loads(_stdout)
+    for _match in _result:
+        _match_elements = _match.get(JSON_ATTR_MATCHES)
+        for _match_element in _match_elements:
+            _elements.append(SnapshotElement(_match_element[JSON_ATTR_PATH], _match_element[JSON_ATTR_TYPE]))
+    return _elements
 
 
 def list_snapshot_elements(action: RestixAction) -> Snapshot:

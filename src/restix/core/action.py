@@ -151,6 +151,8 @@ class RestixAction:
         _cmd = ['restic', self.__action_id, OPTION_REPO, self.option(OPTION_REPO), OPTION_PASSWORD_FILE, self.option(OPTION_PASSWORD_FILE)]
         if self.option(OPTION_DRY_RUN):
             _cmd.append(OPTION_DRY_RUN)
+        if self.option(OPTION_JSON):
+            _cmd.append(OPTION_JSON)
         if self.__action_id == ACTION_BACKUP:
             _cmd.extend((OPTION_FILES_FROM, self.option(OPTION_FILES_FROM)))
             if OPTION_EXCLUDE_FILE in self.__options:
@@ -158,12 +160,18 @@ class RestixAction:
             if OPTION_TAG in self.__options:
                 _cmd.extend((OPTION_TAG, self.option(OPTION_TAG)))
             return _cmd
+        if self.__action_id == ACTION_RESTORE:
+            if OPTION_RESTORE_PATH in self.__options:
+                _cmd.extend([OPTION_TARGET, self.option(OPTION_RESTORE_PATH)])
+            if OPTION_INCLUDE_FILE in self.__options:
+                _cmd.extend((OPTION_INCLUDE_FILE, self.option(OPTION_INCLUDE_FILE)))
+            _cmd.append(self.option(OPTION_SNAPSHOT))
+            return _cmd
         if self.__action_id == ACTION_FIND:
             _cmd.extend((OPTION_SNAPSHOT, self.option(OPTION_SNAPSHOT)))
             _cmd.append(self.option(OPTION_FIND_PATTERN))
             return _cmd
         if self.__action_id == ACTION_LS:
-            _cmd.append(OPTION_JSON)
             _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
         if self.__action_id == ACTION_TAG:
@@ -461,12 +469,12 @@ def build_restic_cmd(restix_action, restic_info):
 _STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE}
 _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_AUTO_TAG, OPTION_BATCH, OPTION_DRY_RUN,
                                    OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM, OPTION_YEAR},
-                   ACTION_FIND: {OPTION_HOST, OPTION_FIND_PATTERN, OPTION_SNAPSHOT, OPTION_YEAR},
+                   ACTION_FIND: {OPTION_HOST, OPTION_FIND_PATTERN, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_SNAPSHOT, OPTION_UNTAGGED},
                    ACTION_INIT: {OPTION_BATCH},
-                   ACTION_LS: {OPTION_HOST, OPTION_SNAPSHOT, OPTION_YEAR},
-                   ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_RESTORE_PATH, OPTION_SNAPSHOT,
-                                    OPTION_YEAR},
+                   ACTION_LS: {OPTION_HOST, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
+                   ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_INCLUDE_FILE,
+                                    OPTION_RESTORE_PATH, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_SNAPSHOTS: {OPTION_HOST, OPTION_YEAR},
                    ACTION_TAG: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_SNAPSHOT, OPTION_TAG},
                    ACTION_HELP: {OPTION_HELP}}

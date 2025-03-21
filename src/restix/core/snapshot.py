@@ -35,16 +35,11 @@
 """
 Modelliert Snapshots von restic Repositories.
 """
+
 from datetime import datetime
-import json
-import re
-import subprocess
 
 from restix.core import *
-from restix.core.action import RestixAction
 from restix.core.messages import *
-from restix.core.restix_exception import RestixException
-from restix.core.task import TaskMonitor, TaskResult
 
 
 class SnapshotElement:
@@ -127,6 +122,15 @@ class Snapshot:
             self.__elements = [element]
         else:
             self.__elements.append(element)
+
+    def add_elements(self, elements: list[SnapshotElement]):
+        """
+        :param elements: hinzuzufügende Elemente
+        """
+        if self.__elements is None:
+            self.__elements = elements
+        else:
+            self.__elements.extend(elements)
 
     def snapshot_id(self) -> str:
         """

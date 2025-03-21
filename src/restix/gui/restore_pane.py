@@ -37,9 +37,10 @@ GUI-Bereich für den Restore.
 """
 import datetime
 import platform
+import tempfile
 
-from PySide6.QtCore import Qt, QThreadPool, QAbstractItemModel
-from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox, QRadioButton, QPushButton
+from PySide6.QtCore import Qt, QThreadPool
+from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox, QRadioButton, QPushButton, QDialog
 
 from restix.core import *
 from restix.core.action import RestixAction
@@ -68,6 +69,7 @@ class RestoreOptionsPane(QGroupBox):
         super().__init__(localized_label(L_OPTIONS), parent)
         self.__local_config = local_config
         self.__target_alias = None
+        self.__selected_elements = None
         self.setStyleSheet(GROUP_BOX_STYLE)
         _layout = QGridLayout()
         _layout.setColumnStretch(3, 1)
@@ -125,17 +127,57 @@ class RestoreOptionsPane(QGroupBox):
             _options[OPTION_HOST] = _host
         return _options
 
+    def selected_elements(self) -> list[str]:
+        """
+        :return: ausgewählte Elemente
+        """
+        return self.__selected_elements
+
+    def selected_restore_path(self) -> str:
+        """
+        :return: ausgewählter Pfad für die Wiederherstellung
+        """
+        return self.__restore_path_selector.text()
+
+    def target_selected(self, target: dict, local_config: LocalConfig):
+        """
+        Wird aufgerufen, wenn der Benutzer ein Backup-Ziel auswählt.
+        Befüllt die Combo-Box mit den Snapshots des ausgewählten Backup-Ziels.
+        """
+        if target is None:
+            return
+        try:
+            self.clear_snapshot_combo()
+            self.__target_alias = target[CFG_PAR_ALIAS]
+            _snapshots_action = RestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS], local_config)
+            _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
+            _combo_data = [f'{_s.time_stamp()} - {_s.snapshot_id()}' for _s in _snapshots]
+            _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
+            self.fill_snapshot_combo(_combo_data)
+        except RestixException as _e:
+            QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR),
+                                 localized_message(E_RESTIC_CMD_FAILED, str(_e)), QMessageBox.StandardButton.Ok)
+
     def _scope_button_clicked(self):
         """
         Wird aufgerufen, wenn der Benutzer den Button zur Auswahl einzelner Dateien für die Wiederherstellung geklickt
         :return:
         """
+        if self.__target_alias is None:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_message(I_GUI_NO_TARGET_SELECTED), QMessageBox.StandardButton.Ok)
+            return
+        _snapshot_id = self.__snapshot_combo.currentData()
+        if _snapshot_id is None or len(_snapshot_id) == 0:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_message(I_GUI_NO_SNAPSHOT_SELECTED), QMessageBox.StandardButton.Ok)
+            return
         self.__some_radio.setChecked(True)
-        _snapshot_id = 'latest'
-        self.__target_alias = 'localdir'
         _snapshot_viewer = SnapshotViewerDialog(self, _snapshot_id, self.__target_alias, self.__local_config,
                                                 self.__host_text.text(), self.__year_combo.currentText())
-        _rc = _snapshot_viewer.exec_()
+        if _snapshot_viewer.exec_() != QDialog.DialogCode.Accepted:
+            return
+        self.__selected_elements = _snapshot_viewer.selected_elements()
 
 
 class RestorePane(ResticActionPane):
@@ -165,6 +207,16 @@ class RestorePane(ResticActionPane):
             _options = self.__options_pane.selected_options()
             _restore_action = RestixAction.for_action_id(ACTION_RESTORE, self.selected_target[CFG_PAR_ALIAS],
                                                          self.restix_config, _options)
+            _restore_action.set_option(OPTION_SNAPSHOT, _options.get(OPTION_SNAPSHOT))
+            _restore_path = self.__options_pane.selected_restore_path()
+            if _restore_path is not None and os.path.isdir(_restore_path):
+                _restore_action.set_option(OPTION_RESTORE_PATH, _restore_path)
+            _selected_elements = self.__options_pane.selected_elements()
+            if _selected_elements is not None and len(_selected_elements) > 0:
+                _f = tempfile.NamedTemporaryFile('wt', delete=False)
+                for _element in _selected_elements:
+                    _f.write(f'{_element}{os.linesep}')
+                _restore_action.set_option(OPTION_INCLUDE_FILE, _f.name)
             self.__worker = Worker.for_action(_restore_action)
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
         except RestixException as _e:
@@ -186,15 +238,4 @@ class RestorePane(ResticActionPane):
         Befüllt die Combo-Box mit den Snapshots des ausgewählten Backup-Ziels.
         """
         _selected_target = self.target_selection_pane.selected_target()
-        if _selected_target is None:
-            return
-        try:
-            self.__options_pane.clear_snapshot_combo()
-            _snapshots_action = RestixAction.for_action_id(ACTION_SNAPSHOTS, _selected_target[CFG_PAR_ALIAS],
-                                                           self.restix_config)
-            _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
-            _combo_data = [f'{_s.time_stamp()} - {_s.snapshot_id()}' for _s in _snapshots]
-            _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
-            self.__options_pane.fill_snapshot_combo(_combo_data)
-        except RestixException as _e:
-            pass
+        self.__options_pane.target_selected(_selected_target, self.restix_config)
