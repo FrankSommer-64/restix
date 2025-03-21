@@ -254,36 +254,15 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
         task_monitor.log_text(_stderr, SEVERITY_ERROR)
         raise RestixException(E_RESTIC_CMD_FAILED, action.action_id())
     _snapshots = []
-    _stdout_lines = _stdout.split(os.linesep)
-    _snapshot_expected = False
-    _last_snapshot = None
-    _id_index = -1
-    _time_index = -1
-    _host_index = -1
-    _tags_index = -1
-    _size_index = -1
-    for _line in _stdout_lines:
-        if _SNAPSHOTS_HEADER_PATTERN.match(_line):
-            _id_index = _line.find(_SNAPSHOT_COLUMN_ID)
-            _time_index = _line.find(_SNAPSHOT_COLUMN_TIME)
-            _host_index = _line.find(_SNAPSHOT_COLUMN_HOST)
-            _tags_index = _line.find(_SNAPSHOT_COLUMN_TAGS)
-            _size_index = _line.find(_SNAPSHOT_COLUMN_SIZE)
-            continue
-        if _line.startswith(_SNAPSHOT_SEP_LINE_CHAR):
-            if _snapshot_expected:
-                break
-            _snapshot_expected = True
-            continue
-        if _line.startswith(_SNAPSHOT_CONTINUATION_LINE_CHAR) and _snapshot_expected:
-            _last_snapshot.add_tag(_line[_tags_index:_size_index].strip())
-            continue
-        if _snapshot_expected and _id_index >= 0:
-            _id = _line[_id_index:_time_index].strip()
-            _time = _line[_time_index:_host_index].strip()
-            _tag = _line[_tags_index:_size_index].strip()
-            _last_snapshot = Snapshot(_id, datetime.fromisoformat(_time), _tag)
-            _snapshots.append(_last_snapshot)
+    _result = json.loads(_stdout)
+    for _element in _result:
+        _snapshot_id = _element.get(JSON_ATTR_SHORT_ID)
+        _time = _element.get(JSON_ATTR_TIME)
+        _snapshot = Snapshot(_snapshot_id, datetime.fromisoformat(_time), '')
+        _tags = _element.get(JSON_ATTR_TAGS)
+        for _tag in _tags:
+            _snapshot.add_tag(_tag)
+        _snapshots.append(_snapshot)
     return _snapshots
 
 

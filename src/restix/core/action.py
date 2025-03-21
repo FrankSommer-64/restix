@@ -180,7 +180,7 @@ class RestixAction:
             _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
         if self.__action_id == ACTION_SNAPSHOTS:
-            _cmd.append(OPTION_COMPACT)
+            _cmd.append(OPTION_JSON)
             return _cmd
         if self.__action_id == ACTION_INIT:
             return _cmd
@@ -475,6 +475,6 @@ _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_AUTO_TAG, OPTION_B
                    ACTION_LS: {OPTION_HOST, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_INCLUDE_FILE,
                                     OPTION_RESTORE_PATH, OPTION_SNAPSHOT, OPTION_YEAR},
-                   ACTION_SNAPSHOTS: {OPTION_HOST, OPTION_YEAR},
+                   ACTION_SNAPSHOTS: {OPTION_HOST, OPTION_JSON, OPTION_YEAR},
                    ACTION_TAG: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_SNAPSHOT, OPTION_TAG},
                    ACTION_HELP: {OPTION_HELP}}

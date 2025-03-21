@@ -151,7 +151,7 @@ class RestoreOptionsPane(QGroupBox):
             self.__target_alias = target[CFG_PAR_ALIAS]
             _snapshots_action = RestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS], local_config)
             _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
-            _combo_data = [f'{_s.time_stamp()} - {_s.snapshot_id()}' for _s in _snapshots]
+            _combo_data = [_s.combo_label() for _s in _snapshots]
             _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
             self.fill_snapshot_combo(_combo_data)
         except RestixException as _e:

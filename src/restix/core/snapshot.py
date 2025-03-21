@@ -150,6 +150,14 @@ class Snapshot:
         """
         return self.__tags
 
+    def combo_label(self) -> str:
+        """
+        :returns: Daten des Snapshots zur Anzeige in einer Combo-Box
+        """
+        _tags = '' if len(self.__tags) == 0 else f' [{",".join(self.__tags)}]'
+        _time = self.__time_stamp.strftime('%Y-%m-%d %H:%M:%S')
+        return f'{self.__snapshot_id} - {_time}{_tags}'
+
     def month(self) -> int:
         """
         :returns: Monat des Snapshot-Zeitstempels
