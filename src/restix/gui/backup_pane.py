@@ -38,7 +38,7 @@ GUI-Bereich für den Backup.
 
 
 from PySide6.QtCore import Qt, QThreadPool
-from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QSizePolicy
 
 from restix.core import *
 from restix.core.action import RestixAction
@@ -89,12 +89,15 @@ class BackupPane(ResticActionPane):
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__(parent, L_DO_BACKUP, local_config, gui_settings)
+        super().__init__(parent, [L_DO_BACKUP], [self.start_button_clicked],
+                         local_config, gui_settings, None)
         self.__worker = None
         # option pane
         self.__options_pane = BackupOptionsPane(self)
         self.pane_layout.addWidget(self.__options_pane, 0, 1)
         self.setLayout(self.pane_layout)
+        self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        self.setStyleSheet(_STANDARD_PANE_STYLE)
 
     def start_button_clicked(self):
         """
@@ -115,3 +118,5 @@ class BackupPane(ResticActionPane):
         super().cancel_button_clicked()
         if self.__worker is not None:
             self.__worker.abort()
+
+_STANDARD_PANE_STYLE = 'background-color: #eeeeee'

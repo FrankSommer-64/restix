@@ -45,7 +45,7 @@ from PySide6.QtGui import QMouseEvent, QBrush, QFont
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
                                QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox,
-                               QComboBox, QLineEdit, QFileDialog, QRadioButton, QButtonGroup)
+                               QComboBox, QLineEdit, QFileDialog)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -136,7 +136,8 @@ class TargetTableView(QTableView):
         self.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
         self.setModel(self._model)
         self.resizeColumnsToContents()
-        self.pressed.connect(selection_handler)
+        if selection_handler is not None:
+            self.pressed.connect(selection_handler)
         self.setStyleSheet(_TARGET_TABLE_STYLE)
 
     def selected_target(self) -> dict | None:
@@ -344,38 +345,47 @@ class ActionButtonPane(QWidget):
     """
     Pane zur Ausgabe von Nachrichten.
     """
-    def __init__(self, parent: QWidget, ok_button_label_id: str, ok_handler, cancel_handler):
+    def __init__(self, parent: QWidget, start_button_label_ids: list[str],
+                 start_handlers: list[Callable], cancel_handler: Callable):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
+        :param start_button_label_ids: Beschriftung des/der Start-Buttons
+        :param start_handlers: Handler, wenn einer der Start-Buttons geklickt wird
+        :param cancel_handler: Handler, wenn der Abbrechen-Button geklickt wird
         """
         super().__init__(parent)
         _layout = QGridLayout(self)
-        self.__ok_button = QPushButton(localized_label(ok_button_label_id))
-        self.__ok_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-        self.__ok_button.setStyleSheet(_OK_BUTTON_STYLE)
-        self.__ok_button.clicked.connect(ok_handler)
-        _layout.addWidget(self.__ok_button, 0, 0)
+        self.__start_buttons = []
+        for _i, _label_id in enumerate(start_button_label_ids):
+            _button = QPushButton(localized_label(start_button_label_ids[_i]))
+            _button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+            _button.setStyleSheet(_OK_BUTTON_STYLE)
+            _button.clicked.connect(start_handlers[_i])
+            self.__start_buttons.append(_button)
+            _layout.addWidget(_button, 0, _i)
         self.__cancel_button = QPushButton(localized_label(L_CANCEL))
         self.__cancel_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         self.__cancel_button.setStyleSheet(_CANCEL_BUTTON_STYLE)
         self.__cancel_button.setEnabled(False)
         self.__cancel_button.clicked.connect(cancel_handler)
-        _layout.addWidget(self.__cancel_button, 0, 1)
+        _layout.addWidget(self.__cancel_button, 0, len(start_button_label_ids))
         self.setLayout(_layout)
 
     def action_started(self):
         """
         Deaktiviert den OK-Button, aktiviert den Cancel-Button.
         """
-        self.__ok_button.setEnabled(False)
+        for _button in self.__start_buttons:
+            _button.setEnabled(False)
         self.__cancel_button.setEnabled(True)
 
     def action_stopped(self):
         """
         Aktiviert den OK-Button, deaktiviert den Cancel-Button.
         """
-        self.__ok_button.setEnabled(True)
+        for _button in self.__start_buttons:
+            _button.setEnabled(True)
         self.__cancel_button.setEnabled(False)
 
 
@@ -415,12 +425,13 @@ class ResticActionPane(QWidget):
     """
     Basisklasse für die Panes aller Aktionen, die einen restic-Befehl auslösen.
     """
-    def __init__(self, parent: QWidget, start_button_label_id: str, local_config: LocalConfig,
-                 gui_settings: GuiSettings, target_selected_handler: Callable):
+    def __init__(self, parent: QWidget, start_button_label_ids: list[str], start_handlers: list[Callable],
+                 local_config: LocalConfig, gui_settings: GuiSettings, target_selected_handler: Callable):
         """
         Konstruktor.
         :param parent: die zentrale restix Pane
-        :param start_button_label_id: ID für die Beschriftung des Start-Buttons
+        :param start_button_label_ids: Beschriftungen der Start-Buttons
+        :param start_handlers: Handler, wenn einer der Start-Buttons geklickt wird
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         :param target_selected_handler: Handler für die Auswahl eines Backup-Ziels
@@ -435,12 +446,12 @@ class ResticActionPane(QWidget):
         self.target_selection_pane = TargetSelectionPane(self, local_config, gui_settings, target_selected_handler)
         self.pane_layout.addWidget(self.target_selection_pane, 0, 0, 2, 1)
         # rechts mittig Buttons
-        self.button_pane = ActionButtonPane(self, start_button_label_id,
-                                            self.start_button_clicked, self.cancel_button_clicked)
+        self.button_pane = ActionButtonPane(self, start_button_label_ids, start_handlers, self.cancel_button_clicked)
         self.pane_layout.addWidget(self.button_pane, 1, 1)
         # unten Ausgabetexte
         self.message_pane = MessagePane(self)
         self.pane_layout.addWidget(self.message_pane, 2, 0, 1, -1)
+        self.setLayout(self.pane_layout)
 
     def start_button_clicked(self):
         """

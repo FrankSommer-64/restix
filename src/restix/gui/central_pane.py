@@ -118,11 +118,10 @@ class CentralPane(QWidget):
         Zeigt die übergebene Pane als Work-Pane an.
         :param pane: die neue Work-Pane
         """
-        pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
-        pane.setStyleSheet(_STANDARD_PANE_STYLE)
-        self._work_pane.setStyleSheet(_STANDARD_PANE_STYLE)
+        self._work_pane.hide()
+        pane.show()
         self._layout.replaceWidget(self._work_pane, pane)
-        self._layout.update()
+        self.update()
         self._work_pane = pane
 
     def _show_manual(self):

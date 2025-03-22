@@ -156,6 +156,7 @@ l-backup Sicherung
 l-configuration Konfiguration
 l-credentials Zugangsdaten
 l-do-backup Sicherung starten
+l-do-backup Sicherung starten
 l-do-restore Wiederherstellung starten
 l-dry-run Dry run
 l-element Element
