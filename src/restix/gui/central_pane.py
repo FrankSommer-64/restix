@@ -45,6 +45,7 @@ from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
 from restix.gui.backup_pane import BackupPane
+from restix.gui.maintenance_pane import MaintenancePane
 from restix.gui.panes import ActionSelectionPane
 from restix.gui.dialogs import AboutDialog, PdfViewerDialog
 from restix.gui.restore_pane import RestorePane
@@ -97,7 +98,10 @@ class CentralPane(QWidget):
         self._activate_pane(RestorePane(self, self._local_config, self._gui_settings))
 
     def _maintenance_selected(self):
-        print('_maintenance_selected')
+        """
+        Zeigt die GUI-Bereiche für die Repository-Wartung an.
+        """
+        self._activate_pane(MaintenancePane(self, self._local_config, self._gui_settings))
 
     def _config_selected(self):
         print('_config_selected')

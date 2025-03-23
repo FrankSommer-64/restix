@@ -453,18 +453,20 @@ class ResticActionPane(QWidget):
         self.pane_layout.addWidget(self.message_pane, 2, 0, 1, -1)
         self.setLayout(self.pane_layout)
 
-    def start_button_clicked(self):
+    def start_button_clicked(self) -> dict | None:
         """
-        Wird aufgerufen, wenn der 'Start'-Button geklickt wurde.
+        Wird aufgerufen, wenn einer der 'Start'-Buttons geklickt wurde.
+        :returns: Daten des ausgewählten Backup-Ziels
         """
         self.selected_target = self.target_selection_pane.selected_target()
         if self.selected_target is None:
             _rc = QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                           localized_message(I_GUI_NO_TARGET_SELECTED),
                                           QMessageBox.StandardButton.Ok)
-            return
+            return None
         self.message_pane.clear()
         self.button_pane.action_started()
+        return self.selected_target
 
     def cancel_button_clicked(self):
         """

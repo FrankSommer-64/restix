@@ -56,9 +56,9 @@ from restix.gui.settings import GuiSettings
 from restix.gui.worker import Worker
 
 
-class RestoreOptionsPane(QGroupBox):
+class MaintenanceOptionsPane(QGroupBox):
     """
-    Pane für die Restore-Optionen.
+    Pane für die Wartungs-Optionen.
     """
     def __init__(self, parent: QWidget, local_config: LocalConfig):
         """
@@ -69,32 +69,21 @@ class RestoreOptionsPane(QGroupBox):
         super().__init__(localized_label(L_OPTIONS), parent)
         self.__local_config = local_config
         self.__target_alias = None
-        self.__selected_elements = None
+        self.__tag_name = None
         self.setStyleSheet(GROUP_BOX_STYLE)
         _layout = QGridLayout()
         _layout.setColumnStretch(3, 1)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__snapshot_combo = create_combo(_layout, L_SNAPSHOT, T_OPT_RST_SNAPSHOT)
-        self.__restore_path_selector = create_dir_selector(_layout, L_RESTORE_PATH, T_OPT_RST_RESTORE_PATH)
-        _layout.addWidget(option_label(L_RESTORE_SCOPE, localized_label(T_OPT_RST_RESTORE_SCOPE)), 3, 0)
-        self.__full_radio = QRadioButton(localized_label(L_FULL))
-        self.__full_radio.setToolTip(localized_label(T_OPT_RST_RESTORE_SCOPE_FULL))
-        self.__full_radio.setChecked(True)
-        _layout.addWidget(self.__full_radio, 3, 1)
-        self.__some_radio = QRadioButton(localized_label(L_SOME))
-        self.__some_radio.setToolTip(localized_label(T_OPT_RST_RESTORE_SCOPE_SOME))
-        _layout.addWidget(self.__some_radio, 4, 1)
-        _select_some_button = QPushButton(localized_label(L_SELECT))
-        _select_some_button.clicked.connect(self._scope_button_clicked)
-        _layout.addWidget(_select_some_button, 4, 2)
-        self.__host_text = create_text(_layout, L_HOST, T_OPT_RST_HOST)
+        self.__snapshot_combo = create_combo(_layout, L_SNAPSHOT, T_OPT_MNT_SNAPSHOT)
+        self.__tag_text = create_text(_layout, L_TAG, T_OPT_MNT_TAG)
+        self.__host_text = create_text(_layout, L_HOST, T_OPT_MNT_HOST)
         self.__host_text.setText(platform.node())
         _current_year = datetime.datetime.now().year
-        self.__year_combo = create_combo(_layout, L_YEAR, T_OPT_RST_YEAR)
+        self.__year_combo = create_combo(_layout, L_YEAR, T_OPT_MNT_YEAR)
         self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year-10, -1)])
         self.__year_combo.setCurrentIndex(0)
-        self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
+        self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_MNT_DRY_RUN, False)
         self.setLayout(_layout)
 
     def clear_snapshot_combo(self):
@@ -115,29 +104,20 @@ class RestoreOptionsPane(QGroupBox):
 
     def selected_options(self) -> dict:
         """
-        :return: Status der unterstützten Restore-Optionen (snapshot, restore-path, host, jahr und dry-run)
+        :return: Status der unterstützten Wartungs-Optionen (snapshot, tag, host, jahr und dry-run)
         """
         _snapshot = self.__snapshot_combo.currentData()
         if _snapshot is None or len(_snapshot) == 0:
             raise RestixException(E_GUI_NO_SNAPSHOT_SELECTED)
         _options = {OPTION_SNAPSHOT: _snapshot, OPTION_YEAR: self.__year_combo.currentText(),
                     OPTION_DRY_RUN: self.__dry_run_option.isChecked()}
+        _tag = self.__tag_text.text()
+        if len(_tag) > 0:
+            _options[OPTION_TAG] = _tag
         _host = self.__host_text.text()
         if len(_host) > 0:
             _options[OPTION_HOST] = _host
         return _options
-
-    def selected_elements(self) -> list[str]:
-        """
-        :return: ausgewählte Elemente
-        """
-        return self.__selected_elements
-
-    def selected_restore_path(self) -> str:
-        """
-        :return: ausgewählter Pfad für die Wiederherstellung
-        """
-        return self.__restore_path_selector.text()
 
     def target_selected(self, target: dict, local_config: LocalConfig):
         """
@@ -158,27 +138,6 @@ class RestoreOptionsPane(QGroupBox):
             QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR),
                                  localized_message(E_RESTIC_CMD_FAILED, str(_e)), QMessageBox.StandardButton.Ok)
 
-    def _scope_button_clicked(self):
-        """
-        Wird aufgerufen, wenn der Benutzer den Button zur Auswahl einzelner Dateien für die Wiederherstellung geklickt
-        :return:
-        """
-        if self.__target_alias is None:
-            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
-                                    localized_message(I_GUI_NO_TARGET_SELECTED), QMessageBox.StandardButton.Ok)
-            return
-        _snapshot_id = self.__snapshot_combo.currentData()
-        if _snapshot_id is None or len(_snapshot_id) == 0:
-            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
-                                    localized_message(I_GUI_NO_SNAPSHOT_SELECTED), QMessageBox.StandardButton.Ok)
-            return
-        self.__some_radio.setChecked(True)
-        _snapshot_viewer = SnapshotViewerDialog(self, _snapshot_id, self.__target_alias, self.__local_config,
-                                                self.__host_text.text(), self.__year_combo.currentText())
-        if _snapshot_viewer.exec_() != QDialog.DialogCode.Accepted:
-            return
-        self.__selected_elements = _snapshot_viewer.selected_elements()
-
 
 class MaintenancePane(ResticActionPane):
     """
@@ -191,21 +150,24 @@ class MaintenancePane(ResticActionPane):
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__(parent, L_DO_RESTORE, local_config, gui_settings, self._target_selected)
+        super().__init__(parent, [L_DO_CLEAN_REPO, L_DO_FORGET_SNAPSHOT, L_DO_TAG_SNAPSHOT],
+                         [self.clean_repo_button_clicked, self.forget_snapshot_button_clicked,
+                          self.tag_snapshot_button_clicked],
+                         local_config, gui_settings, self._target_selected)
         self.__worker = None
         # option pane
-        self.__options_pane = RestoreOptionsPane(self, local_config)
+        self.__options_pane = MaintenanceOptionsPane(self, local_config)
         self.pane_layout.addWidget(self.__options_pane, 0, 1)
         self.setLayout(self.pane_layout)
 
-    def start_button_clicked(self):
+    def clean_repo_button_clicked(self):
         """
-        Wird aufgerufen, wenn der 'Start Restore'-Button geklickt wurde.
+        Wird aufgerufen, wenn der 'Repository aufräumen'-Button geklickt wurde.
         """
         super().start_button_clicked()
         try:
             _options = self.__options_pane.selected_options()
-            _restore_action = RestixAction.for_action_id(ACTION_RESTORE, self.selected_target[CFG_PAR_ALIAS],
+            _restore_action = RestixAction.for_action_id(ACTION_FORGET, self.selected_target[CFG_PAR_ALIAS],
                                                          self.restix_config, _options)
             _restore_action.set_option(OPTION_SNAPSHOT, _options.get(OPTION_SNAPSHOT))
             _restore_path = self.__options_pane.selected_restore_path()
@@ -218,6 +180,33 @@ class MaintenancePane(ResticActionPane):
                     _f.write(f'{_element}{os.linesep}')
                 _restore_action.set_option(OPTION_INCLUDE_FILE, _f.name)
             self.__worker = Worker.for_action(_restore_action)
+            self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
+        except RestixException as _e:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
+            return
+        QThreadPool.globalInstance().start(self.__worker)
+
+    def forget_snapshot_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der 'Snapshot löschen'-Button geklickt wurde.
+        """
+        super().start_button_clicked()
+
+    def tag_snapshot_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der 'Snapshot taggen'-Button geklickt wurde.
+        """
+        _target = super().start_button_clicked()
+        if _target is None:
+            return
+        try:
+            _options = self.__options_pane.selected_options()
+            _tag_action = RestixAction.for_action_id(ACTION_TAG, _target[CFG_PAR_ALIAS], self.restix_config, _options)
+            if _options.get(OPTION_TAG) is None:
+                QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                        localized_message(I_GUI_NO_TAG_DEFINED), QMessageBox.StandardButton.Ok)
+                return
+            self.__worker = Worker.for_action(_tag_action)
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
         except RestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)

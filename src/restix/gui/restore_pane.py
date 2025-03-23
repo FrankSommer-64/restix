@@ -75,7 +75,7 @@ class RestoreOptionsPane(QGroupBox):
         _layout.setColumnStretch(3, 1)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__snapshot_combo = create_combo(_layout, L_SNAPSHOT, T_OPT_RST_SNAPSHOT)
+        self.__snapshot_combo = create_combo(_layout, L_MANDATORY_SNAPSHOT, T_OPT_RST_SNAPSHOT)
         self.__restore_path_selector = create_dir_selector(_layout, L_RESTORE_PATH, T_OPT_RST_RESTORE_PATH)
         _layout.addWidget(option_label(L_RESTORE_SCOPE, localized_label(T_OPT_RST_RESTORE_SCOPE)), 3, 0)
         self.__full_radio = QRadioButton(localized_label(L_FULL))
@@ -94,7 +94,7 @@ class RestoreOptionsPane(QGroupBox):
         self.__year_combo = create_combo(_layout, L_YEAR, T_OPT_RST_YEAR)
         self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year-10, -1)])
         self.__year_combo.setCurrentIndex(0)
-        self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
+        self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_RST_DRY_RUN, False)
         self.setLayout(_layout)
 
     def clear_snapshot_combo(self):

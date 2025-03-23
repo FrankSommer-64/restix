@@ -28,8 +28,8 @@ e-restix-target-scope-missing Für restic-Repository-Alias {0} wurde kein Umfang
 e-restix-target-scope-not-defined Der für restic-Repository {1} angegebene Umfang {1} ist in der Konfigurationsdatei nicht definiert.
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 i-dry-run-tagging-first-snapshot Würde ersten Snapshot mit Tag {0} versehen.
-i-dry-run-tagging-snapshot Würde Snapshot {0} mit Tag {1} versehen.
-i-tagged-snapshot Snapshot {0} wurde mit {1} getagged.
+i-dry-run-tagging-snapshot Würde Snapshot {0} in Repository {1} mit Tag {2} markieren.
+i-tagged-snapshot Snapshot {0} wurde mit Tag {1} markiert.
 w-tag-snapshot-failed Fehler beim Taggen von Snapshot {0} mit {1}.
 
 # Konfiguration
@@ -137,12 +137,14 @@ i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-data-backed-up Daten in Repository {0} gesichert.
 i-gui-data-restored Daten aus Repository {0} wiederhergestellt.
 i-gui-no-snapshot-selected Kein Snapshot ausgewählt
+i-gui-no-tag-defined Kein Tag-Name eingegeben
 i-gui-no-target-selected Kein Backup-Ziel ausgewählt
 i-gui-repo-created restic-Repository {0} erfolgreich angelegt.
 i-gui-restoring-all-data Stelle alle Daten aus Repository {0} wieder her.
 i-gui-restoring-all-data-to-path Kopiere alle Daten aus Repository {0} in Verzeichnis {1}.
 i-gui-restoring-some-data Stelle ausgewählte Daten aus Repository {0} wieder her.
 i-gui-restoring-some-data-to-path Kopiere alle ausgewählte aus Repository {0} in Verzeichnis {1}.
+i-gui-snapshot-tagged Snapshot {0} in Repository {1} wurde mit Tag {2} markiert.
 i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels
@@ -156,8 +158,10 @@ l-backup Sicherung
 l-configuration Konfiguration
 l-credentials Zugangsdaten
 l-do-backup Sicherung starten
-l-do-backup Sicherung starten
+l-do-clean-repo Repository aufräumen
+l-do-forget-snapshot Snapshot löschen
 l-do-restore Wiederherstellung starten
+l-do-tag-snapshot Snapshot taggen
 l-dry-run Dry run
 l-element Element
 l-exit Beenden
@@ -166,6 +170,7 @@ l-help Hilfe
 l-host Hostname
 l-location Ort
 l-maintenance Wartung
+l-mandatory-snapshot * Snapshot
 l-ok OK
 l-options Optionen
 l-restore Wiederherstellung
@@ -176,8 +181,9 @@ l-search Suchen
 l-select Auswählen
 l-select-elements Elemente auswählen
 l-show-all-elements Alle Elemente anzeigen
-l-snapshot * Snapshot
+l-snapshot Snapshot
 l-some einzelne Datei(en)
+l-tag Tag
 l-targets Backup-Ziele
 l-year Jahr
 
@@ -196,6 +202,12 @@ l-menu-user-manual Benutzerhandbuch
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
 t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
 t-opt-bak-dry-run Backup nur simulieren
+t-opt-mnt-dry-run Wartungs-Aktion nur simulieren
+t-opt-mnt-host Bitte ggf. den Hostnamen für das Repository auswählen
+t-opt-mnt-snapshot Snapshot auswählen, der getaggt oder gelöscht werden soll
+t-opt-mnt-tag Name für den Tag des ausgewählten Snapshots eingeben
+t-opt-mnt-year Bitte ggf. das Jahr für das Repository auswählen
+t-opt-rst-dry-run Wiederherstellung nur simulieren
 t-opt-rst-host Bitte ggf. den Hostnamen angeben, falls die Wiederherstellung aus Daten eines anderen Rechners erfolgen soll
 t-opt-rst-restore-path Ggf. Zielverzeichnis für die wiederhergestellten Daten angeben
 t-opt-rst-restore-scope Umfang der Wiederherstellung auswählen
