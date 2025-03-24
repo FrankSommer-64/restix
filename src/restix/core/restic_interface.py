@@ -144,18 +144,22 @@ def run_snapshots(action: RestixAction, task_monitor: TaskMonitor):
     :param task_monitor: der Fortschritt-Handler.
     :raises RestixException: falls die Ausführung fehlschlägt
     """
-    return TaskResult(TASK_FAILED, 'Noch nicht implementiert')
+    try:
+        execute_restic_command(action.to_restic_command(), task_monitor)
+        return TaskResult(TASK_SUCCEEDED, '')
+    except Exception as _e:
+        task_monitor.log(E_BACKGROUND_TASK_FAILED, str(_e))
+        return TaskResult(TASK_FAILED, str(_e))
 
 
 def run_tag(action: RestixAction, task_monitor: TaskMonitor):
     """
-    Tagged einen Snapshot in einem Repository.
+    Markiert einen Snapshot in einem Repository mit einem Tag.
     :param action: die Daten des auszuführenden Tags.
     :param task_monitor: der Fortschritt-Handler.
     :raises RestixException: falls die Ausführung fehlschlägt
     """
     try:
-        print(action.to_restic_command())
         _repo = action.option(OPTION_REPO)
         _snapshot_id = action.option(OPTION_SNAPSHOT)
         _tag = action.option(OPTION_TAG)
@@ -256,6 +260,7 @@ def _auto_tag(action: RestixAction, task_monitor: TaskMonitor):
 
 def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list[Snapshot]:
     """
+    Ermittelt alle Snapshots in einem Repository für die GUI.
     :param action: Snapshot-Aktion
     :param task_monitor: der Fortschritt-Handler.
     :returns: alle Snapshots im Repository.

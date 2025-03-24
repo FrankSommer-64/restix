@@ -402,7 +402,7 @@ class TargetSelectionPane(QGroupBox):
         :param settings: die GUI-Einstellungen des Benutzers
         :param target_selected_handler: Handler für die Auswahl eines Backup-Ziels
         """
-        super().__init__(localized_label(L_TARGETS), parent)
+        super().__init__(localized_label(L_TARGET), parent)
         self.restix_config = local_config
         self.gui_settings = settings
         _layout = QGridLayout(self)
@@ -585,7 +585,8 @@ def option_label(caption_id: str, tooltip_text: str) -> QLabel:
     :param tooltip_text: lokalisierter Tooltip-Text.
     :returns: Label widget
     """
-    _label = QLabel(localized_label(caption_id))
+    _caption = '' if len(caption_id) == 0 else localized_label(caption_id)
+    _label = QLabel(_caption)
     _label.setToolTip(tooltip_text)
     _label.setStyleSheet(_CAPTION_STYLE)
     return _label

@@ -148,6 +148,7 @@ i-gui-snapshot-tagged Snapshot {0} in Repository {1} wurde mit Tag {2} markiert.
 i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels
+l-action Aktion
 l-adopt-selection Ausgewählte Elemente übernehmen
 l-alias Aliasname
 l-auto-create Repository automatisch anlegen
@@ -157,11 +158,13 @@ l-comment Beschreibung
 l-backup Sicherung
 l-configuration Konfiguration
 l-credentials Zugangsdaten
+l-do-auto-tag-snapshots Snapshots automatisch markieren
 l-do-backup Sicherung starten
 l-do-clean-repo Repository aufräumen
 l-do-forget-snapshot Snapshot löschen
 l-do-restore Wiederherstellung starten
-l-do-tag-snapshot Snapshot taggen
+l-do-tag-snapshot Snapshot mit Tag markieren
+l-do-untag-snapshot Snapshot-Tag entfernen
 l-dry-run Dry run
 l-element Element
 l-exit Beenden
@@ -171,8 +174,11 @@ l-host Hostname
 l-location Ort
 l-maintenance Wartung
 l-mandatory-snapshot * Snapshot
+l-mandatory-object * Objekt
 l-ok OK
 l-options Optionen
+l-repository Repository
+l-restic-object Restic Objekt
 l-restore Wiederherstellung
 l-restore-path Zielverzeichnis
 l-restore-scope Restore-Umfang
@@ -184,7 +190,11 @@ l-show-all-elements Alle Elemente anzeigen
 l-snapshot Snapshot
 l-some einzelne Datei(en)
 l-tag Tag
-l-targets Backup-Ziele
+l-tag-interval Tag Intervall
+l-tag-quarterly quartalsweise
+l-tag-monthly monatlich
+l-tag-weekly wöchentlich
+l-target Backup-Ziel
 l-year Jahr
 
 # GUI Widget Labels
@@ -199,13 +209,20 @@ l-menu-about Über restix
 l-menu-user-manual Benutzerhandbuch
 
 # GUI Tooltips
+t-axn-auto-tag-snapshots Snapshots des Repositories automatisch mit Tags markieren
+t-axn-clean-repo Alle nicht mit Tags markierten Snapshots ausser dem neuesten löschen
+t-axn-forget-snapshot Ausgewählten Snapshot aus dem Repository löschen
+t-axn-tag-snapshot Ausgewählten Snapshot mit eingegebenem Tag markieren
+t-axn-untag-snapshot Tag-Markierung vom ausgewählten Snapshot entfernen
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
 t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
 t-opt-bak-dry-run Backup nur simulieren
 t-opt-mnt-dry-run Wartungs-Aktion nur simulieren
 t-opt-mnt-host Bitte ggf. den Hostnamen für das Repository auswählen
+t-opt-mnt-restic-object Restic-Objekt für die Wartung auswählen
 t-opt-mnt-snapshot Snapshot auswählen, der getaggt oder gelöscht werden soll
 t-opt-mnt-tag Name für den Tag des ausgewählten Snapshots eingeben
+t-opt-mnt-tag-interval Zeitraum zwischen zwei Tag-Markierungen auswählen
 t-opt-mnt-year Bitte ggf. das Jahr für das Repository auswählen
 t-opt-rst-dry-run Wiederherstellung nur simulieren
 t-opt-rst-host Bitte ggf. den Hostnamen angeben, falls die Wiederherstellung aus Daten eines anderen Rechners erfolgen soll
