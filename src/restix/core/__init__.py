@@ -134,6 +134,7 @@ JSON_STRUCT_TYPE_NODE = 'node'
 JSON_STRUCT_TYPE_SNAPSHOT = 'snapshot'
 
 # Optionen
+OPTION_ADD = '--add'
 OPTION_AUTO_CREATE = '--auto-create'
 OPTION_AUTO_TAG = '--auto-tag'
 OPTION_BATCH = '--batch'
@@ -146,6 +147,8 @@ OPTION_HOST= '--host'
 OPTION_INCLUDE_FILE = '--include-file'
 OPTION_JSON = '--json'
 OPTION_KEEP_LAST = '--keep-last'
+OPTION_KEEP_MONTHLY = '--keep-monthly'
+OPTION_KEEP_TAG = '--keep-tag'
 OPTION_PASSWORD_FILE = '--password-file'
 OPTION_PRUNE = '--prune'
 OPTION_REPO = '--repo'
@@ -175,3 +178,10 @@ SEVERITY_INFO = 'i'
 SEVERITY_WARNING = 'w'
 TASK_SUCCEEDED = 0
 TASK_FAILED = 1
+
+def initial_tag(year: str) -> str:
+    """
+    :param year: gewünschtes Jahr
+    :return: Tag für den ersten Snapshot eines Jahres
+    """
+    return f'{year}_FIRST'

@@ -82,14 +82,21 @@ def run_backup(action: RestixAction, task_monitor: TaskMonitor):
     return TaskResult(TASK_FAILED, '')
 
 
-def run_forget(action: RestixAction, task_monitor: TaskMonitor):
+def run_forget(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult:
     """
-    Löscht einen Snapshot aus einem Repository.
+    Löscht Snapshots aus einem Repository.
     :param action: die Daten des auszuführenden Forget-Befehls.
     :param task_monitor: der Fortschritt-Handler.
-    :raises RestixException: falls die Ausführung fehlschlägt
+    :returns: Ergebnis der Ausführung
     """
-    return TaskResult(TASK_FAILED, 'Noch nicht implementiert')
+    try:
+        _restic_cmd = action.to_restic_command()
+        task_monitor.log(I_RUNNING_RESTIC_CMD, ' '.join(_restic_cmd))
+        _repo = action.option(OPTION_REPO)
+        execute_restic_command(_restic_cmd, task_monitor)
+        return TaskResult(TASK_SUCCEEDED, '')
+    except Exception as _e:
+        return TaskResult(TASK_FAILED, str(_e))
 
 
 def run_init(action: RestixAction, task_monitor: TaskMonitor):

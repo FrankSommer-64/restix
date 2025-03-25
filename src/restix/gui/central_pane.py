@@ -99,7 +99,7 @@ class CentralPane(QWidget):
 
     def _maintenance_selected(self):
         """
-        Zeigt die GUI-Bereiche für die Repository-Wartung an.
+        Zeigt die GUI-Bereiche für Wartung an.
         """
         self._activate_pane(MaintenancePane(self, self._local_config, self._gui_settings))
 

@@ -29,6 +29,7 @@ e-restix-target-scope-not-defined Der für restic-Repository {1} angegebene Umfa
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 i-dry-run-tagging-first-snapshot Würde ersten Snapshot mit Tag {0} versehen.
 i-dry-run-tagging-snapshot Würde Snapshot {0} in Repository {1} mit Tag {2} markieren.
+i-running-restic-cmd restic-Befehl: {0}
 i-tagged-snapshot Snapshot {0} wurde mit Tag {1} markiert.
 w-tag-snapshot-failed Fehler beim Taggen von Snapshot {0} mit {1}.
 
@@ -160,11 +161,8 @@ l-configuration Konfiguration
 l-credentials Zugangsdaten
 l-do-auto-tag-snapshots Snapshots automatisch markieren
 l-do-backup Sicherung starten
-l-do-clean-repo Repository aufräumen
-l-do-forget-snapshot Snapshot löschen
 l-do-restore Wiederherstellung starten
-l-do-tag-snapshot Snapshot mit Tag markieren
-l-do-untag-snapshot Snapshot-Tag entfernen
+l-do-year-end Jahresabschluss
 l-dry-run Dry run
 l-element Element
 l-exit Beenden
@@ -206,14 +204,17 @@ l-mbox-title-error Fehler
 l-mbox-title-info Information
 l-mbox-title-warning Warnung
 l-menu-about Über restix
+l-menu-auto-tag Snapshots automatisch mit Tag markieren
+l-menu-repo-clean Repository aufräumen
+l-menu-repository Repository
+l-menu-snapshot Snapshot
 l-menu-user-manual Benutzerhandbuch
 
 # GUI Tooltips
-t-axn-auto-tag-snapshots Snapshots des Repositories automatisch mit Tags markieren
-t-axn-clean-repo Alle nicht mit Tags markierten Snapshots ausser dem neuesten löschen
-t-axn-forget-snapshot Ausgewählten Snapshot aus dem Repository löschen
-t-axn-tag-snapshot Ausgewählten Snapshot mit eingegebenem Tag markieren
-t-axn-untag-snapshot Tag-Markierung vom ausgewählten Snapshot entfernen
+t-cancel-action Laufende Aktion abbrechen
+t-do-bak-backup Backup starten
+t-do-mnt-year-end Alle Snapshots ohne Tag löschen, max. einen Snapshot pro Monat behalten
+t-do-rst-restore Wiederherstellung der ausgewählten Elemente starten
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
 t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
 t-opt-bak-dry-run Backup nur simulieren

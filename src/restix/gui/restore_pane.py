@@ -191,8 +191,8 @@ class RestorePane(ResticActionPane):
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__(parent, [L_DO_RESTORE], [self.start_button_clicked],
-                         local_config, gui_settings, self._target_selected)
+        super().__init__(parent, [L_DO_RESTORE], [T_RST_DO_RESTORE], [self.start_button_clicked],
+                         local_config, gui_settings)
         self.__worker = None
         # option pane
         self.__options_pane = RestoreOptionsPane(self, local_config)

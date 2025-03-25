@@ -89,15 +89,14 @@ class BackupPane(ResticActionPane):
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__(parent, [L_DO_BACKUP], [self.start_button_clicked],
-                         local_config, gui_settings, None)
+        super().__init__(parent, [L_DO_BACKUP], [T_DO_BAK_BACKUP], [self.start_button_clicked],
+                         local_config, gui_settings)
         self.__worker = None
         # option pane
         self.__options_pane = BackupOptionsPane(self)
         self.pane_layout.addWidget(self.__options_pane, 0, 1)
         self.setLayout(self.pane_layout)
         self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
-        self.setStyleSheet(_STANDARD_PANE_STYLE)
 
     def start_button_clicked(self):
         """
@@ -118,5 +117,3 @@ class BackupPane(ResticActionPane):
         super().cancel_button_clicked()
         if self.__worker is not None:
             self.__worker.abort()
-
-_STANDARD_PANE_STYLE = 'background-color: #eeeeee'

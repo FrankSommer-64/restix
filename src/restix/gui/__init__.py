@@ -1,0 +1,62 @@
+# -*- coding: utf-8 -*-
+
+# -----------------------------------------------------------------------------------------------
+# restix - Datensicherung auf restic-Basis.
+#
+# Copyright (c) 2025, Frank Sommer.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# -----------------------------------------------------------------------------------------------
+
+# Style für die Buttons zum Starten einer Aktion
+ACTION_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
+
+# Style für den Abbrechen-Button
+CANCEL_BUTTON_STYLE = 'background-color: red; color: white'
+
+# Style für die Beschreibung einer Option
+CAPTION_STYLE = 'color: black; font-weight: bold'
+
+# Style für die Umrahmung aller GroupBoxes
+GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius: 6px; margin-top: 6px} ' \
+                  'QGroupBox::title {color: blue; subcontrol-origin: margin; left: 7px; padding: 0 5px 0 5px;}'
+
+# Style für die Buttons in der Hauptauswahl
+IMAGE_BUTTON_LABEL_STYLE = 'font-weight: bold'
+IMAGE_BUTTON_PANE_STYLE = 'background-color: white; border-width: 2px; border-color: black; border-style: solid'
+
+# Style für die Pane zur Ausgabe von Nachrichten
+MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style: solid; border-width: 1px'
+
+# Style für die Table zur Auswahl eines Backup-Ziels
+TARGET_TABLE_STYLE = 'background-color: white'
+
+# Style für die Texteingabe-Felder
+TEXT_FIELD_STYLE = 'background-color: #ffffcc'
+
+# Anzahl angezeigter Jahre in der Vergangenheit bei den Comboboxen zur Jahresauswahl
+PAST_YEARS_COUNT = 10

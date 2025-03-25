@@ -50,12 +50,9 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout,
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
-from restix.core.task import TaskProgress
+from restix.core.task import TaskProgress, TaskResult
+from restix.gui import *
 from restix.gui.settings import GuiSettings
-
-
-GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius: 6px; margin-top: 6px} ' \
-                  'QGroupBox::title {color: blue; subcontrol-origin: margin; left: 7px; padding: 0 5px 0 5px;}'
 
 
 class TargetModel(QAbstractTableModel):
@@ -138,7 +135,7 @@ class TargetTableView(QTableView):
         self.resizeColumnsToContents()
         if selection_handler is not None:
             self.pressed.connect(selection_handler)
-        self.setStyleSheet(_TARGET_TABLE_STYLE)
+        self.setStyleSheet(TARGET_TABLE_STYLE)
 
     def selected_target(self) -> dict | None:
         """
@@ -229,13 +226,13 @@ class ImageButtonPane(QWidget):
         self.__image_button = ImageButton(self, image_url, click_handler, triggers_menu)
         _layout.addWidget(self.__image_button)
         _label = QLabel(localized_label(label_id), self)
-        _label.setStyleSheet('font-weight: bold')
+        _label.setStyleSheet(IMAGE_BUTTON_LABEL_STYLE)
         _label.setMinimumWidth(128)
         _label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         _label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         _layout.addWidget(_label)
         self.setLayout(_layout)
-        self.setStyleSheet('background-color: white; border-width: 2px; border-color: black; border-style: solid')
+        self.setStyleSheet(IMAGE_BUTTON_PANE_STYLE)
 
 
     def mouseReleaseEvent(self, event: QMouseEvent):
@@ -313,7 +310,7 @@ class MessagePane(QWidget):
         super().__init__(parent)
         _layout = QVBoxLayout(self)
         self.__messages = QListWidget(self)
-        self.__messages.setStyleSheet(_MESSAGE_PANE_STYLE)
+        self.__messages.setStyleSheet(MESSAGE_PANE_STYLE)
         self.__messages.setMinimumHeight(250)
         _layout.addWidget(self.__messages)
         self.setLayout(_layout)
@@ -321,7 +318,7 @@ class MessagePane(QWidget):
     def show_message(self, severity: str, text: str):
         """
         Gibt eine Nachricht aus.
-        :param severity: der Schweregrad der Nachricht (Info, Warnung, Fehler).
+        :param severity: der Schweregrad der Nachricht (Information, Warnung, Fehler).
         :param text: der Nachrichtentext
         """
         _info = QListWidgetItem(text)
@@ -345,37 +342,44 @@ class ActionButtonPane(QWidget):
     """
     Pane zur Ausgabe von Nachrichten.
     """
-    def __init__(self, parent: QWidget, start_button_label_ids: list[str],
-                 start_handlers: list[Callable], cancel_handler: Callable):
+    def __init__(self, parent: QWidget, start_button_label_ids: list[str], start_button_tooltip_ids: list[str],
+                 start_handlers: list[Callable], cancel_handler: Callable | None):
         """
         Konstruktor.
         :param parent: übergeordnete Pane
-        :param start_button_label_ids: Beschriftung des/der Start-Buttons
-        :param start_handlers: Handler, wenn einer der Start-Buttons geklickt wird
+        :param start_button_label_ids: ID der Beschriftungen für die Start-Buttons
+        :param start_button_tooltip_ids: ID der Tooltips für die Start-Buttons
+        :param start_handlers: Click-Handler für jeden der Start-Buttons
         :param cancel_handler: Handler, wenn der Abbrechen-Button geklickt wird
         """
         super().__init__(parent)
         _layout = QGridLayout(self)
         self.__start_buttons = []
+        self.__cancel_button = None
         for _i, _label_id in enumerate(start_button_label_ids):
             _button = QPushButton(localized_label(start_button_label_ids[_i]))
+            _button.setToolTip(localized_label(start_button_tooltip_ids[_i]))
             _button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-            _button.setStyleSheet(_OK_BUTTON_STYLE)
+            _button.setStyleSheet(ACTION_BUTTON_STYLE)
             _button.clicked.connect(start_handlers[_i])
             self.__start_buttons.append(_button)
             _layout.addWidget(_button, 0, _i)
-        self.__cancel_button = QPushButton(localized_label(L_CANCEL))
-        self.__cancel_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
-        self.__cancel_button.setStyleSheet(_CANCEL_BUTTON_STYLE)
-        self.__cancel_button.setEnabled(False)
-        self.__cancel_button.clicked.connect(cancel_handler)
-        _layout.addWidget(self.__cancel_button, 0, len(start_button_label_ids))
+        if cancel_handler is not None:
+            self.__cancel_button = QPushButton(localized_label(L_CANCEL))
+            self.__cancel_button.setToolTip(localized_label(T_CANCEL_ACTION))
+            self.__cancel_button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+            self.__cancel_button.setStyleSheet(CANCEL_BUTTON_STYLE)
+            self.__cancel_button.setEnabled(False)
+            self.__cancel_button.clicked.connect(cancel_handler)
+            _layout.addWidget(self.__cancel_button, 0, len(start_button_label_ids))
         self.setLayout(_layout)
 
     def action_started(self):
         """
         Deaktiviert den OK-Button, aktiviert den Cancel-Button.
         """
+        if self.__cancel_button is None:
+            return
         for _button in self.__start_buttons:
             _button.setEnabled(False)
         self.__cancel_button.setEnabled(True)
@@ -384,6 +388,8 @@ class ActionButtonPane(QWidget):
         """
         Aktiviert den OK-Button, deaktiviert den Cancel-Button.
         """
+        if self.__cancel_button is None:
+            return
         for _button in self.__start_buttons:
             _button.setEnabled(True)
         self.__cancel_button.setEnabled(False)
@@ -425,16 +431,16 @@ class ResticActionPane(QWidget):
     """
     Basisklasse für die Panes aller Aktionen, die einen restic-Befehl auslösen.
     """
-    def __init__(self, parent: QWidget, start_button_label_ids: list[str], start_handlers: list[Callable],
-                 local_config: LocalConfig, gui_settings: GuiSettings, target_selected_handler: Callable):
+    def __init__(self, parent: QWidget, start_button_label_ids: list[str], start_button_tooltip_ids: list[str],
+                 start_handlers: list[Callable], local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
         :param parent: die zentrale restix Pane
-        :param start_button_label_ids: Beschriftungen der Start-Buttons
-        :param start_handlers: Handler, wenn einer der Start-Buttons geklickt wird
+        :param start_button_label_ids: ID der Beschriftungen für die Start-Buttons
+        :param start_button_tooltip_ids: ID der Tooltips für die Start-Buttons
+        :param start_handlers: Click-Handler für jeden der Start-Buttons
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
-        :param target_selected_handler: Handler für die Auswahl eines Backup-Ziels
         """
         super().__init__(parent)
         self.restix_config = local_config
@@ -443,10 +449,11 @@ class ResticActionPane(QWidget):
         self.pane_layout.setSpacing(5)
         self.pane_layout.setColumnStretch(1, 1)
         # links oben Backup-Ziel-Auswahl
-        self.target_selection_pane = TargetSelectionPane(self, local_config, gui_settings, target_selected_handler)
+        self.target_selection_pane = TargetSelectionPane(self, local_config, gui_settings, self.target_selected)
         self.pane_layout.addWidget(self.target_selection_pane, 0, 0, 2, 1)
         # rechts mittig Buttons
-        self.button_pane = ActionButtonPane(self, start_button_label_ids, start_handlers, self.cancel_button_clicked)
+        self.button_pane = ActionButtonPane(self, start_button_label_ids, start_button_tooltip_ids,
+                                            start_handlers, self.cancel_button_clicked)
         self.pane_layout.addWidget(self.button_pane, 1, 1)
         # unten Ausgabetexte
         self.message_pane = MessagePane(self)
@@ -458,7 +465,6 @@ class ResticActionPane(QWidget):
         Wird aufgerufen, wenn einer der 'Start'-Buttons geklickt wurde.
         :returns: Daten des ausgewählten Backup-Ziels
         """
-        self.selected_target = self.target_selection_pane.selected_target()
         if self.selected_target is None:
             _rc = QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                           localized_message(I_GUI_NO_TARGET_SELECTED),
@@ -472,8 +478,13 @@ class ResticActionPane(QWidget):
         """
         Wird aufgerufen, wenn der 'Cancel'-Button geklickt wurde.
         """
-        print('_cancel_button_clicked')
         self.button_pane.action_stopped()
+
+    def target_selected(self):
+        """
+        Wird aufgerufen, wenn der Benutzer ein Backup-Ziel auswählt.
+        """
+        self.selected_target = self.target_selection_pane.selected_target()
 
     def handle_progress(self, progress_info: TaskProgress):
         """
@@ -490,12 +501,13 @@ class ResticActionPane(QWidget):
         self.message_pane.show_message(SEVERITY_INFO, _info)
         self.button_pane.action_stopped()
 
-    def handle_result(self, result):
+    def handle_result(self, result: TaskResult):
         """
         Displays summary of asynchronous task.
-        :param TaskResult result: the task result
+        :param result: the task result
         """
-        pass
+        self.message_pane.show_message(SEVERITY_INFO, result.summary())
+        self.button_pane.action_stopped()
 
     def handle_error(self, exception):
         """
@@ -571,7 +583,7 @@ def create_text(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QLineE
     _tooltip = localized_label(tooltip_id)
     layout.addWidget(option_label(caption_id, _tooltip), _row_nr, 0)
     _input_field = QLineEdit()
-    _input_field.setStyleSheet(_INPUT_FIELD_STYLE)
+    _input_field.setStyleSheet(TEXT_FIELD_STYLE)
     _input_field.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
     _input_field.setToolTip(_tooltip)
     layout.addWidget(_input_field, _row_nr, 1, 1, 2)
@@ -588,13 +600,5 @@ def option_label(caption_id: str, tooltip_text: str) -> QLabel:
     _caption = '' if len(caption_id) == 0 else localized_label(caption_id)
     _label = QLabel(_caption)
     _label.setToolTip(tooltip_text)
-    _label.setStyleSheet(_CAPTION_STYLE)
+    _label.setStyleSheet(CAPTION_STYLE)
     return _label
-
-
-_CANCEL_BUTTON_STYLE = 'background-color: red; color: white'
-_CAPTION_STYLE = 'color: black; font-weight: bold'
-_INPUT_FIELD_STYLE = 'background-color: #ffffcc'
-_MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style: solid; border-width: 1px'
-_OK_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
-_TARGET_TABLE_STYLE = 'background-color: white'

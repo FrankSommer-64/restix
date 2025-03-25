@@ -167,6 +167,14 @@ class RestixAction:
                 _cmd.extend((OPTION_INCLUDE_FILE, self.option(OPTION_INCLUDE_FILE)))
             _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
+        if self.__action_id == ACTION_FORGET:
+            if OPTION_KEEP_MONTHLY in self.__options:
+                _cmd.extend((OPTION_KEEP_MONTHLY, self.option(OPTION_KEEP_MONTHLY)))
+            if OPTION_KEEP_TAG in self.__options:
+                _cmd.extend((OPTION_KEEP_TAG, self.option(OPTION_KEEP_TAG)))
+            if OPTION_PRUNE in self.__options:
+                _cmd.append(OPTION_PRUNE)
+                return _cmd
         if self.__action_id == ACTION_FIND:
             _cmd.extend((OPTION_SNAPSHOT, self.option(OPTION_SNAPSHOT)))
             _cmd.append(self.option(OPTION_FIND_PATTERN))
@@ -175,7 +183,7 @@ class RestixAction:
             _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
         if self.__action_id == ACTION_TAG:
-            _cmd.append('--add')
+            _cmd.append(OPTION_ADD)
             _cmd.append(self.option(OPTION_TAG))
             _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
@@ -470,7 +478,8 @@ _STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE}
 _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_AUTO_TAG, OPTION_BATCH, OPTION_DRY_RUN,
                                    OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM, OPTION_YEAR},
                    ACTION_FIND: {OPTION_HOST, OPTION_FIND_PATTERN, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
-                   ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_SNAPSHOT, OPTION_UNTAGGED},
+                   ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_KEEP_MONTHLY, OPTION_KEEP_TAG,
+                                   OPTION_PRUNE, OPTION_YEAR},
                    ACTION_INIT: {OPTION_BATCH},
                    ACTION_LS: {OPTION_HOST, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_INCLUDE_FILE,
