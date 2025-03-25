@@ -225,7 +225,7 @@ class DetailAction:
 
 def restix_config_dir():
     """
-    :return: local directory containing restix configuration files
+    :returns: local directory containing restix configuration files
     :rtype: str
     """
     if sys.platform.startswith('win'):
@@ -239,7 +239,7 @@ def restix_variables(action):
     """
     Creates a dictionary containing all variables, that may be used in restix configuration files.
     :param DetailAction action: parsed command line arguments
-    :return: restix variable names and values
+    :returns: restix variable names and values
     :rtype: dict
     """
     _restix_vars = {RESTIX_VAR_CONFIG: restix_config_dir(), RESTIX_VAR_HOSTNAME: platform.node(),
@@ -264,7 +264,7 @@ def resolve_restix_vars_in_str(str_value, restix_vars):
     Replaces all references to restix variables (${variable}) with actual values.
     :param str str_value: the string where variable references shall be replaced
     :param dict restix_vars: dictionary containing restix variable names and values
-    :return: string with all variable references replaced by actual values
+    :returns: string with all variable references replaced by actual values
     :rtype: str
     :raises RestixException: if a referenced variable doesn't have an actual value (internal error)
     """
@@ -282,7 +282,7 @@ def resolve_restix_vars_in_value(value, restix_vars):
     Replaces all references to restix variables (${variable}) with actual values.
     :param value: the Python value where variable references shall be replaced
     :param dict restix_vars: dictionary containing restix variable names and values
-    :return: python value with all variable references replaced by actual values
+    :returns: python value with all variable references replaced by actual values
     :raises RestixException: if a referenced variable doesn't have an actual value (internal error)
     """
     if isinstance(value, str):
@@ -299,7 +299,7 @@ def read_restix_config_file(restix_vars):
     """
     Read local restix configuration file.
     :param dict restix_vars: restix variable names and values
-    :return: local restix settings
+    :returns: local restix settings
     :rtype: LocalConfig
     :raises RestixException: if local restix configuration file could not be read or parsed
     """
@@ -313,7 +313,7 @@ def restic_info_for(repo_alias, restix_settings):
     Creates all information needed to execute restic command for desired restix action.
     :param str repo_alias: restix repository alias name
     :param dict restix_settings: local restix settings
-    :return: all data needed to execute restic command
+    :returns: all data needed to execute restic command
     :rtype: dict
     :raise RestixException: if repository alias is not defined or mandatory options are missing
     """
@@ -403,7 +403,7 @@ def build_restic_cmd(restix_action, restic_info):
     Creates restic command for specified restix action.
     :param DetailAction restix_action: restix action including options
     :param dict restic_info: additional information
-    :return: restic command
+    :returns: restic command
     :rtype: list[str]
     :raises RestixException: if desired action is not implemented
     """
@@ -489,7 +489,7 @@ def prompt_confirmation(restix_action, repo_alias):
     not change data.
     :param DetailAction restix_action: restix action including options
     :param str repo_alias: the repository alias
-    :return: True if the command may be executed; otherwise False
+    :returns: True if the command may be executed; otherwise False
     :rtype: bool
     """
     _base_action = restix_action.base_action()

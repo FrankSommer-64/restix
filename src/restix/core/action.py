@@ -427,7 +427,7 @@ def build_restic_cmd(restix_action, restic_info):
     Creates restic command for specified restix action.
     :param DetailAction restix_action: restix action including options
     :param dict restic_info: additional information
-    :return: restic command
+    :returns: restic command
     :rtype: list[str]
     :raises RestixException: if desired action is not implemented
     """

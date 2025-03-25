@@ -102,7 +102,7 @@ class SnapshotViewerDialog(QDialog):
     def _create_viewer_pane(self) -> QGroupBox:
         """
         Erzeugt den oberen Bereich mit den Buttons zum Suchen oder Anzeigen des gesamten Snapshot-Inhalts.
-        :return: oberer Bereich des Dialogfensters
+        :returns: oberer Bereich des Dialogfensters
         """
         _group = QGroupBox(localized_label(L_SELECT_ELEMENTS))
         _group_layout = QVBoxLayout()
@@ -155,7 +155,7 @@ class SnapshotViewerDialog(QDialog):
     def _create_action_pane(self) -> QWidget:
         """
         Erzeugt den unteren Bereich mit den Buttons zum Übernehmen der Selektion und zum Abbrechen des Dialogs.
-        :return: unterer Bereich des Dialogfensters
+        :returns: unterer Bereich des Dialogfensters
         """
         _button_pane = QWidget(self)
         _button_pane_layout = QHBoxLayout()
@@ -230,7 +230,7 @@ class SnapshotViewerDialog(QDialog):
         """
         Erzeugt rekursiv für alle Nachkommen des übergebenen Snapshot-Elements ein Widget für den Tree-Viewer.
         :param node: Daten des Elements
-        :return: Widgets für alle untergeordneten Elemente
+        :returns: Widgets für alle untergeordneten Elemente
         """
         _children = []
         for _k, _v in node.items():

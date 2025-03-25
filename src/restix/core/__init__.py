@@ -77,6 +77,8 @@ CFG_VALUE_CREDENTIALS_TYPE_FILE = 'file'
 CFG_VALUE_CREDENTIALS_TYPE_PROMPT = 'prompt'
 CFG_VALUE_CREDENTIALS_TYPE_TEXT = 'text'
 CFG_VALUE_CREDENTIALS_TYPE_TOKEN = 'token'
+CFG_CREDENTIAL_TYPES = [CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTIALS_TYPE_PROMPT,
+                        CFG_VALUE_CREDENTIALS_TYPE_TEXT, CFG_VALUE_CREDENTIALS_TYPE_TOKEN]
 
 # unterstützte Variablen in der restix-Konfigurationsdatei
 CFG_VAR_HOST = 'HOST'
@@ -182,6 +184,6 @@ TASK_FAILED = 1
 def initial_tag(year: str) -> str:
     """
     :param year: gewünschtes Jahr
-    :return: Tag für den ersten Snapshot eines Jahres
+    :returns: Tag für den ersten Snapshot eines Jahres
     """
     return f'{year}_FIRST'

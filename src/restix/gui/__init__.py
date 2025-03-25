@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from PySide6 import QtCore
 # -----------------------------------------------------------------------------------------------
 # restix - Datensicherung auf restic-Basis.
 #
@@ -32,6 +32,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -----------------------------------------------------------------------------------------------
 
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QPushButton
+
+
 # Style für die Buttons zum Starten einer Aktion
 ACTION_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
 
@@ -60,3 +64,22 @@ TEXT_FIELD_STYLE = 'background-color: #ffffcc'
 
 # Anzahl angezeigter Jahre in der Vergangenheit bei den Comboboxen zur Jahresauswahl
 PAST_YEARS_COUNT = 10
+
+
+class ClickButton(QPushButton):
+    """
+    Push-Button mit unterschiedlichen Handlern für Links- und Rechts-Klicks.
+    """
+    right_clicked = Signal()
+
+    def __init__(self):
+        """
+        Konstruktor
+        """
+        super().__init__()
+
+    def mouseReleaseEvent(self, e, /):
+        if e.button() == QtCore.Qt.MouseButton.RightButton:
+            self.right_clicked.emit()
+            return
+        super().mouseReleaseEvent(e)

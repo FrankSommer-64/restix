@@ -165,22 +165,28 @@ l-do-restore Wiederherstellung starten
 l-do-year-end Jahresabschluss
 l-dry-run Dry run
 l-element Element
+l-excludes-file Excludes-Datei
 l-exit Beenden
+l-file-name Dateiname
 l-full vollständig
 l-help Hilfe
 l-host Hostname
+l-includes-file Includes-Datei
 l-location Ort
 l-maintenance Wartung
 l-mandatory-snapshot * Snapshot
 l-mandatory-object * Objekt
+l-name Name
 l-ok OK
 l-options Optionen
+l-password Passwort
 l-repository Repository
 l-restic-object Restic Objekt
 l-restore Wiederherstellung
 l-restore-path Zielverzeichnis
 l-restore-scope Restore-Umfang
 l-scope Sicherungs-Umfang
+l-scopes Sicherungs-Umfänge
 l-search Suchen
 l-select Auswählen
 l-select-elements Elemente auswählen
@@ -193,10 +199,13 @@ l-tag-quarterly quartalsweise
 l-tag-monthly monatlich
 l-tag-weekly wöchentlich
 l-target Backup-Ziel
+l-type Typ
 l-year Jahr
 
 # GUI Widget Labels
 l-dlg-title-about Über restix
+l-dlg-title-select-excludes-file Excludes-Datei auswählen
+l-dlg-title-select-includes-file Includes-Datei auswählen
 l-dlg-title-snapshot-viewer Snapshot {0} für Host {1} ({2})
 l-dlg-title-user-manual Benutzerhandbuch
 l-main-win-title restix
@@ -212,6 +221,16 @@ l-menu-user-manual Benutzerhandbuch
 
 # GUI Tooltips
 t-cancel-action Laufende Aktion abbrechen
+t-cfg-credential-comment Kommentar zu den Zugriffsdaten
+t-cfg-credential-name Name der Zugriffsdaten
+t-cfg-credential-password Passwort
+t-cfg-credential-type Art der Zugriffsdaten
+t-cfg-credential-file-name Name der Datei mit dem Passwort
+t-cfg-credentials Zu bearbeitende Zugriffsdaten auswählen
+t-cfg-scope Zu bearbeitenden Backup-Umfang auswählen
+t-cfg-scope-comment Kommentar zum Backup-Umfang
+t-cfg-scope-includes Datei mit allen Elementen, die gesichert werden sollen
+t-cfg-scope-name Name des Backup-Umfangs
 t-do-bak-backup Backup starten
 t-do-mnt-year-end Alle Snapshots ohne Tag löschen, max. einen Snapshot pro Monat behalten
 t-do-rst-restore Wiederherstellung der ausgewählten Elemente starten

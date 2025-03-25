@@ -57,25 +57,25 @@ class SnapshotElement:
 
     def path(self) -> str:
         """
-        :return: vollständiger Element-Pfad
+        :returns: vollständiger Element-Pfad
         """
         return self.__path
 
     def type(self) -> str:
         """
-        :return: Element-Typ
+        :returns: Element-Typ
         """
         return self.__type
 
     def path_parts(self) -> list[str]:
         """
-        :return: alle Teile des vollständigen Element-Pfads
+        :returns: alle Teile des vollständigen Element-Pfads
         """
         return self.__path.split(os.sep)[1:]
 
     def path_part_count(self) -> int:
         """
-        :return: Anzahl aller Teile des vollständigen Element-Pfads
+        :returns: Anzahl aller Teile des vollständigen Element-Pfads
         """
         return len(self.__path.split(os.sep)) - 1
 
@@ -173,7 +173,7 @@ class Snapshot:
 
     def element_tree(self) -> dict:
         """
-        :return: Name und Typ aller Elemente in hierarchischer Form
+        :returns: Name und Typ aller Elemente in hierarchischer Form
         """
         _nodes = {}
         for _element in self.__elements:

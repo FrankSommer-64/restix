@@ -49,6 +49,7 @@ from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.restic_interface import determine_snapshots
 from restix.core.task import TaskMonitor
+from restix.gui import PAST_YEARS_COUNT
 from restix.gui.dialogs import SnapshotViewerDialog
 from restix.gui.panes import (ResticActionPane, create_combo, create_dir_selector, create_checkbox, create_text,
                               GROUP_BOX_STYLE, option_label)
@@ -92,7 +93,7 @@ class RestoreOptionsPane(QGroupBox):
         self.__host_text.setText(platform.node())
         _current_year = datetime.datetime.now().year
         self.__year_combo = create_combo(_layout, L_YEAR, T_OPT_RST_YEAR)
-        self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year-10, -1)])
+        self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year - PAST_YEARS_COUNT, -1)])
         self.__year_combo.setCurrentIndex(0)
         self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_RST_DRY_RUN, False)
         self.setLayout(_layout)
@@ -115,7 +116,7 @@ class RestoreOptionsPane(QGroupBox):
 
     def selected_options(self) -> dict:
         """
-        :return: Status der unterstützten Restore-Optionen (snapshot, restore-path, host, jahr und dry-run)
+        :returns: Status der unterstützten Restore-Optionen (snapshot, restore-path, host, jahr und dry-run)
         """
         _snapshot = self.__snapshot_combo.currentData()
         if _snapshot is None or len(_snapshot) == 0:
@@ -129,13 +130,13 @@ class RestoreOptionsPane(QGroupBox):
 
     def selected_elements(self) -> list[str]:
         """
-        :return: ausgewählte Elemente
+        :returns: ausgewählte Elemente
         """
         return self.__selected_elements
 
     def selected_restore_path(self) -> str:
         """
-        :return: ausgewählter Pfad für die Wiederherstellung
+        :returns: ausgewählter Pfad für die Wiederherstellung
         """
         return self.__restore_path_selector.text()
 
@@ -161,7 +162,7 @@ class RestoreOptionsPane(QGroupBox):
     def _scope_button_clicked(self):
         """
         Wird aufgerufen, wenn der Benutzer den Button zur Auswahl einzelner Dateien für die Wiederherstellung geklickt
-        :return:
+        :returns:
         """
         if self.__target_alias is None:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),

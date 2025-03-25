@@ -59,7 +59,7 @@ def read_restix_config_file(action: RestixAction) -> LocalConfig:
     """
     Liest die restix-Konfigurationsdatei und ersetzt darin enthaltene Variablen.
     :param action: die auszuführende Aktion
-    :return: restix-Konfiguration.
+    :returns: restix-Konfiguration.
     :raises RestixException: falls die Datei nicht verarbeitet werden kann
     """
     _vars = {CFG_VAR_HOST: platform.node(), CFG_VAR_USER: current_user(),

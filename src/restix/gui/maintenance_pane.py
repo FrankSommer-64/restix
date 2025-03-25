@@ -80,7 +80,7 @@ class MaintenanceOptionsPane(QGroupBox):
 
     def selected_options(self) -> dict:
         """
-        :return: Status der unterstützten Optionen (host, jahr und dry-run)
+        :returns: Status der unterstützten Optionen (host, jahr und dry-run)
         """
         _options = {OPTION_YEAR: self.__year_combo.currentText(), OPTION_DRY_RUN: self.__dry_run_option.isChecked()}
         _host = self.__host_text.text()

@@ -71,7 +71,7 @@ class BackupOptionsPane(QGroupBox):
 
     def selected_options(self) -> dict:
         """
-        :return: Status der unterstützten Backup-Optionen (auto-create, auto-tag und dry-run)
+        :returns: Status der unterstützten Backup-Optionen (auto-create, auto-tag und dry-run)
         """
         return {OPTION_AUTO_CREATE: self.__auto_create_option.isChecked(),
                 OPTION_AUTO_TAG: self.__auto_tag_option.isChecked(),

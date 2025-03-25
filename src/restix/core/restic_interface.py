@@ -352,7 +352,7 @@ def _tag_snapshot(action: RestixAction, snapshot_id: str, tag: str, task_monitor
     :param snapshot_id: ID des zu markierenden Snapshots
     :param tag: zu setzender Tag
     :param task_monitor: Fortschritt-Handler
-    :return: Return code von restic
+    :returns: Return code von restic
     """
     if action.option(OPTION_DRY_RUN):
         # bei dry-run nur Meldung ausgeben, was getaggt würde
