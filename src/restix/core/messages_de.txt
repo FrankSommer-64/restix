@@ -164,13 +164,16 @@ l-do-backup Sicherung starten
 l-do-restore Wiederherstellung starten
 l-do-year-end Jahresabschluss
 l-dry-run Dry run
+l-edit Editieren
 l-element Element
 l-excludes-file Excludes-Datei
 l-exit Beenden
 l-file-name Dateiname
+l-files-n-dirs Dateien und Verzeichnisse
 l-full vollständig
 l-help Hilfe
 l-host Hostname
+l-ignores Ignorierte Elemente
 l-includes-file Includes-Datei
 l-location Ort
 l-maintenance Wartung
@@ -199,6 +202,7 @@ l-tag-quarterly quartalsweise
 l-tag-monthly monatlich
 l-tag-weekly wöchentlich
 l-target Backup-Ziel
+l-targets Backup-Ziele
 l-type Typ
 l-year Jahr
 
@@ -229,8 +233,14 @@ t-cfg-credential-file-name Name der Datei mit dem Passwort
 t-cfg-credentials Zu bearbeitende Zugriffsdaten auswählen
 t-cfg-scope Zu bearbeitenden Backup-Umfang auswählen
 t-cfg-scope-comment Kommentar zum Backup-Umfang
-t-cfg-scope-includes Datei mit allen Elementen, die gesichert werden sollen
+t-cfg-scope-files-n-dirs Dateien und Verzeichnisse auswählen, die gesichert werden sollen
 t-cfg-scope-name Name des Backup-Umfangs
+t-cfg-target Zu bearbeitendes Backup-Ziel auswählen
+t-cfg-target-alias Aliasname des Backup-Ziels
+t-cfg-target-comment Kommentar zum Backup-Ziel
+t-cfg-target-credentials Zugangsdaten für das Backup-Ziel
+t-cfg-target-location URL zum Backup-Ziel
+t-cfg-target-scope zu sichernder Umfang im Backup-Ziel
 t-do-bak-backup Backup starten
 t-do-mnt-year-end Alle Snapshots ohne Tag löschen, max. einen Snapshot pro Monat behalten
 t-do-rst-restore Wiederherstellung der ausgewählten Elemente starten

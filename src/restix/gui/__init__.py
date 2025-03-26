@@ -32,9 +32,6 @@ from PySide6 import QtCore
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -----------------------------------------------------------------------------------------------
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QPushButton
-
 
 # Style für die Buttons zum Starten einer Aktion
 ACTION_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
@@ -59,27 +56,12 @@ MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style
 # Style für die Table zur Auswahl eines Backup-Ziels
 TARGET_TABLE_STYLE = 'background-color: white'
 
+# Style für Editoren
+EDITOR_STYLE = 'background-color: white'
+
 # Style für die Texteingabe-Felder
-TEXT_FIELD_STYLE = 'background-color: #ffffcc'
+TEXT_FIELD_STYLE = 'background-color: white'
+#TEXT_FIELD_STYLE = 'background-color: #ffffcc'
 
 # Anzahl angezeigter Jahre in der Vergangenheit bei den Comboboxen zur Jahresauswahl
 PAST_YEARS_COUNT = 10
-
-
-class ClickButton(QPushButton):
-    """
-    Push-Button mit unterschiedlichen Handlern für Links- und Rechts-Klicks.
-    """
-    right_clicked = Signal()
-
-    def __init__(self):
-        """
-        Konstruktor
-        """
-        super().__init__()
-
-    def mouseReleaseEvent(self, e, /):
-        if e.button() == QtCore.Qt.MouseButton.RightButton:
-            self.right_clicked.emit()
-            return
-        super().mouseReleaseEvent(e)
