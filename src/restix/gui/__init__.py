@@ -53,6 +53,9 @@ IMAGE_BUTTON_PANE_STYLE = 'background-color: white; border-width: 2px; border-co
 # Style für die Pane zur Ausgabe von Nachrichten
 MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style: solid; border-width: 1px'
 
+# Style für die Tabs in der Konfiguration
+TAB_FOLDER_STYLE = 'QTabBar {font-weight: bold}'
+
 # Style für die Table zur Auswahl eines Backup-Ziels
 TARGET_TABLE_STYLE = 'background-color: white'
 

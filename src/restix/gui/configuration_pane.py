@@ -38,36 +38,33 @@ GUI-Bereich für die restix-Konfiguration.
 
 from typing import Callable
 
-from PySide6.QtCore import Qt, QDir, Signal
+from PySide6.QtCore import Qt, Signal, QObject
 from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QComboBox, QFormLayout,
-                               QLabel, QLineEdit, QSizePolicy, QPushButton, QFileDialog, QScrollArea, QTextEdit)
+                               QLabel, QLineEdit, QSizePolicy, QPushButton, QScrollArea, QTextEdit, QDialog, QTabWidget,
+                               QGridLayout)
 
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
-from restix.gui import EDITOR_STYLE, TEXT_FIELD_STYLE
+from restix.gui import EDITOR_STYLE, TAB_FOLDER_STYLE, TEXT_FIELD_STYLE, ACTION_BUTTON_STYLE
+from restix.gui.dialogs import ScopeEditorDialog
 from restix.gui.panes import GROUP_BOX_STYLE, option_label
 
 
 
 
-class ClickButton(QPushButton):
+class ConfigurationSignals(QObject):
     """
-    Push-Button mit unterschiedlichen Handlern für Links- und Rechts-Klicks.
+    Signale der restix-Konfiguration.
     """
-    right_clicked = Signal()
-
-    def __init__(self):
-        """
-        Konstruktor
-        """
-        super().__init__()
-
-    def mouseReleaseEvent(self, e, /):
-        if e.button() == Qt.MouseButton.RightButton:
-            self.right_clicked.emit()
-            return
-        super().mouseReleaseEvent(e)
+    # Element in der Combo-Box ausgewählt
+    element_selected = Signal(str)
+    # neues Element angelegt
+    element_added = Signal(dict)
+    # Element umbenannt
+    element_renamed = Signal(str, str)
+    # Element gelöscht
+    element_removed = Signal(str)
 
 
 class CredentialsDetailPane(QWidget):
@@ -152,7 +149,44 @@ class CredentialsDetailPane(QWidget):
             self.__password_text = None
 
 
-class CredentialsPane(QGroupBox):
+class ElementSelectorPane(QWidget):
+    """
+    Pane zur Auswahl eines Elements in einer Group von Konfigurationsdaten.
+    """
+    def __init__(self, parent: QWidget, tooltip_id: str, element_names: list[str], handler: list[Callable]):
+        """
+        Konstruktor.
+        :param parent: die übergeordnete Pane
+        :param tooltip_id: Resource ID für den Tooltip-Text der Combo-Box
+        :param element_names: Name aller Elemente der Group
+        :param handler: Slots für die Signale [ausgewählt, neu, umbenannt, gelöscht]
+        """
+        super().__init__(parent)
+        _layout = QVBoxLayout(self)
+        _layout.setContentsMargins(5, 5, 5, 5)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.__combo = QComboBox()
+        self.__combo.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.__combo.customContextMenuRequested.connect(self._show_context_menu)
+        self.__combo.addItems(sorted(element_names))
+        self.__combo.currentIndexChanged.connect(handler[0])
+        self.__combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.__combo.setToolTip(localized_label(tooltip_id))
+        _layout.addWidget(self.__combo)
+        _new_button = QPushButton(localized_label(L_NEW))
+        _new_button.setStyleSheet(ACTION_BUTTON_STYLE)
+        _new_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _new_button.clicked.connect(handler[1])
+        _layout.addWidget(_new_button)
+
+    def _show_context_menu(self):
+        """
+        Wird aufgerufen, wenn der Benutzer mit der rechten Maustaste auf ein Element der Combo-Box klickt.
+        """
+        print('_show_context_menu')
+
+
+class CredentialsPane(QWidget):
     """
     Pane für die Zugriffsdaten.
     """
@@ -162,23 +196,28 @@ class CredentialsPane(QGroupBox):
         :param parent: die übergeordnete Pane
         :param credentials: aktuell konfigurierte Zugriffsdaten
         """
-        super().__init__(localized_label(L_CREDENTIALS), parent)
+        super().__init__(parent)
         self.__credentials = credentials
-        self.setStyleSheet(GROUP_BOX_STYLE)
-        _layout = QHBoxLayout()
+        _layout = QGridLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__credentials_combo = _create_config_group_combo(_layout, L_NAME, T_CFG_CREDENTIALS, credentials,
-                                                              self._credential_selected)
-        self.__detail_pane = CredentialsDetailPane(self)
-        _layout.addWidget(self.__detail_pane)
-        self.setLayout(_layout)
+        _layout.addWidget(ElementSelectorPane(self, T_CFG_CREDENTIAL_NAME, [*credentials],
+                                              [self._credential_created, self._credential_selected]))
+        #self.__detail_pane = CredentialsDetailPane(self)
+        #_layout.addWidget(self.__detail_pane)
+
+    def _credential_created(self, _credential_data: dict):
+        """
+        Wird aufgerufen, wenn der Benutzer einen Eintrag der Zugriffsdaten ausgewählt hat.
+        """
+        pass
 
     def _credential_selected(self, _index: int):
         """
         Wird aufgerufen, wenn der Benutzer einen Eintrag der Zugriffsdaten ausgewählt hat.
         """
-        self.__detail_pane.set_data(self.__credentials_combo.currentData(Qt.ItemDataRole.UserRole))
+        pass
+        #self.__detail_pane.set_data(self.__credentials_combo.currentData(Qt.ItemDataRole.UserRole))
 
 
 class ScopeDetailPane(QWidget):
@@ -232,7 +271,9 @@ class ScopeDetailPane(QWidget):
                 self.__ignores_list.append(_ignore_pattern)
 
     def _edit_files_n_dirs(self):
-        print('_edit_files_n_dirs')
+        _scope_editor = ScopeEditorDialog(self, self.__data[CFG_PAR_INCLUDES], self.__data.get(CFG_PAR_INCLUDES))
+        if _scope_editor.exec_() != QDialog.DialogCode.Accepted:
+            return
 
 
 class ScopePane(QGroupBox):
@@ -363,6 +404,26 @@ class TargetPane(QGroupBox):
                                     _credential_names, _scope_names)
 
 
+class ConfigurationPane(QTabWidget):
+    """
+    Pane für die restix-Konfiguration.
+    Enthält je ein Tab für Zugangsdaten, Backup-Umfänge und Backup-Ziele.
+    """
+    def __init__(self, parent: QWidget, local_config: LocalConfig):
+        """
+        Konstruktor.
+        :param parent: die zentrale restix Pane
+        :param local_config: lokale restix-Konfiguration
+        """
+        super().__init__(parent, tabsClosable=False)
+        self.__local_config = local_config
+        #self.__signals = EditorSignals()
+        self.setStyleSheet(TAB_FOLDER_STYLE)
+        self.addTab(CredentialsPane(self, local_config.credentials()), localized_label(L_CREDENTIALS))
+        self.addTab(ScopePane(self, local_config.path(), local_config.scopes()), localized_label(L_SCOPES))
+        self.addTab(TargetPane(self, local_config), localized_label(L_TARGETS))
+
+'''
 class ConfigurationPane(QWidget):
     """
     Pane für den Backup.
@@ -385,6 +446,7 @@ class ConfigurationPane(QWidget):
         # Group für die Backup-Ziele
         _scroll_pane_layout.addWidget(TargetPane(self, local_config))
         _pane_layout.addWidget(_scroll_pane)
+'''
 
 def _create_config_group_combo(parent_layout: QHBoxLayout, caption_id: str, tooltip_id: str, data: dict,
                                selection_handler: Callable) -> QComboBox:

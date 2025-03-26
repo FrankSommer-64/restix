@@ -180,6 +180,7 @@ l-maintenance Wartung
 l-mandatory-snapshot * Snapshot
 l-mandatory-object * Objekt
 l-name Name
+l-new Neu...
 l-ok OK
 l-options Optionen
 l-password Passwort
@@ -208,6 +209,7 @@ l-year Jahr
 
 # GUI Widget Labels
 l-dlg-title-about Über restix
+l-dlg-title-scope-editor Backup-Umfang festlegen
 l-dlg-title-select-excludes-file Excludes-Datei auswählen
 l-dlg-title-select-includes-file Includes-Datei auswählen
 l-dlg-title-snapshot-viewer Snapshot {0} für Host {1} ({2})
