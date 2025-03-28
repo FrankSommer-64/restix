@@ -159,6 +159,7 @@ I_GUI_TASK_FINISHED = 'i-gui-task-finished'
 
 # GUI widget labels
 L_DLG_TITLE_ABOUT = 'l-dlg-title-about'
+L_DLG_TITLE_NEW_CREDENTIALS = 'l-dlg-title-new-credentials'
 L_DLG_TITLE_SCOPE_EDITOR = 'l-dlg-title-scope-editor'
 L_DLG_TITLE_SELECT_EXCLUDES_FILE = 'l-dlg-title-select-excludes-file'
 L_DLG_TITLE_SELECT_INCLUDES_FILE = 'l-dlg-title-select-includes-file'
@@ -177,6 +178,7 @@ L_MENU_USER_MANUAL = 'l-menu-user-manual'
 
 # GUI labels
 L_ACTION = 'l-action'
+L_ADD = 'l-add'
 L_ADOPT_SELECTION = 'l-adopt-selection'
 L_ALIAS = 'l-alias'
 L_AUTO_CREATE = 'l-auto-create'

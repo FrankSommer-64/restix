@@ -150,6 +150,7 @@ i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels
 l-action Aktion
+l-add Hinzufügen
 l-adopt-selection Ausgewählte Elemente übernehmen
 l-alias Aliasname
 l-auto-create Repository automatisch anlegen
@@ -209,6 +210,7 @@ l-year Jahr
 
 # GUI Widget Labels
 l-dlg-title-about Über restix
+l-dlg-title-new-credentials Neue Zugriffsdaten
 l-dlg-title-scope-editor Backup-Umfang festlegen
 l-dlg-title-select-excludes-file Excludes-Datei auswählen
 l-dlg-title-select-includes-file Includes-Datei auswählen

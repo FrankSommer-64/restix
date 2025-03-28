@@ -42,6 +42,10 @@ CANCEL_BUTTON_STYLE = 'background-color: red; color: white'
 # Style für die Beschreibung einer Option
 CAPTION_STYLE = 'color: black; font-weight: bold'
 
+# Style für Kontext-Menüs
+CONTEXT_MENU_STYLE = 'QMenu {background-color: #ABABAB; border: 1px solid black; margin: 2px;}' \
+                     'QMenu::item:selected {color: white; background: darkblue;}'
+
 # Style für die Umrahmung aller GroupBoxes
 GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius: 6px; margin-top: 6px} ' \
                   'QGroupBox::title {color: blue; subcontrol-origin: margin; left: 7px; padding: 0 5px 0 5px;}'

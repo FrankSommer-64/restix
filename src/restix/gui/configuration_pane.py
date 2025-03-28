@@ -38,16 +38,18 @@ GUI-Bereich für die restix-Konfiguration.
 
 from typing import Callable
 
-from PySide6.QtCore import Qt, Signal, QObject
+from PySide6.QtCore import Qt, Signal, QObject, QAbstractListModel, QModelIndex, QPoint
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QComboBox, QFormLayout,
                                QLabel, QLineEdit, QSizePolicy, QPushButton, QScrollArea, QTextEdit, QDialog, QTabWidget,
-                               QGridLayout)
+                               QGridLayout, QMenu)
 
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
-from restix.gui import EDITOR_STYLE, TAB_FOLDER_STYLE, TEXT_FIELD_STYLE, ACTION_BUTTON_STYLE
+from restix.gui import *
 from restix.gui.dialogs import ScopeEditorDialog
+from restix.gui.model import ConfigModelFactory
 from restix.gui.panes import GROUP_BOX_STYLE, option_label
 
 
@@ -71,15 +73,24 @@ class CredentialsDetailPane(QWidget):
     """
     Pane zum Anzeigen und Editieren von Zugriffsdaten.
     """
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, include_name: bool = False):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
+        :param include_name: zeigt an, ob ein Eingabefeld für den Namen vorhanden sein soll
         """
         super().__init__(parent)
         self.__layout = QFormLayout()
         self.__layout.setContentsMargins(20, 20, 20, 20)
         self.__layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        if include_name:
+            self.__name_text = QLineEdit()
+            self.__name_text.setStyleSheet(TEXT_FIELD_STYLE)
+            self.__name_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+            self.__name_text.setToolTip(localized_label(T_CFG_CREDENTIAL_NAME))
+            self.__layout.addRow(QLabel(localized_label(L_NAME)), self.__name_text)
+        else:
+            self.__name_text = None
         self.__comment_text = QLineEdit()
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
@@ -93,15 +104,32 @@ class CredentialsDetailPane(QWidget):
         self.__type_combo.setCurrentIndex(-1)
         self.__type_combo.currentIndexChanged.connect(self._type_changed)
         self.__layout.addRow(QLabel(localized_label(L_TYPE)), self.__type_combo)
-        self.__filename_text = None
-        self.__password_text = None
+        self.__value_label = QLabel('')
+        self.__value_text = QLineEdit()
+        self.__value_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.__value_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.__value_text.setVisible(False)
+        self.__layout.addRow(self.__value_label, self.__value_text)
         self.setLayout(self.__layout)
+
+    def get_data(self) -> dict:
+        """
+        :returns: Zugriffsdaten
+        """
+        _data = {CFG_PAR_COMMENT: self.__comment_text.text(), CFG_PAR_TYPE: self.__type_combo.currentText()}
+        if self.__name_text is not None:
+            _data[CFG_PAR_NAME] = self.__name_text.text()
+        if self.__value_text.isVisible():
+            _data[CFG_PAR_VALUE] = self.__value_text.text()
+        return _data
 
     def set_data(self, credential_data: dict):
         """
         Überträgt die Zugriffsdaten in die GUI widgets.
         :param credential_data: Zugriffsdaten
         """
+        if self.__name_text is not None:
+            self.__name_text.setText(credential_data[CFG_PAR_NAME])
         self.__comment_text.setText(credential_data[CFG_PAR_COMMENT])
         _type = credential_data[CFG_PAR_TYPE]
         self.__type_combo.setCurrentText(_type)
@@ -120,45 +148,96 @@ class CredentialsDetailPane(QWidget):
         :param credential_type: Credential-Typ
         :param value: Dateiname oder Passwort
         """
+        if credential_type == CFG_VALUE_CREDENTIALS_TYPE_PROMPT or credential_type == CFG_VALUE_CREDENTIALS_TYPE_TOKEN:
+            self.__value_label.setText('')
+            self.__value_label.setToolTip('')
+            self.__value_text.setVisible(False)
+            return
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_FILE:
-            if self.__password_text is not None:
-                self.__layout.removeRow(2)
-                self.__password_text = None
-            if self.__filename_text is None:
-                self.__filename_text = QLineEdit()
-                self.__filename_text.setStyleSheet(TEXT_FIELD_STYLE)
-                self.__filename_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-                self.__filename_text.setToolTip(localized_label(T_CFG_CREDENTIAL_FILE_NAME))
-                self.__layout.insertRow(2, QLabel(localized_label(L_FILE_NAME)), self.__filename_text)
-            self.__filename_text.setText(value)
-        elif credential_type == CFG_VALUE_CREDENTIALS_TYPE_TEXT:
-            if self.__filename_text is not None:
-                self.__layout.removeRow(2)
-                self.__filename_text = None
-            if self.__password_text is None:
-                self.__password_text = QLineEdit(echoMode=QLineEdit.EchoMode.Password)
-                self.__password_text.setStyleSheet(TEXT_FIELD_STYLE)
-                self.__password_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-                self.__password_text.setToolTip(localized_label(T_CFG_CREDENTIAL_PASSWORD))
-                self.__layout.insertRow(2, QLabel(localized_label(L_PASSWORD)), self.__password_text)
-            self.__password_text.setText(value)
-        else:
-            if self.__filename_text is not None or self.__password_text is not None:
-                self.__layout.removeRow(2)
-            self.__filename_text = None
-            self.__password_text = None
+            _tooltip = localized_label(T_CFG_CREDENTIAL_FILE_NAME)
+            self.__value_label.setText(localized_label(L_FILE_NAME))
+            self.__value_label.setToolTip(_tooltip)
+            self.__value_text.setEchoMode(QLineEdit.EchoMode.Normal)
+            self.__value_text.clear()
+            self.__value_text.setVisible(True)
+            return
+        if credential_type == CFG_VALUE_CREDENTIALS_TYPE_TEXT:
+            _tooltip = localized_label(T_CFG_CREDENTIAL_PASSWORD)
+            self.__value_label.setText(localized_label(L_PASSWORD))
+            self.__value_label.setToolTip(_tooltip)
+            self.__value_text.setEchoMode(QLineEdit.EchoMode.Password)
+            self.__value_text.clear()
+            self.__value_text.setVisible(True)
+
+
+class NewElementDialog(QDialog):
+    """
+    Basisklasse der Dialogfenster für neue Elemente.
+    """
+    def __init__(self, parent: QWidget, title_id: str):
+        """
+        Konstruktor.
+        :param parent: übergeordnetes Widget
+        :param title_id: Resource-ID für die Fensterüberschrift
+        """
+        super().__init__(parent)
+        self.setWindowTitle(localized_label(title_id))
+        _parent_rect = parent.contentsRect()
+        self.setGeometry(_parent_rect.x() + _NEW_ELEMENT_DLG_OFFSET, _parent_rect.y() + _NEW_ELEMENT_DLG_OFFSET,
+                         _NEW_ELEMENT_DLG_WIDTH, _NEW_ELEMENT_DLG_HEIGHT)
+        self.setStyleSheet(EDITOR_STYLE)
+        _layout = QVBoxLayout(self)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+    def create_button_pane(self):
+        """
+        :returns: Pane mit den Buttons zum Übernehmen der Eingabedaten oder zum Abbruch
+        """
+        _button_pane = QWidget()
+        _button_pane_layout = QHBoxLayout(_button_pane)
+        _add_button = QPushButton(localized_label(L_ADD))
+        _add_button.setStyleSheet(ACTION_BUTTON_STYLE)
+        _add_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _add_button.clicked.connect(self.add_button_clicked)
+        _button_pane_layout.addWidget(_add_button)
+        _cancel_button = QPushButton(localized_label(L_CANCEL))
+        _cancel_button.setStyleSheet(CANCEL_BUTTON_STYLE)
+        _cancel_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _cancel_button.clicked.connect(self.reject)
+        _button_pane_layout.addWidget(_cancel_button)
+        self.layout().addWidget(_button_pane)
+
+    def add_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den Hinzufügen-Button geklickt hat
+        """
+        pass
+
+
+class NewCredentialDialog(NewElementDialog):
+    """
+    Dialogfenster für neue Zugriffsdaten.
+    """
+    def __init__(self, parent: QWidget):
+        """
+        Konstruktor.
+        :param parent: übergeordnetes Widget
+        """
+        super().__init__(parent, L_DLG_TITLE_NEW_CREDENTIALS)
+        self.layout().addWidget(CredentialsDetailPane(self, True))
+        self.create_button_pane()
 
 
 class ElementSelectorPane(QWidget):
     """
     Pane zur Auswahl eines Elements in einer Group von Konfigurationsdaten.
     """
-    def __init__(self, parent: QWidget, tooltip_id: str, element_names: list[str], handler: list[Callable]):
+    def __init__(self, parent: QWidget, tooltip_id: str, combo_model: QAbstractListModel, handler: list[Callable]):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
         :param tooltip_id: Resource ID für den Tooltip-Text der Combo-Box
-        :param element_names: Name aller Elemente der Group
+        :param combo_model: Model für die Combo-Box zur Auswahl der Elemente
         :param handler: Slots für die Signale [ausgewählt, neu, umbenannt, gelöscht]
         """
         super().__init__(parent)
@@ -168,7 +247,7 @@ class ElementSelectorPane(QWidget):
         self.__combo = QComboBox()
         self.__combo.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.__combo.customContextMenuRequested.connect(self._show_context_menu)
-        self.__combo.addItems(sorted(element_names))
+        self.__combo.setModel(combo_model)
         self.__combo.currentIndexChanged.connect(handler[0])
         self.__combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.__combo.setToolTip(localized_label(tooltip_id))
@@ -176,32 +255,58 @@ class ElementSelectorPane(QWidget):
         _new_button = QPushButton(localized_label(L_NEW))
         _new_button.setStyleSheet(ACTION_BUTTON_STYLE)
         _new_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        _new_button.clicked.connect(handler[1])
+        #_new_button.clicked.connect(handler[1])
+        _new_button.clicked.connect(self._add_element)
         _layout.addWidget(_new_button)
 
-    def _show_context_menu(self):
+    def _show_context_menu(self, position: QPoint):
         """
         Wird aufgerufen, wenn der Benutzer mit der rechten Maustaste auf ein Element der Combo-Box klickt.
         """
         print('_show_context_menu')
+        _context_menu = QMenu(self.__combo)
+        _context_menu.addAction('Umbenennen').triggered.connect(self._rename_element)
+        _context_menu.addAction('Löschen').triggered.connect(self._remove_element)
+        _context_menu.setStyleSheet(CONTEXT_MENU_STYLE)
+        _context_menu.exec(self.mapToGlobal(position))
+
+    def _add_element(self):
+        print('_add_element')
+        _dlg = NewCredentialDialog(self)
+        _rc = _dlg.exec()
+        _element_count = self.__combo.count()
+        _index = self.__combo.model().index(_element_count, 0)
+        self.__combo.model().setData(_index, {CFG_PAR_NAME: 'bla'})
+        # self.__combo.model().beginInsertRows(QModelIndex(), _element_count, _element_count)
+        # if self.__combo.model().insertRow(_element_count):
+        #     _index = self.__combo.model().index(_element_count, 0)
+        #     self.__combo.model().setData(_index, {CFG_PAR_NAME: 'bla'})
+        # self.__combo.model().endInsertRows()
+
+    def _rename_element(self):
+        print('_rename_element')
+
+    def _remove_element(self):
+        print('_remove_element')
+        self.__combo.model().removeRow(self.__combo.currentIndex())
 
 
 class CredentialsPane(QWidget):
     """
     Pane für die Zugriffsdaten.
     """
-    def __init__(self, parent: QWidget, credentials: dict):
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
         :param credentials: aktuell konfigurierte Zugriffsdaten
         """
         super().__init__(parent)
-        self.__credentials = credentials
+        #self.__credentials = credentials
         _layout = QGridLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        _layout.addWidget(ElementSelectorPane(self, T_CFG_CREDENTIAL_NAME, [*credentials],
+        _layout.addWidget(ElementSelectorPane(self, T_CFG_CREDENTIAL_NAME, model_factory.credential_names_model(),
                                               [self._credential_created, self._credential_selected]))
         #self.__detail_pane = CredentialsDetailPane(self)
         #_layout.addWidget(self.__detail_pane)
@@ -409,19 +514,19 @@ class ConfigurationPane(QTabWidget):
     Pane für die restix-Konfiguration.
     Enthält je ein Tab für Zugangsdaten, Backup-Umfänge und Backup-Ziele.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig):
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
         :param parent: die zentrale restix Pane
         :param local_config: lokale restix-Konfiguration
         """
         super().__init__(parent, tabsClosable=False)
-        self.__local_config = local_config
+        #self.__local_config = local_config
         #self.__signals = EditorSignals()
         self.setStyleSheet(TAB_FOLDER_STYLE)
-        self.addTab(CredentialsPane(self, local_config.credentials()), localized_label(L_CREDENTIALS))
-        self.addTab(ScopePane(self, local_config.path(), local_config.scopes()), localized_label(L_SCOPES))
-        self.addTab(TargetPane(self, local_config), localized_label(L_TARGETS))
+        self.addTab(CredentialsPane(self, model_factory), localized_label(L_CREDENTIALS))
+        #self.addTab(ScopePane(self, local_config.path(), local_config.scopes()), localized_label(L_SCOPES))
+        #self.addTab(TargetPane(self, local_config), localized_label(L_TARGETS))
 
 '''
 class ConfigurationPane(QWidget):
@@ -467,3 +572,8 @@ def _create_config_group_combo(parent_layout: QHBoxLayout, caption_id: str, tool
     _layout.addWidget(_combo_box)
     parent_layout.addLayout(_layout)
     return _combo_box
+
+
+_NEW_ELEMENT_DLG_HEIGHT = 480
+_NEW_ELEMENT_DLG_OFFSET = 10
+_NEW_ELEMENT_DLG_WIDTH = 640

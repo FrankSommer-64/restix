@@ -47,6 +47,7 @@ from restix.core.messages import *
 from restix.gui.backup_pane import BackupPane
 from restix.gui.configuration_pane import ConfigurationPane
 from restix.gui.maintenance_pane import MaintenancePane
+from restix.gui.model import ConfigModelFactory
 from restix.gui.panes import ActionSelectionPane
 from restix.gui.dialogs import AboutDialog, PdfViewerDialog
 from restix.gui.restore_pane import RestorePane
@@ -68,6 +69,7 @@ class CentralPane(QWidget):
         super().__init__(parent)
         self._local_config = local_config
         self._gui_settings = gui_settings
+        self.__model_factory = ConfigModelFactory(local_config)
         self._layout = QVBoxLayout()
         self._layout.setSpacing(0)
         self._layout.setContentsMargins(5, 5, 5, 5)
@@ -108,7 +110,7 @@ class CentralPane(QWidget):
         """
         Zeigt die GUI-Bereiche für Konfiguration an.
         """
-        self._activate_pane(ConfigurationPane(self, self._local_config))
+        self._activate_pane(ConfigurationPane(self, self.__model_factory))
 
     def _help_selected(self, mouse_x: int, mouse_y: int):
         """
