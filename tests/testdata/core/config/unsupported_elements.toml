@@ -3,7 +3,7 @@
 # ===============================================================
 
 [[credentials]]
-name = "standard"
+alias = "standard"
 comment = ""
 type = "file"
 value = "pw.txt"
@@ -11,7 +11,7 @@ user = "nobody"
 password = "topsecret"
 
 [[scope]]
-name = "minimal"
+alias = "minimal"
 comment = "Minimaler Backup-Umfang für Upload ins Internet"
 includes = "minimal.list"
 excludes = "minimal_excludes.list"
@@ -27,4 +27,4 @@ credentials = "standard"
 url = "file:/tmp/bla.zip"
 
 [[user]]
-name = "nobody"
+alias = "nobody"

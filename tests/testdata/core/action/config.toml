@@ -2,27 +2,27 @@
 # Unit-Test Konfigurationsdatei für restix
 # ===============================================================
 [[credentials]]
-name = "standard"
+alias = "standard"
 comment = ""
 type = "file"
 value = "pw.txt"
 
 [[scope]]
-name = "minimal"
+alias = "minimal"
 includes = "minimal.list"
 
 [[scope]]
-name = "excludes-only"
+alias = "excludes-only"
 includes = "full.list"
 excludes = "full_excludes.list"
 
 [[scope]]
-name = "ignores-only"
+alias = "ignores-only"
 includes = "full.list"
 ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
 
 [[scope]]
-name = "full"
+alias = "full"
 includes = "full.list"
 excludes = "full_excludes.list"
 ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]

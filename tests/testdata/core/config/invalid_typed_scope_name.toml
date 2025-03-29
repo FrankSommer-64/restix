@@ -4,13 +4,13 @@
 # ===============================================================
 
 [[credentials]]
-name = "standard"
+alias = "standard"
 comment = ""
 type = "file"
 value = "pw.txt"
 
 [[scope]]
-name = 123
+alias = 123
 comment = "Minimaler Backup-Umfang für Upload ins Internet"
 includes = "minimal.list"
 excludes = "minimal_excludes.list"

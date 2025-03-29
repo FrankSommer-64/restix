@@ -1,7 +1,7 @@
 # general
 e-alias-name-already-used Aliasname '{0}' wird bereits verwendet.
 e-alias-name-empty Kein Aliasname angegeben.
-e-alias-referenced Aliasname '{0}' wird noch in Gruppe '{1}' benötigt.
+e-alias-referenced Aliasname '{0}' wird noch in Sicherungs-Zielen verwendet.
 e-background-task-aborted Hintergrund-Task abgebrochen.
 e-background-task-failed Hintergrund-Task fehlgeschlagen: {0}
 e-bool-opt-required Für Option {0} muss True oder False angegeben werden.

@@ -4,13 +4,13 @@
 # ===============================================================
 
 [[credentials]]
-name = "standard"
+alias = "standard"
 comment = ""
 type = "file"
 value = "pw.txt"
 
 [[scope]]
-name = "minimal"
+alias = "minimal"
 comment = "Minimaler Backup-Umfang für Upload ins Internet"
 excludes = "minimal_excludes.list"
 ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]

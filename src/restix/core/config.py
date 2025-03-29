@@ -82,13 +82,13 @@ class LocalConfig(dict):
         """
         :returns: alle definierten Zugangsdaten, sortiert nach Name
         """
-        return self._group(CFG_GROUP_CREDENTIALS, CFG_PAR_NAME)
+        return self._group(CFG_GROUP_CREDENTIALS)
 
     def scopes(self) -> dict:
         """
         :returns: alle definierten Backup-Umfänge, sortiert nach Name
         """
-        return self._group(CFG_GROUP_SCOPE, CFG_PAR_NAME)
+        return self._group(CFG_GROUP_SCOPE)
 
     def credentials_for_target(self, alias: str) -> dict:
         """
@@ -110,7 +110,7 @@ class LocalConfig(dict):
         """
         :returns: alle definierten Backup-Ziele, sortiert nach Name
         """
-        return self._group(CFG_GROUP_TARGET, CFG_PAR_ALIAS)
+        return self._group(CFG_GROUP_TARGET)
 
     def pre_check_remove(self, group: str, alias: str):
         """
@@ -123,9 +123,9 @@ class LocalConfig(dict):
             # Backup-Ziele haben keine Abhängigkeiten
             return
         # bei Backup-Umfang oder Zugriffsdaten prüfen, ob sie in einem Backup-Ziel referenziert werden
-        for _target in self[CFG_GROUP_TARGET].values():
+        for _target in self[CFG_GROUP_TARGET]:
             if _target.get(group) == alias:
-                raise RestixException(E_ALIAS_REFERENCED, alias, group)
+                raise RestixException(E_ALIAS_REFERENCED, alias)
 
     def pre_check_rename(self, group: str, old_alias: str, new_alias: str):
         """
@@ -141,7 +141,7 @@ class LocalConfig(dict):
         if old_alias == new_alias:
             # gleicher Name hat keinen Effekt, muss vom Aufrufer abgefangen werden
             return
-        for new_alias in self[group].keys():
+        if new_alias in self._group(group).keys():
             # neuer Name wird schon verwendet
             raise RestixException(E_ALIAS_NAME_ALREADY_USED, new_alias)
 
@@ -172,15 +172,14 @@ class LocalConfig(dict):
         """
         return len(self.__warnings) > 0
 
-    def _group(self, group_name: str, naming_attr: str) -> dict:
+    def _group(self, group_name: str) -> dict:
         """
         :param group_name: die gewünschte Group
-        :param naming_attr: das Naming-Attribut der Group
         :returns: alle definierten Elemente der übergebenen Group, sortiert nach Name
         """
         _elements = {}
         for _element in self[group_name]:
-            _elements[_element[naming_attr]] = _element
+            _elements[_element[CFG_PAR_ALIAS]] = _element
         return dict(sorted(_elements.items()))
 
     @classmethod
@@ -456,14 +455,14 @@ _VALUED_CREDENTIAL_TYPES = (CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTIA
 # Beschreibung der Parameter in der TOML-Datei:
 # ([0] Typ, [1] Beschreibung der Elemente, [2] unique, [3] mandatory, [4] Bedingung für Mandatory)
 _META_CREDENTIALS = {CFG_PAR_COMMENT: ('s', None, False, False, None),
-                     CFG_PAR_NAME: ('s', None, True, True, None),
+                     CFG_PAR_ALIAS: ('s', None, True, True, None),
                      CFG_PAR_TYPE: (f's:{",".join(_ALLOWED_CREDENTIAL_TYPES)}', None, False, True, None),
                      CFG_PAR_VALUE: ('s', None, False, True, (CFG_PAR_TYPE, _VALUED_CREDENTIAL_TYPES))}
 _META_SCOPE = {CFG_PAR_COMMENT: ('s', None, False, False, None),
                CFG_PAR_EXCLUDES: ('s', None, False, False, None),
                CFG_PAR_IGNORES: ('as', None, False, False, None),
                CFG_PAR_INCLUDES: ('s', None, False, True, None),
-               CFG_PAR_NAME: ('s', None, True, True, None)}
+               CFG_PAR_ALIAS: ('s', None, True, True, None)}
 _META_TARGET = {CFG_PAR_ALIAS: ('s', None, True, True, None),
                 CFG_PAR_COMMENT: ('s', None, False, None),
                 CFG_PAR_CREDENTIALS: ('s', None, False, True, None),

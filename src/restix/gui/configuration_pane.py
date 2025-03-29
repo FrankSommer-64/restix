@@ -102,7 +102,7 @@ class CredentialsDetailPane(QWidget):
         """
         _data = {CFG_PAR_COMMENT: self.__comment_text.text(), CFG_PAR_TYPE: self.__type_combo.currentText()}
         if self.__name_text is not None:
-            _data[CFG_PAR_NAME] = self.__name_text.text()
+            _data[CFG_PAR_ALIAS] = self.__name_text.text()
         if self.__value_text.isVisible():
             _data[CFG_PAR_VALUE] = self.__value_text.text()
         return _data
@@ -113,7 +113,7 @@ class CredentialsDetailPane(QWidget):
         :param credential_data: Zugriffsdaten
         """
         if self.__name_text is not None:
-            self.__name_text.setText(credential_data[CFG_PAR_NAME])
+            self.__name_text.setText(credential_data[CFG_PAR_ALIAS])
         self.__comment_text.setText(credential_data[CFG_PAR_COMMENT])
         _type = credential_data[CFG_PAR_TYPE]
         self.__type_combo.setCurrentText(_type)
@@ -300,14 +300,14 @@ class NewCredentialDialog(NewElementDialog):
         Wird aufgerufen, wenn der Benutzer den Hinzufügen-Button geklickt hat
         """
         _data = self.__credentials_pane.get_data()
-        if len(_data[CFG_PAR_NAME]) == 0:
+        if len(_data[CFG_PAR_ALIAS]) == 0:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                     localized_label(I_GUI_NO_NAME_SPECIFIED),
                                     QMessageBox.StandardButton.Ok)
             return
-        if _data[CFG_PAR_NAME] in self.local_config.credentials():
+        if _data[CFG_PAR_ALIAS] in self.local_config.credentials():
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
-                                    localized_message(I_GUI_CREDENTIAL_EXISTS, _data[CFG_PAR_NAME]),
+                                    localized_message(I_GUI_CREDENTIAL_EXISTS, _data[CFG_PAR_ALIAS]),
                                     QMessageBox.StandardButton.Ok)
             return
         if len(_data[CFG_PAR_TYPE]) == 0:
@@ -381,7 +381,7 @@ class ElementSelectorPane(QWidget):
         if _dlg.exec() == QDialog.DialogCode.Accepted:
             _index = self.__combo.model().index(self.__combo.currentIndex(), 0)
             _element_data = self.__combo.model().data(_index, Qt.ItemDataRole.UserRole)
-            _element_data[CFG_PAR_NAME] = _dlg.get_new_alias()
+            _element_data[CFG_PAR_ALIAS] = _dlg.get_new_alias()
             self.__combo.model().setData(_index, _element_data)
 
     def _remove_element(self):
@@ -393,7 +393,10 @@ class ElementSelectorPane(QWidget):
         try:
             self.__local_config.pre_check_remove(self.__group, _element_alias)
         except RestixException as _e:
-            pass
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    str(_e),
+                                    QMessageBox.StandardButton.Ok)
+            return
         # Prüfen, ob die Zugriffsdaten von einem Backup-Ziel referenziert werden
         #self.__combo.model().removeRow(self.__combo.currentIndex())
 

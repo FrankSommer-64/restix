@@ -48,10 +48,8 @@ UNSUPPORTED_ELEMENTS = ['credentials.[0].user', 'credentials.[0].password', 'sco
                         'target.[0].url', 'user']
 # Namen der Elemente in der Standard-restix-Konfiguration, deren Wert eine Variable enthält
 VAR_CREDENTIALS = {'shared': ['value']}
-VAR_TARGETS = {'localdir': ['access_rights.year', 'access_rights.host', 'access_rights.user'],
-               'usbstick': ['location', 'access_rights.year', 'access_rights.host', 'access_rights.user'],
-               'nvme': ['location', 'access_rights.year', 'access_rights.host', 'access_rights.user'],
-               'veracrypt': ['access_rights.year', 'access_rights.host', 'access_rights.user']}
+VAR_TARGETS = {'usbstick': ['location'],
+               'nvme': ['location']}
 
 
 class TestConfig(unittest.TestCase):

@@ -77,7 +77,7 @@ class CredentialNamesModel(QAbstractListModel):
         if not index.isValid() or index.row() >= len(self.__data[CFG_GROUP_CREDENTIALS]):
             return None
         if role == Qt.ItemDataRole.DisplayRole:
-            return self.__data[CFG_GROUP_CREDENTIALS][index.row()][CFG_PAR_NAME]
+            return self.__data[CFG_GROUP_CREDENTIALS][index.row()][CFG_PAR_ALIAS]
         if role == Qt.ItemDataRole.UserRole:
             return self.__data[CFG_GROUP_CREDENTIALS][index.row()]
         return None
@@ -98,9 +98,9 @@ class CredentialNamesModel(QAbstractListModel):
         else:
             # existierende Zugriffsdaten
             _model_data = self.__data[CFG_GROUP_CREDENTIALS][index.row()]
-            if value[CFG_PAR_NAME] != _model_data[CFG_PAR_NAME]:
+            if value[CFG_PAR_ALIAS] != _model_data[CFG_PAR_ALIAS]:
                 # Alias wurde umbenannt, Referenzen in den Backup-Zielen aktualisieren
-                self.__data.credential_renamed(_model_data[CFG_PAR_NAME], value[CFG_PAR_NAME])
+                self.__data.credential_renamed(_model_data[CFG_PAR_ALIAS], value[CFG_PAR_ALIAS])
             _model_data.update(value)
             self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])
 

@@ -2,26 +2,26 @@
 # Unit-Test Konfigurationsdatei für restix
 # ===============================================================
 [[credentials]]
-name = "standard"
+alias = "standard"
 comment = ""
 type = "file"
 value = "pw.txt"
 
 [[credentials]]
-name = "shared"
+alias = "shared"
 comment = ""
 type = "file"
 value = "/etc/restix/${USER}/pw.txt"
 
 [[scope]]
-name = "minimal"
+alias = "minimal"
 comment = "Minimaler Backup-Umfang für Upload ins Internet"
 includes = "minimal.list"
 excludes = "minimal_excludes.list"
 ignores = [".git", ".idea", ".pytest_cache", ".venv", "__pychache__"]
 
 [[scope]]
-name = "vollstaendig"
+alias = "vollstaendig"
 comment = "Vollständiger Backup-Umfang für lokale Ziele"
 includes = "full.list"
 excludes = "full_excludes.list"
