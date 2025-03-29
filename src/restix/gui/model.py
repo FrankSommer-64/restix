@@ -56,7 +56,7 @@ class CredentialNamesModel(QAbstractListModel):
         """
         super().__init__()
         self.__data = configuration_data
-        self.rowsAboutToBeInserted.connect(self._add_credential_requested)
+        #self.rowsAboutToBeInserted.connect(self._add_credential_requested)
         self.rowsAboutToBeRemoved.connect(self._remove_credential_requested)
 
     def rowCount(self, /, parent: QModelIndex | QPersistentModelIndex= ...) -> int:
@@ -71,6 +71,8 @@ class CredentialNamesModel(QAbstractListModel):
             return None
         if role == Qt.ItemDataRole.DisplayRole:
             return self.__data[CFG_GROUP_CREDENTIALS][index.row()][CFG_PAR_NAME]
+        if role == Qt.ItemDataRole.UserRole:
+            return self.__data[CFG_GROUP_CREDENTIALS][index.row()]
         return None
 
     def setData(self, index, value, /, role = ...):
@@ -80,11 +82,11 @@ class CredentialNamesModel(QAbstractListModel):
             self.__data[CFG_GROUP_CREDENTIALS].append(value)
             self.endInsertRows()
             self.rowsInserted.emit(index, len(self.__data[CFG_GROUP_CREDENTIALS]), 1)
-            #self.layoutChanged.emit()
+            self.layoutChanged.emit()
         else:
             print('existing credential')
-            self.__data[CFG_GROUP_CREDENTIALS][index.row()] = value
-            #self.dataChanged.emit()
+            self.__data[CFG_GROUP_CREDENTIALS][index.row()].update(value)
+            self.dataChanged.emit()
 
     def removeRow(self, row, /, parent = ...) -> bool:
         print('removeRow')
@@ -116,4 +118,7 @@ class ConfigModelFactory:
 
     def credential_names_model(self) -> CredentialNamesModel:
         return self.__credential_names_model
+
+    def configuration_data(self) -> LocalConfig:
+        return self.__data
 

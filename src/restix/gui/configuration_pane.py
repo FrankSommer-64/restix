@@ -38,11 +38,10 @@ GUI-Bereich für die restix-Konfiguration.
 
 from typing import Callable
 
-from PySide6.QtCore import Qt, Signal, QObject, QAbstractListModel, QModelIndex, QPoint
-from PySide6.QtGui import QAction
+from PySide6.QtCore import Qt, Signal, QObject, QAbstractListModel, QPoint
 from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QComboBox, QFormLayout,
-                               QLabel, QLineEdit, QSizePolicy, QPushButton, QScrollArea, QTextEdit, QDialog, QTabWidget,
-                               QGridLayout, QMenu)
+                               QLabel, QLineEdit, QSizePolicy, QPushButton, QTextEdit, QDialog, QTabWidget,
+                               QGridLayout, QMenu, QMessageBox)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -51,22 +50,6 @@ from restix.gui import *
 from restix.gui.dialogs import ScopeEditorDialog
 from restix.gui.model import ConfigModelFactory
 from restix.gui.panes import GROUP_BOX_STYLE, option_label
-
-
-
-
-class ConfigurationSignals(QObject):
-    """
-    Signale der restix-Konfiguration.
-    """
-    # Element in der Combo-Box ausgewählt
-    element_selected = Signal(str)
-    # neues Element angelegt
-    element_added = Signal(dict)
-    # Element umbenannt
-    element_renamed = Signal(str, str)
-    # Element gelöscht
-    element_removed = Signal(str)
 
 
 class CredentialsDetailPane(QWidget):
@@ -170,17 +153,93 @@ class CredentialsDetailPane(QWidget):
             self.__value_text.setVisible(True)
 
 
-class NewElementDialog(QDialog):
+class RenameElementDialog(QDialog):
     """
-    Basisklasse der Dialogfenster für neue Elemente.
+    Dialogfenster zum Umbenennen eines Elements.
     """
-    def __init__(self, parent: QWidget, title_id: str):
+    def __init__(self, parent: QWidget, title_id: str, current_alias: str, all_element_aliases: set):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
         :param title_id: Resource-ID für die Fensterüberschrift
+        :param current_alias: aktueller Aliasname des Elements
+        :param all_element_aliases: alle Aliasnamen der Elemente in derselben Group
         """
         super().__init__(parent)
+        self.__all_element_aliases = all_element_aliases
+        self.__new_alias = None
+        self.setWindowTitle(localized_label(title_id))
+        _parent_rect = parent.contentsRect()
+        self.setGeometry(_parent_rect.x() + _RENAME_ELEMENT_DLG_OFFSET, _parent_rect.y() + _RENAME_ELEMENT_DLG_OFFSET,
+                         _RENAME_ELEMENT_DLG_WIDTH, _RENAME_ELEMENT_DLG_HEIGHT)
+        self.setStyleSheet(EDITOR_STYLE)
+        _layout = QVBoxLayout(self)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        _alias_pane = QWidget()
+        _alias_pane_layout = QFormLayout(_alias_pane)
+        _current_alias_label = QLabel(localized_label(L_CURRENT_ALIAS))
+        self.__current_alias_text = QLineEdit(current_alias, readOnly=True)
+        _alias_pane_layout.addRow(_current_alias_label, self.__current_alias_text)
+        _new_alias_label = QLabel(localized_label(L_NEW_ALIAS))
+        self.__new_alias_text = QLineEdit()
+        self.__new_alias_text.setStyleSheet(TEXT_FIELD_STYLE)
+        _alias_pane_layout.addRow(_new_alias_label, self.__new_alias_text)
+        _layout.addWidget(_alias_pane)
+        _button_pane = QWidget()
+        _button_pane_layout = QHBoxLayout(_button_pane)
+        _rename_button = QPushButton(localized_label(L_RENAME))
+        _rename_button.setStyleSheet(ACTION_BUTTON_STYLE)
+        _rename_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _rename_button.clicked.connect(self._rename_button_clicked)
+        _button_pane_layout.addWidget(_rename_button)
+        _cancel_button = QPushButton(localized_label(L_CANCEL))
+        _cancel_button.setStyleSheet(CANCEL_BUTTON_STYLE)
+        _cancel_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _cancel_button.clicked.connect(self.reject)
+        _button_pane_layout.addWidget(_cancel_button)
+        _layout.addWidget(_button_pane)
+
+    def get_new_alias(self) -> str:
+        """
+        :returns: vom Benutzer eingegebener neuer Aliasname
+        """
+        return self.__new_alias
+
+    def _rename_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den Umbenennen-Button geklickt hat
+        """
+        if len(self.__new_alias_text.text()) == 0:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_label(I_GUI_NO_NAME_SPECIFIED),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        if self.__new_alias_text.text() == self.__current_alias_text.text():
+            self.reject()
+            return
+        if self.__new_alias_text.text() in self.__all_element_aliases:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_message(I_GUI_ALIAS_EXISTS, self.__new_alias_text.text()),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        self.__new_alias = self.__new_alias_text.text()
+        self.accept()
+
+
+class NewElementDialog(QDialog):
+    """
+    Basisklasse der Dialogfenster für neue Elemente.
+    """
+    def __init__(self, parent: QWidget, local_config: LocalConfig, title_id: str):
+        """
+        Konstruktor.
+        :param parent: übergeordnetes Widget
+        :param local_config: lokale restix-Konfiguration
+        :param title_id: Resource-ID für die Fensterüberschrift
+        """
+        super().__init__(parent)
+        self.local_config = local_config
+        self.data = {}
         self.setWindowTitle(localized_label(title_id))
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _NEW_ELEMENT_DLG_OFFSET, _parent_rect.y() + _NEW_ELEMENT_DLG_OFFSET,
@@ -207,6 +266,12 @@ class NewElementDialog(QDialog):
         _button_pane_layout.addWidget(_cancel_button)
         self.layout().addWidget(_button_pane)
 
+    def get_data(self) -> dict:
+        """
+        :returns: vom Benutzer eingegebene Daten
+        """
+        return self.data
+
     def add_button_clicked(self):
         """
         Wird aufgerufen, wenn der Benutzer den Hinzufügen-Button geklickt hat
@@ -218,29 +283,56 @@ class NewCredentialDialog(NewElementDialog):
     """
     Dialogfenster für neue Zugriffsdaten.
     """
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, local_config: LocalConfig):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
+        :param local_config: lokale restix-Konfiguration
         """
-        super().__init__(parent, L_DLG_TITLE_NEW_CREDENTIALS)
-        self.layout().addWidget(CredentialsDetailPane(self, True))
+        super().__init__(parent, local_config, L_DLG_TITLE_NEW_CREDENTIALS)
+        self.__credentials_pane = CredentialsDetailPane(self, True)
+        self.layout().addWidget(self.__credentials_pane)
         self.create_button_pane()
+
+    def add_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den Hinzufügen-Button geklickt hat
+        """
+        _data = self.__credentials_pane.get_data()
+        if len(_data[CFG_PAR_NAME]) == 0:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_label(I_GUI_NO_NAME_SPECIFIED),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        if _data[CFG_PAR_NAME] in self.local_config.credentials():
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_message(I_GUI_CREDENTIAL_EXISTS, _data[CFG_PAR_NAME]),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        if len(_data[CFG_PAR_TYPE]) == 0:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_label(I_GUI_NO_CREDENTIAL_TYPE_SPECIFIED),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        self.data = _data
+        self.accept()
 
 
 class ElementSelectorPane(QWidget):
     """
     Pane zur Auswahl eines Elements in einer Group von Konfigurationsdaten.
     """
-    def __init__(self, parent: QWidget, tooltip_id: str, combo_model: QAbstractListModel, handler: list[Callable]):
+    def __init__(self, parent: QWidget, tooltip_id: str, local_config: LocalConfig, combo_model: QAbstractListModel, handler: list[Callable]):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
         :param tooltip_id: Resource ID für den Tooltip-Text der Combo-Box
+        :param local_config: lokale restix-Konfiguration
         :param combo_model: Model für die Combo-Box zur Auswahl der Elemente
         :param handler: Slots für die Signale [ausgewählt, neu, umbenannt, gelöscht]
         """
         super().__init__(parent)
+        self.__local_config = local_config
         _layout = QVBoxLayout(self)
         _layout.setContentsMargins(5, 5, 5, 5)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -263,32 +355,43 @@ class ElementSelectorPane(QWidget):
         """
         Wird aufgerufen, wenn der Benutzer mit der rechten Maustaste auf ein Element der Combo-Box klickt.
         """
-        print('_show_context_menu')
         _context_menu = QMenu(self.__combo)
-        _context_menu.addAction('Umbenennen').triggered.connect(self._rename_element)
-        _context_menu.addAction('Löschen').triggered.connect(self._remove_element)
+        _context_menu.addAction(localized_label(L_MENU_RENAME)).triggered.connect(self._rename_element)
+        _context_menu.addAction(localized_label(L_MENU_REMOVE)).triggered.connect(self._remove_element)
         _context_menu.setStyleSheet(CONTEXT_MENU_STYLE)
         _context_menu.exec(self.mapToGlobal(position))
 
     def _add_element(self):
-        print('_add_element')
-        _dlg = NewCredentialDialog(self)
-        _rc = _dlg.exec()
-        _element_count = self.__combo.count()
-        _index = self.__combo.model().index(_element_count, 0)
-        self.__combo.model().setData(_index, {CFG_PAR_NAME: 'bla'})
-        # self.__combo.model().beginInsertRows(QModelIndex(), _element_count, _element_count)
-        # if self.__combo.model().insertRow(_element_count):
-        #     _index = self.__combo.model().index(_element_count, 0)
-        #     self.__combo.model().setData(_index, {CFG_PAR_NAME: 'bla'})
-        # self.__combo.model().endInsertRows()
+        """
+        Wird aufgerufen, wenn der Benutzer den "Neu"-Button geklickt hat.
+        """
+        _dlg = NewCredentialDialog(self, self.__local_config)
+        if _dlg.exec() == QDialog.DialogCode.Accepted:
+            _index = self.__combo.model().index(self.__combo.count(), 0)
+            self.__combo.model().setData(_index, _dlg.get_data())
 
     def _rename_element(self):
-        print('_rename_element')
+        """
+        Wird aufgerufen, wenn der Benutzer den Eintrag "Umbenennen" im Kontextmenü ausgewählt hat
+        """
+        # Prüfen, ob es bereits einen Alias mit dem neuen Namen gibt
+        # Referenzierende Backup-Ziele aktualisieren
+        print(f'_rename_element {self.__combo.currentText()}')
+        _dlg = RenameElementDialog(self, L_DLG_TITLE_RENAME_CREDENTIALS, self.__combo.currentText(),
+                                   set(self.__local_config.credentials().keys()))
+        if _dlg.exec() == QDialog.DialogCode.Accepted:
+            _index = self.__combo.model().index(self.__combo.currentIndex(), 0)
+            _element_data = self.__combo.model().data(_index, Qt.ItemDataRole.UserRole)
+            _element_data[CFG_PAR_NAME] = _dlg.get_new_alias()
+            self.__combo.model().setData(_index, _element_data)
 
     def _remove_element(self):
-        print('_remove_element')
-        self.__combo.model().removeRow(self.__combo.currentIndex())
+        """
+        Wird aufgerufen, wenn der Benutzer den Eintrag "Löschen" im Kontextmenü ausgewählt hat
+        """
+        print(f'_remove_element {self.__combo.currentText()}')
+        # Prüfen, ob die Zugriffsdaten von einem Backup-Ziel referenziert werden
+        #self.__combo.model().removeRow(self.__combo.currentIndex())
 
 
 class CredentialsPane(QWidget):
@@ -306,7 +409,8 @@ class CredentialsPane(QWidget):
         _layout = QGridLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        _layout.addWidget(ElementSelectorPane(self, T_CFG_CREDENTIAL_NAME, model_factory.credential_names_model(),
+        _layout.addWidget(ElementSelectorPane(self, T_CFG_CREDENTIAL_NAME, model_factory.configuration_data(),
+                                              model_factory.credential_names_model(),
                                               [self._credential_created, self._credential_selected]))
         #self.__detail_pane = CredentialsDetailPane(self)
         #_layout.addWidget(self.__detail_pane)
@@ -518,7 +622,7 @@ class ConfigurationPane(QTabWidget):
         """
         Konstruktor.
         :param parent: die zentrale restix Pane
-        :param local_config: lokale restix-Konfiguration
+        :param model_factory: Factory für die Models
         """
         super().__init__(parent, tabsClosable=False)
         #self.__local_config = local_config
@@ -577,3 +681,7 @@ def _create_config_group_combo(parent_layout: QHBoxLayout, caption_id: str, tool
 _NEW_ELEMENT_DLG_HEIGHT = 480
 _NEW_ELEMENT_DLG_OFFSET = 10
 _NEW_ELEMENT_DLG_WIDTH = 640
+
+_RENAME_ELEMENT_DLG_HEIGHT = 320
+_RENAME_ELEMENT_DLG_OFFSET = 10
+_RENAME_ELEMENT_DLG_WIDTH = 480
