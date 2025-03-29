@@ -38,10 +38,10 @@ GUI-Bereich für die restix-Konfiguration.
 
 from typing import Callable
 
-from PySide6.QtCore import Qt, Signal, QObject, QAbstractListModel, QPoint
+from PySide6.QtCore import Qt, QAbstractListModel, QPoint, QModelIndex
 from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QComboBox, QFormLayout,
                                QLabel, QLineEdit, QSizePolicy, QPushButton, QTextEdit, QDialog, QTabWidget,
-                               QGridLayout, QMenu, QMessageBox)
+                               QMenu, QMessageBox, QAbstractItemView)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -53,7 +53,7 @@ from restix.gui.model import ConfigModelFactory
 from restix.gui.panes import GROUP_BOX_STYLE, option_label
 
 
-class CredentialsDetailPane(QWidget):
+class CredentialsDetailPane(QAbstractItemView):
     """
     Pane zum Anzeigen und Editieren von Zugriffsdaten.
     """
@@ -142,7 +142,7 @@ class CredentialsDetailPane(QWidget):
             self.__value_label.setText(localized_label(L_FILE_NAME))
             self.__value_label.setToolTip(_tooltip)
             self.__value_text.setEchoMode(QLineEdit.EchoMode.Normal)
-            self.__value_text.clear()
+            self.__value_text.setText(value)
             self.__value_text.setVisible(True)
             return
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_TEXT:
@@ -150,7 +150,7 @@ class CredentialsDetailPane(QWidget):
             self.__value_label.setText(localized_label(L_PASSWORD))
             self.__value_label.setToolTip(_tooltip)
             self.__value_text.setEchoMode(QLineEdit.EchoMode.Password)
-            self.__value_text.clear()
+            self.__value_text.setText(value)
             self.__value_text.setVisible(True)
 
 
@@ -279,6 +279,11 @@ class NewElementDialog(QDialog):
         """
         pass
 
+    @classmethod
+    def for_group(cls, group: str, parent: QWidget, local_config: LocalConfig):
+        if group == CFG_GROUP_CREDENTIALS:
+            return NewCredentialDialog(parent, local_config)
+
 
 class NewCredentialDialog(NewElementDialog):
     """
@@ -323,7 +328,8 @@ class ElementSelectorPane(QWidget):
     """
     Pane zur Auswahl eines Elements in einer Group von Konfigurationsdaten.
     """
-    def __init__(self, parent: QWidget, group: str, tooltip_id: str, local_config: LocalConfig, combo_model: QAbstractListModel, handler: list[Callable]):
+    def __init__(self, parent: QWidget, group: str, tooltip_id: str, local_config: LocalConfig,
+                 combo_model: QAbstractListModel, selected_handler: Callable):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
@@ -331,7 +337,7 @@ class ElementSelectorPane(QWidget):
         :param tooltip_id: Resource ID für den Tooltip-Text der Combo-Box
         :param local_config: lokale restix-Konfiguration
         :param combo_model: Model für die Combo-Box zur Auswahl der Elemente
-        :param handler: Slots für die Signale [ausgewählt, neu, umbenannt, gelöscht]
+        :param selected_handler: Handler, wenn ein Element in der Combo-Box ausgewählt wird
         """
         super().__init__(parent)
         self.__group = group
@@ -343,14 +349,14 @@ class ElementSelectorPane(QWidget):
         self.__combo.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.__combo.customContextMenuRequested.connect(self._show_context_menu)
         self.__combo.setModel(combo_model)
-        self.__combo.currentIndexChanged.connect(handler[0])
+        self.__combo.setCurrentIndex(-1)
+        self.__combo.currentIndexChanged.connect(selected_handler)
         self.__combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         self.__combo.setToolTip(localized_label(tooltip_id))
         _layout.addWidget(self.__combo)
         _new_button = QPushButton(localized_label(L_NEW))
         _new_button.setStyleSheet(ACTION_BUTTON_STYLE)
         _new_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        #_new_button.clicked.connect(handler[1])
         _new_button.clicked.connect(self._add_element)
         _layout.addWidget(_new_button)
 
@@ -368,7 +374,7 @@ class ElementSelectorPane(QWidget):
         """
         Wird aufgerufen, wenn der Benutzer den "Neu"-Button geklickt hat.
         """
-        _dlg = NewCredentialDialog(self, self.__local_config)
+        _dlg = NewElementDialog.for_group(self.__group, self, self.__local_config)
         if _dlg.exec() == QDialog.DialogCode.Accepted:
             _index = self.__combo.model().index(self.__combo.count(), 0)
             self.__combo.model().setData(_index, _dlg.get_data())
@@ -389,7 +395,6 @@ class ElementSelectorPane(QWidget):
         Wird aufgerufen, wenn der Benutzer den Eintrag "Löschen" im Kontextmenü ausgewählt hat
         """
         _element_alias = self.__combo.currentText()
-        print(f'_remove_element {_element_alias}')
         try:
             self.__local_config.pre_check_remove(self.__group, _element_alias)
         except RestixException as _e:
@@ -397,8 +402,10 @@ class ElementSelectorPane(QWidget):
                                     str(_e),
                                     QMessageBox.StandardButton.Ok)
             return
-        # Prüfen, ob die Zugriffsdaten von einem Backup-Ziel referenziert werden
-        #self.__combo.model().removeRow(self.__combo.currentIndex())
+        if QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                   localized_message(I_GUI_CONFIRM_REMOVE, _element_alias),
+                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No):
+            self.__combo.model().removeRow(self.__combo.currentIndex())
 
 
 class CredentialsPane(QWidget):
@@ -409,32 +416,31 @@ class CredentialsPane(QWidget):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
-        :param credentials: aktuell konfigurierte Zugriffsdaten
+        :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent)
-        #self.__credentials = credentials
-        _layout = QGridLayout(self)
+        _layout = QHBoxLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_CREDENTIALS, T_CFG_CREDENTIAL_NAME,
                                               model_factory.configuration_data(),
                                               model_factory.credential_names_model(),
-                                              [self._credential_created, self._credential_selected]))
-        #self.__detail_pane = CredentialsDetailPane(self)
-        #_layout.addWidget(self.__detail_pane)
+                                              self._credential_selected))
+        _detail_group_box = QGroupBox('')
+        _group_box_layout = QVBoxLayout(_detail_group_box)
+        #_detail_group_box.setStyleSheet(GROUP_BOX_STYLE)
+        self.__detail_pane = CredentialsDetailPane(self)
+        self.__detail_pane.setModel(model_factory.credentials_model())
+        _group_box_layout.addWidget(self.__detail_pane)
+        _layout.addWidget(_detail_group_box)
 
-    def _credential_created(self, _credential_data: dict):
+    def _credential_selected(self, index: int):
         """
         Wird aufgerufen, wenn der Benutzer einen Eintrag der Zugriffsdaten ausgewählt hat.
         """
-        pass
-
-    def _credential_selected(self, _index: int):
-        """
-        Wird aufgerufen, wenn der Benutzer einen Eintrag der Zugriffsdaten ausgewählt hat.
-        """
-        pass
-        #self.__detail_pane.set_data(self.__credentials_combo.currentData(Qt.ItemDataRole.UserRole))
+        print(f'_credential_selected {index}')
+        _model_index = self.__detail_pane.model().createIndex(index, 0)
+        self.__detail_pane.set_data(self.__detail_pane.model().data(_model_index, Qt.ItemDataRole.DisplayRole))
 
 
 class ScopeDetailPane(QWidget):

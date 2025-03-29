@@ -38,8 +38,7 @@ Model der restix-Konfiguration zur Nutzung in der GUI.
 
 from typing import Any
 
-from PySide6.QtCore import Qt, Signal, QObject, QAbstractProxyModel, QAbstractListModel, QModelIndex, \
-    QPersistentModelIndex
+from PySide6.QtCore import Qt, QAbstractListModel, QModelIndex, QPersistentModelIndex, QAbstractItemModel
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -56,8 +55,6 @@ class CredentialNamesModel(QAbstractListModel):
         """
         super().__init__()
         self.__data = configuration_data
-        #self.rowsAboutToBeInserted.connect(self._add_credential_requested)
-        self.rowsAboutToBeRemoved.connect(self._remove_credential_requested)
 
     def rowCount(self, /, parent: QModelIndex | QPersistentModelIndex= ...) -> int:
         """
@@ -87,6 +84,7 @@ class CredentialNamesModel(QAbstractListModel):
         Ändert Zugriffsdaten im Model.
         :param index: Index der Zugriffsdaten
         :param value: komplette Zugriffsdaten
+        :param role: Typ-Selektor
         """
         if index.row() < 0:
             # neue Zugriffsdaten
@@ -105,17 +103,95 @@ class CredentialNamesModel(QAbstractListModel):
             self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])
 
     def removeRow(self, row, /, parent = ...) -> bool:
-        print('removeRow')
+        """
+        Löscht Zugriffsdaten im Model.
+        :param row: Index der Zugriffsdaten
+        :param parent: immer None
+        """
         self.beginRemoveRows(QModelIndex(), row, row)
-        print('after beginRemoveRows')
+        del self.__data[CFG_GROUP_CREDENTIALS][row]
         self.endRemoveRows()
-        return False
+        self.layoutChanged.emit()
+        return True
 
-    def _add_credential_requested(self):
-        print('_add_credential_requested')
 
-    def _remove_credential_requested(self):
-        print('_remove_credential_requested')
+class CredentialsModel(QAbstractItemModel):
+    """
+    Model für Combobox-Widgets, die nur mit dem Namen von Zugriffsdaten arbeiten.
+    """
+    def __init__(self, configuration_data: LocalConfig):
+        """
+        Konstruktor.
+        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        """
+        super().__init__()
+        self.__data = configuration_data
+
+    def parent(self):
+        print('CredentialsModel.parent')
+        return QModelIndex()
+
+    def index(self, row: int, column: int, /, parent: QModelIndex | QPersistentModelIndex = ...) -> QModelIndex:
+        """
+        :param parent:
+        :returns: Anzahl der Zugriffsdaten-Elemente
+        """
+        print('CredentialsModel.index')
+        return QModelIndex()
+
+    def rowCount(self, /, parent: QModelIndex | QPersistentModelIndex= ...) -> int:
+        """
+        :param parent:
+        :returns: Anzahl der Zugriffsdaten-Elemente
+        """
+        print('CredentialsModel.rowCount')
+        return len(self.__data[CFG_GROUP_CREDENTIALS])
+
+    def columnCount(self, /, parent: QModelIndex | QPersistentModelIndex= ...) -> int:
+        """
+        :param parent:
+        :returns: Anzahl der Zugriffsdaten-Elemente
+        """
+        print('CredentialsModel.columnCount')
+        return 4
+
+    def data(self, index: QModelIndex | QPersistentModelIndex, /, role: int = ...) -> Any:
+        """
+        Gibt die Daten von Zugriffsdaten zurück, bei DisplayRole der Aliasname für die Anzeige in einer Combobox,
+        bei UserRole das Dictionary mit den gesamten Daten.
+        :param index: Index der Zugriffsdaten
+        :param role: Role
+        :returns: Zugriffsdaten für die role
+        """
+        print('CredentialsModel.data')
+        if not index.isValid() or index.row() >= len(self.__data[CFG_GROUP_CREDENTIALS]):
+            return None
+        if role == Qt.ItemDataRole.DisplayRole or Qt.ItemDataRole.UserRole:
+            return self.__data[CFG_GROUP_CREDENTIALS][index.row()]
+        return None
+
+    def setData(self, index: QModelIndex | QPersistentModelIndex, value: dict, /, role = ...):
+        """
+        Ändert Zugriffsdaten im Model.
+        :param index: Index der Zugriffsdaten
+        :param value: komplette Zugriffsdaten
+        :param role: Typ-Selektor
+        """
+        if index.row() < 0:
+            # neue Zugriffsdaten
+            self.beginInsertRows(QModelIndex(), index.row(), index.row())
+            self.__data[CFG_GROUP_CREDENTIALS].append(value)
+            self.endInsertRows()
+            self.rowsInserted.emit(index, len(self.__data[CFG_GROUP_CREDENTIALS]), 1)
+            self.layoutChanged.emit()
+        else:
+            # existierende Zugriffsdaten
+            _model_data = self.__data[CFG_GROUP_CREDENTIALS][index.row()]
+            if value[CFG_PAR_ALIAS] != _model_data[CFG_PAR_ALIAS]:
+                # Alias wurde umbenannt, Referenzen in den Backup-Zielen aktualisieren
+                self.__data.credential_renamed(_model_data[CFG_PAR_ALIAS], value[CFG_PAR_ALIAS])
+            _model_data.update(value)
+            self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])
 
 
 class ConfigModelFactory:
@@ -131,9 +207,13 @@ class ConfigModelFactory:
         super().__init__()
         self.__data = configuration_data
         self.__credential_names_model = CredentialNamesModel(configuration_data)
+        self.__credentials_model = CredentialsModel(configuration_data)
 
     def credential_names_model(self) -> CredentialNamesModel:
         return self.__credential_names_model
+
+    def credentials_model(self) -> CredentialsModel:
+        return self.__credentials_model
 
     def configuration_data(self) -> LocalConfig:
         return self.__data

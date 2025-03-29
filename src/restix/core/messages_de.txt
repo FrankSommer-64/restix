@@ -137,6 +137,7 @@ i-gui-alias-exists Aliasname '{0}' existiert bereits.
 i-gui-backing-up-data Sichere Daten in Repository {0}.
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
+i-gui-confirm-remove {0} wirklich löschen ?
 i-gui-create-config-root x
 i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-credential-exists Zugriffsdaten mit Alias '{0}' existieren bereits.

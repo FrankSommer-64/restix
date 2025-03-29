@@ -156,6 +156,17 @@ class LocalConfig(dict):
             if _target.get(CFG_PAR_CREDENTIALS) == old_alias:
                 _target[CFG_PAR_CREDENTIALS] = new_alias
 
+    def scope_renamed(self, old_alias: str, new_alias: str):
+        """
+        Passt die in Backup-Zielen referenzierten Backup-Umfänge aufgrund einer Umbenennung an.
+        :param old_alias: alter Aliasname des Backup-Umfangs
+        :param new_alias: neuer Aliasname des Backup-Umfangs
+        :return:
+        """
+        for _target in self[CFG_GROUP_TARGET].values():
+            if _target.get(CFG_PAR_SCOPE) == old_alias:
+                _target[CFG_PAR_SCOPE] = new_alias
+
     def for_cli(self, variables: dict):
         """
         :param variables: Namen und Werte der zu ersetzenden Variablen
