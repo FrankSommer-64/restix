@@ -41,6 +41,9 @@ import os
 from restix.core.util import platform_locale
 
 # Allgemeine Nachrichten
+E_ALIAS_NAME_ALREADY_USED = 'e-alias-name-already-used'
+E_ALIAS_NAME_EMPTY = 'e-alias-name-empty'
+E_ALIAS_REFERENCED = 'e-alias-referenced'
 E_BACKGROUND_TASK_ABORTED = 'e-background-task-aborted'
 E_BACKGROUND_TASK_FAILED = 'e-background-task-failed'
 E_BOOL_OPT_REQUIRED = 'e-bool-opt-required'
@@ -164,7 +167,7 @@ I_GUI_TASK_FINISHED = 'i-gui-task-finished'
 # GUI widget labels
 L_DLG_TITLE_ABOUT = 'l-dlg-title-about'
 L_DLG_TITLE_NEW_CREDENTIALS = 'l-dlg-title-new-credentials'
-L_DLG_TITLE_RENAME_CREDENTIALS = 'l-dlg-title-rename-credentials'
+L_DLG_TITLE_RENAME_ELEMENT = 'l-dlg-title-rename-element'
 L_DLG_TITLE_SCOPE_EDITOR = 'l-dlg-title-scope-editor'
 L_DLG_TITLE_SELECT_EXCLUDES_FILE = 'l-dlg-title-select-excludes-file'
 L_DLG_TITLE_SELECT_INCLUDES_FILE = 'l-dlg-title-select-includes-file'

@@ -46,6 +46,7 @@ from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QCo
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
+from restix.core.restix_exception import RestixException
 from restix.gui import *
 from restix.gui.dialogs import ScopeEditorDialog
 from restix.gui.model import ConfigModelFactory
@@ -157,18 +158,19 @@ class RenameElementDialog(QDialog):
     """
     Dialogfenster zum Umbenennen eines Elements.
     """
-    def __init__(self, parent: QWidget, title_id: str, current_alias: str, all_element_aliases: set):
+    def __init__(self, parent: QWidget, group: str, current_alias: str, local_config: LocalConfig):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param title_id: Resource-ID für die Fensterüberschrift
+        :param group: Gruppe des Elements
         :param current_alias: aktueller Aliasname des Elements
-        :param all_element_aliases: alle Aliasnamen der Elemente in derselben Group
+        :param local_config: lokale restix-Konfiguration
         """
         super().__init__(parent)
-        self.__all_element_aliases = all_element_aliases
+        self.__group = group
+        self.__local_config = local_config
         self.__new_alias = None
-        self.setWindowTitle(localized_label(title_id))
+        self.setWindowTitle(localized_message(L_DLG_TITLE_RENAME_ELEMENT, group))
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _RENAME_ELEMENT_DLG_OFFSET, _parent_rect.y() + _RENAME_ELEMENT_DLG_OFFSET,
                          _RENAME_ELEMENT_DLG_WIDTH, _RENAME_ELEMENT_DLG_HEIGHT)
@@ -209,20 +211,19 @@ class RenameElementDialog(QDialog):
         """
         Wird aufgerufen, wenn der Benutzer den Umbenennen-Button geklickt hat
         """
-        if len(self.__new_alias_text.text()) == 0:
-            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
-                                    localized_label(I_GUI_NO_NAME_SPECIFIED),
-                                    QMessageBox.StandardButton.Ok)
-            return
-        if self.__new_alias_text.text() == self.__current_alias_text.text():
+        _old_alias = self.__current_alias_text.text()
+        _new_alias = self.__new_alias_text.text()
+        if _new_alias == _old_alias:
             self.reject()
             return
-        if self.__new_alias_text.text() in self.__all_element_aliases:
+        try:
+            self.__local_config.pre_check_rename(self.__group, _old_alias, _new_alias)
+        except RestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
-                                    localized_message(I_GUI_ALIAS_EXISTS, self.__new_alias_text.text()),
+                                    str(_e),
                                     QMessageBox.StandardButton.Ok)
             return
-        self.__new_alias = self.__new_alias_text.text()
+        self.__new_alias = _new_alias
         self.accept()
 
 
@@ -322,16 +323,18 @@ class ElementSelectorPane(QWidget):
     """
     Pane zur Auswahl eines Elements in einer Group von Konfigurationsdaten.
     """
-    def __init__(self, parent: QWidget, tooltip_id: str, local_config: LocalConfig, combo_model: QAbstractListModel, handler: list[Callable]):
+    def __init__(self, parent: QWidget, group: str, tooltip_id: str, local_config: LocalConfig, combo_model: QAbstractListModel, handler: list[Callable]):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
+        :param group: die Element-Gruppe
         :param tooltip_id: Resource ID für den Tooltip-Text der Combo-Box
         :param local_config: lokale restix-Konfiguration
         :param combo_model: Model für die Combo-Box zur Auswahl der Elemente
         :param handler: Slots für die Signale [ausgewählt, neu, umbenannt, gelöscht]
         """
         super().__init__(parent)
+        self.__group = group
         self.__local_config = local_config
         _layout = QVBoxLayout(self)
         _layout.setContentsMargins(5, 5, 5, 5)
@@ -374,11 +377,7 @@ class ElementSelectorPane(QWidget):
         """
         Wird aufgerufen, wenn der Benutzer den Eintrag "Umbenennen" im Kontextmenü ausgewählt hat
         """
-        # Prüfen, ob es bereits einen Alias mit dem neuen Namen gibt
-        # Referenzierende Backup-Ziele aktualisieren
-        print(f'_rename_element {self.__combo.currentText()}')
-        _dlg = RenameElementDialog(self, L_DLG_TITLE_RENAME_CREDENTIALS, self.__combo.currentText(),
-                                   set(self.__local_config.credentials().keys()))
+        _dlg = RenameElementDialog(self, self.__group, self.__combo.currentText(), self.__local_config)
         if _dlg.exec() == QDialog.DialogCode.Accepted:
             _index = self.__combo.model().index(self.__combo.currentIndex(), 0)
             _element_data = self.__combo.model().data(_index, Qt.ItemDataRole.UserRole)
@@ -389,7 +388,12 @@ class ElementSelectorPane(QWidget):
         """
         Wird aufgerufen, wenn der Benutzer den Eintrag "Löschen" im Kontextmenü ausgewählt hat
         """
-        print(f'_remove_element {self.__combo.currentText()}')
+        _element_alias = self.__combo.currentText()
+        print(f'_remove_element {_element_alias}')
+        try:
+            self.__local_config.pre_check_remove(self.__group, _element_alias)
+        except RestixException as _e:
+            pass
         # Prüfen, ob die Zugriffsdaten von einem Backup-Ziel referenziert werden
         #self.__combo.model().removeRow(self.__combo.currentIndex())
 
@@ -409,7 +413,8 @@ class CredentialsPane(QWidget):
         _layout = QGridLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        _layout.addWidget(ElementSelectorPane(self, T_CFG_CREDENTIAL_NAME, model_factory.configuration_data(),
+        _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_CREDENTIALS, T_CFG_CREDENTIAL_NAME,
+                                              model_factory.configuration_data(),
                                               model_factory.credential_names_model(),
                                               [self._credential_created, self._credential_selected]))
         #self.__detail_pane = CredentialsDetailPane(self)

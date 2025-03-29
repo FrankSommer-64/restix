@@ -112,6 +112,50 @@ class LocalConfig(dict):
         """
         return self._group(CFG_GROUP_TARGET, CFG_PAR_ALIAS)
 
+    def pre_check_remove(self, group: str, alias: str):
+        """
+        Prüft, ob ein Element gelöscht werden kann.
+        :param group: Group des Elements
+        :param alias: Aliasname des Elements.
+        :raises RestixException: falls das Element nicht gelöscht werden darf
+        """
+        if group == CFG_GROUP_TARGET:
+            # Backup-Ziele haben keine Abhängigkeiten
+            return
+        # bei Backup-Umfang oder Zugriffsdaten prüfen, ob sie in einem Backup-Ziel referenziert werden
+        for _target in self[CFG_GROUP_TARGET].values():
+            if _target.get(group) == alias:
+                raise RestixException(E_ALIAS_REFERENCED, alias, group)
+
+    def pre_check_rename(self, group: str, old_alias: str, new_alias: str):
+        """
+        Prüft, ob ein Element umbenannt werden kann.
+        :param group: Group des Elements
+        :param old_alias: alter Aliasname des Elements
+        :param new_alias: neuer Aliasname des Elements.
+        :raises RestixException: falls das Element nicht umbenannt werden darf
+        """
+        if len(new_alias) == 0:
+            # Leerstring als neuer Aliasname ist nie erlaubt
+            raise RestixException(E_ALIAS_NAME_EMPTY)
+        if old_alias == new_alias:
+            # gleicher Name hat keinen Effekt, muss vom Aufrufer abgefangen werden
+            return
+        for new_alias in self[group].keys():
+            # neuer Name wird schon verwendet
+            raise RestixException(E_ALIAS_NAME_ALREADY_USED, new_alias)
+
+    def credential_renamed(self, old_alias: str, new_alias: str):
+        """
+        Passt die in Backup-Zielen referenzierten Zugriffsdaten aufgrund einer Umbenennung an.
+        :param old_alias: alter Aliasname der Zugriffsdaten
+        :param new_alias: neuer Aliasname der Zugriffsdaten
+        :return:
+        """
+        for _target in self[CFG_GROUP_TARGET].values():
+            if _target.get(CFG_PAR_CREDENTIALS) == old_alias:
+                _target[CFG_PAR_CREDENTIALS] = new_alias
+
     def for_cli(self, variables: dict):
         """
         :param variables: Namen und Werte der zu ersetzenden Variablen

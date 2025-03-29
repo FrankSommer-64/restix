@@ -67,6 +67,13 @@ class CredentialNamesModel(QAbstractListModel):
         return len(self.__data[CFG_GROUP_CREDENTIALS])
 
     def data(self, index: QModelIndex | QPersistentModelIndex, /, role: int = ...) -> Any:
+        """
+        Gibt die Daten von Zugriffsdaten zurück, bei DisplayRole der Aliasname für die Anzeige in einer Combobox,
+        bei UserRole das Dictionary mit den gesamten Daten.
+        :param index: Index der Zugriffsdaten
+        :param role: Role
+        :returns: Zugriffsdaten für die role
+        """
         if not index.isValid() or index.row() >= len(self.__data[CFG_GROUP_CREDENTIALS]):
             return None
         if role == Qt.ItemDataRole.DisplayRole:
@@ -75,18 +82,27 @@ class CredentialNamesModel(QAbstractListModel):
             return self.__data[CFG_GROUP_CREDENTIALS][index.row()]
         return None
 
-    def setData(self, index, value, /, role = ...):
+    def setData(self, index: QModelIndex | QPersistentModelIndex, value: dict, /, role = ...):
+        """
+        Ändert Zugriffsdaten im Model.
+        :param index: Index der Zugriffsdaten
+        :param value: komplette Zugriffsdaten
+        """
         if index.row() < 0:
-            print('new credential')
+            # neue Zugriffsdaten
             self.beginInsertRows(QModelIndex(), index.row(), index.row())
             self.__data[CFG_GROUP_CREDENTIALS].append(value)
             self.endInsertRows()
             self.rowsInserted.emit(index, len(self.__data[CFG_GROUP_CREDENTIALS]), 1)
             self.layoutChanged.emit()
         else:
-            print('existing credential')
-            self.__data[CFG_GROUP_CREDENTIALS][index.row()].update(value)
-            self.dataChanged.emit()
+            # existierende Zugriffsdaten
+            _model_data = self.__data[CFG_GROUP_CREDENTIALS][index.row()]
+            if value[CFG_PAR_NAME] != _model_data[CFG_PAR_NAME]:
+                # Alias wurde umbenannt, Referenzen in den Backup-Zielen aktualisieren
+                self.__data.credential_renamed(_model_data[CFG_PAR_NAME], value[CFG_PAR_NAME])
+            _model_data.update(value)
+            self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])
 
     def removeRow(self, row, /, parent = ...) -> bool:
         print('removeRow')

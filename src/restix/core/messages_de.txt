@@ -1,4 +1,7 @@
 # general
+e-alias-name-already-used Aliasname '{0}' wird bereits verwendet.
+e-alias-name-empty Kein Aliasname angegeben.
+e-alias-referenced Aliasname '{0}' wird noch in Gruppe '{1}' benötigt.
 e-background-task-aborted Hintergrund-Task abgebrochen.
 e-background-task-failed Hintergrund-Task fehlgeschlagen: {0}
 e-bool-opt-required Für Option {0} muss True oder False angegeben werden.
@@ -219,7 +222,7 @@ l-year Jahr
 # GUI Widget Labels
 l-dlg-title-about Über restix
 l-dlg-title-new-credentials Neue Zugriffsdaten
-l-dlg-title-rename-credentials Zugriffsdaten-Alias umbenennen
+l-dlg-title-rename-element {0} umbenennen
 l-dlg-title-scope-editor Backup-Umfang festlegen
 l-dlg-title-select-excludes-file Excludes-Datei auswählen
 l-dlg-title-select-includes-file Includes-Datei auswählen
