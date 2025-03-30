@@ -218,6 +218,7 @@ l-tag-weekly wöchentlich
 l-target Backup-Ziel
 l-targets Backup-Ziele
 l-type Typ
+l-update Aktualisieren
 l-year Jahr
 
 # GUI Widget Labels

@@ -187,11 +187,11 @@ class CredentialsModel(QAbstractItemModel):
         else:
             # existierende Zugriffsdaten
             _model_data = self.__data[CFG_GROUP_CREDENTIALS][index.row()]
-            if value[CFG_PAR_ALIAS] != _model_data[CFG_PAR_ALIAS]:
+            _value_alias = value.get(CFG_PAR_ALIAS)
+            if _value_alias is not None and _value_alias != _model_data[CFG_PAR_ALIAS]:
                 # Alias wurde umbenannt, Referenzen in den Backup-Zielen aktualisieren
-                self.__data.credential_renamed(_model_data[CFG_PAR_ALIAS], value[CFG_PAR_ALIAS])
+                self.__data.credential_renamed(_model_data[CFG_PAR_ALIAS], _value_alias)
             _model_data.update(value)
-            self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])
 
 
 class ConfigModelFactory:

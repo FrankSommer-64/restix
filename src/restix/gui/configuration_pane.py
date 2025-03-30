@@ -38,10 +38,10 @@ GUI-Bereich für die restix-Konfiguration.
 
 from typing import Callable
 
-from PySide6.QtCore import Qt, QAbstractListModel, QPoint, QModelIndex
+from PySide6.QtCore import Qt, QAbstractListModel, QPoint
 from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QComboBox, QFormLayout,
                                QLabel, QLineEdit, QSizePolicy, QPushButton, QTextEdit, QDialog, QTabWidget,
-                               QMenu, QMessageBox, QAbstractItemView)
+                               QMenu, QMessageBox, QListView)
 
 from restix.core import *
 from restix.core.config import LocalConfig
@@ -53,7 +53,7 @@ from restix.gui.model import ConfigModelFactory
 from restix.gui.panes import GROUP_BOX_STYLE, option_label
 
 
-class CredentialsDetailPane(QAbstractItemView):
+class CredentialsDetailPane(QListView):
     """
     Pane zum Anzeigen und Editieren von Zugriffsdaten.
     """
@@ -419,6 +419,7 @@ class CredentialsPane(QWidget):
         :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent)
+        self.__model_index = None
         _layout = QHBoxLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -428,10 +429,14 @@ class CredentialsPane(QWidget):
                                               self._credential_selected))
         _detail_group_box = QGroupBox('')
         _group_box_layout = QVBoxLayout(_detail_group_box)
-        #_detail_group_box.setStyleSheet(GROUP_BOX_STYLE)
         self.__detail_pane = CredentialsDetailPane(self)
         self.__detail_pane.setModel(model_factory.credentials_model())
         _group_box_layout.addWidget(self.__detail_pane)
+        _update_button = QPushButton(localized_label(L_UPDATE))
+        _update_button.setStyleSheet(ACTION_BUTTON_STYLE)
+        _update_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _update_button.clicked.connect(self._update_credential)
+        _group_box_layout.addWidget(_update_button, alignment=Qt.AlignmentFlag.AlignHCenter)
         _layout.addWidget(_detail_group_box)
 
     def _credential_selected(self, index: int):
@@ -439,8 +444,18 @@ class CredentialsPane(QWidget):
         Wird aufgerufen, wenn der Benutzer einen Eintrag der Zugriffsdaten ausgewählt hat.
         """
         print(f'_credential_selected {index}')
-        _model_index = self.__detail_pane.model().createIndex(index, 0)
-        self.__detail_pane.set_data(self.__detail_pane.model().data(_model_index, Qt.ItemDataRole.DisplayRole))
+        self.__model_index = self.__detail_pane.model().createIndex(index, 0)
+        self.__detail_pane.set_data(self.__detail_pane.model().data(self.__model_index, Qt.ItemDataRole.DisplayRole))
+
+    def _update_credential(self):
+        """
+        Wird aufgerufen, wenn der Aktualisieren-Button gedrückt wurde.
+        :return:
+        """
+        print('_update_credential')
+        if self.__model_index is None:
+            return
+        self.__detail_pane.model().setData(self.__model_index, self.__detail_pane.get_data())
 
 
 class ScopeDetailPane(QWidget):

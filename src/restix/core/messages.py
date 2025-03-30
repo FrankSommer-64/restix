@@ -248,6 +248,7 @@ L_TAG_INTERVAL_WEEKLY = 'l-tag-weekly'
 L_TARGET = 'l-target'
 L_TARGETS = 'l-targets'
 L_TYPE = 'l-type'
+L_UPDATE = 'l-update'
 L_YEAR = 'l-year'
 
 # GUI Tooltips
