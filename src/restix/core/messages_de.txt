@@ -5,6 +5,7 @@ e-alias-referenced Aliasname '{0}' wird noch in Sicherungs-Zielen verwendet.
 e-background-task-aborted Hintergrund-Task abgebrochen.
 e-background-task-failed Hintergrund-Task fehlgeschlagen: {0}
 e-bool-opt-required Für Option {0} muss True oder False angegeben werden.
+e-file-name-missing Kein Dateiname angegeben.
 e-file-opt-required Datei {0} für Option {1} nicht gefunden.
 e-invalid-hostname Der angegebene Hostname {0} ist ungültig.
 e-invalid-action Ungültige Aktion {0}.
@@ -30,6 +31,7 @@ e-restix-target-repo-missing Für restic-Repository-Alias {0} wurde keine Adress
 e-restix-target-scope-missing Für restic-Repository-Alias {0} wurde kein Umfang ausgewählt.
 e-restix-target-scope-not-defined Der für restic-Repository {1} angegebene Umfang {1} ist in der Konfigurationsdatei nicht definiert.
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
+e-write-file-failed Fehler beim Schreiben der Datei {0}: {1}.
 i-dry-run-tagging-first-snapshot Würde ersten Snapshot mit Tag {0} versehen.
 i-dry-run-tagging-snapshot Würde Snapshot {0} in Repository {1} mit Tag {2} markieren.
 i-running-restic-cmd restic-Befehl: {0}
@@ -143,6 +145,7 @@ i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-credential-exists Zugriffsdaten mit Alias '{0}' existieren bereits.
 i-gui-data-backed-up Daten in Repository {0} gesichert.
 i-gui-data-restored Daten aus Repository {0} wiederhergestellt.
+i-gui-local-config-changed restix-Konfiguration wurde verändert.
 i-gui-no-credential-type-specified Kein Zugriffsdaten-Typ ausgewählt.
 i-gui-no-name-specified Kein Name angegeben.
 i-gui-no-snapshot-selected Kein Snapshot ausgewählt
@@ -169,6 +172,7 @@ l-backup Sicherung
 l-configuration Konfiguration
 l-credentials Zugangsdaten
 l-current-alias Aktueller Aliasname
+l-dismiss Änderungen verwerfen
 l-do-auto-tag-snapshots Snapshots automatisch markieren
 l-do-backup Sicherung starten
 l-do-restore Wiederherstellung starten
@@ -202,6 +206,8 @@ l-restic-object Restic Objekt
 l-restore Wiederherstellung
 l-restore-path Zielverzeichnis
 l-restore-scope Restore-Umfang
+l-save Speichern
+l-save-as Speichern unter
 l-scope Sicherungs-Umfang
 l-scopes Sicherungs-Umfänge
 l-search Suchen
@@ -225,8 +231,10 @@ l-year Jahr
 l-dlg-title-about Über restix
 l-dlg-title-new-credentials Neue Zugriffsdaten
 l-dlg-title-rename-element {0} umbenennen
+l-dlg-title-save-local-config Lokale restix-Konfiguration speichern
 l-dlg-title-scope-editor Backup-Umfang festlegen
 l-dlg-title-select-excludes-file Excludes-Datei auswählen
+l-dlg-title-select-file Dateiname auswählen
 l-dlg-title-select-includes-file Includes-Datei auswählen
 l-dlg-title-snapshot-viewer Snapshot {0} für Host {1} ({2})
 l-dlg-title-user-manual Benutzerhandbuch

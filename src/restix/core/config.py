@@ -44,6 +44,8 @@ import re
 import tomli
 from typing import Self
 
+import tomli_w
+
 from restix.core import *
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
@@ -122,7 +124,8 @@ class LocalConfig(dict):
         if group == CFG_GROUP_TARGET:
             # Backup-Ziele haben keine Abhängigkeiten
             return
-        # bei Backup-Umfang oder Zugriffsdaten prüfen, ob sie in einem Backup-Ziel referenziert werden
+        # Backup-Umfang oder Zugriffsdaten
+        # hier muss geprüft werden, ob sie in einem Backup-Ziel referenziert werden
         for _target in self[CFG_GROUP_TARGET]:
             if _target.get(group) == alias:
                 raise RestixException(E_ALIAS_REFERENCED, alias)
@@ -150,7 +153,6 @@ class LocalConfig(dict):
         Passt die in Backup-Zielen referenzierten Zugriffsdaten aufgrund einer Umbenennung an.
         :param old_alias: alter Aliasname der Zugriffsdaten
         :param new_alias: neuer Aliasname der Zugriffsdaten
-        :return:
         """
         for _target in self[CFG_GROUP_TARGET].values():
             if _target.get(CFG_PAR_CREDENTIALS) == old_alias:
@@ -161,7 +163,6 @@ class LocalConfig(dict):
         Passt die in Backup-Zielen referenzierten Backup-Umfänge aufgrund einer Umbenennung an.
         :param old_alias: alter Aliasname des Backup-Umfangs
         :param new_alias: neuer Aliasname des Backup-Umfangs
-        :return:
         """
         for _target in self[CFG_GROUP_TARGET].values():
             if _target.get(CFG_PAR_SCOPE) == old_alias:
@@ -183,10 +184,26 @@ class LocalConfig(dict):
         """
         return len(self.__warnings) > 0
 
+    def to_file(self, file_path: str = None):
+        """
+        Speichert die Konfiguration in Datei.
+        Überschreibt den Inhalt, falls die Datei bereits existiert.
+        :param file_path: der Dateiname; bei None wird der Dateiname vom öffnen benutzt.
+        :raises RestixException: falls das Speichern fehlschlägt
+        """
+        _output_file_path = self.__file_path if file_path is None else file_path
+        if _output_file_path is None:
+            raise RestixException(E_FILE_NAME_MISSING)
+        try:
+            with open(_output_file_path, 'wb') as _f:
+                tomli_w.dump(self, _f)
+        except IOError | OSError as _e:
+            raise RestixException(E_WRITE_FILE_FAILED, _output_file_path, str(_e))
+
     def _group(self, group_name: str) -> dict:
         """
         :param group_name: die gewünschte Group
-        :returns: alle definierten Elemente der übergebenen Group, sortiert nach Name
+        :returns: alle definierten Elemente der übergebenen Group, sortiert nach Aliasname
         """
         _elements = {}
         for _element in self[group_name]:

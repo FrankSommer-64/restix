@@ -35,14 +35,15 @@
 """
 Hauptfenster der restix GUI.
 """
+from copy import deepcopy
 
-from PySide6.QtWidgets import QMainWindow, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QDialog
 
-from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.restix_exception import RestixException
 from restix.core.messages import *
 from restix.gui.central_pane import CentralPane
+from restix.gui.dialogs import SaveConfigDialog
 from restix.gui.settings import GuiSettings
 
 
@@ -57,6 +58,8 @@ class MainWindow(QMainWindow):
         :param local_config: lokale restix-Konfiguration
         """
         super().__init__()
+        self.__config = local_config
+        self.__original_config = deepcopy(local_config)
         self.__settings = GuiSettings.from_file()
         self.setGeometry(self.__settings.win_geometry())
         self.setWindowTitle(localized_label(L_MAIN_WIN_TITLE))
@@ -68,8 +71,16 @@ class MainWindow(QMainWindow):
 
     def save_settings(self):
         """
-        Speichert die GUI-Einstellungen in einer Datei.
+        Speichert die lokale restix-Konfiguration und die GUI-Einstellungen in einer Datei.
         """
+        if self.__original_config != self.__config:
+            _dlg = SaveConfigDialog(self)
+            if _dlg.exec() == QDialog.DialogCode.Accepted:
+                try:
+                    self.__config.to_file(_dlg.save_as_file_path())
+                except RestixException as _e:
+                    QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR), str(_e),
+                                         QMessageBox.StandardButton.Ok)
         self.__settings.set_win_geometry(self.rect())
         try:
             self.__settings.save()

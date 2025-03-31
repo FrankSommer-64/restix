@@ -45,7 +45,7 @@ from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
                                QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit,
-                               QTreeWidget, QTreeWidgetItem, QStyle)
+                               QTreeWidget, QTreeWidgetItem, QStyle, QFileDialog)
 
 from restix.core import *
 from restix.core.action import RestixAction
@@ -398,6 +398,58 @@ class AboutDialog(QDialog):
         self.__issai_image.setPixmap(_pixmap)
 
 
+class SaveConfigDialog(QDialog):
+    """
+    Auswahldialog beim Beenden, falls die lokale restix-Konfiguration geändert wurde.
+    """
+    def __init__(self, parent: QWidget):
+        """
+        Konstruktor.
+        :param parent: das übergeordnete Widget
+        """
+        super().__init__(parent)
+        self.__selected_file_name = None
+        self.setWindowTitle(localized_label(L_DLG_TITLE_SAVE_LOCAL_CONFIG))
+        _parent_rect = parent.contentsRect()
+        self.setGeometry(_parent_rect.x() + _SAVE_DIALOG_OFFSET, _parent_rect.y() + _SAVE_DIALOG_OFFSET,
+                         _SAVE_DIALOG_WIDTH, _SAVE_DIALOG_HEIGHT)
+        self.setStyleSheet(_STYLE_WHITE_BG)
+        _layout = QVBoxLayout(self)
+        _layout.setSpacing(10)
+        _layout.addWidget(QLabel(localized_label(I_GUI_LOCAL_CONFIG_CHANGED)))
+        _button_pane = QWidget()
+        _button_pane_layout = QHBoxLayout(_button_pane)
+        _dismiss_button = QPushButton(localized_label(L_DISMISS))
+        _dismiss_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _dismiss_button.clicked.connect(self.reject)
+        _button_pane_layout.addWidget(_dismiss_button, alignment=Qt.AlignmentFlag.AlignCenter)
+        _save_as_button = QPushButton(localized_label(L_SAVE_AS))
+        _save_as_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _save_as_button.clicked.connect(self._save_as_button_clicked)
+        _button_pane_layout.addWidget(_save_as_button, alignment=Qt.AlignmentFlag.AlignCenter)
+        _save_button = QPushButton(localized_label(L_SAVE))
+        _save_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _save_button.clicked.connect(self.accept)
+        _button_pane_layout.addWidget(_save_button, alignment=Qt.AlignmentFlag.AlignCenter)
+        _layout.addWidget(_button_pane)
+
+    def save_as_file_path(self) -> str | None:
+        """
+        :returns: Ausgewählter Dateiname für "Speichern unter"; ansonsten None
+        """
+        return self.__selected_file_name
+
+    def _save_as_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den "Speichern unter"-Button geklickt hat.
+        """
+        _file_name, _filter = QFileDialog.getSaveFileName(self, localized_label(L_DLG_TITLE_SELECT_FILE))
+        if _file_name is None:
+            return
+        self.__selected_file_name = _file_name
+        self.accept()
+
+
 def exception_box(icon, reason, question, buttons, default_button):
     """
     Creates and returns a message box in reaction to an exception.
@@ -433,6 +485,9 @@ _RESTIX_IMAGE_SPACING = 16
 _PDF_VIEWER_HEIGHT = 720
 _PDF_VIEWER_OFFSET = 10
 _PDF_VIEWER_WIDTH = 640
+_SAVE_DIALOG_HEIGHT = 240
+_SAVE_DIALOG_OFFSET = 80
+_SAVE_DIALOG_WIDTH = 360
 _SCOPE_EDITOR_HEIGHT = 720
 _SCOPE_EDITOR_OFFSET = 10
 _SCOPE_EDITOR_WIDTH = 1200

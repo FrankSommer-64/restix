@@ -128,31 +128,30 @@ class CredentialsModel(QAbstractItemModel):
         self.__data = configuration_data
 
     def parent(self):
-        print('CredentialsModel.parent')
         return QModelIndex()
 
     def index(self, row: int, column: int, /, parent: QModelIndex | QPersistentModelIndex = ...) -> QModelIndex:
         """
-        :param parent:
+        :param row: Zeile
+        :param column: Spalte
+        :param parent: immer ungültiger Index
         :returns: Anzahl der Zugriffsdaten-Elemente
         """
-        print('CredentialsModel.index')
-        return QModelIndex()
+        return QAbstractItemModel.createIndex(self, row, column)
 
     def rowCount(self, /, parent: QModelIndex | QPersistentModelIndex= ...) -> int:
         """
-        :param parent:
+        :param parent: immer ungültiger Index
         :returns: Anzahl der Zugriffsdaten-Elemente
         """
-        print('CredentialsModel.rowCount')
         return len(self.__data[CFG_GROUP_CREDENTIALS])
 
     def columnCount(self, /, parent: QModelIndex | QPersistentModelIndex= ...) -> int:
         """
-        :param parent:
+        :param parent: immer ungültiger Index
         :returns: Anzahl der Zugriffsdaten-Elemente
         """
-        print('CredentialsModel.columnCount')
+        # alias, comment, type, value
         return 4
 
     def data(self, index: QModelIndex | QPersistentModelIndex, /, role: int = ...) -> Any:
@@ -163,7 +162,6 @@ class CredentialsModel(QAbstractItemModel):
         :param role: Role
         :returns: Zugriffsdaten für die role
         """
-        print('CredentialsModel.data')
         if not index.isValid() or index.row() >= len(self.__data[CFG_GROUP_CREDENTIALS]):
             return None
         if role == Qt.ItemDataRole.DisplayRole or Qt.ItemDataRole.UserRole:
@@ -210,11 +208,19 @@ class ConfigModelFactory:
         self.__credentials_model = CredentialsModel(configuration_data)
 
     def credential_names_model(self) -> CredentialNamesModel:
+        """
+        :returns: Model für die Anzeige der Aliasnamen von Zugriffsdaten in einer Combo-Box
+        """
         return self.__credential_names_model
 
     def credentials_model(self) -> CredentialsModel:
+        """
+        :returns: Model für die Anzeige von Zugriffsdaten in einer Pane
+        """
         return self.__credentials_model
 
     def configuration_data(self) -> LocalConfig:
+        """
+        :returns: Lokale restix-Konfiguration
+        """
         return self.__data
-
