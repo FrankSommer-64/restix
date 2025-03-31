@@ -59,7 +59,6 @@ def run_backup(action: RestixAction, task_monitor: TaskMonitor):
     task_monitor.log(I_GUI_BACKING_UP_DATA, _repo)
     _rc, _, _ = _execute_restic_command(action.to_restic_command(), task_monitor, True)
     if _rc == RESTIC_RC_OK:
-        _auto_tag(action, task_monitor)
         return TaskResult(TASK_SUCCEEDED, localized_message(I_GUI_DATA_BACKED_UP, _repo))
     if _rc != RESTIC_RC_REPO_DOES_NOT_EXIST or not action.option(OPTION_AUTO_CREATE) or action.option(OPTION_DRY_RUN):
         task_monitor.log(E_BACKGROUND_TASK_FAILED, '')
@@ -76,7 +75,6 @@ def run_backup(action: RestixAction, task_monitor: TaskMonitor):
     # Backup, zweiter Versuch
     _rc, _, _ = _execute_restic_command(action.to_restic_command(), task_monitor, True)
     if _rc == RESTIC_RC_OK:
-        _auto_tag(action, task_monitor)
         return TaskResult(TASK_SUCCEEDED, localized_message(I_GUI_DATA_BACKED_UP, _repo))
     task_monitor.log(E_BACKGROUND_TASK_FAILED, '')
     return TaskResult(TASK_FAILED, '')
@@ -226,43 +224,6 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     elif _rc == 130:
         _exception_id = E_RESTIC_CMD_INTERRUPTED
     raise RestixException(_exception_id, ' '.join(cmd))
-
-
-def _auto_tag(action: RestixAction, task_monitor: TaskMonitor):
-    """
-    Versieht Snapshots mit Tags, falls die Option auto-tag gesetzt wurde.
-    :param action: die Daten des auszuführenden Backups.
-    :param task_monitor: der Fortschritt-Handler.
-    """
-    if not action.option(OPTION_AUTO_TAG):
-        return
-    # Snapshots des Repositories holen
-    _snapshots = determine_snapshots(action.snapshots_action(), task_monitor)
-    _current_year = datetime.now().year
-    _current_month = datetime.now().month
-    _first_tag = f'{_current_year}_FIRST'
-    if len(_snapshots) == 0:
-        # Bei dry-run wurde kein Snapshot angelegt, d.h. Backup war der erste des Jahres, dann würde mit
-        # Jahresanfangskennung getaggt. Ohne dry-run ist was schiefgegangen, dann tun wir hier nichts.
-        if action.option(OPTION_DRY_RUN):
-            task_monitor.log(I_DRY_RUN_TAGGING_FIRST_SNAPSHOT, _first_tag)
-        return
-    # ersten Snapshot des Jahres ggf. mit Jahresanfangskennung taggen
-    _first_snapshot = _snapshots[0]
-    if not _first_snapshot.is_tagged_with(_first_tag):
-        # erster Snapshot hat noch keine Jahresanfangskennung
-        if _tag_snapshot(action, _first_snapshot.snapshot_id(), _first_tag, task_monitor) != RESTIC_RC_OK:
-            # Taggen hat nicht funktioniert, dann sparen wir uns auch die möglichen weiteren
-            return
-    if len(_snapshots) == 1:
-        # bei nur einem Snapshot sind wir fertig
-        return
-    _last_snapshot = _first_snapshot
-    for _snapshot in _snapshots[1:]:
-        if _last_snapshot.month() < _snapshot.month():
-            # letzter Snapshot eines Monats bekommt Tag 'YYYY_MM'
-            _tag = f'{_current_year}_{_last_snapshot.month():02}'
-            _tag_snapshot(action, _last_snapshot.snapshot_id(), _tag, task_monitor)
 
 
 def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list[Snapshot]:

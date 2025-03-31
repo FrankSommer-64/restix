@@ -165,7 +165,6 @@ l-add Hinzufügen
 l-adopt-selection Ausgewählte Elemente übernehmen
 l-alias Aliasname
 l-auto-create Repository automatisch anlegen
-l-auto-tag Automatisch taggen
 l-cancel Abbrechen
 l-comment Beschreibung
 l-backup Sicherung
@@ -173,7 +172,6 @@ l-configuration Konfiguration
 l-credentials Zugangsdaten
 l-current-alias Aktueller Aliasname
 l-dismiss Änderungen verwerfen
-l-do-auto-tag-snapshots Snapshots automatisch markieren
 l-do-backup Sicherung starten
 l-do-restore Wiederherstellung starten
 l-do-year-end Jahresabschluss
@@ -243,7 +241,6 @@ l-mbox-title-error Fehler
 l-mbox-title-info Information
 l-mbox-title-warning Warnung
 l-menu-about Über restix
-l-menu-auto-tag Snapshots automatisch mit Tag markieren
 l-menu-new Neu...
 l-menu-remove Löschen
 l-menu-rename Umbenennen...
@@ -274,7 +271,6 @@ t-do-bak-backup Backup starten
 t-do-mnt-year-end Alle Snapshots ohne Tag löschen, max. einen Snapshot pro Monat behalten
 t-do-rst-restore Wiederherstellung der ausgewählten Elemente starten
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
-t-opt-bak-auto-tag Gesicherten Snapshot automatisch mit einem Tag versehen
 t-opt-bak-dry-run Backup nur simulieren
 t-opt-mnt-dry-run Wartungs-Aktion nur simulieren
 t-opt-mnt-host Bitte ggf. den Hostnamen für das Repository auswählen

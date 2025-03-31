@@ -65,7 +65,6 @@ class BackupOptionsPane(QGroupBox):
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__auto_create_option = create_checkbox(_layout, L_AUTO_CREATE, T_OPT_BAK_AUTO_CREATE, True)
-        self.__auto_tag_option = create_checkbox(_layout, L_AUTO_TAG, T_OPT_BAK_AUTO_TAG, True)
         self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
         self.setLayout(_layout)
 
@@ -74,7 +73,6 @@ class BackupOptionsPane(QGroupBox):
         :returns: Status der unterstützten Backup-Optionen (auto-create, auto-tag und dry-run)
         """
         return {OPTION_AUTO_CREATE: self.__auto_create_option.isChecked(),
-                OPTION_AUTO_TAG: self.__auto_tag_option.isChecked(),
                 OPTION_DRY_RUN: self.__dry_run_option.isChecked()}
 
 

@@ -422,60 +422,8 @@ class RestixAction:
         return _action
 
 
-def build_restic_cmd(restix_action, restic_info):
-    """
-    Creates restic command for specified restix action.
-    :param DetailAction restix_action: restix action including options
-    :param dict restic_info: additional information
-    :returns: restic command
-    :rtype: list[str]
-    :raises RestixException: if desired action is not implemented
-    """
-    pass
-    '''
-    _restic_cmd = ['restic', '-r', restic_info[RESTIX_TOML_KEY_REPO], '-p', restic_info[RESTIX_TOML_KEY_PW_FILE]]
-    if restix_action.option(CLI_OPTION_DRY_RUN):
-        _restic_cmd.append('--dry-run')
-    _base_action = restix_action.base_action()
-    if _base_action == RESTIC_ACTION_SNAPSHOTS:
-        _restic_cmd.append(_base_action)
-        return _restic_cmd
-    if _base_action == RESTIC_ACTION_RESTORE:
-        _restic_cmd.append(_base_action)
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
-        if _snapshot_id is None:
-            _restic_cmd.append('latest')
-        else:
-            _restic_cmd.append(_snapshot_id)
-        _restore_path = restix_action.option(CLI_OPTION_RESTORE_PATH)
-        if _restore_path is not None:
-            _restic_cmd.append('--target')
-            _restic_cmd.append(_restore_path)
-        return _restic_cmd
-    if _base_action == RESTIC_ACTION_FORGET:
-        _restic_cmd.append(_base_action)
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
-        if _snapshot_id is None:
-            _restic_cmd.append('--tag')
-            _restic_cmd.append("''")
-            _restic_cmd.append('--keep-last')
-            _restic_cmd.append('1')
-        else:
-            _restic_cmd.append(_snapshot_id)
-        _restic_cmd.append('--prune')
-        return _restic_cmd
-    if _base_action == RESTIC_ACTION_TAG:
-        _restic_cmd.append(_base_action)
-        _restic_cmd.append('--set')
-        _restic_cmd.append(restix_action.option(CLI_OPTION_TAGS))
-        _restic_cmd.append(restix_action.option(CLI_OPTION_SNAPSHOT))
-        return _restic_cmd
-    raise RestixException(E_CLI_INVALID_ACTION, _base_action)
-    '''
-
-
 _STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE}
-_ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_AUTO_TAG, OPTION_BATCH, OPTION_DRY_RUN,
+_ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_BATCH, OPTION_DRY_RUN,
                                    OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM, OPTION_YEAR},
                    ACTION_FIND: {OPTION_HOST, OPTION_FIND_PATTERN, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_KEEP_MONTHLY, OPTION_KEEP_TAG,

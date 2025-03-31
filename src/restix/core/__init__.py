@@ -137,7 +137,6 @@ JSON_STRUCT_TYPE_SNAPSHOT = 'snapshot'
 # Optionen
 OPTION_ADD = '--add'
 OPTION_AUTO_CREATE = '--auto-create'
-OPTION_AUTO_TAG = '--auto-tag'
 OPTION_BATCH = '--batch'
 OPTION_DRY_RUN = '--dry-run'
 OPTION_EXCLUDE_FILE = '--exclude-file'
