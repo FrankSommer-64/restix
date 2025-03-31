@@ -109,6 +109,7 @@ RESTIC_COMMAND_TAG = 'tag'
 
 # interne Aktionen
 ACTION_BACKUP = 'backup'
+ACTION_CAT = 'cat'
 ACTION_FORGET = 'forget'
 ACTION_FIND = 'find'
 ACTION_HELP = 'help'

@@ -4,7 +4,10 @@ e-alias-name-empty Kein Aliasname angegeben.
 e-alias-referenced Aliasname '{0}' wird noch in Sicherungs-Zielen verwendet.
 e-background-task-aborted Hintergrund-Task abgebrochen.
 e-background-task-failed Hintergrund-Task fehlgeschlagen: {0}
+e-backup-failed Backup zu Repository {0} fehlgeschlagen, restic return code {1}.
 e-bool-opt-required Für Option {0} muss True oder False angegeben werden.
+e-could-not-create-repo Konnte Repository {0} nicht anlegen, restic return code {1}.
+e-could-not-determine-repo-status Konnte Status von Repository {0} nicht ermitteln, restic return code {1}.
 e-file-name-missing Kein Dateiname angegeben.
 e-file-opt-required Datei {0} für Option {1} nicht gefunden.
 e-invalid-hostname Der angegebene Hostname {0} ist ungültig.
@@ -14,6 +17,7 @@ e-invalid-restix-cfg-file Die restix-Konfigurationsdatei {0} enthält Fehler: {1
 e-invalid-snapshot-id Die angegebene Snapshot-ID {0} ist ungültig, Hexadezimalzahl erforderlich.
 e-invalid-year Die angegebene Jahreszahl {0} ist ungültig, vier Ziffern erforderlich.
 e-internal-error Interner Fehler: {0}.
+e-repo-does-not-exist restic-Repository {0} existiert nicht.
 e-restix-cfg-file-not-found restix-Konfigurationsdatei {0} nicht gefunden.
 e-restix-excludes-file-does-not-exist Exclude-Datei {0} nicht gefunden.
 e-restix-guard-file-does-not-exist Guard-Datei {0} nicht gefunden.
@@ -32,10 +36,12 @@ e-restix-target-scope-missing Für restic-Repository-Alias {0} wurde kein Umfang
 e-restix-target-scope-not-defined Der für restic-Repository {1} angegebene Umfang {1} ist in der Konfigurationsdatei nicht definiert.
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 e-write-file-failed Fehler beim Schreiben der Datei {0}: {1}.
+i-dry-run-create-repo Werde Repository {0} anlegen.
 i-dry-run-tagging-first-snapshot Würde ersten Snapshot mit Tag {0} versehen.
 i-dry-run-tagging-snapshot Würde Snapshot {0} in Repository {1} mit Tag {2} markieren.
 i-running-restic-cmd restic-Befehl: {0}
 i-tagged-snapshot Snapshot {0} wurde mit Tag {1} markiert.
+w-cant-dry-run-backup-without-repo Trockenlauf der Sicherung nicht möglich, da Repository {0} nicht existiert.
 w-tag-snapshot-failed Fehler beim Taggen von Snapshot {0} mit {1}.
 
 # Konfiguration

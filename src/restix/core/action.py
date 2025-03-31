@@ -218,22 +218,6 @@ class RestixAction:
         _snapshots_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
         return _snapshots_action
 
-    def tag_action(self, snapshot_id: str, tag: str) -> Self:
-        """
-        :param snapshot_id: ID des zu taggenden Snapshots.
-        :param tag: Tag
-        :returns: Tag-Aktion aus dieser Aktion.
-        :raises RestixException: falls diese Aktion kein Backup ist
-        """
-        if self.__action_id != ACTION_BACKUP:
-            raise RestixException(E_INTERNAL_ERROR, 'Geht nur für Backup-Aktion')
-        _tag_action = RestixAction(ACTION_TAG, self.target_alias())
-        _tag_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
-        _tag_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
-        _tag_action.__options[OPTION_SNAPSHOT] = snapshot_id
-        _tag_action.__options[OPTION_TAG] = tag
-        return _tag_action
-
     def _set_basic_options(self, local_config: LocalConfig, options: dict | None):
         """
         Setzt die Optionen, die restic immer benötigt sowie die angegebenen benutzerdefinierten Optionen.

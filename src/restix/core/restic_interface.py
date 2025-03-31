@@ -55,28 +55,46 @@ def run_backup(action: RestixAction, task_monitor: TaskMonitor):
     :param task_monitor: der Fortschritt-Handler.
     :raises RestixException: falls das Backup fehlschlägt
     """
+    _auto_create = action.option(OPTION_AUTO_CREATE) is True
+    _dry_run = action.option(OPTION_DRY_RUN) is True
     _repo = action.option(OPTION_REPO)
-    task_monitor.log(I_GUI_BACKING_UP_DATA, _repo)
-    _rc, _, _ = _execute_restic_command(action.to_restic_command(), task_monitor, True)
-    if _rc == RESTIC_RC_OK:
-        return TaskResult(TASK_SUCCEEDED, localized_message(I_GUI_DATA_BACKED_UP, _repo))
-    if _rc != RESTIC_RC_REPO_DOES_NOT_EXIST or not action.option(OPTION_AUTO_CREATE) or action.option(OPTION_DRY_RUN):
-        task_monitor.log(E_BACKGROUND_TASK_FAILED, '')
-        return TaskResult(TASK_FAILED, '')
-    # restic-Repository existiert nicht, Option auto-create wurde angegeben: Repository anlegen
-    task_monitor.log(I_GUI_CREATING_REPO, _repo)
-    _init_action = action.init_action()
-    _rc, _, _ = _execute_restic_command(_init_action.to_restic_command(), task_monitor)
-    if _rc == RESTIC_RC_OK:
-        task_monitor.log(I_GUI_REPO_CREATED, _repo)
+    _status = _repo_status(action)
+    if _status == 1:
+        # Repository existiert
+        pass
+    elif _status == 0:
+        # Repository existiert nicht
+        if not _auto_create:
+            # ohne auto create-Flag geht es nicht weiter
+            task_monitor.log(E_REPO_DOES_NOT_EXIST, _repo)
+            return TaskResult(TASK_FAILED, '')
+        if _dry_run:
+            # dry-run Flag gesetzt
+            task_monitor.log(I_DRY_RUN_CREATE_REPO, _repo)
+            task_monitor.log(W_CANT_DRY_RUN_BACKUP_WITHOUT_REPO, _repo)
+            return TaskResult(TASK_SUCCEEDED, '')
+        # Repository anlegen
+        _init_action = action.init_action()
+        _restic_cmd = _init_action.to_restic_command()
+        task_monitor.log(I_RUNNING_RESTIC_CMD, ' '.join(_restic_cmd))
+        _rc, _, _ = _execute_restic_command(_restic_cmd, task_monitor)
+        if _rc != RESTIC_RC_OK:
+            _detail_msg = localized_message(E_COULD_CREATE_REPO, _repo, _rc)
+            task_monitor.log(E_BACKGROUND_TASK_FAILED, _detail_msg)
+            return TaskResult(TASK_FAILED, '')
     else:
-        task_monitor.log(E_BACKGROUND_TASK_FAILED, '')
+        # Fehler bei restic-Befehl
+        _detail_msg = localized_message(E_COULD_NOT_DETERMINE_REPO_STATUS, _repo, _status)
+        task_monitor.log(E_BACKGROUND_TASK_FAILED, _detail_msg)
         return TaskResult(TASK_FAILED, '')
-    # Backup, zweiter Versuch
+    # Backup ausführen
+    _restic_cmd = action.to_restic_command()
+    task_monitor.log(I_RUNNING_RESTIC_CMD, ' '.join(_restic_cmd))
     _rc, _, _ = _execute_restic_command(action.to_restic_command(), task_monitor, True)
     if _rc == RESTIC_RC_OK:
-        return TaskResult(TASK_SUCCEEDED, localized_message(I_GUI_DATA_BACKED_UP, _repo))
-    task_monitor.log(E_BACKGROUND_TASK_FAILED, '')
+        return TaskResult(TASK_SUCCEEDED, '')
+    _detail_msg = localized_message(E_BACKUP_FAILED, _repo, _rc)
+    task_monitor.log(E_BACKGROUND_TASK_FAILED, _detail_msg)
     return TaskResult(TASK_FAILED, '')
 
 
@@ -306,29 +324,16 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
     return _snapshot
 
 
-def _tag_snapshot(action: RestixAction, snapshot_id: str, tag: str, task_monitor: TaskMonitor) -> int:
+def _repo_status(action: RestixAction) -> int:
     """
-    Markiert einen Snapshot mit dem angegebenen Tag.
     :param action: Backup-Aktion
-    :param snapshot_id: ID des zu markierenden Snapshots
-    :param tag: zu setzender Tag
-    :param task_monitor: Fortschritt-Handler
-    :returns: Return code von restic
+    :returns: 1: repo existiert, 0: repo existiert nicht, andere Werte: Fehler bei restic-Befehl
     """
-    if action.option(OPTION_DRY_RUN):
-        # bei dry-run nur Meldung ausgeben, was getaggt würde
-        task_monitor.log(I_DRY_RUN_TAGGING_SNAPSHOT, snapshot_id, action.option(OPTION_REPO), tag)
-        return RESTIC_RC_OK
-    _tag_action = action.tag_action(snapshot_id, tag)
-    _rc, _stdout, _stderr = _execute_restic_command(_tag_action.to_restic_command(), task_monitor)
-    if _rc == RESTIC_RC_OK:
-        # restic-Befehl war erfolgreich, Meldung ausgeben
-        task_monitor.log(I_TAGGED_SNAPSHOT, snapshot_id, tag)
-    else:
-        # restic-Befehl ist fehlgeschlagen, Warnung und restic-Ausgaben an den Fortschritt-Handler weiterreichen
-        task_monitor.log(W_TAG_SNAPSHOT_FAILED, snapshot_id, tag)
-        task_monitor.log(_stdout, SEVERITY_WARNING)
-        task_monitor.log(_stderr, SEVERITY_WARNING)
+    _snapshots_action = action.snapshots_action()
+    _silent_monitor = TaskMonitor(None, True)
+    _rc, _, _ = _execute_restic_command(_snapshots_action.to_restic_command(), _silent_monitor)
+    if _rc == RESTIC_RC_OK: return 1
+    if _rc == RESTIC_RC_REPO_DOES_NOT_EXIST: return 0
     return _rc
 
 
