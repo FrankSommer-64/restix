@@ -44,16 +44,18 @@ from restix.core import *
 from restix.core.config import LocalConfig
 
 
-class CredentialNamesModel(QAbstractListModel):
+class ConfigGroupNamesModel(QAbstractListModel):
     """
-    Model für Combobox-Widgets, die nur mit dem Namen von Zugriffsdaten arbeiten.
+    Basis-Model für Combobox-Widgets, die nur mit dem Aliasnamen von Daten einer Group arbeiten.
     """
-    def __init__(self, configuration_data: LocalConfig):
+    def __init__(self, group: str, configuration_data: LocalConfig):
         """
         Konstruktor.
+        :param group: Name der Group
         :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
         """
         super().__init__()
+        self.__group = group
         self.__data = configuration_data
 
     def rowCount(self, /, parent: QModelIndex | QPersistentModelIndex= ...) -> int:
@@ -61,7 +63,7 @@ class CredentialNamesModel(QAbstractListModel):
         :param parent:
         :returns: Anzahl der Zugriffsdaten-Elemente
         """
-        return len(self.__data[CFG_GROUP_CREDENTIALS])
+        return len(self.__data[self.__group])
 
     def data(self, index: QModelIndex | QPersistentModelIndex, /, role: int = ...) -> Any:
         """
@@ -71,12 +73,12 @@ class CredentialNamesModel(QAbstractListModel):
         :param role: Role
         :returns: Zugriffsdaten für die role
         """
-        if not index.isValid() or index.row() >= len(self.__data[CFG_GROUP_CREDENTIALS]):
+        if not index.isValid() or index.row() >= len(self.__data[self.__group]):
             return None
         if role == Qt.ItemDataRole.DisplayRole:
-            return self.__data[CFG_GROUP_CREDENTIALS][index.row()][CFG_PAR_ALIAS]
+            return self.__data[self.__group][index.row()][CFG_PAR_ALIAS]
         if role == Qt.ItemDataRole.UserRole:
-            return self.__data[CFG_GROUP_CREDENTIALS][index.row()]
+            return self.__data[self.__group][index.row()]
         return None
 
     def setData(self, index: QModelIndex | QPersistentModelIndex, value: dict, /, role = ...):
@@ -89,16 +91,16 @@ class CredentialNamesModel(QAbstractListModel):
         if index.row() < 0:
             # neue Zugriffsdaten
             self.beginInsertRows(QModelIndex(), index.row(), index.row())
-            self.__data[CFG_GROUP_CREDENTIALS].append(value)
+            self.__data[self.__group].append(value)
             self.endInsertRows()
-            self.rowsInserted.emit(index, len(self.__data[CFG_GROUP_CREDENTIALS]), 1)
+            self.rowsInserted.emit(index, len(self.__data[self.__group]), 1)
             self.layoutChanged.emit()
         else:
             # existierende Zugriffsdaten
-            _model_data = self.__data[CFG_GROUP_CREDENTIALS][index.row()]
+            _model_data = self.__data[self.__group][index.row()]
             if value[CFG_PAR_ALIAS] != _model_data[CFG_PAR_ALIAS]:
                 # Alias wurde umbenannt, Referenzen in den Backup-Zielen aktualisieren
-                self.__data.credential_renamed(_model_data[CFG_PAR_ALIAS], value[CFG_PAR_ALIAS])
+                self.__data.element_renamed(self.__group, _model_data[CFG_PAR_ALIAS], value[CFG_PAR_ALIAS])
             _model_data.update(value)
             self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])
 
@@ -109,22 +111,24 @@ class CredentialNamesModel(QAbstractListModel):
         :param parent: immer None
         """
         self.beginRemoveRows(QModelIndex(), row, row)
-        del self.__data[CFG_GROUP_CREDENTIALS][row]
+        del self.__data[self.__group][row]
         self.endRemoveRows()
         self.layoutChanged.emit()
         return True
 
 
-class CredentialsModel(QAbstractItemModel):
+class ConfigGroupModel(QAbstractItemModel):
     """
-    Model für Combobox-Widgets, die nur mit dem Namen von Zugriffsdaten arbeiten.
+    Model für Widgets, die mit allen Daten der Elemente einer Group arbeiten.
     """
-    def __init__(self, configuration_data: LocalConfig):
+    def __init__(self, group: str, configuration_data: LocalConfig):
         """
         Konstruktor.
+        :param group: Name der Group
         :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
         """
         super().__init__()
+        self.__group = group
         self.__data = configuration_data
 
     def parent(self):
@@ -144,7 +148,7 @@ class CredentialsModel(QAbstractItemModel):
         :param parent: immer ungültiger Index
         :returns: Anzahl der Zugriffsdaten-Elemente
         """
-        return len(self.__data[CFG_GROUP_CREDENTIALS])
+        return len(self.__data[self.__group])
 
     def columnCount(self, /, parent: QModelIndex | QPersistentModelIndex= ...) -> int:
         """
@@ -162,10 +166,10 @@ class CredentialsModel(QAbstractItemModel):
         :param role: Role
         :returns: Zugriffsdaten für die role
         """
-        if not index.isValid() or index.row() >= len(self.__data[CFG_GROUP_CREDENTIALS]):
+        if not index.isValid() or index.row() >= len(self.__data[self.__group]):
             return None
         if role == Qt.ItemDataRole.DisplayRole or Qt.ItemDataRole.UserRole:
-            return self.__data[CFG_GROUP_CREDENTIALS][index.row()]
+            return self.__data[self.__group][index.row()]
         return None
 
     def setData(self, index: QModelIndex | QPersistentModelIndex, value: dict, /, role = ...):
@@ -178,18 +182,66 @@ class CredentialsModel(QAbstractItemModel):
         if index.row() < 0:
             # neue Zugriffsdaten
             self.beginInsertRows(QModelIndex(), index.row(), index.row())
-            self.__data[CFG_GROUP_CREDENTIALS].append(value)
+            self.__data[self.__group].append(value)
             self.endInsertRows()
-            self.rowsInserted.emit(index, len(self.__data[CFG_GROUP_CREDENTIALS]), 1)
+            self.rowsInserted.emit(index, len(self.__data[self.__group]), 1)
             self.layoutChanged.emit()
         else:
             # existierende Zugriffsdaten
-            _model_data = self.__data[CFG_GROUP_CREDENTIALS][index.row()]
+            _model_data = self.__data[self.__group][index.row()]
             _value_alias = value.get(CFG_PAR_ALIAS)
             if _value_alias is not None and _value_alias != _model_data[CFG_PAR_ALIAS]:
                 # Alias wurde umbenannt, Referenzen in den Backup-Zielen aktualisieren
-                self.__data.credential_renamed(_model_data[CFG_PAR_ALIAS], _value_alias)
+                self.__data.element_renamed(self.__group, _model_data[CFG_PAR_ALIAS], _value_alias)
             _model_data.update(value)
+
+
+class CredentialNamesModel(ConfigGroupNamesModel):
+    """
+    Model für Combobox-Widgets, die nur mit dem Aliasnamen von Zugriffsdaten arbeiten.
+    """
+    def __init__(self, configuration_data: LocalConfig):
+        """
+        Konstruktor.
+        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        """
+        super().__init__(CFG_GROUP_CREDENTIALS, configuration_data)
+
+
+class CredentialsModel(ConfigGroupModel):
+    """
+    Model für Widgets, die mit Zugriffsdaten arbeiten.
+    """
+    def __init__(self, configuration_data: LocalConfig):
+        """
+        Konstruktor.
+        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        """
+        super().__init__(CFG_GROUP_CREDENTIALS, configuration_data)
+
+
+class ScopeNamesModel(ConfigGroupNamesModel):
+    """
+    Model für Combobox-Widgets, die nur den Aliasnamen von Backup-Umfängen arbeiten.
+    """
+    def __init__(self, configuration_data: LocalConfig):
+        """
+        Konstruktor.
+        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        """
+        super().__init__(CFG_GROUP_SCOPE, configuration_data)
+
+
+class ScopeModel(ConfigGroupModel):
+    """
+    Model für Widgets, die mit Backup-Umfängen arbeiten.
+    """
+    def __init__(self, configuration_data: LocalConfig):
+        """
+        Konstruktor.
+        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        """
+        super().__init__(CFG_GROUP_SCOPE, configuration_data)
 
 
 class ConfigModelFactory:
@@ -206,6 +258,8 @@ class ConfigModelFactory:
         self.__data = configuration_data
         self.__credential_names_model = CredentialNamesModel(configuration_data)
         self.__credentials_model = CredentialsModel(configuration_data)
+        self.__scope_names_model = ScopeNamesModel(configuration_data)
+        self.__scope_model = ScopeModel(configuration_data)
 
     def credential_names_model(self) -> CredentialNamesModel:
         """
@@ -218,6 +272,18 @@ class ConfigModelFactory:
         :returns: Model für die Anzeige von Zugriffsdaten in einer Pane
         """
         return self.__credentials_model
+
+    def scope_names_model(self) -> ScopeNamesModel:
+        """
+        :returns: Model für die Anzeige der Aliasnamen von Zugriffsdaten in einer Combo-Box
+        """
+        return self.__scope_names_model
+
+    def scope_model(self) -> ScopeModel:
+        """
+        :returns: Model für die Anzeige von Zugriffsdaten in einer Pane
+        """
+        return self.__scope_model
 
     def configuration_data(self) -> LocalConfig:
         """

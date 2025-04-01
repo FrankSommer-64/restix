@@ -50,7 +50,7 @@ from restix.core.restix_exception import RestixException
 from restix.gui import *
 from restix.gui.dialogs import ScopeEditorDialog
 from restix.gui.model import ConfigModelFactory
-from restix.gui.panes import GROUP_BOX_STYLE, option_label
+from restix.gui.panes import GROUP_BOX_STYLE
 
 
 class CredentialsDetailPane(QListView):
@@ -283,6 +283,8 @@ class NewElementDialog(QDialog):
     def for_group(cls, group: str, parent: QWidget, local_config: LocalConfig):
         if group == CFG_GROUP_CREDENTIALS:
             return NewCredentialDialog(parent, local_config)
+        if group == CFG_GROUP_SCOPE:
+            return NewScopeDialog(parent, local_config)
 
 
 class NewCredentialDialog(NewElementDialog):
@@ -295,7 +297,7 @@ class NewCredentialDialog(NewElementDialog):
         :param parent: übergeordnetes Widget
         :param local_config: lokale restix-Konfiguration
         """
-        super().__init__(parent, local_config, L_DLG_TITLE_NEW_CREDENTIALS)
+        super().__init__(parent, local_config, localized_label(L_DLG_TITLE_NEW_CREDENTIALS))
         self.__credentials_pane = CredentialsDetailPane(self, True)
         self.layout().addWidget(self.__credentials_pane)
         self.create_button_pane()
@@ -318,6 +320,40 @@ class NewCredentialDialog(NewElementDialog):
         if len(_data[CFG_PAR_TYPE]) == 0:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                     localized_label(I_GUI_NO_CREDENTIAL_TYPE_SPECIFIED),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        self.data = _data
+        self.accept()
+
+
+class NewScopeDialog(NewElementDialog):
+    """
+    Dialogfenster für neue Backup-Umfänge.
+    """
+    def __init__(self, parent: QWidget, local_config: LocalConfig):
+        """
+        Konstruktor.
+        :param parent: übergeordnetes Widget
+        :param local_config: lokale restix-Konfiguration
+        """
+        super().__init__(parent, local_config, localized_label(L_DLG_TITLE_NEW_SCOPE))
+        self.__scope_pane = ScopeDetailPane(self, True)
+        self.layout().addWidget(self.__scope_pane)
+        self.create_button_pane()
+
+    def add_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den Hinzufügen-Button geklickt hat
+        """
+        _data = self.__scope_pane.get_data()
+        if len(_data[CFG_PAR_ALIAS]) == 0:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_label(I_GUI_NO_NAME_SPECIFIED),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        if _data[CFG_PAR_ALIAS] in self.local_config.credentials():
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_message(I_GUI_SCOPE_EXISTS, _data[CFG_PAR_ALIAS]),
                                     QMessageBox.StandardButton.Ok)
             return
         self.data = _data
@@ -443,7 +479,6 @@ class CredentialsPane(QWidget):
         """
         Wird aufgerufen, wenn der Benutzer einen Eintrag der Zugriffsdaten ausgewählt hat.
         """
-        print(f'_credential_selected {index}')
         self.__model_index = self.__detail_pane.model().createIndex(index, 0)
         self.__detail_pane.set_data(self.__detail_pane.model().data(self.__model_index, Qt.ItemDataRole.DisplayRole))
 
@@ -452,56 +487,76 @@ class CredentialsPane(QWidget):
         Wird aufgerufen, wenn der Aktualisieren-Button gedrückt wurde.
         :return:
         """
-        print('_update_credential')
         if self.__model_index is None:
             return
         self.__detail_pane.model().setData(self.__model_index, self.__detail_pane.get_data())
 
 
-class ScopeDetailPane(QWidget):
+class ScopeDetailPane(QListView):
     """
     Pane zum Anzeigen und Editieren von Backup-Umfängen.
     """
-    def __init__(self, parent: QWidget, config_path: str):
+    def __init__(self, parent: QWidget, include_name: bool = False):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
-        :param config_path: Pfad zur lokalen restix-Konfiguration
+        :param include_name: zeigt an, ob ein Eingabefeld für den Aliasnamen vorhanden sein soll
         """
         super().__init__(parent)
-        self.__config_path = config_path
-        self.__orig_data = None
-        self.__data = None
-        self.__is_empty = True
-        self.__layout = QFormLayout()
-        self.__layout.setContentsMargins(20, 20, 20, 20)
-        self.__layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.__includes_file_name = None
+        self.__excludes_file_name = None
+        _layout = QFormLayout(self)
+        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        if include_name:
+            self.__alias_text = QLineEdit()
+            self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
+            self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+            self.__alias_text.setToolTip(localized_label(T_CFG_SCOPE_NAME))
+            _layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
+        else:
+            self.__alias_text = None
         self.__comment_text = QLineEdit()
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.__comment_text.setToolTip(localized_label(T_CFG_SCOPE_COMMENT))
-        self.__layout.addRow(QLabel(localized_label(L_COMMENT)), self.__comment_text)
+        _layout.addRow(QLabel(localized_label(L_COMMENT)), self.__comment_text)
         self.__includes_button = QPushButton(localized_label(L_EDIT))
         self.__includes_button.setToolTip(localized_label(T_CFG_SCOPE_FILES_N_DIRS))
         self.__includes_button.clicked.connect(self._edit_files_n_dirs)
-        self.__layout.addRow(QLabel(localized_label(L_FILES_N_DIRS)), self.__includes_button)
+        _layout.addRow(QLabel(localized_label(L_FILES_N_DIRS)), self.__includes_button)
         self.__ignores_list = QTextEdit()
         self.__ignores_list.setStyleSheet(EDITOR_STYLE)
-        self.__ignores_list.setMinimumHeight(60)
-        self.__ignores_list.setMaximumHeight(100)
+        self.__ignores_list.setMinimumHeight(100)
+        self.__ignores_list.setMaximumHeight(200)
+        self.__ignores_list.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.MinimumExpanding)
         self.__ignores_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.__layout.addRow(QLabel(localized_label(L_IGNORES)), self.__ignores_list)
-        self.setLayout(self.__layout)
+        _layout.addRow(QLabel(localized_label(L_IGNORES)), self.__ignores_list)
+
+    def get_data(self) -> dict:
+        """
+        :returns: Backup-Umfang
+        """
+        _data = {CFG_PAR_COMMENT: self.__comment_text.text(), CFG_PAR_INCLUDES: self.__includes_file_name}
+        if self.__alias_text is not None:
+            _data[CFG_PAR_ALIAS] = self.__alias_text.text()
+        if self.__excludes_file_name is not None:
+            _data[CFG_PAR_EXCLUDES] = self.__excludes_file_name
+        _ignores_list = self.__ignores_list.toPlainText()
+        if len(_ignores_list) > 0:
+            _data[CFG_PAR_IGNORES] = _ignores_list.split(os.sep)
+        return _data
 
     def set_data(self, scope_data: dict):
         """
         Überträgt die Daten eines Backup-Umfangs in die GUI widgets.
         :param scope_data: Backup-Umfang
         """
-        self.__orig_data = scope_data
-        self.__data = scope_data.copy()
-        self.__is_empty = False
+        if self.__alias_text is not None:
+            self.__alias_text.setText(scope_data[CFG_PAR_ALIAS])
         self.__comment_text.setText(scope_data[CFG_PAR_COMMENT])
+        self.__includes_file_name = scope_data[CFG_PAR_INCLUDES]
+        self.__excludes_file_name = scope_data.get(CFG_PAR_EXCLUDES)
         self.__ignores_list.clear()
         _ignores = scope_data.get(CFG_PAR_IGNORES)
         if _ignores is not None:
@@ -509,39 +564,57 @@ class ScopeDetailPane(QWidget):
                 self.__ignores_list.append(_ignore_pattern)
 
     def _edit_files_n_dirs(self):
-        _scope_editor = ScopeEditorDialog(self, self.__data[CFG_PAR_INCLUDES], self.__data.get(CFG_PAR_INCLUDES))
+        _scope_editor = ScopeEditorDialog(self, self.__includes_file_name, self.__excludes_file_name)
         if _scope_editor.exec_() != QDialog.DialogCode.Accepted:
             return
 
 
-class ScopePane(QGroupBox):
+class ScopePane(QWidget):
     """
     Pane für die Backup-Umfänge.
     """
-    def __init__(self, parent: QWidget, config_path: str, scopes: dict):
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
-        :param config_path: Pfad zur lokalen restix-Konfiguration
-        :param scopes: aktuell konfigurierte Backup-Umfänge
+        :param model_factory: Factory für die Qt-Models
         """
-        super().__init__(localized_label(L_SCOPES), parent)
-        self.__scopes = scopes
-        self.setStyleSheet(GROUP_BOX_STYLE)
-        _layout = QHBoxLayout()
+        super().__init__(parent)
+        self.__model_index = None
+        _layout = QHBoxLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__scope_combo = _create_config_group_combo(_layout, L_NAME, T_CFG_SCOPE, scopes,
-                                                              self._scope_selected)
-        self.__detail_pane = ScopeDetailPane(self, config_path)
-        _layout.addWidget(self.__detail_pane)
-        self.setLayout(_layout)
+        _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_SCOPE, T_CFG_SCOPE_NAME,
+                                              model_factory.configuration_data(),
+                                              model_factory.scope_names_model(),
+                                              self._scope_selected))
+        _detail_group_box = QGroupBox('')
+        _group_box_layout = QVBoxLayout(_detail_group_box)
+        self.__detail_pane = ScopeDetailPane(self)
+        self.__detail_pane.setModel(model_factory.scope_model())
+        _group_box_layout.addWidget(self.__detail_pane, alignment=Qt.AlignmentFlag.AlignTop)
+        _update_button = QPushButton(localized_label(L_UPDATE))
+        _update_button.setStyleSheet(ACTION_BUTTON_STYLE)
+        _update_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _update_button.clicked.connect(self._update_scope)
+        _group_box_layout.addWidget(_update_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+        _layout.addWidget(_detail_group_box)
 
-    def _scope_selected(self, _index: int):
+    def _scope_selected(self, index: int):
         """
         Wird aufgerufen, wenn der Benutzer einen Eintrag der Backup-Umfänge ausgewählt hat.
         """
-        self.__detail_pane.set_data(self.__scope_combo.currentData(Qt.ItemDataRole.UserRole))
+        self.__model_index = self.__detail_pane.model().createIndex(index, 0)
+        self.__detail_pane.set_data(self.__detail_pane.model().data(self.__model_index, Qt.ItemDataRole.DisplayRole))
+
+    def _update_scope(self):
+        """
+        Wird aufgerufen, wenn der Aktualisieren-Button gedrückt wurde.
+        :return:
+        """
+        if self.__model_index is None:
+            return
+        self.__detail_pane.model().setData(self.__model_index, self.__detail_pane.get_data())
 
 
 class TargetDetailPane(QWidget):
@@ -626,8 +699,7 @@ class TargetPane(QGroupBox):
         _layout = QHBoxLayout()
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__targets_combo = _create_config_group_combo(_layout, L_ALIAS, T_CFG_TARGET, self.__targets,
-                                                          self._target_selected)
+        self.__targets_combo = QComboBox()
         self.__detail_pane = TargetDetailPane(self)
         _layout.addWidget(self.__detail_pane)
         self.setLayout(_layout)
@@ -654,57 +726,10 @@ class ConfigurationPane(QTabWidget):
         :param model_factory: Factory für die Models
         """
         super().__init__(parent, tabsClosable=False)
-        #self.__local_config = local_config
-        #self.__signals = EditorSignals()
         self.setStyleSheet(TAB_FOLDER_STYLE)
         self.addTab(CredentialsPane(self, model_factory), localized_label(L_CREDENTIALS))
-        #self.addTab(ScopePane(self, local_config.path(), local_config.scopes()), localized_label(L_SCOPES))
+        self.addTab(ScopePane(self, model_factory), localized_label(L_SCOPES))
         #self.addTab(TargetPane(self, local_config), localized_label(L_TARGETS))
-
-'''
-class ConfigurationPane(QWidget):
-    """
-    Pane für den Backup.
-    """
-    def __init__(self, parent: QWidget, local_config: LocalConfig):
-        """
-        Konstruktor.
-        :param parent: die zentrale restix Pane
-        :param local_config: lokale restix-Konfiguration
-        """
-        super().__init__(parent)
-        self.__local_config = local_config
-        _pane_layout = QVBoxLayout(self)
-        _scroll_pane = QScrollArea(self)
-        _scroll_pane_layout = QVBoxLayout(_scroll_pane)
-        # Group für die Zugriffsdaten
-        _scroll_pane_layout.addWidget(CredentialsPane(self, local_config.credentials()))
-        # Group für die Backup-Umfänge
-        _scroll_pane_layout.addWidget(ScopePane(self, local_config.path(), local_config.scopes()))
-        # Group für die Backup-Ziele
-        _scroll_pane_layout.addWidget(TargetPane(self, local_config))
-        _pane_layout.addWidget(_scroll_pane)
-'''
-
-def _create_config_group_combo(parent_layout: QHBoxLayout, caption_id: str, tooltip_id: str, data: dict,
-                               selection_handler: Callable) -> QComboBox:
-    """
-
-    :return:
-    """
-    _layout = QHBoxLayout()
-    _tooltip = localized_label(tooltip_id)
-    _layout.addWidget(option_label(caption_id, _tooltip))
-    _combo_box = QComboBox()
-    _combo_box.setMinimumWidth(240)
-    _combo_box.setToolTip(_tooltip)
-    for _name, _credential_data in sorted(data.items()):
-        _combo_box.addItem(_name, _credential_data)
-    _combo_box.setCurrentIndex(-1)
-    _combo_box.currentIndexChanged.connect(selection_handler)
-    _layout.addWidget(_combo_box)
-    parent_layout.addLayout(_layout)
-    return _combo_box
 
 
 _NEW_ELEMENT_DLG_HEIGHT = 480

@@ -148,25 +148,16 @@ class LocalConfig(dict):
             # neuer Name wird schon verwendet
             raise RestixException(E_ALIAS_NAME_ALREADY_USED, new_alias)
 
-    def credential_renamed(self, old_alias: str, new_alias: str):
+    def element_renamed(self, group: str, old_alias: str, new_alias: str):
         """
-        Passt die in Backup-Zielen referenzierten Zugriffsdaten aufgrund einer Umbenennung an.
+        Passt die in Backup-Zielen referenzierten Elemente aufgrund einer Umbenennung an.
+        :param group: Group, in dem sich das umbenannte Element befindet
         :param old_alias: alter Aliasname der Zugriffsdaten
         :param new_alias: neuer Aliasname der Zugriffsdaten
         """
         for _target in self[CFG_GROUP_TARGET].values():
-            if _target.get(CFG_PAR_CREDENTIALS) == old_alias:
-                _target[CFG_PAR_CREDENTIALS] = new_alias
-
-    def scope_renamed(self, old_alias: str, new_alias: str):
-        """
-        Passt die in Backup-Zielen referenzierten Backup-Umfänge aufgrund einer Umbenennung an.
-        :param old_alias: alter Aliasname des Backup-Umfangs
-        :param new_alias: neuer Aliasname des Backup-Umfangs
-        """
-        for _target in self[CFG_GROUP_TARGET].values():
-            if _target.get(CFG_PAR_SCOPE) == old_alias:
-                _target[CFG_PAR_SCOPE] = new_alias
+            if _target.get(group) == old_alias:
+                _target[group] = new_alias
 
     def for_cli(self, variables: dict):
         """
