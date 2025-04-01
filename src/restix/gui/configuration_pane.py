@@ -50,7 +50,6 @@ from restix.core.restix_exception import RestixException
 from restix.gui import *
 from restix.gui.dialogs import ScopeEditorDialog
 from restix.gui.model import ConfigModelFactory
-from restix.gui.panes import GROUP_BOX_STYLE
 
 
 class CredentialsDetailPane(QListView):
@@ -68,13 +67,13 @@ class CredentialsDetailPane(QListView):
         self.__layout.setContentsMargins(20, 20, 20, 20)
         self.__layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         if include_name:
-            self.__name_text = QLineEdit()
-            self.__name_text.setStyleSheet(TEXT_FIELD_STYLE)
-            self.__name_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-            self.__name_text.setToolTip(localized_label(T_CFG_CREDENTIAL_NAME))
-            self.__layout.addRow(QLabel(localized_label(L_NAME)), self.__name_text)
+            self.__alias_text = QLineEdit()
+            self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
+            self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+            self.__alias_text.setToolTip(localized_label(T_CFG_CREDENTIAL_ALIAS))
+            self.__layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
         else:
-            self.__name_text = None
+            self.__alias_text = None
         self.__comment_text = QLineEdit()
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
@@ -101,8 +100,8 @@ class CredentialsDetailPane(QListView):
         :returns: Zugriffsdaten
         """
         _data = {CFG_PAR_COMMENT: self.__comment_text.text(), CFG_PAR_TYPE: self.__type_combo.currentText()}
-        if self.__name_text is not None:
-            _data[CFG_PAR_ALIAS] = self.__name_text.text()
+        if self.__alias_text is not None:
+            _data[CFG_PAR_ALIAS] = self.__alias_text.text()
         if self.__value_text.isVisible():
             _data[CFG_PAR_VALUE] = self.__value_text.text()
         return _data
@@ -112,8 +111,8 @@ class CredentialsDetailPane(QListView):
         Überträgt die Zugriffsdaten in die GUI widgets.
         :param credential_data: Zugriffsdaten
         """
-        if self.__name_text is not None:
-            self.__name_text.setText(credential_data[CFG_PAR_ALIAS])
+        if self.__alias_text is not None:
+            self.__alias_text.setText(credential_data[CFG_PAR_ALIAS])
         self.__comment_text.setText(credential_data[CFG_PAR_COMMENT])
         _type = credential_data[CFG_PAR_TYPE]
         self.__type_combo.setCurrentText(_type)
@@ -231,15 +230,15 @@ class NewElementDialog(QDialog):
     """
     Basisklasse der Dialogfenster für neue Elemente.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig, title_id: str):
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory, title_id: str):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param local_config: lokale restix-Konfiguration
+        :param model_factory: Factory für die Models
         :param title_id: Resource-ID für die Fensterüberschrift
         """
         super().__init__(parent)
-        self.local_config = local_config
+        self.model_factory = model_factory
         self.data = {}
         self.setWindowTitle(localized_label(title_id))
         _parent_rect = parent.contentsRect()
@@ -280,24 +279,26 @@ class NewElementDialog(QDialog):
         pass
 
     @classmethod
-    def for_group(cls, group: str, parent: QWidget, local_config: LocalConfig):
+    def for_group(cls, group: str, parent: QWidget, model_factory: ConfigModelFactory):
         if group == CFG_GROUP_CREDENTIALS:
-            return NewCredentialDialog(parent, local_config)
+            return NewCredentialDialog(parent, model_factory)
         if group == CFG_GROUP_SCOPE:
-            return NewScopeDialog(parent, local_config)
+            return NewScopeDialog(parent, model_factory)
+        if group == CFG_GROUP_TARGET:
+            return NewTargetDialog(parent, model_factory)
 
 
 class NewCredentialDialog(NewElementDialog):
     """
     Dialogfenster für neue Zugriffsdaten.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig):
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param local_config: lokale restix-Konfiguration
+        :param model_factory: Factory für die Models
         """
-        super().__init__(parent, local_config, localized_label(L_DLG_TITLE_NEW_CREDENTIALS))
+        super().__init__(parent, model_factory, localized_label(L_DLG_TITLE_NEW_CREDENTIALS))
         self.__credentials_pane = CredentialsDetailPane(self, True)
         self.layout().addWidget(self.__credentials_pane)
         self.create_button_pane()
@@ -312,7 +313,8 @@ class NewCredentialDialog(NewElementDialog):
                                     localized_label(I_GUI_NO_NAME_SPECIFIED),
                                     QMessageBox.StandardButton.Ok)
             return
-        if _data[CFG_PAR_ALIAS] in self.local_config.credentials():
+        _local_config = self.model_factory.configuration_data()
+        if _data[CFG_PAR_ALIAS] in _local_config.credentials():
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                     localized_message(I_GUI_CREDENTIAL_EXISTS, _data[CFG_PAR_ALIAS]),
                                     QMessageBox.StandardButton.Ok)
@@ -330,13 +332,13 @@ class NewScopeDialog(NewElementDialog):
     """
     Dialogfenster für neue Backup-Umfänge.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig):
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param local_config: lokale restix-Konfiguration
+        :param model_factory: Factory für die Models
         """
-        super().__init__(parent, local_config, localized_label(L_DLG_TITLE_NEW_SCOPE))
+        super().__init__(parent, model_factory, localized_label(L_DLG_TITLE_NEW_SCOPE))
         self.__scope_pane = ScopeDetailPane(self, True)
         self.layout().addWidget(self.__scope_pane)
         self.create_button_pane()
@@ -351,9 +353,45 @@ class NewScopeDialog(NewElementDialog):
                                     localized_label(I_GUI_NO_NAME_SPECIFIED),
                                     QMessageBox.StandardButton.Ok)
             return
-        if _data[CFG_PAR_ALIAS] in self.local_config.credentials():
+        _local_config = self.model_factory.configuration_data()
+        if _data[CFG_PAR_ALIAS] in _local_config.scopes():
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                     localized_message(I_GUI_SCOPE_EXISTS, _data[CFG_PAR_ALIAS]),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        self.data = _data
+        self.accept()
+
+
+class NewTargetDialog(NewElementDialog):
+    """
+    Dialogfenster für neue Backup-Ziele.
+    """
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
+        """
+        Konstruktor.
+        :param parent: übergeordnetes Widget
+        :param model_factory: Factory für die Models
+        """
+        super().__init__(parent, model_factory, localized_label(L_DLG_TITLE_NEW_TARGET))
+        self.__target_pane = TargetDetailPane(self, model_factory, True)
+        self.layout().addWidget(self.__target_pane)
+        self.create_button_pane()
+
+    def add_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den Hinzufügen-Button geklickt hat
+        """
+        _data = self.__target_pane.get_data()
+        if len(_data[CFG_PAR_ALIAS]) == 0:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_label(I_GUI_NO_NAME_SPECIFIED),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        _local_config = self.model_factory.configuration_data()
+        if _data[CFG_PAR_ALIAS] in _local_config.targets():
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_message(I_GUI_TARGET_EXISTS, _data[CFG_PAR_ALIAS]),
                                     QMessageBox.StandardButton.Ok)
             return
         self.data = _data
@@ -364,20 +402,20 @@ class ElementSelectorPane(QWidget):
     """
     Pane zur Auswahl eines Elements in einer Group von Konfigurationsdaten.
     """
-    def __init__(self, parent: QWidget, group: str, tooltip_id: str, local_config: LocalConfig,
+    def __init__(self, parent: QWidget, group: str, tooltip_id: str, model_factory: ConfigModelFactory,
                  combo_model: QAbstractListModel, selected_handler: Callable):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
         :param group: die Element-Gruppe
         :param tooltip_id: Resource ID für den Tooltip-Text der Combo-Box
-        :param local_config: lokale restix-Konfiguration
+        :param model_factory: Factory für die Models
         :param combo_model: Model für die Combo-Box zur Auswahl der Elemente
         :param selected_handler: Handler, wenn ein Element in der Combo-Box ausgewählt wird
         """
         super().__init__(parent)
         self.__group = group
-        self.__local_config = local_config
+        self.__model_factory = model_factory
         _layout = QVBoxLayout(self)
         _layout.setContentsMargins(5, 5, 5, 5)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -410,7 +448,7 @@ class ElementSelectorPane(QWidget):
         """
         Wird aufgerufen, wenn der Benutzer den "Neu"-Button geklickt hat.
         """
-        _dlg = NewElementDialog.for_group(self.__group, self, self.__local_config)
+        _dlg = NewElementDialog.for_group(self.__group, self, self.__model_factory)
         if _dlg.exec() == QDialog.DialogCode.Accepted:
             _index = self.__combo.model().index(self.__combo.count(), 0)
             self.__combo.model().setData(_index, _dlg.get_data())
@@ -419,7 +457,8 @@ class ElementSelectorPane(QWidget):
         """
         Wird aufgerufen, wenn der Benutzer den Eintrag "Umbenennen" im Kontextmenü ausgewählt hat
         """
-        _dlg = RenameElementDialog(self, self.__group, self.__combo.currentText(), self.__local_config)
+        _local_config = self.__model_factory.configuration_data()
+        _dlg = RenameElementDialog(self, self.__group, self.__combo.currentText(), _local_config)
         if _dlg.exec() == QDialog.DialogCode.Accepted:
             _index = self.__combo.model().index(self.__combo.currentIndex(), 0)
             _element_data = self.__combo.model().data(_index, Qt.ItemDataRole.UserRole)
@@ -431,8 +470,9 @@ class ElementSelectorPane(QWidget):
         Wird aufgerufen, wenn der Benutzer den Eintrag "Löschen" im Kontextmenü ausgewählt hat
         """
         _element_alias = self.__combo.currentText()
+        _local_config = self.__model_factory.configuration_data()
         try:
-            self.__local_config.pre_check_remove(self.__group, _element_alias)
+            _local_config.pre_check_remove(self.__group, _element_alias)
         except RestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                     str(_e),
@@ -459,9 +499,8 @@ class CredentialsPane(QWidget):
         _layout = QHBoxLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_CREDENTIALS, T_CFG_CREDENTIAL_NAME,
-                                              model_factory.configuration_data(),
-                                              model_factory.credential_names_model(),
+        _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_CREDENTIALS, T_CFG_CREDENTIAL_ALIAS,
+                                              model_factory, model_factory.credential_names_model(),
                                               self._credential_selected))
         _detail_group_box = QGroupBox('')
         _group_box_layout = QVBoxLayout(_detail_group_box)
@@ -512,7 +551,7 @@ class ScopeDetailPane(QListView):
             self.__alias_text = QLineEdit()
             self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
             self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-            self.__alias_text.setToolTip(localized_label(T_CFG_SCOPE_NAME))
+            self.__alias_text.setToolTip(localized_label(T_CFG_SCOPE_ALIAS))
             _layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
         else:
             self.__alias_text = None
@@ -584,9 +623,8 @@ class ScopePane(QWidget):
         _layout = QHBoxLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_SCOPE, T_CFG_SCOPE_NAME,
-                                              model_factory.configuration_data(),
-                                              model_factory.scope_names_model(),
+        _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_SCOPE, T_CFG_SCOPE_ALIAS,
+                                              model_factory, model_factory.scope_names_model(),
                                               self._scope_selected))
         _detail_group_box = QGroupBox('')
         _group_box_layout = QVBoxLayout(_detail_group_box)
@@ -617,23 +655,29 @@ class ScopePane(QWidget):
         self.__detail_pane.model().setData(self.__model_index, self.__detail_pane.get_data())
 
 
-class TargetDetailPane(QWidget):
+class TargetDetailPane(QListView):
     """
     Pane zum Anzeigen und Editieren von Backup-Zielen.
     """
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory, include_name: bool = False):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
+        :param model_factory: Factory für die Qt-Models
+        :param include_name: zeigt an, ob ein Eingabefeld für den Aliasnamen vorhanden sein soll
         """
         super().__init__(parent)
-        self.__orig_data = None
-        self.__data = None
-        self.__credential_names = []
-        self.__scope_names = []
         _layout = QFormLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        if include_name:
+            self.__alias_text = QLineEdit()
+            self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
+            self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+            self.__alias_text.setToolTip(localized_label(T_CFG_TARGET_ALIAS))
+            _layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
+        else:
+            self.__alias_text = None
         self.__comment_text = QLineEdit()
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
@@ -647,71 +691,84 @@ class TargetDetailPane(QWidget):
         self.__credential_combo = QComboBox()
         self.__credential_combo.setMinimumWidth(240)
         self.__credential_combo.setToolTip(localized_label(T_CFG_TARGET_CREDENTIALS))
-        self.__credential_combo.currentIndexChanged.connect(self._credentials_selected)
+        self.__credential_combo.setModel(model_factory.credential_names_model())
         _layout.addRow(QLabel(localized_label(L_CREDENTIALS)), self.__credential_combo)
         self.__scope_combo = QComboBox()
         self.__scope_combo.setMinimumWidth(240)
         self.__scope_combo.setToolTip(localized_label(T_CFG_TARGET_SCOPE))
-        self.__scope_combo.currentIndexChanged.connect(self._scope_selected)
+        self.__scope_combo.setModel(model_factory.scope_names_model())
         _layout.addRow(QLabel(localized_label(L_SCOPE)), self.__scope_combo)
 
-    def set_data(self, target_data: dict, credential_names: list[str], scope_names: list[str]):
+    def get_data(self) -> dict:
+        """
+        :returns: Backup-Ziel
+        """
+        _data = {CFG_PAR_COMMENT: self.__comment_text.text(), CFG_PAR_LOCATION: self.__location_text.text(),
+                 CFG_PAR_SCOPE: self.__scope_combo.currentText(),
+                 CFG_PAR_CREDENTIALS: self.__credential_combo.currentText()}
+        if self.__alias_text is not None:
+            _data[CFG_PAR_ALIAS] = self.__alias_text.text()
+        return _data
+
+
+    def set_data(self, target_data: dict):
         """
         Überträgt die Daten eines Backup-Ziels in die GUI widgets.
         :param target_data: Backup-Ziel
         """
-        self.__orig_data = target_data
-        self.__data = target_data.copy()
+        if self.__alias_text is not None:
+            self.__alias_text.setText(target_data[CFG_PAR_ALIAS])
         self.__comment_text.setText(target_data[CFG_PAR_COMMENT])
         self.__location_text.setText(target_data[CFG_PAR_LOCATION])
-        self.__credential_combo.currentIndexChanged.disconnect()
-        self.__credential_combo.clear()
-        self.__credential_combo.addItems(scope_names)
         self.__credential_combo.setCurrentText(target_data[CFG_PAR_CREDENTIALS])
-        self.__credential_combo.currentIndexChanged.connect(self._credentials_selected)
-        self.__scope_combo.currentIndexChanged.disconnect()
-        self.__scope_combo.clear()
-        self.__scope_combo.addItems(scope_names)
         self.__scope_combo.setCurrentText(target_data[CFG_PAR_SCOPE])
-        self.__scope_combo.currentIndexChanged.connect(self._scope_selected)
-
-    def _credentials_selected(self):
-        print('_credentials_selected')
-
-    def _scope_selected(self):
-        print('_scope_selected')
 
 
 class TargetPane(QGroupBox):
     """
     Pane für die Backup-Ziele.
     """
-    def __init__(self, parent: QWidget, local_config: LocalConfig):
+    def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
-        :param local_config: lokale restix-Konfiguration
+        :param model_factory: Factory für die Qt-Models
         """
-        super().__init__(localized_label(L_TARGETS), parent)
-        self.__targets = local_config.targets()
-        self.__config = local_config
-        self.setStyleSheet(GROUP_BOX_STYLE)
-        _layout = QHBoxLayout()
+        super().__init__(parent)
+        self.__model_index = None
+        _layout = QHBoxLayout(self)
         _layout.setContentsMargins(20, 20, 20, 20)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__targets_combo = QComboBox()
-        self.__detail_pane = TargetDetailPane(self)
-        _layout.addWidget(self.__detail_pane)
-        self.setLayout(_layout)
+        _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_TARGET, T_CFG_TARGET_ALIAS,
+                                              model_factory, model_factory.target_names_model(),
+                                              self._target_selected))
+        _detail_group_box = QGroupBox('')
+        _group_box_layout = QVBoxLayout(_detail_group_box)
+        self.__detail_pane = TargetDetailPane(self, model_factory)
+        self.__detail_pane.setModel(model_factory.target_model())
+        _group_box_layout.addWidget(self.__detail_pane, alignment=Qt.AlignmentFlag.AlignTop)
+        _update_button = QPushButton(localized_label(L_UPDATE))
+        _update_button.setStyleSheet(ACTION_BUTTON_STYLE)
+        _update_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        _update_button.clicked.connect(self._update_target)
+        _group_box_layout.addWidget(_update_button, alignment=Qt.AlignmentFlag.AlignHCenter)
+        _layout.addWidget(_detail_group_box)
 
-    def _target_selected(self, _index: int):
+    def _target_selected(self, index: int):
         """
         Wird aufgerufen, wenn der Benutzer einen Eintrag der Backup-Ziele ausgewählt hat.
         """
-        _credential_names = [_c for _c in self.__config.credentials().keys()]
-        _scope_names = [_s for _s in self.__config.scopes().keys()]
-        self.__detail_pane.set_data(self.__targets_combo.currentData(Qt.ItemDataRole.UserRole),
-                                    _credential_names, _scope_names)
+        self.__model_index = self.__detail_pane.model().createIndex(index, 0)
+        self.__detail_pane.set_data(self.__detail_pane.model().data(self.__model_index, Qt.ItemDataRole.DisplayRole))
+
+    def _update_target(self):
+        """
+        Wird aufgerufen, wenn der Aktualisieren-Button gedrückt wurde.
+        :return:
+        """
+        if self.__model_index is None:
+            return
+        self.__detail_pane.model().setData(self.__model_index, self.__detail_pane.get_data())
 
 
 class ConfigurationPane(QTabWidget):
@@ -726,10 +783,11 @@ class ConfigurationPane(QTabWidget):
         :param model_factory: Factory für die Models
         """
         super().__init__(parent, tabsClosable=False)
+        self.setContentsMargins(10, 10, 10, 10)
         self.setStyleSheet(TAB_FOLDER_STYLE)
         self.addTab(CredentialsPane(self, model_factory), localized_label(L_CREDENTIALS))
         self.addTab(ScopePane(self, model_factory), localized_label(L_SCOPES))
-        #self.addTab(TargetPane(self, local_config), localized_label(L_TARGETS))
+        self.addTab(TargetPane(self, model_factory), localized_label(L_TARGETS))
 
 
 _NEW_ELEMENT_DLG_HEIGHT = 480

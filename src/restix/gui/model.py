@@ -244,6 +244,30 @@ class ScopeModel(ConfigGroupModel):
         super().__init__(CFG_GROUP_SCOPE, configuration_data)
 
 
+class TargetNamesModel(ConfigGroupNamesModel):
+    """
+    Model für Combobox-Widgets, die nur den Aliasnamen von Backup-Zielen arbeiten.
+    """
+    def __init__(self, configuration_data: LocalConfig):
+        """
+        Konstruktor.
+        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        """
+        super().__init__(CFG_GROUP_TARGET, configuration_data)
+
+
+class TargetModel(ConfigGroupModel):
+    """
+    Model für Widgets, die mit Backup-Zielen arbeiten.
+    """
+    def __init__(self, configuration_data: LocalConfig):
+        """
+        Konstruktor.
+        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        """
+        super().__init__(CFG_GROUP_TARGET, configuration_data)
+
+
 class ConfigModelFactory:
     """
     Models für die gesamte restix-Konfiguration.
@@ -260,6 +284,8 @@ class ConfigModelFactory:
         self.__credentials_model = CredentialsModel(configuration_data)
         self.__scope_names_model = ScopeNamesModel(configuration_data)
         self.__scope_model = ScopeModel(configuration_data)
+        self.__target_names_model = TargetNamesModel(configuration_data)
+        self.__target_model = TargetModel(configuration_data)
 
     def credential_names_model(self) -> CredentialNamesModel:
         """
@@ -284,6 +310,18 @@ class ConfigModelFactory:
         :returns: Model für die Anzeige von Zugriffsdaten in einer Pane
         """
         return self.__scope_model
+
+    def target_names_model(self) -> TargetNamesModel:
+        """
+        :returns: Model für die Anzeige der Aliasnamen von Backup-Zielen in einer Combo-Box
+        """
+        return self.__target_names_model
+
+    def target_model(self) -> TargetModel:
+        """
+        :returns: Model für die Anzeige von Backup-Zielen in einer Pane
+        """
+        return self.__target_model
 
     def configuration_data(self) -> LocalConfig:
         """

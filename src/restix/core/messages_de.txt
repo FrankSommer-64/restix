@@ -164,6 +164,7 @@ i-gui-restoring-some-data Stelle ausgewählte Daten aus Repository {0} wieder he
 i-gui-restoring-some-data-to-path Kopiere alle ausgewählte aus Repository {0} in Verzeichnis {1}.
 i-gui-scope-exists Sicherungsumfang mit Alias '{0}' existiert bereits.
 i-gui-snapshot-tagged Snapshot {0} in Repository {1} wurde mit Tag {2} markiert.
+i-gui-target-exists Sicherungsziel mit Alias '{0}' existiert bereits.
 i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels
@@ -236,6 +237,7 @@ l-year Jahr
 l-dlg-title-about Über restix
 l-dlg-title-new-credentials Neue Zugriffsdaten
 l-dlg-title-new-scope Neuer Sicherungsumfang
+l-dlg-title-new-target Neues Sicherungsziel
 l-dlg-title-rename-element {0} umbenennen
 l-dlg-title-save-local-config Lokale restix-Konfiguration speichern
 l-dlg-title-scope-editor Backup-Umfang festlegen
@@ -260,7 +262,7 @@ l-menu-user-manual Benutzerhandbuch
 # GUI Tooltips
 t-cancel-action Laufende Aktion abbrechen
 t-cfg-credential-comment Kommentar zu den Zugriffsdaten
-t-cfg-credential-name Name der Zugriffsdaten
+t-cfg-credential-alias Aliasname der Zugriffsdaten
 t-cfg-credential-password Passwort
 t-cfg-credential-type Art der Zugriffsdaten
 t-cfg-credential-file-name Name der Datei mit dem Passwort
@@ -268,7 +270,7 @@ t-cfg-credentials Zu bearbeitende Zugriffsdaten auswählen
 t-cfg-scope Zu bearbeitenden Backup-Umfang auswählen
 t-cfg-scope-comment Kommentar zum Backup-Umfang
 t-cfg-scope-files-n-dirs Dateien und Verzeichnisse auswählen, die gesichert werden sollen
-t-cfg-scope-name Name des Backup-Umfangs
+t-cfg-scope-alias Aliasname des Backup-Umfangs
 t-cfg-target Zu bearbeitendes Backup-Ziel auswählen
 t-cfg-target-alias Aliasname des Backup-Ziels
 t-cfg-target-comment Kommentar zum Backup-Ziel

@@ -71,7 +71,7 @@ class CentralPane(QWidget):
         self._gui_settings = gui_settings
         self.__model_factory = ConfigModelFactory(local_config)
         self._layout = QVBoxLayout()
-        self._layout.setSpacing(0)
+        self._layout.setSpacing(10)
         self._layout.setContentsMargins(5, 5, 5, 5)
         _actions = (('backup_icon.png', L_BACKUP, self._backup_selected, False),
                     ('restore_icon.png', L_RESTORE, self._restore_selected, False),
