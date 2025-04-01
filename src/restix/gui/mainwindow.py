@@ -51,10 +51,9 @@ class MainWindow(QMainWindow):
     """
     Hauptfenster der restix GUI.
     """
-    def __init__(self, config_path: str, local_config: LocalConfig):
+    def __init__(self, local_config: LocalConfig):
         """
         Konstruktor.
-        :param config_path: restix-Konfigurationsverzeichnis
         :param local_config: lokale restix-Konfiguration
         """
         super().__init__()
@@ -64,7 +63,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(self.__settings.win_geometry())
         self.setWindowTitle(localized_label(L_MAIN_WIN_TITLE))
         # central widget
-        self.setCentralWidget(CentralPane(self, config_path, local_config, self.__settings))
+        self.setCentralWidget(CentralPane(self, local_config, self.__settings))
         self.layout().setContentsMargins(_MAIN_WINDOW_MARGIN, _MAIN_WINDOW_MARGIN,
                                          _MAIN_WINDOW_MARGIN, _MAIN_WINDOW_MARGIN)
         self.layout().update()

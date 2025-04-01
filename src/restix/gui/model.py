@@ -38,10 +38,44 @@ Model der restix-Konfiguration zur Nutzung in der GUI.
 
 from typing import Any
 
-from PySide6.QtCore import Qt, QAbstractListModel, QModelIndex, QPersistentModelIndex, QAbstractItemModel
+from PySide6.QtCore import Qt, QAbstractListModel, QModelIndex, QPersistentModelIndex, QAbstractItemModel, QDir
+from PySide6.QtWidgets import QFileSystemModel
 
 from restix.core import *
 from restix.core.config import LocalConfig
+
+
+class CheckBoxFileSystemModel(QFileSystemModel):
+    """
+    Model für den Verzeichnisbaum im Scope-Editor.
+    """
+    def __init__(self):
+        """
+        Konstruktor.
+        """
+        super().__init__()
+        self.__check_state = {}
+        self.setFilter(QDir.Filter.AllEntries | QDir.Filter.NoDotAndDotDot | QDir.Filter.Hidden)
+
+    def flags(self, index: QModelIndex | QPersistentModelIndex, /) -> Qt.ItemFlag:
+        """
+        Fügt den angezeigten Elementen eine Checkbox hinzu.
+        :param index: Index des Elements
+        :returns: Flags für das Element
+        """
+        return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
+
+    def check_state(self, index):
+        """
+        :param index: Index des Elements
+        :returns: Status der Checkbox des Elements
+        """
+        return self.__check_state.get(self.filePath(index), Qt.CheckState.Unchecked)
+
+    def data(self, index: QModelIndex | QPersistentModelIndex, role = Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
+            return self.check_state(index)
+        return super().data(index, role)
 
 
 class ConfigGroupNamesModel(QAbstractListModel):

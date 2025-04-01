@@ -48,7 +48,7 @@ from restix.core.config import LocalConfig
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.gui import *
-from restix.gui.dialogs import ScopeEditorDialog
+from restix.gui.editors import ScopeEditor
 from restix.gui.model import ConfigModelFactory
 
 
@@ -603,7 +603,7 @@ class ScopeDetailPane(QListView):
                 self.__ignores_list.append(_ignore_pattern)
 
     def _edit_files_n_dirs(self):
-        _scope_editor = ScopeEditorDialog(self, self.__includes_file_name, self.__excludes_file_name)
+        _scope_editor = ScopeEditor(self, self.__includes_file_name, self.__excludes_file_name)
         if _scope_editor.exec_() != QDialog.DialogCode.Accepted:
             return
 

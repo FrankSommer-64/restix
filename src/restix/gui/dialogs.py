@@ -55,27 +55,6 @@ from restix.core.restic_interface import find_snapshot_elements, list_snapshot_e
 from restix.core.snapshot import Snapshot
 
 
-class ScopeEditorDialog(QDialog):
-    """
-    Dialogfenster zum Auswählen der ein- und auszuschliessenden Elemente eines Backup-Umfangs.
-    """
-    def __init__(self, parent: QWidget, includes_file_path: str, excludes_file_path: str | None):
-        """
-        Konstruktor.
-        :param parent: übergeordnetes Widget
-        :param includes_file_path: Pfad und Name der Datei, in der die einzuschliessenden Elemente enthalten sind.
-        :param excludes_file_path: Pfad und Name der Datei mit den auszuschliessenden Elementen.
-        """
-        super().__init__(parent)
-        self.setWindowTitle(localized_label(L_DLG_TITLE_SCOPE_EDITOR))
-        _parent_rect = parent.contentsRect()
-        self.setGeometry(_parent_rect.x() + _SCOPE_EDITOR_OFFSET, _parent_rect.y() + _SCOPE_EDITOR_OFFSET,
-                         _SCOPE_EDITOR_WIDTH, _SCOPE_EDITOR_HEIGHT)
-        self.setStyleSheet(_STYLE_WHITE_BG)
-        _layout = QVBoxLayout(self)
-        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-
 class SnapshotViewerDialog(QDialog):
     """
     Zeigt den Inhalt eines Snapshots an.

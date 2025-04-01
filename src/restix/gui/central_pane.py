@@ -58,11 +58,10 @@ class CentralPane(QWidget):
     """
     Arbeitsbereich der restix GUI.
     """
-    def __init__(self, parent: QWidget, config_path: str, local_config: LocalConfig, gui_settings: GuiSettings):
+    def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
         :param parent: das Hauptfenster
-        :param config_path: restix-Konfigurationsverzeichnis
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die personalisierten GUI-Einstellungen
         """

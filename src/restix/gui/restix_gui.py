@@ -87,7 +87,7 @@ def gui_main():
             sys.exit(1)
 
         # restix GUI starten
-        main_win = MainWindow(_config_root_path, _restix_config)
+        main_win = MainWindow(_restix_config)
         main_win.show()
         app.aboutToQuit.connect(main_win.save_settings)
         sys.exit(app.exec())
