@@ -339,7 +339,8 @@ class NewScopeDialog(NewElementDialog):
         :param model_factory: Factory für die Models
         """
         super().__init__(parent, model_factory, localized_label(L_DLG_TITLE_NEW_SCOPE))
-        self.__scope_pane = ScopeDetailPane(self, True)
+        _config_path = model_factory.configuration_data().path()
+        self.__scope_pane = ScopeDetailPane(self, _config_path, True)
         self.layout().addWidget(self.__scope_pane)
         self.create_button_pane()
 
@@ -535,13 +536,15 @@ class ScopeDetailPane(QListView):
     """
     Pane zum Anzeigen und Editieren von Backup-Umfängen.
     """
-    def __init__(self, parent: QWidget, include_name: bool = False):
+    def __init__(self, parent: QWidget, config_path: str, include_name: bool = False):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
+        :param config_path: Verzeichnis der lokalen restix-Konfiguration
         :param include_name: zeigt an, ob ein Eingabefeld für den Aliasnamen vorhanden sein soll
         """
         super().__init__(parent)
+        self.__config_path = config_path
         self.__includes_file_name = None
         self.__excludes_file_name = None
         _layout = QFormLayout(self)
@@ -603,7 +606,9 @@ class ScopeDetailPane(QListView):
                 self.__ignores_list.append(_ignore_pattern)
 
     def _edit_files_n_dirs(self):
-        _scope_editor = ScopeEditor(self, self.__includes_file_name, self.__excludes_file_name)
+        _ignores = self.__ignores_list.toPlainText().split(os.linesep)
+        _scope_editor = ScopeEditor(self, self.__config_path, self.__includes_file_name, self.__excludes_file_name,
+                                    _ignores)
         if _scope_editor.exec_() != QDialog.DialogCode.Accepted:
             return
 
@@ -628,7 +633,7 @@ class ScopePane(QWidget):
                                               self._scope_selected))
         _detail_group_box = QGroupBox('')
         _group_box_layout = QVBoxLayout(_detail_group_box)
-        self.__detail_pane = ScopeDetailPane(self)
+        self.__detail_pane = ScopeDetailPane(self, model_factory.configuration_data().path())
         self.__detail_pane.setModel(model_factory.scope_model())
         _group_box_layout.addWidget(self.__detail_pane, alignment=Qt.AlignmentFlag.AlignTop)
         _update_button = QPushButton(localized_label(L_UPDATE))

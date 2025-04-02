@@ -35,39 +35,42 @@
 """
 Editoren für die restix GUI.
 """
+import os.path
 
-from PySide6 import QtCore
-from PySide6.QtCore import qVersion, Qt, QPoint
-from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
-                               QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit,
-                               QTreeWidget, QTreeWidgetItem, QStyle, QFileDialog, QTreeView)
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QDialog, QPushButton, QVBoxLayout, QHBoxLayout, QTreeView
 
-from restix.core import *
-from restix.core.config import LocalConfig
 from restix.core.messages import *
 from restix.gui.model import CheckBoxFileSystemModel
 
 
 class CheckBoxFileViewer(QTreeView):
-    def __init__(self, parent):
+    def __init__(self, parent, includes: list[str], excludes: list[str], ignores: list[str]):
         super().__init__(parent)
-        self.__model = CheckBoxFileSystemModel()
+        self.__model = CheckBoxFileSystemModel(includes, excludes, ignores)
         self.__model.setRootPath('')
         self.setModel(self.__model)
+        self.setColumnWidth(0, _SCOPE_EDITOR_WIDTH >> 1)
 
 
 class ScopeEditor(QDialog):
     """
     Editor zum Auswählen der ein- und auszuschliessenden Elemente eines Backup-Umfangs.
     """
-    def __init__(self, parent: QWidget, includes_file_path: str | None, excludes_file_path: str | None):
+    def __init__(self, parent: QWidget, config_path: str, includes_file_path: str | None,
+                 excludes_file_path: str | None, ignore_list: list[str]):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
+        :param config_path: Verzeichnis der lokalen restix-Konfiguration.
         :param includes_file_path: Pfad und Name der Datei, in der die einzuschliessenden Elemente enthalten sind.
         :param excludes_file_path: Pfad und Name der Datei mit den auszuschliessenden Elementen.
+        :param ignore_list: Patterns zu ignorierender Elemente.
         """
         super().__init__(parent)
+        self.__config_path = config_path
+        self.__includes_file_path = includes_file_path
+        self.__excludes_file_path = excludes_file_path
         self.setWindowTitle(localized_label(L_DLG_TITLE_SCOPE_EDITOR))
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _SCOPE_EDITOR_OFFSET, _parent_rect.y() + _SCOPE_EDITOR_OFFSET,
@@ -76,7 +79,8 @@ class ScopeEditor(QDialog):
         _layout = QVBoxLayout(self)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         # oberer Bereich Tree-Viewer mit dem Dateisystem
-        self.__tree_viewer = CheckBoxFileViewer(self)
+        self.__tree_viewer = CheckBoxFileViewer(self, self._read_file(includes_file_path),
+                                                self._read_file(excludes_file_path), ignore_list)
         _layout.addWidget(self.__tree_viewer)
         # unterer Bereich Buttons zum Speichern und Abbrechen
         _button_pane = QWidget(self)
@@ -94,6 +98,15 @@ class ScopeEditor(QDialog):
         print('_save_button_clicked')
         self.accept()
 
+    def _read_file(self, file_path) -> list[str]:
+        if file_path is None:
+            return []
+        _file_path = file_path if os.path.isabs(file_path) else os.path.join(self.__config_path, file_path)
+        if not os.path.isfile(_file_path):
+            return []
+        with open(_file_path, 'r') as _f:
+            return _f.read().splitlines()
+
 
 _SAVE_DIALOG_HEIGHT = 240
 _SAVE_DIALOG_OFFSET = 80
@@ -102,8 +115,4 @@ _SCOPE_EDITOR_HEIGHT = 720
 _SCOPE_EDITOR_OFFSET = 10
 _SCOPE_EDITOR_WIDTH = 1200
 
-_STYLE_INPUT_FIELD = 'background-color: #ffffcc'
 _STYLE_WHITE_BG = 'background-color: white'
-_STYLE_BOLD_TEXT = 'font-weight: bold'
-_STYLE_EXCEPTION_BOX_INFO = 'QLabel#qt_msgbox_informativelabel {font-weight: bold}'
-_STYLE_RUN_BUTTON = 'background-color: green; color: white; font-weight: bold'

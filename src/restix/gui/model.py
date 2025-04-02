@@ -38,6 +38,8 @@ Model der restix-Konfiguration zur Nutzung in der GUI.
 
 from typing import Any
 
+import re
+
 from PySide6.QtCore import Qt, QAbstractListModel, QModelIndex, QPersistentModelIndex, QAbstractItemModel, QDir
 from PySide6.QtWidgets import QFileSystemModel
 
@@ -49,12 +51,22 @@ class CheckBoxFileSystemModel(QFileSystemModel):
     """
     Model für den Verzeichnisbaum im Scope-Editor.
     """
-    def __init__(self):
+    def __init__(self, includes: list[str], excludes: list[str], ignores: list[str]):
         """
         Konstruktor.
+        :param includes: einzuschließende Dateien und Verzeichnisse
+        :param excludes: auszuschließende Dateien und Verzeichnisse
+        :param ignores: zu ignorierende Dateien und Verzeichnisse
         """
         super().__init__()
         self.__check_state = {}
+        for _element in excludes:
+            self.__check_state[_element] = False
+        for _element in includes:
+            self.__check_state[_element] = True
+        self.__ignore_patterns = CheckBoxFileSystemModel._regex_patterns_for(ignores)
+        print(self.__check_state)
+        print(self.__ignore_patterns)
         self.setFilter(QDir.Filter.AllEntries | QDir.Filter.NoDotAndDotDot | QDir.Filter.Hidden)
 
     def flags(self, index: QModelIndex | QPersistentModelIndex, /) -> Qt.ItemFlag:
@@ -72,10 +84,62 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         """
         return self.__check_state.get(self.filePath(index), Qt.CheckState.Unchecked)
 
+    def check_parent(self, parent):
+        if not parent.isValid():
+            return
+        childStates = [self.check_state(self.index(r, 0, parent)) for r in range(self.rowCount(parent))]
+        newState = Qt.CheckState.Checked if all(childStates) else Qt.CheckState.Unchecked
+        oldState = self.check_state(parent)
+        if newState != oldState:
+            self.set_check_state(parent, newState)
+            self.dataChanged.emit(parent, parent)
+        self.check_parent(parent.parent())
+
+    def set_check_state(self, index, state):
+        path = self.filePath(index)
+        if self.__check_state.get(path) == state:
+            return
+        self.__check_state[path] = state
+
     def data(self, index: QModelIndex | QPersistentModelIndex, role = Qt.ItemDataRole.DisplayRole):
+        """
+        :param index: Index der Zugriffsdaten
+        :param role: Role
+        :return: Daten des Elements mit angegebenem Index und Role
+        """
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
             return self.check_state(index)
         return super().data(index, role)
+
+    def setData(self, index: QModelIndex | QPersistentModelIndex, value, role):
+        """
+        Ändert Zugriffsdaten im Model.
+        :param index: Index der Zugriffsdaten
+        :param role: Typ-Selektor
+        :param value: Wert des Elements
+        """
+        if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
+            self.set_check_state(index, value)
+            for row in range(self.rowCount(index)):
+                self.setData(self.index(row, 0, index), value, Qt.ItemDataRole.CheckStateRole)
+            self.dataChanged.emit(index, index)
+            return True
+        return super().setData(index, value, role)
+
+    @classmethod
+    def _regex_patterns_for(cls, patterns: list[str]) -> list[re.Pattern]:
+        _regex_patterns = []
+        for _pattern in patterns:
+            _regex_pattern = ''
+            for _ch in _pattern:
+                if _ch in r'\.[]{}()+-=^$':
+                    _regex_pattern += f'\\{_ch}'
+                elif _ch == '*':
+                    _regex_pattern += '.*'
+                else:
+                    _regex_pattern += _ch
+            _regex_patterns.append(re.compile(_regex_pattern))
+        return _regex_patterns
 
 
 class ConfigGroupNamesModel(QAbstractListModel):
