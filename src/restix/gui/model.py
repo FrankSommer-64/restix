@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Model der restix-Konfiguration zur Nutzung in der GUI.
+Models der restix-Konfiguration zur Nutzung in der GUI.
 """
 
 from typing import Any
@@ -41,6 +41,7 @@ from typing import Any
 import re
 
 from PySide6.QtCore import Qt, QAbstractListModel, QModelIndex, QPersistentModelIndex, QAbstractItemModel, QDir
+from PySide6.QtGui import QColorConstants
 from PySide6.QtWidgets import QFileSystemModel
 
 from restix.core import *
@@ -59,14 +60,12 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :param ignores: zu ignorierende Dateien und Verzeichnisse
         """
         super().__init__()
-        self.__check_state = {}
+        self.__check_status = {}
         for _element in excludes:
-            self.__check_state[_element] = False
+            self.__check_status[_element] = Qt.CheckState.Unchecked
         for _element in includes:
-            self.__check_state[_element] = True
+            self.__check_status[_element] = Qt.CheckState.Checked
         self.__ignore_patterns = CheckBoxFileSystemModel._regex_patterns_for(ignores)
-        print(self.__check_state)
-        print(self.__ignore_patterns)
         self.setFilter(QDir.Filter.AllEntries | QDir.Filter.NoDotAndDotDot | QDir.Filter.Hidden)
 
     def flags(self, index: QModelIndex | QPersistentModelIndex, /) -> Qt.ItemFlag:
@@ -77,59 +76,88 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         """
         return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
 
-    def check_state(self, index):
+    def checkbox_status(self, index: QModelIndex | QPersistentModelIndex) -> Qt.CheckState:
         """
         :param index: Index des Elements
         :returns: Status der Checkbox des Elements
         """
-        return self.__check_state.get(self.filePath(index), Qt.CheckState.Unchecked)
+        return self.__check_status.get(self.filePath(index), Qt.CheckState.Unchecked)
 
-    def check_parent(self, parent):
-        if not parent.isValid():
+    def set_checkbox_status(self, index: QModelIndex | QPersistentModelIndex, status: Qt.CheckState):
+        """
+        Setzt den Status der Checkbox eines Elements.
+        :param index: Index des Elements
+        :param status: Checkbox-Status
+        """
+        _file_path = self.filePath(index)
+        if self.__check_status.get(_file_path) == status:
             return
-        childStates = [self.check_state(self.index(r, 0, parent)) for r in range(self.rowCount(parent))]
-        newState = Qt.CheckState.Checked if all(childStates) else Qt.CheckState.Unchecked
-        oldState = self.check_state(parent)
-        if newState != oldState:
-            self.set_check_state(parent, newState)
-            self.dataChanged.emit(parent, parent)
-        self.check_parent(parent.parent())
-
-    def set_check_state(self, index, state):
-        path = self.filePath(index)
-        if self.__check_state.get(path) == state:
-            return
-        self.__check_state[path] = state
+        self.__check_status[_file_path] = status
 
     def data(self, index: QModelIndex | QPersistentModelIndex, role = Qt.ItemDataRole.DisplayRole):
         """
         :param index: Index der Zugriffsdaten
-        :param role: Role
+        :param role: Typ-Selektor
         :return: Daten des Elements mit angegebenem Index und Role
         """
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
-            return self.check_state(index)
+            # Checkbox-Status
+            return Qt.CheckState.Unchecked if self._is_in_ignore_list(index) else self.checkbox_status(index)
+        if role == Qt.ItemDataRole.ForegroundRole and index.column() == 0:
+            # falls das Element selbst oder eines der übergeordneten Elemente in der Ignore-Liste ist,
+            # dann seinen Namen in Rot anzeigen
+            if self._is_in_ignore_list(index, True):
+                return QColorConstants.DarkRed
         return super().data(index, role)
 
-    def setData(self, index: QModelIndex | QPersistentModelIndex, value, role):
+    def setData(self, index: QModelIndex | QPersistentModelIndex, value: Any,
+                role: Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:
         """
-        Ändert Zugriffsdaten im Model.
-        :param index: Index der Zugriffsdaten
+        Ändert den Zustand der Checkboxen im Model.
+        :param index: Index des Elements
         :param role: Typ-Selektor
         :param value: Wert des Elements
+        :returns: True, falls der Zustand geändert wurde
         """
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
-            self.set_check_state(index, value)
+            if self._is_in_ignore_list(index, True):
+                # Element oder eines der übergeordneten Elemente ist in der Liste der zu ignorierenden Elemente
+                return False
+            self.set_checkbox_status(index, value)
             for row in range(self.rowCount(index)):
                 self.setData(self.index(row, 0, index), value, Qt.ItemDataRole.CheckStateRole)
             self.dataChanged.emit(index, index)
             return True
         return super().setData(index, value, role)
 
+    def _is_in_ignore_list(self, index: QModelIndex | QPersistentModelIndex,
+                           consider_ancestors: bool = False) -> bool:
+        """
+        :param index: Index des Elements
+        :param consider_ancestors: True, wenn auch die übergeordneten Elemente geprüft werden sollen
+        :returns: True, falls die Checkbox des Elements unveränderlich sein soll
+        """
+        if not index.isValid():
+            return False
+        _item_file_name = self.fileName(index)
+        for _pattern in self.__ignore_patterns:
+            if _pattern.match(_item_file_name):
+                return True
+        if consider_ancestors:
+            return self._is_in_ignore_list(index.parent(), True)
+        return False
+
     @classmethod
     def _regex_patterns_for(cls, patterns: list[str]) -> list[re.Pattern]:
+        """
+        Wandelt die Patterns für zu ignorierende Dateien aus der restix-Konfiguration in reguläre Ausdrücke um.
+        :param patterns: Patterns aus der restix-Konfiguration
+        :return: Patterns als reguläre Ausdrücke
+        """
         _regex_patterns = []
         for _pattern in patterns:
+            if len(_pattern) == 0:
+                continue
             _regex_pattern = ''
             for _ch in _pattern:
                 if _ch in r'\.[]{}()+-=^$':

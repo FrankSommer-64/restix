@@ -99,6 +99,12 @@ class ScopeEditor(QDialog):
         self.accept()
 
     def _read_file(self, file_path) -> list[str]:
+        """
+        Liest eine Datei mit includes oder excludes ein. Falls der Dateiname nicht absolut angegeben wurde, wird diese
+        unterhalb des restix-Konfigurationsverzeichnisses gesucht.
+        :param file_path: Dateiname
+        :returns: zeilenweiser Inhalt der Datei
+        """
         if file_path is None:
             return []
         _file_path = file_path if os.path.isabs(file_path) else os.path.join(self.__config_path, file_path)
