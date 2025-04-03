@@ -153,6 +153,7 @@ i-gui-data-backed-up Daten in Repository {0} gesichert.
 i-gui-data-restored Daten aus Repository {0} wiederhergestellt.
 i-gui-local-config-changed restix-Konfiguration wurde verändert.
 i-gui-no-credential-type-specified Kein Zugriffsdaten-Typ ausgewählt.
+i-gui-no-includes-specified Keine zu sichernden Elemente ausgewählt.
 i-gui-no-name-specified Kein Name angegeben.
 i-gui-no-snapshot-selected Kein Snapshot ausgewählt
 i-gui-no-tag-defined Kein Tag-Name eingegeben

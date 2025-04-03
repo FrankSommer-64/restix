@@ -38,7 +38,8 @@ Editoren für die restix GUI.
 import os.path
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QDialog, QPushButton, QVBoxLayout, QHBoxLayout, QTreeView
+from PySide6.QtWidgets import QWidget, QDialog, QPushButton, QVBoxLayout, QHBoxLayout, QTreeView, QMessageBox, \
+    QFileDialog
 
 from restix.core.messages import *
 from restix.gui.model import CheckBoxFileSystemModel
@@ -93,6 +94,7 @@ class ScopeEditor(QDialog):
         self.__config_path = config_path
         self.__includes_file_path = includes_file_path
         self.__excludes_file_path = excludes_file_path
+        self.__preferred_out_path = config_path if includes_file_path is None else os.path.dirname(includes_file_path)
         self.setWindowTitle(localized_label(L_DLG_TITLE_SCOPE_EDITOR))
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _SCOPE_EDITOR_OFFSET, _parent_rect.y() + _SCOPE_EDITOR_OFFSET,
@@ -111,20 +113,78 @@ class ScopeEditor(QDialog):
         _save_button = QPushButton(localized_label(L_SAVE))
         _save_button.clicked.connect(self._save_button_clicked)
         _button_pane_layout.addWidget(_save_button)
+        if includes_file_path is not None:
+            _save_as_button = QPushButton(localized_label(L_SAVE_AS))
+            _save_as_button.clicked.connect(self._save_as_button_clicked)
+            _button_pane_layout.addWidget(_save_as_button)
         _cancel_button = QPushButton(localized_label(L_CANCEL))
         _cancel_button.clicked.connect(self.reject)
         _button_pane_layout.addWidget(_cancel_button)
         _layout.addWidget(_button_pane)
 
+    def scope_files(self) -> tuple[str, str | None]:
+        """
+        :returns: Name der Includes-Datei, Name der Excludes-Datei
+        """
+        return self.__includes_file_path, self.__excludes_file_path
+
     def _save_button_clicked(self):
         """
-        Wird aufgerufen, wenn der Benutzer auf den Speichern-Button klickt.
+        Wird aufgerufen, wenn der Benutzer auf den "Speichern"-Button klickt.
         Speichert Includes und ggf. Excludes in den Dateien, aus denen die geladen wurden.
         """
-        print('_save_button_clicked')
-        print(self.__tree_viewer.includes())
-        print(self.__tree_viewer.excludes())
+        self._save_scope()
+
+    def _save_as_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer auf den "Speichern unter"-Button klickt.
+        Speichert Includes und ggf. Excludes in neuen Dateien.
+        """
+        self.__includes_file_path = self.__excludes_file_path = None
+        self._save_scope()
+
+    def _save_scope(self):
+        """
+        Speichert den Sicherungsumfang in Dateien.
+        """
+        _includes = self.__tree_viewer.includes()
+        if len(_includes) == 0:
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_label(I_GUI_NO_INCLUDES_SPECIFIED),
+                                    QMessageBox.StandardButton.Ok)
+            return
+        self.__includes_file_path = self._save_scope_elements(_includes, self.__includes_file_path,
+                                                              L_DLG_TITLE_SELECT_INCLUDES_FILE)
+        if self.__includes_file_path is None:
+            return
+        _excludes = self.__tree_viewer.excludes()
+        self.__excludes_file_path = self._save_scope_elements(_excludes, self.__excludes_file_path,
+                                                              L_DLG_TITLE_SELECT_EXCLUDES_FILE)
+        if len(_excludes) > 0 and self.__excludes_file_path is None:
+            return
         self.accept()
+
+    def _save_scope_elements(self, elements: list[str], file_path: str, dlg_title_id: str) -> str | None:
+        """
+        Speichert eine Liste von Include- oder Exclude-Dateien in Datei.
+        :param elements: Liste der Include- oder Exclude-Dateien
+        :param file_path: Name der Ausgabedatei
+        :param dlg_title_id: Resource-ID für das Dialogfenster zur Auswahl eines Ausgabedatei-Namens
+        :returns: Name und Pfad der Ausgabedatei; None, falls die Element-Liste leer ist oder der Benutzer den
+                  Dialog zur Auswahl eines Ausgabedatei-Namens abgebrochen hat
+        """
+        _output_file_path = file_path
+        if len(elements) > 0:
+            if _output_file_path is None:
+                _output_file_path, _filter = QFileDialog.getSaveFileName(self, localized_label(dlg_title_id),
+                                                                         self.__preferred_out_path)
+                if len(_output_file_path) == 0:
+                    return None
+            element_lines = [f'{_element}{os.linesep}' for _element in elements]
+            with open(_output_file_path, 'w') as _f:
+                _f.writelines(element_lines)
+            return _output_file_path
+        return None
 
     def _read_file(self, file_path) -> list[str]:
         """
