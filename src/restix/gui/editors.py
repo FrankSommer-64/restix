@@ -45,12 +45,34 @@ from restix.gui.model import CheckBoxFileSystemModel
 
 
 class CheckBoxFileViewer(QTreeView):
+    """
+    Dateisystem-Viewer mit Checkboxen zur Auswahl von Dateien und Verzeichnissen..
+    """
     def __init__(self, parent, includes: list[str], excludes: list[str], ignores: list[str]):
+        """
+        Konstruktor.
+        :param parent: übergeordnetes Widget
+        :param includes: in die Sicherung einzuschließende Dateien und Verzeichnisse
+        :param excludes: aus der Sicherung auszuschließende Dateien und Verzeichnisse
+        :param ignores: Pattern mit zu ignorierenden Dateien und Verzeichnissen
+        """
         super().__init__(parent)
         self.__model = CheckBoxFileSystemModel(includes, excludes, ignores)
         self.__model.setRootPath('')
         self.setModel(self.__model)
         self.setColumnWidth(0, _SCOPE_EDITOR_WIDTH >> 1)
+
+    def excludes(self) -> list[str]:
+        """
+        :returns: alle nicht in die Sicherung einzuschließende Elemente
+        """
+        return self.__model.excludes()
+
+    def includes(self) -> list[str]:
+        """
+        :returns: alle in die Sicherung einzuschließende Elemente
+        """
+        return self.__model.includes()
 
 
 class ScopeEditor(QDialog):
@@ -95,7 +117,13 @@ class ScopeEditor(QDialog):
         _layout.addWidget(_button_pane)
 
     def _save_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer auf den Speichern-Button klickt.
+        Speichert Includes und ggf. Excludes in den Dateien, aus denen die geladen wurden.
+        """
         print('_save_button_clicked')
+        print(self.__tree_viewer.includes())
+        print(self.__tree_viewer.excludes())
         self.accept()
 
     def _read_file(self, file_path) -> list[str]:
