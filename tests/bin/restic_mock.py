@@ -45,8 +45,8 @@ class DetailAction:
         """
         self.__base_action = base_action
         self.__repo_alias = repo_alias
-        self.__options = {CLI_OPTION_BATCH: False, CLI_OPTION_HOST: platform.node(),
-                          CLI_OPTION_YEAR: str(datetime.date.today().year)}
+        self.__options = {OPTION_BATCH: False, OPTION_HOST: platform.node(),
+                          OPTION_YEAR: str(datetime.date.today().year)}
 
     def base_action(self):
         """
@@ -76,11 +76,11 @@ class DetailAction:
         :param opt_value: the option value
         """
         if opt_value is None: return
-        if opt_name == CLI_OPTION_BATCH:
+        if opt_name == OPTION_BATCH:
             # batch option has no parameter
             self.__options[opt_name] = True
             return
-        if opt_name == CLI_OPTION_RESTORE_PATH or opt_name == CLI_OPTION_TARGET_MOUNT_PATH:
+        if opt_name == OPTION_RESTORE_PATH or opt_name == OPTION_TARGET_MOUNT_PATH:
             # restore or target mount path must refer to an existing directory
             try:
                 _path = os.path.abspath(opt_value)
@@ -92,16 +92,16 @@ class DetailAction:
                 return
             except Exception as _e:
                 raise RestixException(E_CLI_INVALID_PATH_SPEC, opt_name, _e)
-        if opt_name == CLI_OPTION_HOST:
+        if opt_name == OPTION_HOST:
             # generous hostname check, but enough to prevent malicious values, as hostname is
             # part of the restic repository path
             if not re.match(r'^[a-z0-9\-_.]+$', opt_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_HOSTNAME, opt_value)
-        elif opt_name == CLI_OPTION_SNAPSHOT:
+        elif opt_name == OPTION_SNAPSHOT:
             # restic snapshot IDs must be hex numbers
             if not re.match(r'^[a-f0-9]+$', opt_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_SNAPSHOT_ID, opt_value)
-        elif opt_name == CLI_OPTION_YEAR:
+        elif opt_name == OPTION_YEAR:
             # year must be 4 digits
             if not re.match(r'^[0-9]{4}$', opt_value, re.IGNORECASE):
                 raise RestixException(E_INVALID_YEAR, opt_value)
@@ -116,9 +116,8 @@ class DetailAction:
         :rtype: DetailAction
         :raises RestixException: if detail action cannot be created from command line
         """
-        _option_values = {CLI_OPTION_BATCH: None, CLI_OPTION_HOST: None, CLI_OPTION_RESTORE_PATH: None,
-                          CLI_OPTION_SNAPSHOT: None, CLI_OPTION_TAGS: None, CLI_OPTION_TARGET_MOUNT_PATH: None,
-                          CLI_OPTION_YEAR: None}
+        _option_values = {OPTION_BATCH: None, OPTION_HOST: None, OPTION_RESTORE_PATH: None,
+                          OPTION_SNAPSHOT: None, OPTION_YEAR: None}
         _base_action = ''
         _target = ''
         _host_value_expected = 0
@@ -134,39 +133,31 @@ class DetailAction:
             p = p.strip()
             # option values
             if _host_value_expected == 1:
-                _option_values[CLI_OPTION_HOST] = p
+                _option_values[OPTION_HOST] = p
                 _host_value_expected = 2
                 continue
             if _restore_path_value_expected == 1:
-                _option_values[CLI_OPTION_RESTORE_PATH] = p
+                _option_values[OPTION_RESTORE_PATH] = p
                 _restore_path_value_expected = 2
                 continue
             if _snapshot_value_expected == 1:
-                _option_values[CLI_OPTION_SNAPSHOT] = p
+                _option_values[OPTION_SNAPSHOT] = p
                 _snapshot_value_expected = 2
                 continue
-            if _tags_value_expected == 1:
-                _option_values[CLI_OPTION_TAGS] = p
-                _tags_value_expected = 2
-                continue
-            if _target_mount_path_value_expected == 1:
-                _option_values[CLI_OPTION_TARGET_MOUNT_PATH] = p
-                _target_mount_path_value_expected = 2
-                continue
             if _year_value_expected == 1:
-                _option_values[CLI_OPTION_YEAR] = p
+                _option_values[OPTION_YEAR] = p
                 _year_value_expected = 2
                 continue
             if p.startswith('-'):
                 # options
                 if p == '-b' or p == '--batch':
-                    _option_values[CLI_OPTION_BATCH] = True
+                    _option_values[OPTION_BATCH] = True
                     continue
                 if p == '--dry-run':
-                    _option_values[CLI_OPTION_DRY_RUN] = True
+                    _option_values[OPTION_DRY_RUN] = True
                     continue
                 if p == '--help':
-                    return DetailAction(CLI_ACTION_HELP)
+                    return DetailAction(ACTION_HELP)
                 if p == '--host':
                     if _host_value_expected > 0:
                         raise RestixException(E_CLI_DUP_OPTION, p)
@@ -213,8 +204,8 @@ class DetailAction:
             raise RestixException(E_CLI_ACTION_MISSING)
         if _target is None and _base_action != CLI_ACTION_TARGETS:
             raise RestixException(E_CLI_TARGET_MISSING, _base_action)
-        if _base_action == CLI_ACTION_TAG and (_option_values[CLI_OPTION_TAGS] is None or
-                                               _option_values[CLI_OPTION_SNAPSHOT] is None):
+        if _base_action == CLI_ACTION_TAG and (_option_values[OPTION_TAGS] is None or
+                                               _option_values[OPTION_SNAPSHOT] is None):
             raise RestixException(E_CLI_TAG_OPTIONS_MISSING)
         _action = DetailAction(_base_action, _target)
         for _k, _v in _option_values.items():
@@ -250,10 +241,10 @@ def restix_variables(action):
     else:
         _restix_vars[RESTIX_VAR_HOME] = os.environ[ENVA_HOME]
         _restix_vars[RESTIX_VAR_USER] = os.environ[ENVA_USER]
-    _opt_host_name = action.option(CLI_OPTION_HOST)
+    _opt_host_name = action.option(OPTION_HOST)
     if _opt_host_name is not None:
         _restix_vars[RESTIX_VAR_HOSTNAME] = _opt_host_name
-    _opt_year = action.option(CLI_OPTION_YEAR)
+    _opt_year = action.option(OPTION_YEAR)
     if _opt_year is not None:
         _restix_vars[RESTIX_VAR_YEAR] = _opt_year
     return _restix_vars
@@ -408,7 +399,7 @@ def build_restic_cmd(restix_action, restic_info):
     :raises RestixException: if desired action is not implemented
     """
     _restic_cmd = ['restic', '-r', restic_info[RESTIX_TOML_KEY_REPO], '-p', restic_info[RESTIX_TOML_KEY_PW_FILE]]
-    if restix_action.option(CLI_OPTION_DRY_RUN):
+    if restix_action.option(OPTION_DRY_RUN):
         _restic_cmd.append('--dry-run')
     _base_action = restix_action.base_action()
     if _base_action == RESTIC_ACTION_BACKUP:
@@ -425,19 +416,19 @@ def build_restic_cmd(restix_action, restic_info):
         return _restic_cmd
     if _base_action == RESTIC_ACTION_RESTORE:
         _restic_cmd.append(_base_action)
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
+        _snapshot_id = restix_action.option(OPTION_SNAPSHOT)
         if _snapshot_id is None:
             _restic_cmd.append('latest')
         else:
             _restic_cmd.append(_snapshot_id)
-        _restore_path = restix_action.option(CLI_OPTION_RESTORE_PATH)
+        _restore_path = restix_action.option(OPTION_RESTORE_PATH)
         if _restore_path is not None:
             _restic_cmd.append('--target')
             _restic_cmd.append(_restore_path)
         return _restic_cmd
     if _base_action == RESTIC_ACTION_FORGET:
         _restic_cmd.append(_base_action)
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
+        _snapshot_id = restix_action.option(OPTION_SNAPSHOT)
         if _snapshot_id is None:
             _restic_cmd.append('--tag')
             _restic_cmd.append("''")
@@ -450,8 +441,8 @@ def build_restic_cmd(restix_action, restic_info):
     if _base_action == RESTIC_ACTION_TAG:
         _restic_cmd.append(_base_action)
         _restic_cmd.append('--set')
-        _restic_cmd.append(restix_action.option(CLI_OPTION_TAGS))
-        _restic_cmd.append(restix_action.option(CLI_OPTION_SNAPSHOT))
+        _restic_cmd.append(restix_action.option(OPTION_TAGS))
+        _restic_cmd.append(restix_action.option(OPTION_SNAPSHOT))
         return _restic_cmd
     raise RestixException(E_CLI_INVALID_ACTION, _base_action)
 
@@ -493,27 +484,27 @@ def prompt_confirmation(restix_action, repo_alias):
     :rtype: bool
     """
     _base_action = restix_action.base_action()
-    if _base_action == RESTIC_ACTION_SNAPSHOTS or restix_action.option(CLI_OPTION_BATCH): return True
+    if _base_action == RESTIC_ACTION_SNAPSHOTS or restix_action.option(OPTION_BATCH): return True
     if _base_action == RESTIC_ACTION_BACKUP:
         print(localized_message(T_CLI_CONFIRM_BACKUP, repo_alias))
     elif _base_action == RESTIC_ACTION_INIT:
         print(localized_message(T_CLI_CONFIRM_INIT, repo_alias))
     elif _base_action == RESTIC_ACTION_TAG:
-        _tags = restix_action.option(CLI_OPTION_TAGS)
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
+        _tags = restix_action.option(OPTION_TAGS)
+        _snapshot_id = restix_action.option(OPTION_SNAPSHOT)
         print(localized_message(T_CLI_CONFIRM_TAG_SNAPSHOT, _snapshot_id, repo_alias, _tags))
     elif _base_action == RESTIC_ACTION_FORGET:
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
+        _snapshot_id = restix_action.option(OPTION_SNAPSHOT)
         if _snapshot_id is None:
             print(localized_message(T_CLI_CONFIRM_FORGET_UNTAGGED, repo_alias))
         else:
             print(localized_message(T_CLI_CONFIRM_FORGET_SNAPSHOT, _snapshot_id, repo_alias))
     else:
         # RESTORE
-        _snapshot_id = restix_action.option(CLI_OPTION_SNAPSHOT)
+        _snapshot_id = restix_action.option(OPTION_SNAPSHOT)
         if _snapshot_id is None:
             _snapshot_id = 'latest'
-        _restore_path = restix_action.option(CLI_OPTION_RESTORE_PATH)
+        _restore_path = restix_action.option(OPTION_RESTORE_PATH)
         if _restore_path is None:
             _restore_path = os.sep
         print(localized_message(T_CLI_CONFIRM_RESTORE, _snapshot_id, _restore_path, repo_alias))

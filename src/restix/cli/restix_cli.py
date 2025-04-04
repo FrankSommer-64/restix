@@ -52,7 +52,7 @@ from restix.core.util import current_user
 
 _COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_FORGET: T_CLI_HELP_FORGET,
                      CLI_COMMAND_INIT: T_CLI_HELP_INIT, CLI_COMMAND_RESTORE: T_CLI_HELP_RESTORE,
-                     CLI_COMMAND_SNAPSHOTS: T_CLI_HELP_SHAPSHOTS, CLI_COMMAND_TAG: T_CLI_HELP_TAG}
+                     CLI_COMMAND_SNAPSHOTS: T_CLI_HELP_SHAPSHOTS}
 
 
 def read_restix_config_file(action: RestixAction) -> LocalConfig:
@@ -89,10 +89,6 @@ def prompt_confirmation(action: RestixAction) -> bool:
         print(localized_message(T_CLI_CONFIRM_BACKUP, _target_alias))
     elif _base_action == RESTIC_COMMAND_INIT:
         print(localized_message(T_CLI_CONFIRM_INIT, _target_alias))
-    elif _base_action == RESTIC_COMMAND_TAG:
-        _tag = action.option(OPTION_TAG)
-        _snapshot_id = action.option(OPTION_SNAPSHOT)
-        print(localized_message(T_CLI_CONFIRM_TAG_SNAPSHOT, _snapshot_id, _target_alias, _tag))
     elif _base_action == RESTIC_COMMAND_FORGET:
         _snapshot_id = action.option(OPTION_SNAPSHOT)
         if _snapshot_id is None:

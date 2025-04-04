@@ -175,28 +175,6 @@ def run_snapshots(action: RestixAction, task_monitor: TaskMonitor):
         return TaskResult(TASK_FAILED, str(_e))
 
 
-def run_tag(action: RestixAction, task_monitor: TaskMonitor):
-    """
-    Markiert einen Snapshot in einem Repository mit einem Tag.
-    :param action: die Daten des auszuführenden Tags.
-    :param task_monitor: der Fortschritt-Handler.
-    :raises RestixException: falls die Ausführung fehlschlägt
-    """
-    try:
-        _repo = action.option(OPTION_REPO)
-        _snapshot_id = action.option(OPTION_SNAPSHOT)
-        _tag = action.option(OPTION_TAG)
-        if action.option(OPTION_DRY_RUN):
-            task_monitor.log(I_DRY_RUN_TAGGING_SNAPSHOT, _snapshot_id, _repo, _tag)
-            return TaskResult(TASK_SUCCEEDED, '')
-        else:
-            execute_restic_command(action.to_restic_command(), task_monitor)
-        return TaskResult(TASK_SUCCEEDED, localized_message(I_GUI_SNAPSHOT_TAGGED, _snapshot_id, _repo, _tag))
-    except Exception as _e:
-        task_monitor.log(E_BACKGROUND_TASK_FAILED, str(_e))
-        return TaskResult(TASK_FAILED, str(_e))
-
-
 def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_long_runner: bool = False) -> str:
     """
     Führt einen restic-Befehl aus.

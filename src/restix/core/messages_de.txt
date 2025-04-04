@@ -13,43 +13,26 @@ e-file-opt-required Datei {0} für Option {1} nicht gefunden.
 e-invalid-hostname Der angegebene Hostname {0} ist ungültig.
 e-invalid-action Ungültige Aktion {0}.
 e-invalid-option Die Option {0} wird nicht unterstützt.
-e-invalid-restix-cfg-file Die restix-Konfigurationsdatei {0} enthält Fehler: {1}.
 e-invalid-snapshot-id Die angegebene Snapshot-ID {0} ist ungültig, Hexadezimalzahl erforderlich.
 e-invalid-year Die angegebene Jahreszahl {0} ist ungültig, vier Ziffern erforderlich.
 e-internal-error Interner Fehler: {0}.
 e-repo-does-not-exist restic-Repository {0} existiert nicht.
-e-restix-cfg-file-not-found restix-Konfigurationsdatei {0} nicht gefunden.
-e-restix-excludes-file-does-not-exist Exclude-Datei {0} nicht gefunden.
-e-restix-guard-file-does-not-exist Guard-Datei {0} nicht gefunden.
-e-restix-guard-file-modified Inhalt der Guard-Datei {0} entspricht nicht der Erwartung.
-e-restix-guard-text-not-defined Erwarteter Inhalt der Guard-Datei {0} wurde nicht festgelegt.
-e-restix-includes-file-does-not-exist Include-Datei {0} nicht gefunden.
-e-restix-no-scopes-defined In der Konfigurationsdatei wurden keine Umfänge definiert.
-e-restix-pw-file-does-not-exist Passwort-Datei {0} nicht gefunden.
-e-restix-pw-file-not-defined Pfad der Passwort-Datei wurde nicht definiert.
-e-restix-read-guard-file-failed Guard-Datei {0} konnte nicht gelesen werden: {1}.
-e-restix-scope-includes-missing Für Umfang {0} wurde in der Konfigurationsdatei keine Include-Datei definiert.
-e-restix-target-needs-mount-path restic-Repository {0} benötigt die Angabe eines Mount-Verzeichnisses.
 e-restix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
-e-restix-target-repo-missing Für restic-Repository-Alias {0} wurde keine Adresse definiert.
-e-restix-target-scope-missing Für restic-Repository-Alias {0} wurde kein Umfang ausgewählt.
-e-restix-target-scope-not-defined Der für restic-Repository {1} angegebene Umfang {1} ist in der Konfigurationsdatei nicht definiert.
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 e-write-file-failed Fehler beim Schreiben der Datei {0}: {1}.
 i-dry-run-create-repo Werde Repository {0} anlegen.
-i-dry-run-tagging-first-snapshot Würde ersten Snapshot mit Tag {0} versehen.
-i-dry-run-tagging-snapshot Würde Snapshot {0} in Repository {1} mit Tag {2} markieren.
 i-running-restic-cmd restic-Befehl: {0}
-i-tagged-snapshot Snapshot {0} wurde mit Tag {1} markiert.
 w-cant-dry-run-backup-without-repo Trockenlauf der Sicherung nicht möglich, da Repository {0} nicht existiert.
-w-tag-snapshot-failed Fehler beim Taggen von Snapshot {0} mit {1}.
 
 # Konfiguration
+e-cfg-custom-config-root-not-found Konfigurationsverzeichnis {0} nicht gefunden.
+e-cfg-default-config-root-not-found Standard-Konfigurationsverzeichnis {0} nicht gefunden.
 e-cfg-duplicate-group Group {0} {1} wurde in der Konfigurationsdatei {2} mehrfach definiert
 e-cfg-invalid-credentials-ref Target {0} in der Konfigurationsdatei {2} benutzt ungültigen Credentials-Namen {1}
 e-cfg-invalid-elem-type Ungültiger Typ für Element {0} in der Konfigurationsdatei {2}, {1} erwartet
 e-cfg-invalid-elem-value Ungültiger Wert für Element {0} in der Konfigurationsdatei {2}, {1} erwartet
 e-cfg-invalid-scope-ref Target {0} in der Konfigurationsdatei {2} benutzt ungültigen Scope-Namen {1}
+e-cfg-invalid-variable Variablenname {0} wird nicht unterstützt.
 e-cfg-mandatory-elem-missing Für Element {0} wurde das notwendige Attribut {1} nicht definiert
 e-cfg-mandatory-grp-missing Notwendige Group {0} wurde in der Konfigurationsdatei {1} nicht definiert
 e-cfg-meta-desc-missing Beschreibung für Typ {0} nicht vorhanden
@@ -64,8 +47,6 @@ t-cli-confirm-forget-snapshot Lösche Snapshot {0} von Repository {1}.
 t-cli-confirm-forget-untagged Lösche alle unmarkierten Snapshots von Repository {0}.
 t-cli-confirm-init Initialisiere Repository {0}.
 t-cli-confirm-restore Restore Snapshot {0} von Repository {1} nach {2}.
-t-cli-confirm-tag-latest Markiere letzten Snapshot in Repository {0} mit {1}.
-t-cli-confirm-tag-snapshot Markiere Snapshot {0} in Repository {1} mit {2}.
 t-cli-help-backup Lokale Daten in restic-Repository sichern\n \
     Befehl: restix backup [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
@@ -98,13 +79,6 @@ t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
     Optionen: --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
     --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
     Backup-Ziel: Alias aus der restix-Konfigurationsdatei
-t-cli-help-tag Snapshots eines restic-Repositories taggen\n \
-    Befehl: restix tag [Optionen] Backup-Ziel\n \
-    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
-    --dry-run * simulierter Lauf, kein Taggen von Daten im Repository\n           \
-    --snapshot Snapshot - Snapshot (ID oder latest)\n           \
-    --tag Tag - zu setzender Tag\n \
-    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
 t-cli-prompt-for-confirmation OK (j/n)?
 t-cli-usage-info Aufruf: restix [Optionen] Aktion [Backup-Ziel]\n \
     Aktionen: backup | forget | init | restore | snapshots | tag | targets\n \
@@ -122,9 +96,7 @@ e-cli-invalid-option Die Option {0} ist ungültig.
 e-cli-invalid-path-spec Ungültige Pfadangabe für Option {0}: {1}.
 e-cli-non-existing-path Pfad {0} für Option {1} existiert nicht.
 e-cli-path-is-not-dir Pfad {0} für Option {1} ist kein Verzeichnis.
-e-cli-restic-action-failed restic-Befehl {0} fehlgeschlagen: {1}.
 e-cli-restix-action-failed +++ Operation fehlgeschlagen +++
-e-cli-tag-options-missing Für Aktion tag werden die Optionen tags und snapshot benötigt.
 e-cli-target-missing Kein Alias für das restic-Repository angegeben.
 e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.
 
@@ -141,22 +113,18 @@ e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort
 i-gui-about-detail-text Version {0}\nQt-Version {1}
 i-gui-about-info-text Copyright (c) 2025 Frank Sommer
 i-gui-about-text restix - Datensicherung auf restic-Basis
-i-gui-alias-exists Aliasname '{0}' existiert bereits.
-i-gui-backing-up-data Sichere Daten in Repository {0}.
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-confirm-remove {0} wirklich löschen ?
 i-gui-create-config-root x
 i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-credential-exists Zugriffsdaten mit Alias '{0}' existieren bereits.
-i-gui-data-backed-up Daten in Repository {0} gesichert.
 i-gui-data-restored Daten aus Repository {0} wiederhergestellt.
 i-gui-local-config-changed restix-Konfiguration wurde verändert.
 i-gui-no-credential-type-specified Kein Zugriffsdaten-Typ ausgewählt.
 i-gui-no-includes-specified Keine zu sichernden Elemente ausgewählt.
 i-gui-no-name-specified Kein Name angegeben.
 i-gui-no-snapshot-selected Kein Snapshot ausgewählt
-i-gui-no-tag-defined Kein Tag-Name eingegeben
 i-gui-no-target-selected Kein Backup-Ziel ausgewählt
 i-gui-repo-created restic-Repository {0} erfolgreich angelegt.
 i-gui-restoring-all-data Stelle alle Daten aus Repository {0} wieder her.
@@ -164,12 +132,10 @@ i-gui-restoring-all-data-to-path Kopiere alle Daten aus Repository {0} in Verzei
 i-gui-restoring-some-data Stelle ausgewählte Daten aus Repository {0} wieder her.
 i-gui-restoring-some-data-to-path Kopiere alle ausgewählte aus Repository {0} in Verzeichnis {1}.
 i-gui-scope-exists Sicherungsumfang mit Alias '{0}' existiert bereits.
-i-gui-snapshot-tagged Snapshot {0} in Repository {1} wurde mit Tag {2} markiert.
 i-gui-target-exists Sicherungsziel mit Alias '{0}' existiert bereits.
 i-gui-task-finished Hintergrund-Task beendet
 
 # GUI Labels
-l-action Aktion
 l-add Hinzufügen
 l-adopt-selection Ausgewählte Elemente übernehmen
 l-alias Aliasname
@@ -187,7 +153,6 @@ l-do-year-end Jahresabschluss
 l-dry-run Dry run
 l-edit Editieren
 l-element Element
-l-excludes-file Excludes-Datei
 l-exit Beenden
 l-file-name Dateiname
 l-files-n-dirs Dateien und Verzeichnisse
@@ -195,21 +160,15 @@ l-full vollständig
 l-help Hilfe
 l-host Hostname
 l-ignores Ignorierte Elemente
-l-includes-file Includes-Datei
 l-location Ort
 l-maintenance Wartung
 l-mandatory-snapshot * Snapshot
-l-mandatory-object * Objekt
-l-name Name
 l-new Neu...
 l-new-alias Neuer Aliasname
 l-ok OK
 l-options Optionen
 l-password Passwort
-l-remove Löschen
 l-rename Umbenennen
-l-repository Repository
-l-restic-object Restic Objekt
 l-restore Wiederherstellung
 l-restore-path Zielverzeichnis
 l-restore-scope Restore-Umfang
@@ -221,13 +180,7 @@ l-search Suchen
 l-select Auswählen
 l-select-elements Elemente auswählen
 l-show-all-elements Alle Elemente anzeigen
-l-snapshot Snapshot
 l-some einzelne Datei(en)
-l-tag Tag
-l-tag-interval Tag Intervall
-l-tag-quarterly quartalsweise
-l-tag-monthly monatlich
-l-tag-weekly wöchentlich
 l-target Backup-Ziel
 l-targets Backup-Ziele
 l-type Typ
@@ -252,12 +205,8 @@ l-mbox-title-error Fehler
 l-mbox-title-info Information
 l-mbox-title-warning Warnung
 l-menu-about Über restix
-l-menu-new Neu...
 l-menu-remove Löschen
 l-menu-rename Umbenennen...
-l-menu-repo-clean Repository aufräumen
-l-menu-repository Repository
-l-menu-snapshot Snapshot
 l-menu-user-manual Benutzerhandbuch
 
 # GUI Tooltips
@@ -267,12 +216,9 @@ t-cfg-credential-alias Aliasname der Zugriffsdaten
 t-cfg-credential-password Passwort
 t-cfg-credential-type Art der Zugriffsdaten
 t-cfg-credential-file-name Name der Datei mit dem Passwort
-t-cfg-credentials Zu bearbeitende Zugriffsdaten auswählen
-t-cfg-scope Zu bearbeitenden Backup-Umfang auswählen
 t-cfg-scope-comment Kommentar zum Backup-Umfang
 t-cfg-scope-files-n-dirs Dateien und Verzeichnisse auswählen, die gesichert werden sollen
 t-cfg-scope-alias Aliasname des Backup-Umfangs
-t-cfg-target Zu bearbeitendes Backup-Ziel auswählen
 t-cfg-target-alias Aliasname des Backup-Ziels
 t-cfg-target-comment Kommentar zum Backup-Ziel
 t-cfg-target-credentials Zugangsdaten für das Backup-Ziel
@@ -285,10 +231,6 @@ t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existi
 t-opt-bak-dry-run Backup nur simulieren
 t-opt-mnt-dry-run Wartungs-Aktion nur simulieren
 t-opt-mnt-host Bitte ggf. den Hostnamen für das Repository auswählen
-t-opt-mnt-restic-object Restic-Objekt für die Wartung auswählen
-t-opt-mnt-snapshot Snapshot auswählen, der getaggt oder gelöscht werden soll
-t-opt-mnt-tag Name für den Tag des ausgewählten Snapshots eingeben
-t-opt-mnt-tag-interval Zeitraum zwischen zwei Tag-Markierungen auswählen
 t-opt-mnt-year Bitte ggf. das Jahr für das Repository auswählen
 t-opt-rst-dry-run Wiederherstellung nur simulieren
 t-opt-rst-host Bitte ggf. den Hostnamen angeben, falls die Wiederherstellung aus Daten eines anderen Rechners erfolgen soll

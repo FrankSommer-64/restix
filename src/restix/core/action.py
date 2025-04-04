@@ -157,8 +157,6 @@ class RestixAction:
             _cmd.extend((OPTION_FILES_FROM, self.option(OPTION_FILES_FROM)))
             if OPTION_EXCLUDE_FILE in self.__options:
                 _cmd.extend((OPTION_EXCLUDE_FILE, self.option(OPTION_EXCLUDE_FILE)))
-            if OPTION_TAG in self.__options:
-                _cmd.extend((OPTION_TAG, self.option(OPTION_TAG)))
             return _cmd
         if self.__action_id == ACTION_RESTORE:
             if OPTION_RESTORE_PATH in self.__options:
@@ -170,8 +168,6 @@ class RestixAction:
         if self.__action_id == ACTION_FORGET:
             if OPTION_KEEP_MONTHLY in self.__options:
                 _cmd.extend((OPTION_KEEP_MONTHLY, self.option(OPTION_KEEP_MONTHLY)))
-            if OPTION_KEEP_TAG in self.__options:
-                _cmd.extend((OPTION_KEEP_TAG, self.option(OPTION_KEEP_TAG)))
             if OPTION_PRUNE in self.__options:
                 _cmd.append(OPTION_PRUNE)
                 return _cmd
@@ -180,11 +176,6 @@ class RestixAction:
             _cmd.append(self.option(OPTION_FIND_PATTERN))
             return _cmd
         if self.__action_id == ACTION_LS:
-            _cmd.append(self.option(OPTION_SNAPSHOT))
-            return _cmd
-        if self.__action_id == ACTION_TAG:
-            _cmd.append(OPTION_ADD)
-            _cmd.append(self.option(OPTION_TAG))
             _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
         if self.__action_id == ACTION_SNAPSHOTS:
@@ -307,7 +298,6 @@ class RestixAction:
         _host_value_expected = 0
         _restore_path_value_expected = 0
         _snapshot_value_expected = 0
-        _tag_value_expected = 0
         _year_value_expected = 0
         _action_processed = False
         _target_processed = False
@@ -329,11 +319,6 @@ class RestixAction:
                 # vorangegangenes Argument verlangt die Angabe einer Snapshot-ID
                 _option_values[OPTION_SNAPSHOT] = _arg
                 _snapshot_value_expected = 2
-                continue
-            if _tag_value_expected == 1:
-                # vorangegangenes Argument verlangt die Angabe eines Tag-Namens
-                _option_values[OPTION_TAG] = _arg
-                _tags_value_expected = 2
                 continue
             if _year_value_expected == 1:
                 # vorangegangenes Argument war --year
@@ -366,11 +351,6 @@ class RestixAction:
                         raise RestixException(E_CLI_DUP_OPTION, _arg)
                     _snapshot_value_expected = 1
                     continue
-                if _arg == OPTION_TAG:
-                    if _tag_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, _arg)
-                    _tag_value_expected = 1
-                    continue
                 if _arg == OPTION_YEAR:
                     if _year_value_expected > 0:
                         raise RestixException(E_CLI_DUP_OPTION, _arg)
@@ -397,9 +377,6 @@ class RestixAction:
             raise RestixException(E_CLI_ACTION_MISSING)
         if _target is None and _action_id != CLI_COMMAND_TARGETS:
             raise RestixException(E_CLI_TARGET_MISSING, _action_id)
-        if _action_id == CLI_COMMAND_TAG and (_option_values[OPTION_TAG] is None or
-                                              _option_values[OPTION_SNAPSHOT] is None):
-            raise RestixException(E_CLI_TAG_OPTIONS_MISSING)
         _action = RestixAction(_action_id, _target)
         for _k, _v in _option_values.items():
             _action.set_option(_k, _v)
@@ -410,12 +387,11 @@ _STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE}
 _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_BATCH, OPTION_DRY_RUN,
                                    OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM, OPTION_YEAR},
                    ACTION_FIND: {OPTION_HOST, OPTION_FIND_PATTERN, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
-                   ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_KEEP_MONTHLY, OPTION_KEEP_TAG,
+                   ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_KEEP_MONTHLY,
                                    OPTION_PRUNE, OPTION_YEAR},
                    ACTION_INIT: {OPTION_BATCH},
                    ACTION_LS: {OPTION_HOST, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_INCLUDE_FILE,
                                     OPTION_RESTORE_PATH, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_SNAPSHOTS: {OPTION_HOST, OPTION_JSON, OPTION_YEAR},
-                   ACTION_TAG: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_SNAPSHOT, OPTION_TAG, OPTION_YEAR},
                    ACTION_HELP: {OPTION_HELP}}

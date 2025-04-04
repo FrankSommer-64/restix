@@ -100,8 +100,8 @@ class MaintenancePane(ResticActionPane):
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__(parent, [L_DO_YEAR_END], [T_DO_MNT_YEAR_END],[self._year_end_clicked],
-                         local_config, gui_settings)
+        super().__init__(parent, [L_DO_YEAR_END], [T_DO_MNT_YEAR_END], None,
+                         [self._year_end_clicked], local_config, gui_settings)
         self.__worker = None
         # Optionen
         self.__options_pane = MaintenanceOptionsPane(self)
@@ -118,7 +118,6 @@ class MaintenancePane(ResticActionPane):
             _forget_action = RestixAction.for_action_id(ACTION_FORGET, self.selected_target[CFG_PAR_ALIAS],
                                                         self.restix_config, _options)
             _forget_action.set_option(OPTION_KEEP_MONTHLY, '1')
-            _forget_action.set_option(OPTION_KEEP_TAG, initial_tag(_options[OPTION_YEAR]))
             _forget_action.set_option(OPTION_PRUNE, True)
             self.__worker = Worker.for_action(_forget_action)
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result,

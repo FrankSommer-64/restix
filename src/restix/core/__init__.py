@@ -92,10 +92,9 @@ CLI_COMMAND_HELP = 'help'
 CLI_COMMAND_INIT = 'init'
 CLI_COMMAND_RESTORE = 'restore'
 CLI_COMMAND_SNAPSHOTS = 'snapshots'
-CLI_COMMAND_TAG = 'tag'
 CLI_COMMAND_TARGETS = 'targets'
 ALL_CLI_COMMANDS = (CLI_COMMAND_BACKUP, CLI_COMMAND_FORGET, CLI_COMMAND_HELP, CLI_COMMAND_INIT, CLI_COMMAND_RESTORE,
-                    CLI_COMMAND_SNAPSHOTS, CLI_COMMAND_TAG, CLI_COMMAND_TARGETS)
+                    CLI_COMMAND_SNAPSHOTS, CLI_COMMAND_TARGETS)
 
 # restic Befehle
 RESTIC_COMMAND_BACKUP = 'backup'
@@ -105,7 +104,6 @@ RESTIC_COMMAND_INIT = 'init'
 RESTIC_COMMAND_LS = 'ls'
 RESTIC_COMMAND_RESTORE = 'restore'
 RESTIC_COMMAND_SNAPSHOTS = 'snapshots'
-RESTIC_COMMAND_TAG = 'tag'
 
 # interne Aktionen
 ACTION_BACKUP = 'backup'
@@ -117,7 +115,6 @@ ACTION_INIT = 'init'
 ACTION_LS = 'ls'
 ACTION_RESTORE = 'restore'
 ACTION_SNAPSHOTS = 'snapshots'
-ACTION_TAG = 'tag'
 
 # interne Attribute
 ATTR_CHILDREN = 'children'
@@ -149,14 +146,12 @@ OPTION_INCLUDE_FILE = '--include-file'
 OPTION_JSON = '--json'
 OPTION_KEEP_LAST = '--keep-last'
 OPTION_KEEP_MONTHLY = '--keep-monthly'
-OPTION_KEEP_TAG = '--keep-tag'
 OPTION_PASSWORD_FILE = '--password-file'
 OPTION_PRUNE = '--prune'
 OPTION_REPO = '--repo'
 OPTION_RESTORE_PATH = '--restore-path'
 OPTION_SET = '--set'
 OPTION_SNAPSHOT = '--snapshot'
-OPTION_TAG = '--tag'
 OPTION_TARGET = '--target'
 OPTION_UNTAGGED = '--untagged'
 OPTION_USER = '--user'
@@ -179,10 +174,3 @@ SEVERITY_INFO = 'i'
 SEVERITY_WARNING = 'w'
 TASK_SUCCEEDED = 0
 TASK_FAILED = 1
-
-def initial_tag(year: str) -> str:
-    """
-    :param year: gewünschtes Jahr
-    :returns: Tag für den ersten Snapshot eines Jahres
-    """
-    return f'{year}_FIRST'
