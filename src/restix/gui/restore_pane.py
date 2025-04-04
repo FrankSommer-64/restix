@@ -140,7 +140,7 @@ class RestoreOptionsPane(QGroupBox):
         """
         return self.__restore_path_selector.text()
 
-    def target_selected(self, target: dict, local_config: LocalConfig):
+    def target_selected(self, target: dict):
         """
         Wird aufgerufen, wenn der Benutzer ein Backup-Ziel auswählt.
         Befüllt die Combo-Box mit den Snapshots des ausgewählten Backup-Ziels.
@@ -150,7 +150,8 @@ class RestoreOptionsPane(QGroupBox):
         try:
             self.clear_snapshot_combo()
             self.__target_alias = target[CFG_PAR_ALIAS]
-            _snapshots_action = RestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS], local_config)
+            _snapshots_action = RestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS],
+                                                           self.__local_config)
             _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
             _combo_data = [_s.combo_label() for _s in _snapshots]
             _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
@@ -192,8 +193,8 @@ class RestorePane(ResticActionPane):
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__(parent, [L_DO_RESTORE], [T_RST_DO_RESTORE], [self.start_button_clicked],
-                         local_config, gui_settings)
+        super().__init__(parent, [L_DO_RESTORE], [T_RST_DO_RESTORE], self._target_selected,
+                         [self.start_button_clicked], local_config, gui_settings)
         self.__worker = None
         # option pane
         self.__options_pane = RestoreOptionsPane(self, local_config)
@@ -240,4 +241,4 @@ class RestorePane(ResticActionPane):
         Befüllt die Combo-Box mit den Snapshots des ausgewählten Backup-Ziels.
         """
         _selected_target = self.target_selection_pane.selected_target()
-        self.__options_pane.target_selected(_selected_target, self.restix_config)
+        self.__options_pane.target_selected(_selected_target)

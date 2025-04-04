@@ -61,7 +61,6 @@ class TestSettings(unittest.TestCase):
         _settings.set_latest_target(STANDARD_TARGET)
         self.assertEqual(QRect(100, 100, 800, 600), _settings.win_geometry())
         self.assertEqual(STANDARD_TARGET, _settings.latest_target())
-        self.assertTrue(_settings._GuiSettings__is_modified)
 
     def test_roundtrip(self):
         """

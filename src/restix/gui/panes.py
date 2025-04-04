@@ -432,18 +432,21 @@ class ResticActionPane(QWidget):
     Basisklasse für die Panes aller Aktionen, die einen restic-Befehl auslösen.
     """
     def __init__(self, parent: QWidget, start_button_label_ids: list[str], start_button_tooltip_ids: list[str],
-                 start_handlers: list[Callable], local_config: LocalConfig, gui_settings: GuiSettings):
+                 target_selected_handler: Callable | None, start_handlers: list[Callable],
+                 local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
         :param parent: die zentrale restix Pane
         :param start_button_label_ids: ID der Beschriftungen für die Start-Buttons
         :param start_button_tooltip_ids: ID der Tooltips für die Start-Buttons
+        :param target_selected_handler: Handler, wenn der Benutzer ein Backup-Ziel auswählt
         :param start_handlers: Click-Handler für jeden der Start-Buttons
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)
         self.restix_config = local_config
+        self.__target_selected_handler = target_selected_handler
         self.selected_target = None
         self.pane_layout = QGridLayout(self)
         self.pane_layout.setSpacing(5)
@@ -485,6 +488,8 @@ class ResticActionPane(QWidget):
         Wird aufgerufen, wenn der Benutzer ein Backup-Ziel auswählt.
         """
         self.selected_target = self.target_selection_pane.selected_target()
+        if self.__target_selected_handler is not None:
+            self.__target_selected_handler()
 
     def handle_progress(self, progress_info: TaskProgress):
         """

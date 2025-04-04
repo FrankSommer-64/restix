@@ -42,12 +42,13 @@ from PySide6.QtWidgets import QWidget, QDialog, QPushButton, QVBoxLayout, QHBoxL
     QFileDialog
 
 from restix.core.messages import *
+from restix.core.util import full_config_path_of
 from restix.gui.model import CheckBoxFileSystemModel
 
 
 class CheckBoxFileViewer(QTreeView):
     """
-    Dateisystem-Viewer mit Checkboxen zur Auswahl von Dateien und Verzeichnissen..
+    Dateisystem-Viewer mit Checkboxen zur Auswahl von Dateien und Verzeichnissen.
     """
     def __init__(self, parent, includes: list[str], excludes: list[str], ignores: list[str]):
         """
@@ -94,7 +95,8 @@ class ScopeEditor(QDialog):
         self.__config_path = config_path
         self.__includes_file_path = includes_file_path
         self.__excludes_file_path = excludes_file_path
-        self.__preferred_out_path = config_path if includes_file_path is None else os.path.dirname(includes_file_path)
+        self.__preferred_out_path = config_path if includes_file_path is None\
+            else os.path.dirname(full_config_path_of(includes_file_path, config_path))
         self.setWindowTitle(localized_label(L_DLG_TITLE_SCOPE_EDITOR))
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _SCOPE_EDITOR_OFFSET, _parent_rect.y() + _SCOPE_EDITOR_OFFSET,

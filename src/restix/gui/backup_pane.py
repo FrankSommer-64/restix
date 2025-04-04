@@ -87,7 +87,7 @@ class BackupPane(ResticActionPane):
         :param local_config: lokale restix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
-        super().__init__(parent, [L_DO_BACKUP], [T_DO_BAK_BACKUP], [self.start_button_clicked],
+        super().__init__(parent, [L_DO_BACKUP], [T_DO_BAK_BACKUP], None, [self.start_button_clicked],
                          local_config, gui_settings)
         self.__worker = None
         # option pane

@@ -164,7 +164,7 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             return False
         _item_file_name = self.fileName(index)
         for _pattern in self.__ignore_patterns:
-            if _pattern.match(_item_file_name):
+            if _pattern.fullmatch(_item_file_name):
                 return True
         return self._is_in_ignore_list(index.parent())
 

@@ -37,6 +37,7 @@ Persönliche Einstellungen der restix GUI.
 """
 
 import os
+
 import tomli
 import tomli_w
 from typing import Self
@@ -66,6 +67,7 @@ class GuiSettings(dict):
         """
         return self.get(_KEY_LATEST_TARGET)
 
+    # noinspection PyArgumentList
     def win_geometry(self) -> QRect:
         """
         :returns: letzte Position und Größe des GUI-Fensters

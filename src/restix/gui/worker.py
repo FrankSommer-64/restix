@@ -40,10 +40,6 @@ from collections.abc import Callable
 from typing import Any, Self
 from PySide6.QtCore import QObject, QRunnable, Signal
 
-from restix.core import *
-from restix.core.action import RestixAction
-from restix.core.restix_exception import RestixException
-from restix.core.messages import E_BACKGROUND_TASK_FAILED, E_INTERNAL_ERROR, E_INVALID_ACTION, localized_message
 from restix.core.restic_interface import *
 from restix.core.task import TaskExecutor, TaskMonitor, TaskProgress, TaskResult
 
@@ -71,7 +67,7 @@ class WorkerSignals(QObject):
 
 class Worker(QRunnable, TaskExecutor):
     """
-    Worker zur Ausführung einer Hintergrund-Task.
+    Worker zur Ausführung einer Hintergrundtask.
     """
     def __init__(self, worker_fn: Callable, *args: Any):
         """

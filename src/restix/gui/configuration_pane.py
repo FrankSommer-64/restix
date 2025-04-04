@@ -47,6 +47,7 @@ from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
+from restix.core.util import relative_config_path_of
 from restix.gui import *
 from restix.gui.editors import ScopeEditor
 from restix.gui.model import ConfigModelFactory
@@ -563,10 +564,10 @@ class ScopeDetailPane(QListView):
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.__comment_text.setToolTip(localized_label(T_CFG_SCOPE_COMMENT))
         _layout.addRow(QLabel(localized_label(L_COMMENT)), self.__comment_text)
-        self.__includes_button = QPushButton(localized_label(L_EDIT))
-        self.__includes_button.setToolTip(localized_label(T_CFG_SCOPE_FILES_N_DIRS))
-        self.__includes_button.clicked.connect(self._edit_files_n_dirs)
-        _layout.addRow(QLabel(localized_label(L_FILES_N_DIRS)), self.__includes_button)
+        self.__edit_scope_button = QPushButton(localized_label(L_EDIT))
+        self.__edit_scope_button.setToolTip(localized_label(T_CFG_SCOPE_FILES_N_DIRS))
+        self.__edit_scope_button.clicked.connect(self._edit_files_n_dirs)
+        _layout.addRow(QLabel(localized_label(L_FILES_N_DIRS)), self.__edit_scope_button)
         self.__ignores_list = QTextEdit()
         self.__ignores_list.setStyleSheet(EDITOR_STYLE)
         self.__ignores_list.setMinimumHeight(100)
@@ -606,11 +607,18 @@ class ScopeDetailPane(QListView):
                 self.__ignores_list.append(_ignore_pattern)
 
     def _edit_files_n_dirs(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den "Editieren"-Button klickt.
+        Startet den Scope-Editor zur Auswahl ein- und auszuschließender Dateien und Verzeichnisse.
+        """
         _ignores = self.__ignores_list.toPlainText().split(os.linesep)
         _scope_editor = ScopeEditor(self, self.__config_path, self.__includes_file_name, self.__excludes_file_name,
                                     _ignores)
         if _scope_editor.exec_() != QDialog.DialogCode.Accepted:
             return
+        _editor_includes_file_name, _editor_excludes_file_name = _scope_editor.scope_files()
+        self.__includes_file_name = relative_config_path_of(_editor_includes_file_name, self.__config_path)
+        self.__excludes_file_name = relative_config_path_of(_editor_excludes_file_name, self.__config_path)
 
 
 class ScopePane(QWidget):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PySide6 import QtCore
+
 # -----------------------------------------------------------------------------------------------
 # restix - Datensicherung auf restic-Basis.
 #
@@ -68,7 +68,6 @@ EDITOR_STYLE = 'background-color: white'
 
 # Style für die Texteingabe-Felder
 TEXT_FIELD_STYLE = 'background-color: white'
-#TEXT_FIELD_STYLE = 'background-color: #ffffcc'
 
 # Anzahl angezeigter Jahre in der Vergangenheit bei den Comboboxen zur Jahresauswahl
 PAST_YEARS_COUNT = 10

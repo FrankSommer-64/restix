@@ -67,6 +67,36 @@ def full_path_of(path_spec: str) -> str:
     return os.path.abspath(path_spec)
 
 
+def relative_config_path_of(file_path: str, config_dir_path: str) -> str | None:
+    """
+    :param file_path: Dateiname
+    :param config_dir_path: restix Konfigurationsverzeichnis
+    :return: Dateiname mit Pfad relativ zum Konfigurationsverzeichnis, falls möglich
+    """
+    if file_path is None:
+        return None
+    if os.path.isabs(file_path):
+        # bei absolutem Pfad prüfen, ob die Datei im gegebenen Verzeichnis liegt
+        _common_path = os.path.commonpath([file_path, config_dir_path])
+        if len(_common_path) > 0:
+            return file_path[len(_common_path) + len(os.sep):]
+    # Dateiname hat schon relativen Pfad oder liegt nicht unterhalb des angegebenen Verzeichnisses
+    return file_path
+
+
+def full_config_path_of(file_path: str, config_dir_path: str) -> str | None:
+    """
+    :param file_path: Dateiname
+    :param config_dir_path: restix Konfigurationsverzeichnis
+    :return: Dateiname mit absolutem Pfad
+    """
+    if file_path is None:
+        return None
+    if os.path.isabs(file_path):
+        return file_path
+    return os.path.join(config_dir_path, file_path)
+
+
 def shell_cmd(cmd: list[str], runtime_env: dict = None) -> tuple[int, str, str]:
     """
     Führt den übergebenen Befehl in der Shell aus.
