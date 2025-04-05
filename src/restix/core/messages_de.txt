@@ -16,6 +16,7 @@ e-invalid-option Die Option {0} wird nicht unterstützt.
 e-invalid-snapshot-id Die angegebene Snapshot-ID {0} ist ungültig, Hexadezimalzahl erforderlich.
 e-invalid-year Die angegebene Jahreszahl {0} ist ungültig, vier Ziffern erforderlich.
 e-internal-error Interner Fehler: {0}.
+e-no-snapshot-desc-from-restic Keine Snapshot-Beschreibung von restic bekommen.
 e-repo-does-not-exist restic-Repository {0} existiert nicht.
 e-restix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
@@ -25,7 +26,7 @@ i-running-restic-cmd restic-Befehl: {0}
 w-cant-dry-run-backup-without-repo Trockenlauf der Sicherung nicht möglich, da Repository {0} nicht existiert.
 
 # Konfiguration
-e-cfg-custom-config-root-not-found Konfigurationsverzeichnis {0} nicht gefunden.
+e-cfg-custom-config-root-not-found Konfigurationsverzeichnis {0} aus Umgebungsvariable {1} nicht gefunden.
 e-cfg-default-config-root-not-found Standard-Konfigurationsverzeichnis {0} nicht gefunden.
 e-cfg-duplicate-group Group {0} {1} wurde in der Konfigurationsdatei {2} mehrfach definiert
 e-cfg-invalid-credentials-ref Target {0} in der Konfigurationsdatei {2} benutzt ungültigen Credentials-Namen {1}
@@ -97,11 +98,11 @@ e-cli-invalid-path-spec Ungültige Pfadangabe für Option {0}: {1}.
 e-cli-non-existing-path Pfad {0} für Option {1} existiert nicht.
 e-cli-path-is-not-dir Pfad {0} für Option {1} ist kein Verzeichnis.
 e-cli-restix-action-failed +++ Operation fehlgeschlagen +++
-e-cli-target-missing Kein Alias für das restic-Repository angegeben.
+e-cli-target-missing Für Aktion {0} wurde kein Alias für das restic-Repository angegeben.
 e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.
 
 # restic Fehler
-e-restic-cmd-failed restic-Befehl {0} fehlgeschlagen: Allgemeiner restic-Fehler.
+e-restic-cmd-failed restic-Befehl {0} fehlgeschlagen: {1}.
 e-restic-cmd-interrupted restic-Befehl {0} fehlgeschlagen: restic-Befehl wurde abgebrochen.
 e-restic-go-runtime-error restic-Befehl {0} fehlgeschlagen: Go-Laufzeitfehler.
 e-restic-read-backup-data-failed restic-Befehl {0} fehlgeschlagen: Fehler beim Lesen der Backup-Daten.
@@ -133,7 +134,7 @@ i-gui-restoring-some-data Stelle ausgewählte Daten aus Repository {0} wieder he
 i-gui-restoring-some-data-to-path Kopiere alle ausgewählte aus Repository {0} in Verzeichnis {1}.
 i-gui-scope-exists Sicherungsumfang mit Alias '{0}' existiert bereits.
 i-gui-target-exists Sicherungsziel mit Alias '{0}' existiert bereits.
-i-gui-task-finished Hintergrund-Task beendet
+i-gui-task-finished Hintergrund-Task beendet {0}.
 
 # GUI Labels
 l-add Hinzufügen

@@ -111,7 +111,7 @@ def _show_mbox(icon: QMessageBox.Icon, title_id: str, text_id: str, info_text: s
     _mbox = QMessageBox()
     _mbox.setIcon(icon)
     _mbox.setWindowTitle(localized_label(title_id))
-    _mbox.setText(localized_message(text_id))
+    _mbox.setText(localized_label(text_id))
     _mbox.setInformativeText(info_text)
     _mbox.setStandardButtons(buttons)
     return _mbox.exec()

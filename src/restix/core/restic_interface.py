@@ -206,7 +206,7 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
         _rc = res.returncode
     if _rc == 0:
         return _stdout
-    _exception_id = E_RESTIC_CMD_FAILED
+    _restic_cmd = ' '.join(cmd)
     if _rc == 2:
         _exception_id = E_RESTIC_GO_RUNTIME_ERROR
     elif _rc == 3:
@@ -219,7 +219,9 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
         _exception_id = E_RESTIC_REPO_WRONG_PASSWORD
     elif _rc == 130:
         _exception_id = E_RESTIC_CMD_INTERRUPTED
-    raise RestixException(_exception_id, ' '.join(cmd))
+    else:
+        raise RestixException(E_RESTIC_CMD_FAILED, _restic_cmd, _stdout)
+    raise RestixException(_exception_id, _restic_cmd)
 
 
 def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list[Snapshot]:
@@ -235,7 +237,8 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
     if _rc != RESTIC_RC_OK:
         task_monitor.log_text(_stdout, SEVERITY_INFO)
         task_monitor.log_text(_stderr, SEVERITY_ERROR)
-        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id())
+        _result = f'{_stderr}{os.linesep}{_stdout}'
+        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
     _snapshots = []
     _result = json.loads(_stdout)
     for _element in _result:
@@ -295,7 +298,8 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
                     _snapshot.add_tag(_tag)
         elif _element.get(JSON_ATTR_STRUCT_TYPE) == JSON_STRUCT_TYPE_NODE:
             if _snapshot is None:
-                raise RestixException(E_RESTIC_CMD_FAILED, 'keine Snapshot-Beschreibung')
+                _reason = localized_message(E_NO_SNAPSHOT_DESC_FROM_RESTIC)
+                raise RestixException(E_RESTIC_CMD_FAILED, ACTION_SNAPSHOTS, _reason)
             _snapshot.add_element(SnapshotElement(_element[JSON_ATTR_PATH], _element[JSON_ATTR_TYPE]))
         else:
             continue
