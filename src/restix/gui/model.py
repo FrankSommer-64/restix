@@ -64,19 +64,12 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         self.__excludes = [_f.rstrip(os.sep) for _f in excludes]
         self.__check_status_map = {}
         for _element in self.__excludes:
+            # Ausgeschlossene Elemente sind immer ohne Haken
             self.__check_status_map[_element] = Qt.CheckState.Unchecked
         for _element in self.__includes:
+            # Eingeschlossene Elemente bekommen einen Haken
             self.__check_status_map[_element] = Qt.CheckState.Checked
-        for _element in self.__includes:
-            _element_path_parts = _element.split(os.sep)
-            if len(_element_path_parts) <= 2:
-                continue
-            _part = _element_path_parts[0]
-            for _p in _element_path_parts[1:-1]:
-                _part = f'{_part}{os.sep}{_p}'
-                if _part in self.__excludes or _part in self.__check_status_map:
-                    continue
-                self.__check_status_map[_part] = Qt.CheckState.PartiallyChecked
+            self._partially_check_elements(True)
         self.__ignore_patterns = CheckBoxFileSystemModel._regex_patterns_for(ignores)
         self.setFilter(QDir.Filter.AllEntries | QDir.Filter.NoDotAndDotDot | QDir.Filter.Hidden)
 
@@ -119,6 +112,7 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             if status == Qt.CheckState.Unchecked.value:
                 # excludes aktualisieren
                 CheckBoxFileSystemModel._update_scope_list(self.__excludes, _file_path)
+        self._partially_check_elements(status == Qt.CheckState.Checked.value)
 
     def data(self, index: QModelIndex | QPersistentModelIndex, role = Qt.ItemDataRole.DisplayRole):
         """
@@ -199,6 +193,33 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         if self.data(_parent_index, Qt.ItemDataRole.CheckStateRole) == Qt.CheckState.Checked.value:
             return False
         return self._all_ancestors_unchecked(_parent_index)
+
+    def _partially_check_elements(self, due_to_include: bool):
+        """
+        Passt den Checkbox-Status oberhalb des Elements mit dem angegebenen Index an, falls es an- oder abgehakt wurde.
+        :param due_to_include: zeigt an, ob die Status aufgrund eines Anhakens (True) oder Abhakens (False)
+        aktualisiert werden sollen
+        """
+        for _element in self.__includes:
+            # Elemente oberhalb eingeschlossener Elemente bekommen ein "partially checked", um anzuzeigen, dass
+            # darunter angehakte Elemente liegen
+            _element_path_parts = _element.split(os.sep)
+            if len(_element_path_parts) <= 2:
+                continue
+            _part = _element_path_parts[0]
+            for _p in _element_path_parts[1:-1]:
+                _part = f'{_part}{os.sep}{_p}'
+                if _part in self.__excludes:
+                    continue
+                _current_status = self.__check_status_map.get(_part)
+                if due_to_include:
+                    _old_status = Qt.CheckState.Unchecked
+                    _new_status = Qt.CheckState.PartiallyChecked
+                else:
+                    _old_status = Qt.CheckState.PartiallyChecked
+                    _new_status = Qt.CheckState.Unchecked
+                if _current_status is None or _current_status == _old_status:
+                    self.__check_status_map[_part] = _new_status
 
     @classmethod
     def _update_scope_list(cls, scope_list: list[str], file_path: str):
