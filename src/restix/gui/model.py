@@ -67,6 +67,16 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             self.__check_status_map[_element] = Qt.CheckState.Unchecked
         for _element in self.__includes:
             self.__check_status_map[_element] = Qt.CheckState.Checked
+        for _element in self.__includes:
+            _element_path_parts = _element.split(os.sep)
+            if len(_element_path_parts) <= 2:
+                continue
+            _part = _element_path_parts[0]
+            for _p in _element_path_parts[1:-1]:
+                _part = f'{_part}{os.sep}{_p}'
+                if _part in self.__excludes or _part in self.__check_status_map:
+                    continue
+                self.__check_status_map[_part] = Qt.CheckState.PartiallyChecked
         self.__ignore_patterns = CheckBoxFileSystemModel._regex_patterns_for(ignores)
         self.setFilter(QDir.Filter.AllEntries | QDir.Filter.NoDotAndDotDot | QDir.Filter.Hidden)
 
@@ -125,7 +135,9 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             if _status is not None:
                 return _status
             _parent_status = self.__check_status_map.get(self.filePath(index.parent()))
-            return Qt.CheckState.Unchecked if _parent_status is None else _parent_status
+            if _parent_status is None or _parent_status == Qt.CheckState.PartiallyChecked:
+                return Qt.CheckState.Unchecked
+            return _parent_status
         if role == Qt.ItemDataRole.ForegroundRole and index.column() == 0:
             # falls das Element selbst oder eines der übergeordneten Elemente in der Ignore-Liste ist,
             # dann seinen Namen in Rot anzeigen
@@ -149,8 +161,15 @@ class CheckBoxFileSystemModel(QFileSystemModel):
                 return False
             # Checkbox-Status für das Element und alle Nachkommen auf den übergebenen Wert setzen
             self.update_element_status(index, value)
+            if value == Qt.CheckState.PartiallyChecked.value:
+                return True
             for row in range(self.rowCount(index)):
                 self.setData(self.index(row, 0, index), value, Qt.ItemDataRole.CheckStateRole)
+            if value == Qt.CheckState.Checked:
+                _parent_index = index.parent()
+                while _parent_index.isValid():
+                    self.setData(_parent_index, Qt.CheckState.PartiallyChecked, Qt.ItemDataRole.CheckStateRole)
+                    _parent_index = _parent_index.parent()
             self.dataChanged.emit(index, index)
             return True
         return super().setData(index, value, role)

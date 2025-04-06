@@ -353,13 +353,3 @@ def _execute_restic_command(cmd: list[str], task_monitor: TaskMonitor,
         _stderr = res.stderr
         _rc = res.returncode
     return _rc, _stdout, _stderr
-
-
-_SNAPSHOT_COLUMN_HOST = 'Host'
-_SNAPSHOT_COLUMN_ID = 'ID'
-_SNAPSHOT_COLUMN_SIZE = 'Size'
-_SNAPSHOT_COLUMN_TAGS = 'Tags'
-_SNAPSHOT_COLUMN_TIME = 'Time'
-_SNAPSHOTS_HEADER_PATTERN = re.compile(r'ID\s+Time\s+Host\s+Tags\s+Size')
-_SNAPSHOT_SEP_LINE_CHAR = '-'
-_SNAPSHOT_CONTINUATION_LINE_CHAR = ' '
