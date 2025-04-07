@@ -148,6 +148,7 @@ l-credentials Credentials
 l-current-alias Current alias name
 l-dismiss Dismiss changes
 l-do-backup Start backup
+l-do-init-repo Create repository
 l-do-restore Start restore
 l-do-year-end Year end
 l-dry-run Dry run
@@ -225,6 +226,7 @@ t-cfg-target-credentials Credentials for backup target
 t-cfg-target-location URL to backup target
 t-cfg-target-scope files and directories to transfer to backup target
 t-do-bak-backup Start backup
+t-do-mnt-init-repo Create restic repository
 t-do-mnt-year-end Remove all snapshots but latest for every month
 t-do-rst-restore Start restore of selected elements
 t-opt-bak-auto-create Automatically create repository, if it doesn't exist

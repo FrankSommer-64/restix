@@ -149,6 +149,7 @@ l-credentials Zugangsdaten
 l-current-alias Aktueller Aliasname
 l-dismiss Änderungen verwerfen
 l-do-backup Sicherung starten
+l-do-init-repo Repository anlegen
 l-do-restore Wiederherstellung starten
 l-do-year-end Jahresabschluss
 l-dry-run Dry run
@@ -226,7 +227,8 @@ t-cfg-target-credentials Zugangsdaten für das Backup-Ziel
 t-cfg-target-location URL zum Backup-Ziel
 t-cfg-target-scope zu sichernder Umfang im Backup-Ziel
 t-do-bak-backup Backup starten
-t-do-mnt-year-end Alle Snapshots ohne Tag löschen, max. einen Snapshot pro Monat behalten
+t-do-mnt-init-repo Restic Repository anlegen
+t-do-mnt-year-end Alle Snapshots bis auf max. einen Snapshot pro Monat löschen
 t-do-rst-restore Wiederherstellung der ausgewählten Elemente starten
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
 t-opt-bak-dry-run Backup nur simulieren

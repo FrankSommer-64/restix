@@ -37,7 +37,6 @@ Functions to export entities from TCMS to files.
 """
 from datetime import datetime
 import json
-import re
 import subprocess
 
 from restix.core import *
@@ -128,7 +127,6 @@ def run_init(action: RestixAction, task_monitor: TaskMonitor):
         execute_restic_command(action.to_restic_command(), task_monitor)
         return TaskResult(TASK_SUCCEEDED, localized_message(I_GUI_REPO_CREATED, _repo))
     except Exception as _e:
-        task_monitor.log(E_BACKGROUND_TASK_FAILED, str(_e))
         return TaskResult(TASK_FAILED, str(_e))
 
 
@@ -175,7 +173,7 @@ def run_snapshots(action: RestixAction, task_monitor: TaskMonitor):
         return TaskResult(TASK_FAILED, str(_e))
 
 
-def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_long_runner: bool = False) -> str:
+def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_long_runner: bool = False):
     """
     Führt einen restic-Befehl aus.
     Bei potenziell lang laufenden Befehlen werden die Fortschritt-Nachrichten sofort an den TaskMonitor weitergeleitet,
@@ -183,29 +181,35 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     :param cmd: auszuführender restic-Befehl
     :param task_monitor: der Fortschritt-Handler.
     :param potential_long_runner: zeigt an, ob die Ausführung sehr lange dauern kann.
-    :returns: die Standard-Ausgabe.
     :raises RestixException: falls die Ausführung fehlschlägt
     """
-    _stdout = []
+    _err_info = []
     if potential_long_runner:
         # potenziell lang laufender restic-Befehl, Ausgaben gleich an den TaskMonitor weiterreichen
         _p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         for _line in iter(_p.stdout.readline, ""):
-            _stdout.append(_line.strip())
-            task_monitor.log_text(_line.strip(), SEVERITY_INFO)
+            _pure_line = _line.strip()
+            if len(_pure_line) > 0:
+                task_monitor.log_text(_pure_line, SEVERITY_INFO)
         for _line in iter(_p.stderr.readline, ""):
-            task_monitor.log_text(_line.strip(), SEVERITY_ERROR)
+            _pure_line = _line.strip()
+            if len(_pure_line) > 0:
+                _err_info.append(_line.strip())
+                task_monitor.log_text(_pure_line, SEVERITY_ERROR)
         _rc = _p.wait()
-        _stdout = os.linesep.join(_stdout)
     else:
         # kurz laufender restic-Befehl, Ausgaben erst am Ende aufsammeln
         res = subprocess.run(cmd, capture_output=True, encoding='utf-8')
-        if len(res.stderr) > 0: task_monitor.log_text(res.stderr, SEVERITY_ERROR)
-        _stdout = res.stdout
-        if len(res.stdout) > 0: task_monitor.log_text(res.stdout, SEVERITY_INFO)
+        if len(res.stderr) > 0:
+            _pure_output = os.linesep.join([_s for _s in res.stderr.split(os.linesep) if _s])
+            _err_info.append(_pure_output)
+            task_monitor.log_text(_pure_output, SEVERITY_ERROR)
+        if len(res.stdout) > 0:
+            _pure_output = os.linesep.join([_s for _s in res.stdout.split(os.linesep) if _s])
+            task_monitor.log_text(_pure_output, SEVERITY_INFO)
         _rc = res.returncode
     if _rc == 0:
-        return _stdout
+        return
     _restic_cmd = ' '.join(cmd)
     if _rc == 2:
         _exception_id = E_RESTIC_GO_RUNTIME_ERROR
@@ -220,7 +224,7 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     elif _rc == 130:
         _exception_id = E_RESTIC_CMD_INTERRUPTED
     else:
-        raise RestixException(E_RESTIC_CMD_FAILED, _restic_cmd, _stdout)
+        raise RestixException(E_RESTIC_CMD_FAILED, _restic_cmd, os.linesep.join(_err_info))
     raise RestixException(_exception_id, _restic_cmd)
 
 
