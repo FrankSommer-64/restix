@@ -112,7 +112,19 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             if status == Qt.CheckState.Unchecked.value:
                 # excludes aktualisieren
                 CheckBoxFileSystemModel._update_scope_list(self.__excludes, _file_path)
-        self._partially_check_elements(status == Qt.CheckState.Checked.value)
+        if status == Qt.CheckState.Unchecked.value:
+            # beim Abhaken dürfen oberhalb befindliche partially-checked Elemente nur dann geändert werden, wenn dieses
+            # Element das einzige auf seiner Ebene war
+            _was_last_checked_elem = True
+            for _row in range(0, self.rowCount(index.parent())):
+                _child = index.sibling(_row, 0)
+                if _child == index:
+                    continue
+                if self.__check_status_map.get(self.filePath(_child)) == Qt.CheckState.Checked:
+                    _was_last_checked_elem = False
+                    break
+            if _was_last_checked_elem:
+                self._partially_check_elements(False)
 
     def data(self, index: QModelIndex | QPersistentModelIndex, role = Qt.ItemDataRole.DisplayRole):
         """
@@ -164,7 +176,20 @@ class CheckBoxFileSystemModel(QFileSystemModel):
                 while _parent_index.isValid():
                     self.setData(_parent_index, Qt.CheckState.PartiallyChecked, Qt.ItemDataRole.CheckStateRole)
                     _parent_index = _parent_index.parent()
-            self.dataChanged.emit(index, index)
+            elif value == Qt.CheckState.Unchecked:
+                _was_last_checked_elem = True
+                for _row in range(0, self.rowCount(index.parent())):
+                    _child = index.sibling(_row, 0)
+                    if _child == index:
+                        continue
+                    if self.__check_status_map.get(self.filePath(_child)) == Qt.CheckState.Checked:
+                        _was_last_checked_elem = False
+                        break
+                if _was_last_checked_elem:
+                    _parent_index = index.parent()
+                    if _parent_index.isValid():
+                        self.setData(_parent_index, Qt.CheckState.Unchecked, Qt.ItemDataRole.CheckStateRole)
+            self.dataChanged.emit(index, index, Qt.ItemDataRole.CheckStateRole)
             return True
         return super().setData(index, value, role)
 
