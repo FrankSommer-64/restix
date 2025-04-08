@@ -16,6 +16,7 @@ e-invalid-option Option {0} is not supported.
 e-invalid-snapshot-id Specified snapshot ID {0} invalid, hex number required.
 e-invalid-year Specified year {0} invalid, four digits required.
 e-internal-error Internal error: {0}.
+e-mandatory-option-missing Mandatory option {0} not specified.
 e-no-snapshot-desc-from-restic Did not get snapshot description from restic.
 e-repo-does-not-exist restic repository {0} doesn't exist.
 e-restix-target-not-defined Alias for restic repository {0} is not configured.
@@ -54,7 +55,7 @@ t-cli-help-backup Backup local data to restic repository\n \
     --dry-run * simulate execution only, no data transferred to repository\n           \
     --auto-create * create repository automatically, if it doesn't exist\n           \
     Backup-target: Alias name from restix configuration file
-t-cli-help-forget Snapshots aus restic-repository entfernen\n \
+t-cli-help-cleanup Snapshots aus restic-repository entfernen\n \
     Befehl: restix forget [options] Backup-Ziel\n \
     Options: --batch * execute restic command without confirmation\n \
     --dry-run * simulierter Lauf, kein Löschen von Daten im repository\n           \
@@ -64,6 +65,12 @@ t-cli-help-forget Snapshots aus restic-repository entfernen\n \
 t-cli-help-init Create new restic repository\n \
     Command: restix init [options] backup-target\n \
     Options: --batch * execute restic command without confirmation\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-ls Show elements in restic repository\n \
+    Befehl: restix ls [options] backup-target\n \
+    Options: --snapshot Snapshot - Snapshot where to take elements from (ID or latest)\n           \
+    --host hostname * Use repository for specified host\n           \
+    --year year * Use repository for specified year\n \
     Backup-target: Alias name from restix configuration file
 t-cli-help-restore Daten aus restic-repository wiederherstellen\n \
     Befehl: restix restore [options] Backup-Ziel\n \
@@ -93,9 +100,10 @@ e-cli-invalid-option Invalid option {0}.
 e-cli-invalid-path-spec Invalid path for option {0}: {1}.
 e-cli-non-existing-path Path {0} for option {1} does not exist.
 e-cli-path-is-not-dir Path {0} for option {1} is not a directory.
-e-cli-restix-action-failed +++ Operation failed +++
+e-cli-restix-command-failed +++ Command failed +++
 e-cli-target-missing Action {0} requires an alias name for the backup target.
 e-cli-too-many-args Too many arguments given, cannot process '{0}'.
+e-cli-unsupported-credential-type Credentials type {0} not yet supported.
 
 # restic errors
 e-restic-cmd-failed restic command {0} failed: {1}.

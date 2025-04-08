@@ -544,7 +544,7 @@ def cli_main():
         if prompt_confirmation(_action, _repo_alias):
             do_action(_action, _restic_info)
     except Exception as _e:
-        print(localized_message(E_CLI_RESTIX_ACTION_FAILED))
+        print(localized_message(E_CLI_RESTIX_COMMAND_FAILED))
         print(f'> {_e}')
         print()
 

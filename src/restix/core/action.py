@@ -144,6 +144,18 @@ class RestixAction:
                 raise RestixException(E_INVALID_YEAR, option_value)
         self.__options[option_name] = option_value
 
+    def verify_mandatory_options(self):
+        """
+        Prüft, ob alle notwendigen Optionen für eine Aktion gesetzt wurden.
+        :raises RestixException: wenn mindestens eine notwendige Option nicht gesetzt wurde
+        """
+        _mandatory_options = _MANDATORY_OPTIONS.get(self.__action_id)
+        if _mandatory_options is None:
+            return
+        for _option in _mandatory_options:
+            if self.option(_option) is None:
+                raise RestixException(E_MANDATORY_OPTION_MISSING, _option)
+
     def to_restic_command(self) -> list[str]:
         """
         :returns: restic-Kommando für die Daten dieser Aktion.
@@ -403,3 +415,8 @@ _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_BATCH, OPTION_DRY_
                                     OPTION_RESTORE_PATH, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_SNAPSHOTS: {OPTION_BATCH, OPTION_HOST, OPTION_JSON, OPTION_YEAR},
                    ACTION_HELP: {OPTION_HELP}}
+
+_MANDATORY_OPTIONS = {ACTION_BACKUP: (OPTION_FILES_FROM,),
+                      ACTION_FIND: (OPTION_FIND_PATTERN, OPTION_SNAPSHOT),
+                      ACTION_LS: (OPTION_SNAPSHOT,),
+                      ACTION_RESTORE: (OPTION_SNAPSHOT,)}

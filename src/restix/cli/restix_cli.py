@@ -49,8 +49,9 @@ from restix.core.restic_interface import execute_restic_command
 from restix.core.task import TaskMonitor
 from restix.core.util import current_user, full_config_path_of
 
-_COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_CLEANUP: T_CLI_HELP_FORGET,
-                     CLI_COMMAND_INIT: T_CLI_HELP_INIT, CLI_COMMAND_RESTORE: T_CLI_HELP_RESTORE,
+_COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_CLEANUP: T_CLI_HELP_CLEANUP,
+                     CLI_COMMAND_FIND: T_CLI_HELP_FIND, CLI_COMMAND_INIT: T_CLI_HELP_INIT,
+                     CLI_COMMAND_LS: T_CLI_HELP_LS, CLI_COMMAND_RESTORE: T_CLI_HELP_RESTORE,
                      CLI_COMMAND_SNAPSHOTS: T_CLI_HELP_SHAPSHOTS}
 
 
@@ -81,7 +82,8 @@ def prompt_confirmation(action: RestixAction) -> bool:
     :returns: True, falls die Aktion bestätigt wurde; ansonsten False
     """
     _base_action = action.action_id()
-    if _base_action == RESTIC_COMMAND_SNAPSHOTS or action.option(OPTION_BATCH) or action.option(OPTION_DRY_RUN):
+    if (_base_action == RESTIC_COMMAND_SNAPSHOTS or _base_action == RESTIC_COMMAND_LS or
+            action.option(OPTION_BATCH) or action.option(OPTION_DRY_RUN)):
         return True
     _target_alias = action.target_alias()
     if _base_action == RESTIC_COMMAND_BACKUP:
@@ -142,6 +144,7 @@ def cli_main():
         if _action.action_id() == ACTION_HELP:
             show_help(_action.option(OPTION_HELP))
             sys.exit(0)
+        _action.verify_mandatory_options()
     except RestixException as _e:
         print(str(_e))
         show_help()
@@ -163,12 +166,12 @@ def cli_main():
             _pw_file = full_config_path_of(_credentials.get(CFG_PAR_VALUE), _restix_config.path())
             _action.set_option(OPTION_PASSWORD_FILE, _pw_file)
         else:
-            raise RuntimeError(f'Credentials type {_credentials_type} wird nicht unterstützt')
+            raise RuntimeError(localized_message(E_CLI_UNSUPPORTED_CREDENTIAL_TYPE, _credentials_type))
         # Aktion ausführen
         if prompt_confirmation(_action):
             execute_restic_command(_action.to_restic_command(), TaskMonitor())
     except Exception as _e:
-        print(localized_message(E_CLI_RESTIX_ACTION_FAILED))
+        print(localized_message(E_CLI_RESTIX_COMMAND_FAILED))
         print(f'> {_e}')
         print()
 
