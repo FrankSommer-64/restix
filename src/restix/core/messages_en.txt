@@ -45,41 +45,47 @@ w-cfg-elem-ignored Element {0} ignored.
 t-cli-backup-targets-header Backup targets:
 t-cli-backup-target-info {0} - {1}
 t-cli-confirm-backup Backup to repository {0}.
-t-cli-confirm-forget-snapshot Remove snapshot {0} from repository {1}.
-t-cli-confirm-forget-untagged Remove all untagged snapshots from repository {0}.
+t-cli-confirm-cleanup Remove all snapshots except one per month from repository {0}.
 t-cli-confirm-init Initialise repository {0}.
 t-cli-confirm-restore Restore snapshot {0} from repository {1} to {2}.
 t-cli-help-backup Backup local data to restic repository\n \
     Command: restix backup [options] backup-target\n \
-    Options: --batch * execute restic command without confirmation\n \
+    Options: --batch * execute restic command without confirmation\n           \
     --dry-run * simulate execution only, no data transferred to repository\n           \
-    --auto-create * create repository automatically, if it doesn't exist\n           \
+    --auto-create * create repository automatically, if it doesn't exist\n \
     Backup-target: Alias name from restix configuration file
-t-cli-help-cleanup Snapshots aus restic-repository entfernen\n \
-    Befehl: restix forget [options] Backup-Ziel\n \
+t-cli-help-cleanup Remove snapshots except one per month from restic repository\n \
+    Command: restix cleanup  [options] backup-target\n \
     Options: --batch * execute restic command without confirmation\n \
-    --dry-run * simulierter Lauf, kein Löschen von Daten im repository\n           \
-    --snapshot Snapshot - zu löschender Snapshot (ID oder latest)\n           \
-    --untagged - alle Snapshots bis auf den neuesten löschen, die keinen Tag besitzen\n \
+    --dry-run * simulate execution only, no data removed from repository\n           \
+    --host hostname * Use repository for specified host\n           \
+    --year year * Use repository for specified year\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-find Search elements in restic repository\n \
+    Command: restix find [options] backup-target\n \
+    Options: --pattern pattern - Search pattern for the elements\n           \
+    --snapshot snapshot * Snapshot (ID or latest)\n           \
+    --host hostname * Use repository for specified host\n           \
+    --year year * Use repository for specified year\n \
     Backup-target: Alias name from restix configuration file
 t-cli-help-init Create new restic repository\n \
     Command: restix init [options] backup-target\n \
     Options: --batch * execute restic command without confirmation\n \
     Backup-target: Alias name from restix configuration file
 t-cli-help-ls Show elements in restic repository\n \
-    Befehl: restix ls [options] backup-target\n \
-    Options: --snapshot Snapshot - Snapshot where to take elements from (ID or latest)\n           \
+    Command: restix ls [options] backup-target\n \
+    Options: --snapshot snapshot * Snapshot where to take elements from (ID or latest)\n           \
     --host hostname * Use repository for specified host\n           \
     --year year * Use repository for specified year\n \
     Backup-target: Alias name from restix configuration file
-t-cli-help-restore Daten aus restic-repository wiederherstellen\n \
-    Befehl: restix restore [options] Backup-Ziel\n \
-    Options: --batch * execute restic command without confirmation\n \
-    --dry-run * simulierter Lauf, keine Änderungen am repository und im lokalen Dateisystem\n           \
-    --host Hostname * Daten aus dem repository des angegebenen Hosts nehmen\n           \
-    --restore-path Verzeichnis * Verzeichnis, in das die wiederhergestellten Daten geschrieben werden sollen\n           \
-    --snapshot Snapshot - Snapshot (ID oder latest)\n           \
-    --year Jahr * Daten aus dem repository des angegeben Jahrs nehmen\n \
+t-cli-help-restore Restore data from restic repository to local filesystem\n \
+    Command: restix restore [options] backup-target\n \
+    Options: --batch * execute restic command without confirmation\n           \
+    --dry-run * simulate execution only, no data copied from repository\n           \
+    --host hostname * Use repository for specified host\n           \
+    --restore-path path * Root directory, where to copy data from repository\n           \
+    --snapshot snapshot * Snapshot (ID or latest)\n           \
+    --year year * Use repository for specified year\n \
     Backup-target: Alias name from restix configuration file
 t-cli-help-snapshots Show snapshots of a restic repository\n \
     Command: restix snapshots [options] backup-target\n \

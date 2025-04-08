@@ -47,7 +47,7 @@ from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.restic_interface import execute_restic_command
 from restix.core.task import TaskMonitor
-from restix.core.util import current_user, full_config_path_of
+from restix.core.util import current_user
 
 _COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_CLEANUP: T_CLI_HELP_CLEANUP,
                      CLI_COMMAND_FIND: T_CLI_HELP_FIND, CLI_COMMAND_INIT: T_CLI_HELP_INIT,
@@ -82,21 +82,17 @@ def prompt_confirmation(action: RestixAction) -> bool:
     :returns: True, falls die Aktion bestätigt wurde; ansonsten False
     """
     _base_action = action.action_id()
-    if (_base_action == RESTIC_COMMAND_SNAPSHOTS or _base_action == RESTIC_COMMAND_LS or
-            action.option(OPTION_BATCH) or action.option(OPTION_DRY_RUN)):
+    if (_base_action == ACTION_SNAPSHOTS or _base_action == ACTION_LS or
+            _base_action == ACTION_FIND or action.option(OPTION_BATCH) or action.option(OPTION_DRY_RUN)):
         return True
     _target_alias = action.target_alias()
-    if _base_action == RESTIC_COMMAND_BACKUP:
+    if _base_action == ACTION_BACKUP:
         print(localized_message(T_CLI_CONFIRM_BACKUP, _target_alias))
-    elif _base_action == RESTIC_COMMAND_INIT:
+    elif _base_action == ACTION_INIT:
         print(localized_message(T_CLI_CONFIRM_INIT, _target_alias))
-    elif _base_action == RESTIC_COMMAND_FORGET:
-        _snapshot_id = action.option(OPTION_SNAPSHOT)
-        if _snapshot_id is None:
-            print(localized_message(T_CLI_CONFIRM_FORGET_UNTAGGED, _target_alias))
-        else:
-            print(localized_message(T_CLI_CONFIRM_FORGET_SNAPSHOT, _snapshot_id, _target_alias))
-    elif _base_action == RESTIC_COMMAND_RESTORE:
+    elif _base_action == ACTION_FORGET:
+        print(localized_message(T_CLI_CONFIRM_CLEANUP, _target_alias))
+    elif _base_action == ACTION_RESTORE:
         _snapshot_id = action.option(OPTION_SNAPSHOT)
         if _snapshot_id is None:
             _snapshot_id = RESTIC_SNAPSHOT_LATEST
@@ -144,7 +140,6 @@ def cli_main():
         if _action.action_id() == ACTION_HELP:
             show_help(_action.option(OPTION_HELP))
             sys.exit(0)
-        _action.verify_mandatory_options()
     except RestixException as _e:
         print(str(_e))
         show_help()
@@ -158,17 +153,13 @@ def cli_main():
             sys.exit(0)
         # Repository und Zugangsdaten in die Aktion eintragen
         _target_alias = _action.target_alias()
-        _repo = full_config_path_of(_restix_config.repo_for_target(_target_alias), _restix_config.path())
-        _action.set_option(OPTION_REPO, _repo)
-        _credentials = _restix_config.credentials_for_target(_target_alias)
-        _credentials_type = _credentials.get(CFG_PAR_TYPE)
-        if _credentials_type == CFG_VALUE_CREDENTIALS_TYPE_FILE:
-            _pw_file = full_config_path_of(_credentials.get(CFG_PAR_VALUE), _restix_config.path())
-            _action.set_option(OPTION_PASSWORD_FILE, _pw_file)
-        else:
-            raise RuntimeError(localized_message(E_CLI_UNSUPPORTED_CREDENTIAL_TYPE, _credentials_type))
+        _action.set_basic_options(_restix_config, None)
+        if _action.action_id() == ACTION_BACKUP:
+            _action.set_scope_options(_restix_config.scope_for_target(_target_alias))
         # Aktion ausführen
+        _action.verify_mandatory_options()
         if prompt_confirmation(_action):
+            print(_action.to_restic_command())
             execute_restic_command(_action.to_restic_command(), TaskMonitor())
     except Exception as _e:
         print(localized_message(E_CLI_RESTIX_COMMAND_FAILED))

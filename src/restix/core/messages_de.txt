@@ -45,27 +45,28 @@ w-cfg-elem-ignored Element {0} ignoriert
 t-cli-backup-targets-header Backup-Ziele:
 t-cli-backup-target-info {0} - {1}
 t-cli-confirm-backup Backup nach Repository {0}.
-t-cli-confirm-forget-snapshot Lösche Snapshot {0} von Repository {1}.
-t-cli-confirm-forget-untagged Lösche alle unmarkierten Snapshots von Repository {0}.
+t-cli-confirm-cleanup Lösche alle Snapshots bis auf einen pro Monat von Repository {0}.
 t-cli-confirm-init Initialisiere Repository {0}.
 t-cli-confirm-restore Restore Snapshot {0} von Repository {1} nach {2}.
 t-cli-help-backup Lokale Daten in restic-Repository sichern\n \
     Befehl: restix backup [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
     --dry-run * simulierter Lauf, keine Datenübertragung ins Repository\n           \
-    --auto-create * Repository automatisch anlegen, falls es nicht existiert\n           \
-    --auto-tag * Snapshot automatisch taggen\n \
-    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
-t-cli-help-cleanup Snapshots aus restic-Repository entfernen\n \
-    Befehl: restix forget [Optionen] Backup-Ziel\n \
+    --auto-create * Repository automatisch anlegen, falls es nicht existiert\n \
+    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+t-cli-help-cleanup Snapshots bis auf einen pro Monat aus restic-Repository entfernen\n \
+    Befehl: restix cleanup [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
     --dry-run * simulierter Lauf, kein Löschen von Daten im Repository\n           \
-    --snapshot Snapshot - zu löschender Snapshot (ID oder latest)\n           \
-    --untagged - alle Snapshots bis auf den neuesten löschen, die keinen Tag besitzen\n \
-    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
-t-cli-help-find Neues restic-Repository anlegen\n \
-    Befehl: restix init [Optionen] Backup-Ziel\n \
-    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n \
+    --host Hostname * Repository für den angegebenen Host verwenden\n           \
+    --year Jahr * Repository für das angegebene Jahr verwenden\n \
+    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+t-cli-help-find Elemente in restic-Repository suchen\n \
+    Befehl: restix find [Optionen] Backup-Ziel\n \
+    Optionen: --pattern Pattern - Pattern für die zu suchenden Elemente\n           \
+    --snapshot Snapshot * Snapshot (ID oder latest)\n           \
+    --host Hostname * Repository für den angegebenen Host verwenden\n           \
+    --year Jahr * Repository für das angegebene Jahr verwenden\n \
     Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-help-init Neues restic-Repository anlegen\n \
     Befehl: restix init [Optionen] Backup-Ziel\n \
@@ -73,7 +74,7 @@ t-cli-help-init Neues restic-Repository anlegen\n \
     Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-help-ls Elemente aus restic-Repository anzeigen\n \
     Befehl: restix ls [Optionen] Backup-Ziel\n \
-    Optionen: --snapshot Snapshot - Snapshot, aus dem die Daten angezeigt werden sollen (ID oder latest)\n           \
+    Optionen: --snapshot Snapshot * Snapshot, aus dem die Daten angezeigt werden sollen (ID oder latest)\n           \
     --host Hostname * Repository für den angegebenen Host verwenden\n           \
     --year Jahr * Repository für das angegebene Jahr verwenden\n \
     Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
@@ -83,9 +84,9 @@ t-cli-help-restore Daten aus restic-Repository wiederherstellen\n \
     --dry-run * simulierter Lauf, keine Änderungen am Repository und im lokalen Dateisystem\n           \
     --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
     --restore-path Verzeichnis * Verzeichnis, in das die wiederhergestellten Daten geschrieben werden sollen\n           \
-    --snapshot Snapshot - Snapshot (ID oder latest)\n           \
+    --snapshot Snapshot * Snapshot (ID oder latest)\n           \
     --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
-    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
     Befehl: restix snapshots [Optionen] Backup-Ziel\n \
     Optionen: --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \

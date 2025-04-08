@@ -187,7 +187,7 @@ class SnapshotViewerDialog(QDialog):
         Zeigt die Elemente des Snapshots, die auf den eingegebenen Filter passen im Viewer an.
         """
         _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id,
-                    OPTION_JSON: True, OPTION_FIND_PATTERN: self.__search_field.text()}
+                    OPTION_JSON: True, OPTION_PATTERN: self.__search_field.text()}
         _action = RestixAction.for_action_id(ACTION_FIND, self.__target_alias, self.__local_config, _options)
         _elements = find_snapshot_elements(_action)
         _snapshot = Snapshot(self.__snapshot_id, datetime.datetime.now(), '')
