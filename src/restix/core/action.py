@@ -178,9 +178,6 @@ class RestixAction:
         if self.__action_id == ACTION_LS:
             _cmd.append(self.option(OPTION_SNAPSHOT))
             return _cmd
-        if self.__action_id == ACTION_SNAPSHOTS:
-            _cmd.append(OPTION_JSON)
-            return _cmd
         if self.__action_id == ACTION_INIT:
             return _cmd
         return _cmd
@@ -207,6 +204,7 @@ class RestixAction:
         _snapshots_action = RestixAction(ACTION_SNAPSHOTS, self.target_alias())
         _snapshots_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
         _snapshots_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
+        _snapshots_action.__options[OPTION_JSON] = True
         return _snapshots_action
 
     def _set_basic_options(self, local_config: LocalConfig, options: dict | None):
@@ -283,6 +281,8 @@ class RestixAction:
         if action_id == ACTION_BACKUP:
             # ein- und auszuschliessende Daten setzen
             _action._set_scope_options(local_config.scope_for_target(target_alias))
+        elif action_id == ACTION_SNAPSHOTS:
+            _action.set_option(OPTION_JSON, True)
         return _action
 
     @classmethod
@@ -295,6 +295,7 @@ class RestixAction:
         _option_values = {}
         _action_id = ''
         _target = ''
+        _find_pattern_expected = 0
         _host_value_expected = 0
         _restore_path_value_expected = 0
         _snapshot_value_expected = 0
@@ -305,6 +306,11 @@ class RestixAction:
         for _arg in _cmd_line:
             _arg = _arg.strip()
             # Optionswerte verarbeiten
+            if _find_pattern_expected == 1:
+                # vorangegangenes Argument war --find-pattern
+                _option_values[OPTION_FIND_PATTERN] = _arg
+                _find_pattern_expected = 2
+                continue
             if _host_value_expected == 1:
                 # vorangegangenes Argument war --host
                 _option_values[OPTION_HOST] = _arg
@@ -327,11 +333,8 @@ class RestixAction:
                 continue
             if _arg.startswith('-'):
                 # Option
-                if _arg == OPTION_BATCH:
-                    _option_values[OPTION_BATCH] = True
-                    continue
-                if _arg == OPTION_DRY_RUN:
-                    _option_values[OPTION_DRY_RUN] = True
+                if _arg == OPTION_BATCH or _arg == OPTION_DRY_RUN or _arg == OPTION_AUTO_CREATE:
+                    _option_values[_arg] = True
                     continue
                 if _arg == OPTION_HELP:
                     _option_values[OPTION_HELP] = True
@@ -364,8 +367,13 @@ class RestixAction:
                     _action.set_option(OPTION_HELP, _arg)
                     return _action
                 if _arg not in ALL_CLI_COMMANDS:
-                    raise RestixException(E_CLI_INVALID_ACTION, _arg)
-                _action_id = _arg
+                    raise RestixException(E_CLI_INVALID_COMMAND, _arg)
+                if _arg == CLI_COMMAND_CLEANUP:
+                    _arg = ACTION_FORGET
+                    _option_values[OPTION_KEEP_MONTHLY] = 1
+                    _option_values[OPTION_PRUNE] = True
+                else:
+                    _action_id = _arg
                 _action_processed = True
                 continue
             if not _target_processed:
@@ -374,7 +382,7 @@ class RestixAction:
                 continue
             raise RestixException(E_CLI_TOO_MANY_ARGS, _arg)
         if not _action_processed:
-            raise RestixException(E_CLI_ACTION_MISSING)
+            raise RestixException(E_CLI_COMMAND_MISSING)
         if _target is None and _action_id != CLI_COMMAND_TARGETS:
             raise RestixException(E_CLI_TARGET_MISSING, _action_id)
         _action = RestixAction(_action_id, _target)
@@ -385,7 +393,7 @@ class RestixAction:
 
 _STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE}
 _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_BATCH, OPTION_DRY_RUN,
-                                   OPTION_EXCLUDE_FILE, OPTION_HOST, OPTION_FILES_FROM, OPTION_YEAR},
+                                   OPTION_EXCLUDE_FILE, OPTION_FILES_FROM},
                    ACTION_FIND: {OPTION_HOST, OPTION_FIND_PATTERN, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_FORGET: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_KEEP_MONTHLY,
                                    OPTION_PRUNE, OPTION_YEAR},
@@ -393,5 +401,5 @@ _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_BATCH, OPTION_DRY_
                    ACTION_LS: {OPTION_HOST, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},
                    ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_INCLUDE_FILE,
                                     OPTION_RESTORE_PATH, OPTION_SNAPSHOT, OPTION_YEAR},
-                   ACTION_SNAPSHOTS: {OPTION_HOST, OPTION_JSON, OPTION_YEAR},
+                   ACTION_SNAPSHOTS: {OPTION_BATCH, OPTION_HOST, OPTION_JSON, OPTION_YEAR},
                    ACTION_HELP: {OPTION_HELP}}

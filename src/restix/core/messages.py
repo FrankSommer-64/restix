@@ -100,9 +100,9 @@ T_CLI_USAGE_INFO = 't-cli-usage-info'
 T_CLI_YES_CHAR = 't-cli-yes-char'
 
 # CLI messages
-E_CLI_ACTION_MISSING = 'e-cli-action-missing'
+E_CLI_COMMAND_MISSING = 'e-cli-command-missing'
 E_CLI_DUP_OPTION = 'e-cli-dup-option'
-E_CLI_INVALID_ACTION = 'e-cli-invalid-action'
+E_CLI_INVALID_COMMAND = 'e-cli-invalid-command'
 E_CLI_INVALID_OPTION = 'e-cli-invalid-option'
 E_CLI_INVALID_PATH_SPEC = 'e-cli-invalid-path-spec'
 E_CLI_NON_EXISTING_PATH = 'e-cli-non-existing-path'

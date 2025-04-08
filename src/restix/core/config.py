@@ -92,6 +92,13 @@ class LocalConfig(dict):
         """
         return self._group(CFG_GROUP_SCOPE)
 
+    def repo_for_target(self, alias: str) -> str:
+        """
+        :param alias: der Aliasname des Backup-Ziels
+        :returns: Repository-Location für das angegebene Backup-Ziel
+        """
+        return self.targets().get(alias).get(CFG_PAR_LOCATION)
+
     def credentials_for_target(self, alias: str) -> dict:
         """
         :param alias: der Aliasname des Backup-Ziels

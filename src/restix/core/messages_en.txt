@@ -50,48 +50,45 @@ t-cli-confirm-init Initialise repository {0}.
 t-cli-confirm-restore Restore snapshot {0} from repository {1} to {2}.
 t-cli-help-backup Backup local data to restic repository\n \
     Command: restix backup [options] backup-target\n \
-    Options: --batch * restic execute command without confirmation\n           \
+    Options: --batch * execute restic command without confirmation\n \
     --dry-run * simulate execution only, no data transferred to repository\n           \
     --auto-create * create repository automatically, if it doesn't exist\n           \
-    Backup-target: Alias from restix configuration file
+    Backup-target: Alias name from restix configuration file
 t-cli-help-forget Snapshots aus restic-repository entfernen\n \
-    Befehl: restix forget [Optionen] Backup-Ziel\n \
-    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
+    Befehl: restix forget [options] Backup-Ziel\n \
+    Options: --batch * execute restic command without confirmation\n \
     --dry-run * simulierter Lauf, kein Löschen von Daten im repository\n           \
     --snapshot Snapshot - zu löschender Snapshot (ID oder latest)\n           \
     --untagged - alle Snapshots bis auf den neuesten löschen, die keinen Tag besitzen\n \
-    Backup-Ziel: Alias aus der restix-configuration file
-t-cli-help-init Neues restic-repository anlegen\n \
-    Befehl: restix init [Optionen] Backup-Ziel\n \
-    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n \
-    Backup-Ziel: Alias aus der restix-configuration file
+    Backup-target: Alias name from restix configuration file
+t-cli-help-init Create new restic repository\n \
+    Command: restix init [options] backup-target\n \
+    Options: --batch * execute restic command without confirmation\n \
+    Backup-target: Alias name from restix configuration file
 t-cli-help-restore Daten aus restic-repository wiederherstellen\n \
-    Befehl: restix restore [Optionen] Backup-Ziel\n \
-    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
+    Befehl: restix restore [options] Backup-Ziel\n \
+    Options: --batch * execute restic command without confirmation\n \
     --dry-run * simulierter Lauf, keine Änderungen am repository und im lokalen Dateisystem\n           \
     --host Hostname * Daten aus dem repository des angegebenen Hosts nehmen\n           \
     --restore-path Verzeichnis * Verzeichnis, in das die wiederhergestellten Daten geschrieben werden sollen\n           \
     --snapshot Snapshot - Snapshot (ID oder latest)\n           \
     --year Jahr * Daten aus dem repository des angegeben Jahrs nehmen\n \
-    Backup-Ziel: Alias aus der restix-configuration file
-t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
-    Befehl: restix snapshots [Optionen] Backup-Ziel\n \
-    Optionen: --host Hostname * Daten aus dem repository des angegebenen Hosts nehmen\n           \
-    --year Jahr * Daten aus dem repository des angegeben Jahrs nehmen\n \
-    Backup-Ziel: Alias aus der restix-configuration file
+    Backup-target: Alias name from restix configuration file
+t-cli-help-snapshots Show snapshots of a restic repository\n \
+    Command: restix snapshots [options] backup-target\n \
+    Options: --host hostname * Use repository for specified host\n           \
+    --year year * Use repository for specified year\n \
+    Backup-target: Alias name from restix configuration file
 t-cli-prompt-for-confirmation OK (y/n)?
-t-cli-usage-info Aufruf: restix [options] action [backup-target]\n \
-    Actions: backup | forget | init | restore | snapshots | tag | targets\n \
-    Optionen: --batch * keine Bestätigung vor dem Ausführen des restic Befehls\n           \
-    --dry-run * simulierter Lauf, keine Sicherung der Daten im repository\n           \
-    --tag Tag * zu setzender Tag\n \
-    Backup-Ziel: Alias aus der restix-configuration file
-t-cli-yes-char j
+t-cli-usage-info Usage: restix command [options] [backup-target]\n \
+    Commands: backup | cleanup | find | init | ls | restore | snapshots | targets\n \
+    For help on each command use restix --help <command>
+t-cli-yes-char y
 
 # CLI messages
-e-cli-action-missing No action specified.
+e-cli-command-missing No command specified.
 e-cli-dup-option Option {0} specified multiple times.
-e-cli-invalid-action Invalid action {0}.
+e-cli-invalid-command Invalid command {0}.
 e-cli-invalid-option Invalid option {0}.
 e-cli-invalid-path-spec Invalid path for option {0}: {1}.
 e-cli-non-existing-path Path {0} for option {1} does not exist.

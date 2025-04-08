@@ -47,10 +47,9 @@ from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.restic_interface import execute_restic_command
 from restix.core.task import TaskMonitor
-from restix.core.util import current_user
+from restix.core.util import current_user, full_config_path_of
 
-
-_COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_FORGET: T_CLI_HELP_FORGET,
+_COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_CLEANUP: T_CLI_HELP_FORGET,
                      CLI_COMMAND_INIT: T_CLI_HELP_INIT, CLI_COMMAND_RESTORE: T_CLI_HELP_RESTORE,
                      CLI_COMMAND_SNAPSHOTS: T_CLI_HELP_SHAPSHOTS}
 
@@ -154,6 +153,17 @@ def cli_main():
             # Sonderfall Backup-Ziele anzeigen (resultiert nicht in einem restic-Befehl)
             show_targets(_restix_config.targets())
             sys.exit(0)
+        # Repository und Zugangsdaten in die Aktion eintragen
+        _target_alias = _action.target_alias()
+        _repo = full_config_path_of(_restix_config.repo_for_target(_target_alias), _restix_config.path())
+        _action.set_option(OPTION_REPO, _repo)
+        _credentials = _restix_config.credentials_for_target(_target_alias)
+        _credentials_type = _credentials.get(CFG_PAR_TYPE)
+        if _credentials_type == CFG_VALUE_CREDENTIALS_TYPE_FILE:
+            _pw_file = full_config_path_of(_credentials.get(CFG_PAR_VALUE), _restix_config.path())
+            _action.set_option(OPTION_PASSWORD_FILE, _pw_file)
+        else:
+            raise RuntimeError(f'Credentials type {_credentials_type} wird nicht unterstützt')
         # Aktion ausführen
         if prompt_confirmation(_action):
             execute_restic_command(_action.to_restic_command(), TaskMonitor())

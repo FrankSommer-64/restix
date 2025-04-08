@@ -65,7 +65,7 @@ t-cli-help-forget Snapshots aus restic-Repository entfernen\n \
 t-cli-help-init Neues restic-Repository anlegen\n \
     Befehl: restix init [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n \
-    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-help-restore Daten aus restic-Repository wiederherstellen\n \
     Befehl: restix restore [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
@@ -79,20 +79,17 @@ t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
     Befehl: restix snapshots [Optionen] Backup-Ziel\n \
     Optionen: --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
     --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
-    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-prompt-for-confirmation OK (j/n)?
-t-cli-usage-info Aufruf: restix [Optionen] Aktion [Backup-Ziel]\n \
-    Aktionen: backup | forget | init | restore | snapshots | tag | targets\n \
-    Optionen: --batch * keine Bestätigung vor dem Ausführen des restic Befehls\n           \
-    --dry-run * simulierter Lauf, keine Sicherung der Daten im Repository\n           \
-    --tag Tag * zu setzender Tag\n \
-    Backup-Ziel: Alias aus der restix-Konfigurationsdatei
+t-cli-usage-info Aufruf: restix Befehl [Optionen] [Backup-Ziel]\n \
+    Befehle: backup | cleanup | find | init | ls | restore | snapshots | targets\n \
+    Hilfe zu jedem Befehl mit restix --help <Befehl>
 t-cli-yes-char j
 
 # CLI messages
-e-cli-action-missing Keine Aktion angegeben.
+e-cli-command-missing Kein Befehl angegeben.
 e-cli-dup-option Option {0} wurde mehrfach angegeben.
-e-cli-invalid-action Die Aktion {0} ist ungültig.
+e-cli-invalid-command Der Befehl {0} ist ungültig.
 e-cli-invalid-option Die Option {0} ist ungültig.
 e-cli-invalid-path-spec Ungültige Pfadangabe für Option {0}: {1}.
 e-cli-non-existing-path Pfad {0} für Option {1} existiert nicht.

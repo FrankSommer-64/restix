@@ -191,7 +191,7 @@ class DetailAction:
                 raise RestixException(E_CLI_INVALID_OPTION, p)
             if not _action_processed:
                 if p not in ALL_CLI_ACTIONS:
-                    raise RestixException(E_CLI_INVALID_ACTION, p)
+                    raise RestixException(E_CLI_INVALID_COMMAND, p)
                 _base_action = p
                 _action_processed = True
                 continue
@@ -201,7 +201,7 @@ class DetailAction:
                 continue
             raise RestixException(E_CLI_TOO_MANY_ARGS, p)
         if not _action_processed:
-            raise RestixException(E_CLI_ACTION_MISSING)
+            raise RestixException(E_CLI_COMMAND_MISSING)
         if _target is None and _base_action != CLI_ACTION_TARGETS:
             raise RestixException(E_CLI_TARGET_MISSING, _base_action)
         if _base_action == CLI_ACTION_TAG and (_option_values[OPTION_TAGS] is None or
@@ -444,7 +444,7 @@ def build_restic_cmd(restix_action, restic_info):
         _restic_cmd.append(restix_action.option(OPTION_TAGS))
         _restic_cmd.append(restix_action.option(OPTION_SNAPSHOT))
         return _restic_cmd
-    raise RestixException(E_CLI_INVALID_ACTION, _base_action)
+    raise RestixException(E_CLI_INVALID_COMMAND, _base_action)
 
 
 def do_action(restix_action, restic_info):
