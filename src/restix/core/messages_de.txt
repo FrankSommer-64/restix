@@ -109,7 +109,6 @@ e-cli-path-is-not-dir Pfad {0} für Option {1} ist kein Verzeichnis.
 e-cli-restix-command-failed +++ Befehl fehlgeschlagen +++
 e-cli-target-missing Für Aktion {0} wurde kein Alias für das restic-Repository angegeben.
 e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.
-e-cli-unsupported-credential-type Typ {0} für die Zugriffsdaten wird noch nicht unterstützt.
 
 # restic Fehler
 e-restic-cmd-failed restic-Befehl {0} fehlgeschlagen: {1}.

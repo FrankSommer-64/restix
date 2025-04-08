@@ -112,7 +112,6 @@ E_CLI_PATH_IS_NOT_DIR = 'e-cli-path-is-not-dir'
 E_CLI_RESTIX_COMMAND_FAILED = 'e-cli-restix-command-failed'
 E_CLI_TARGET_MISSING = 'e-cli-target-missing'
 E_CLI_TOO_MANY_ARGS = 'e-cli-too-many-args'
-E_CLI_UNSUPPORTED_CREDENTIAL_TYPE = 'e-cli-unsupported-credential-type'
 
 # restic Fehler
 E_RESTIC_CMD_FAILED = 'e-restic-cmd-failed'

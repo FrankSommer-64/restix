@@ -159,7 +159,6 @@ def cli_main():
         # Aktion ausführen
         _action.verify_mandatory_options()
         if prompt_confirmation(_action):
-            print(_action.to_restic_command())
             execute_restic_command(_action.to_restic_command(), TaskMonitor())
     except Exception as _e:
         print(localized_message(E_CLI_RESTIX_COMMAND_FAILED))

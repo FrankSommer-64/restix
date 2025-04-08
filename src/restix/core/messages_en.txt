@@ -109,7 +109,6 @@ e-cli-path-is-not-dir Path {0} for option {1} is not a directory.
 e-cli-restix-command-failed +++ Command failed +++
 e-cli-target-missing Action {0} requires an alias name for the backup target.
 e-cli-too-many-args Too many arguments given, cannot process '{0}'.
-e-cli-unsupported-credential-type Credentials type {0} not yet supported.
 
 # restic errors
 e-restic-cmd-failed restic command {0} failed: {1}.
