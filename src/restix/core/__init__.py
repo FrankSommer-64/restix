@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 # restix Version
-VERSION = '0.1snapshot'
+VERSION = '0.9'
 
 # Anfang des Dateinamens für die lokalisierten Benutzerhandbücher
 USER_MANUAL_STEM = 'user_manual_'
