@@ -40,7 +40,10 @@ Alternativ kann das Verzeichnis durch Umgebungsvariable RESTIX_CONFIG_PATH festg
 
 import copy
 import os.path
+import pathlib
 import re
+import shutil
+
 import tomli
 from typing import Self
 
@@ -49,7 +52,7 @@ import tomli_w
 from restix.core import *
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
-from restix.core.util import full_path_of
+from restix.core.util import full_path_of, current_user
 
 
 class LocalConfig(dict):
@@ -291,16 +294,27 @@ def create_config_root() -> str:
     Erzeugt das restix-Konfigurationsverzeichnis.
     Falls Umgebungsvariable RESTIX_CONFIG_PATH gesetzt ist, wird dieses als Verzeichnisname benutzt, ansonsten wird
     das Verzeichnis $HOME/.config/restix erzeugt.
-    Creates root directory for Issai configuration and a default master configuration file.
-    If defined, directory path is taken from environment variable ISSAI_CONFIG_PATH,
-    otherwise creates default directory $HOME/.config/issai.
-    :returns: restix-Konfigurationsverzeichnis mit vollständigem Pfad
+    :returns: restix-Konfigurationsverzeichnis mit vollständigem Pfad.
+    :raises RestixException: falls das Erstellen fehlschlägt
     """
     _config_path = os.environ.get(ENVA_RESTIX_CONFIG_PATH)
     if _config_path is None:
         _config_path = os.path.join(os.path.expanduser('~'), RESTIX_CONFIG_SUBDIR)
     _config_path = full_path_of(_config_path)
-    os.makedirs(_config_path, 0o755, True)
+    try:
+        os.makedirs(_config_path, 0o755, True)
+        _source_path = pathlib.Path(__file__).parent.resolve()
+        # für wheel templates path anpassen !
+        #_templates_path = os.path.abspath(os.path.join(_source_path, '..', RESTIX_TEMPLATES_DIR))
+        _templates_path = os.path.abspath(os.path.join(_source_path, '..', '..', '..', RESTIX_TEMPLATES_DIR))
+        shutil.copy(os.path.join(_templates_path, RESTIX_CONFIG_FN), _config_path)
+        with open(os.path.join(_templates_path, RESTIX_DEFAULT_INCLUDES_FN), 'r') as _includes_template:
+            _contents = _includes_template.read()
+            _contents = _contents.replace(f'${{{CFG_VAR_USER}}}', current_user())
+            with open(os.path.join(_config_path, RESTIX_DEFAULT_INCLUDES_FN), 'w') as _default_includes_file:
+                _default_includes_file.write(_contents)
+    except OSError as _e:
+        raise RestixException(E_CFG_CREATE_CONFIG_ROOT_FAILED, _config_path, str(_e))
     return _config_path
 
 

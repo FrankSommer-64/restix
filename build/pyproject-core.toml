@@ -48,5 +48,8 @@ exclude = [
 packages = ["src/restix"]
 exclude = ["/src/restix/gui"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"templates" = "restix/templates"
+
 [tool.hatch.version]
 path = "src/restix/core/__init__.py"

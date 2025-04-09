@@ -27,6 +27,7 @@ i-running-restic-cmd restic-Befehl: {0}
 w-cant-dry-run-backup-without-repo Trockenlauf der Sicherung nicht möglich, da Repository {0} nicht existiert.
 
 # Konfiguration
+e-cfg-create-config-root-failed Konnte Konfigurationsverzeichnis {0} nicht anlegen: {1}.
 e-cfg-custom-config-root-not-found Konfigurationsverzeichnis {0} aus Umgebungsvariable {1} nicht gefunden.
 e-cfg-default-config-root-not-found Standard-Konfigurationsverzeichnis {0} nicht gefunden.
 e-cfg-duplicate-group Group {0} {1} wurde in der Konfigurationsdatei {2} mehrfach definiert
@@ -126,7 +127,7 @@ i-gui-about-text restix - Datensicherung auf restic-Basis
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-confirm-remove {0} wirklich löschen ?
-i-gui-create-config-root x
+i-gui-create-config-root Konfigurationsverzeichnis anlegen ?
 i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-credential-exists Zugriffsdaten mit Alias '{0}' existieren bereits.
 i-gui-data-restored Daten aus Repository {0} wiederhergestellt.

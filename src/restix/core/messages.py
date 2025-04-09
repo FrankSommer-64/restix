@@ -69,6 +69,7 @@ I_RUNNING_RESTIC_CMD = 'i-running-restic-cmd'
 W_CANT_DRY_RUN_BACKUP_WITHOUT_REPO = 'w-cant-dry-run-backup-without-repo'
 
 # Fehlermeldungen zur Konfiguration
+E_CFG_CREATE_CONFIG_ROOT_FAILED = 'e-cfg-create-config-root-failed'
 E_CFG_CUSTOM_CONFIG_ROOT_NOT_FOUND = 'e-cfg-custom-config-root-not-found'
 E_CFG_DEFAULT_CONFIG_ROOT_NOT_FOUND = 'e-cfg-default-config-root-not-found'
 E_CFG_DUPLICATE_GROUP = 'e-cfg-duplicate-group'

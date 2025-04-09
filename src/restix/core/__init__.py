@@ -49,6 +49,10 @@ ENVA_WIN_USER = 'USERNAME'
 # Unterverzeichnis für Bilder und die Benutzerhandbücher
 RESTIX_ASSETS_DIR = 'assets'
 
+# Vorlagen der Konfigurationsdateien
+RESTIX_TEMPLATES_DIR = 'templates'
+RESTIX_DEFAULT_INCLUDES_FN = 'default.list'
+
 # Dateiname für die persönlichen Einstellungen der GUI
 RESTIX_GUI_SETTINGS_FILE_PATH = '~/.restix'
 
