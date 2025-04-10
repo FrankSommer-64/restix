@@ -44,6 +44,7 @@ from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizePolicy, Q
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
+from restix.gui import *
 from restix.gui.backup_pane import BackupPane
 from restix.gui.configuration_pane import ConfigurationPane
 from restix.gui.maintenance_pane import MaintenancePane
@@ -72,12 +73,12 @@ class CentralPane(QWidget):
         self._layout = QVBoxLayout()
         self._layout.setSpacing(10)
         self._layout.setContentsMargins(5, 5, 5, 5)
-        _actions = (('backup_icon.png', L_BACKUP, self._backup_selected, False),
-                    ('restore_icon.png', L_RESTORE, self._restore_selected, False),
-                    ('maintenance_icon.png', L_MAINTENANCE, self._maintenance_selected, False),
-                    ('configuration_icon.png', L_CONFIGURATION, self._config_selected, False),
-                    ('help_icon.png', L_HELP, self._help_selected, True),
-                    ('exit_icon.png', L_EXIT, QApplication.instance().quit, False))
+        _actions = ((BUTTON_ICON_BACKUP, L_BACKUP, self._backup_selected, False),
+                    (BUTTON_ICON_RESTORE, L_RESTORE, self._restore_selected, False),
+                    (BUTTON_ICON_MAINTENANCE, L_MAINTENANCE, self._maintenance_selected, False),
+                    (BUTTON_ICON_CONFIGURATION, L_CONFIGURATION, self._config_selected, False),
+                    (BUTTON_ICON_HELP, L_HELP, self._help_selected, True),
+                    (BUTTON_ICON_EXIT, L_EXIT, QApplication.instance().quit, False))
         self._layout.addWidget(ActionSelectionPane(self, _actions))
         _welcome_pane = QWidget(self)
         _welcome_pane.setStyleSheet(_WELCOME_PANE_STYLE)

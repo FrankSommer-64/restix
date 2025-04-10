@@ -50,6 +50,14 @@ CONTEXT_MENU_STYLE = 'QMenu {background-color: #ABABAB; border: 1px solid black;
 GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius: 6px; margin-top: 6px} ' \
                   'QGroupBox::title {color: blue; subcontrol-origin: margin; left: 7px; padding: 0 5px 0 5px;}'
 
+# Icons
+BUTTON_ICON_BACKUP = 'backup_icon.png'
+BUTTON_ICON_CONFIGURATION = 'configuration_icon.png'
+BUTTON_ICON_EXIT = 'exit_icon.png'
+BUTTON_ICON_HELP = 'help_icon.png'
+BUTTON_ICON_MAINTENANCE = 'maintenance_icon.png'
+BUTTON_ICON_RESTORE = 'restore_icon.png'
+
 # Style für die Buttons in der Hauptauswahl
 IMAGE_BUTTON_LABEL_STYLE = 'font-weight: bold'
 IMAGE_BUTTON_PANE_STYLE = 'background-color: white; border-width: 2px; border-color: black; border-style: solid'

@@ -45,9 +45,8 @@ import re
 import shutil
 
 import tomli
-from typing import Self
-
 import tomli_w
+from typing import Self
 
 from restix.core import *
 from restix.core.messages import *

@@ -166,7 +166,8 @@ class RestixAction:
         """
         :returns: restic-Kommando für die Daten dieser Aktion.
         """
-        _cmd = ['restic', self.__action_id, OPTION_REPO, self.option(OPTION_REPO), OPTION_PASSWORD_FILE, self.option(OPTION_PASSWORD_FILE)]
+        _cmd = [RESTIC_EXECUTABLE, self.__action_id, OPTION_REPO, self.option(OPTION_REPO),
+                OPTION_PASSWORD_FILE, self.option(OPTION_PASSWORD_FILE)]
         if self.option(OPTION_DRY_RUN):
             _cmd.append(OPTION_DRY_RUN)
         if self.option(OPTION_JSON):
@@ -203,10 +204,7 @@ class RestixAction:
     def init_action(self) -> Self:
         """
         :returns: Init-Aktion aus dieser Aktion.
-        :raises RestixException: falls diese Aktion kein Backup ist
         """
-        if self.__action_id != ACTION_BACKUP:
-            raise RestixException(E_INTERNAL_ERROR, 'Geht nur für Backup-Aktion')
         _init_action = RestixAction(ACTION_INIT, self.target_alias())
         _init_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
         _init_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
@@ -215,10 +213,7 @@ class RestixAction:
     def snapshots_action(self) -> Self:
         """
         :returns: Snapshots-Aktion aus dieser Aktion.
-        :raises RestixException: falls diese Aktion kein Backup ist
         """
-        if self.__action_id != ACTION_BACKUP:
-            raise RestixException(E_INTERNAL_ERROR, 'Geht nur für Backup-Aktion')
         _snapshots_action = RestixAction(ACTION_SNAPSHOTS, self.target_alias())
         _snapshots_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
         _snapshots_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
@@ -313,41 +308,17 @@ class RestixAction:
         _option_values = {}
         _action_id = ''
         _target = ''
-        _find_pattern_expected = 0
-        _host_value_expected = 0
-        _restore_path_value_expected = 0
-        _snapshot_value_expected = 0
-        _year_value_expected = 0
+        _specified_options = set()
+        _option_value_expected = None
         _action_processed = False
         _target_processed = False
         _cmd_line = shlex.split(cmd_line[0]) if len(cmd_line) == 1 else cmd_line
         for _arg in _cmd_line:
             _arg = _arg.strip()
             # Optionswerte verarbeiten
-            if _find_pattern_expected == 1:
-                # vorangegangenes Argument war --pattern
-                _option_values[OPTION_PATTERN] = _arg
-                _find_pattern_expected = 2
-                continue
-            if _host_value_expected == 1:
-                # vorangegangenes Argument war --host
-                _option_values[OPTION_HOST] = _arg
-                _host_value_expected = 2
-                continue
-            if _restore_path_value_expected == 1:
-                # vorangegangenes Argument war --restore-path
-                _option_values[OPTION_RESTORE_PATH] = _arg
-                _restore_path_value_expected = 2
-                continue
-            if _snapshot_value_expected == 1:
-                # vorangegangenes Argument verlangt die Angabe einer Snapshot-ID
-                _option_values[OPTION_SNAPSHOT] = _arg
-                _snapshot_value_expected = 2
-                continue
-            if _year_value_expected == 1:
-                # vorangegangenes Argument war --year
-                _option_values[OPTION_YEAR] = _arg
-                _year_value_expected = 2
+            if _option_value_expected is not None:
+                _option_values[_option_value_expected] = _arg
+                _option_value_expected = None
                 continue
             if _arg.startswith('-'):
                 # Option
@@ -357,30 +328,12 @@ class RestixAction:
                 if _arg == OPTION_HELP:
                     _option_values[OPTION_HELP] = True
                     continue
-                if _arg == OPTION_HOST:
-                    if _host_value_expected > 0:
+                if (_arg == OPTION_HOST or _arg == OPTION_PATTERN or _arg == OPTION_RESTORE_PATH or
+                        _arg == OPTION_SNAPSHOT or _arg == OPTION_YEAR):
+                    if _arg in _specified_options:
                         raise RestixException(E_CLI_DUP_OPTION, _arg)
-                    _host_value_expected = 1
-                    continue
-                if _arg == OPTION_PATTERN:
-                    if _find_pattern_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, _arg)
-                    _find_pattern_expected = 1
-                    continue
-                if _arg == OPTION_RESTORE_PATH:
-                    if _restore_path_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, _arg)
-                    _restore_path_value_expected = 1
-                    continue
-                if _arg == OPTION_SNAPSHOT:
-                    if _snapshot_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, _arg)
-                    _snapshot_value_expected = 1
-                    continue
-                if _arg == OPTION_YEAR:
-                    if _year_value_expected > 0:
-                        raise RestixException(E_CLI_DUP_OPTION, _arg)
-                    _year_value_expected = 1
+                    _option_value_expected = _arg
+                    _specified_options.add(_arg)
                     continue
                 raise RestixException(E_CLI_INVALID_OPTION, _arg)
             if not _action_processed:
