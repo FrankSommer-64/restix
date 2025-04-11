@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -40,8 +40,8 @@ from collections.abc import Callable
 from typing import Any, Self
 from PySide6.QtCore import QObject, QRunnable, Signal
 
-from restix.core.restic_interface import *
-from restix.core.task import TaskExecutor, TaskMonitor, TaskProgress, TaskResult
+from arestix.core.restic_interface import *
+from arestix.core.task import TaskExecutor, TaskMonitor, TaskProgress, TaskResult
 
 
 class WorkerSignals(QObject):
@@ -52,7 +52,7 @@ class WorkerSignals(QObject):
     # Task erfolgreich beendet
     finished = Signal()
     # Task mit Fehler beendet
-    error = Signal(RestixException)
+    error = Signal(ArestixException)
     # detailliertes Ergebnis der Task
     result = Signal(TaskResult)
     # Fortschritt der Task
@@ -112,10 +112,10 @@ class Worker(QRunnable, TaskExecutor):
         try:
             _result = self.__fn(*self.__args, self.__task_monitor)
             self.__signals.result.emit(_result)
-        except RestixException as _e:
+        except ArestixException as _e:
             self.__signals.error.emit(_e)
         except BaseException as _e:
-            _ex = RestixException(E_BACKGROUND_TASK_FAILED, str(_e))
+            _ex = ArestixException(E_BACKGROUND_TASK_FAILED, str(_e))
             self.__signals.error.emit(_ex)
         self.__signals.finished.emit()
 
@@ -127,7 +127,7 @@ class Worker(QRunnable, TaskExecutor):
         self.__signals.progress.emit(progress_data)
 
     @classmethod
-    def for_action(cls: Self, action: RestixAction) -> Self:
+    def for_action(cls: Self, action: ArestixAction) -> Self:
         """
         Creates a worker for specified action.
         :param action: die vom Worker auszuführende Aktion
@@ -145,4 +145,4 @@ class Worker(QRunnable, TaskExecutor):
         elif _action_id == ACTION_SNAPSHOTS:
             return Worker(run_snapshots, action)
         _emsg = localized_message(E_INVALID_ACTION, _action_id)
-        raise RestixException(E_INTERNAL_ERROR, _emsg)
+        raise ArestixException(E_INTERNAL_ERROR, _emsg)

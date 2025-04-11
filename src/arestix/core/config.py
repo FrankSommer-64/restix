@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,8 +33,8 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Lokale restix-Konfiguration.
-Die Konfiguration erfolgt durch Dateien im Konfigurationsverzeichnis $HOME/.config/restix.
+Lokale arestix-Konfiguration.
+Die Konfiguration erfolgt durch Dateien im Konfigurationsverzeichnis $HOME/.config/arestix.
 Alternativ kann das Verzeichnis durch Umgebungsvariable RESTIX_CONFIG_PATH festgelegt werden.
 """
 
@@ -48,15 +48,15 @@ import tomli
 import tomli_w
 from typing import Self
 
-from restix.core import *
-from restix.core.messages import *
-from restix.core.restix_exception import RestixException
-from restix.core.util import full_path_of, current_user
+from arestix.core import *
+from arestix.core.messages import *
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.util import full_path_of, current_user
 
 
 class LocalConfig(dict):
     """
-    Lokale restix-Konfiguration.
+    Lokale arestix-Konfiguration.
     """
     def __init__(self, toml_data: dict, file_path: str, warnings: list[str]):
         """
@@ -72,7 +72,7 @@ class LocalConfig(dict):
 
     def path(self) -> str:
         """
-        :returns: Verzeichnis der restix-Konfiguration inklusive Pfad
+        :returns: Verzeichnis der arestix-Konfiguration inklusive Pfad
         """
         return os.path.dirname(self.__file_path)
 
@@ -137,7 +137,7 @@ class LocalConfig(dict):
         # hier muss geprüft werden, ob sie in einem Backup-Ziel referenziert werden
         for _target in self[CFG_GROUP_TARGET]:
             if _target.get(group) == alias:
-                raise RestixException(E_ALIAS_REFERENCED, alias)
+                raise ArestixException(E_ALIAS_REFERENCED, alias)
 
     def pre_check_rename(self, group: str, old_alias: str, new_alias: str):
         """
@@ -149,13 +149,13 @@ class LocalConfig(dict):
         """
         if len(new_alias) == 0:
             # Leerstring als neuer Aliasname ist nie erlaubt
-            raise RestixException(E_ALIAS_NAME_EMPTY)
+            raise ArestixException(E_ALIAS_NAME_EMPTY)
         if old_alias == new_alias:
             # gleicher Name hat keinen Effekt, muss vom Aufrufer abgefangen werden
             return
         if new_alias in self._group(group).keys():
             # neuer Name wird schon verwendet
-            raise RestixException(E_ALIAS_NAME_ALREADY_USED, new_alias)
+            raise ArestixException(E_ALIAS_NAME_ALREADY_USED, new_alias)
 
     def element_renamed(self, group: str, old_alias: str, new_alias: str):
         """
@@ -193,12 +193,12 @@ class LocalConfig(dict):
         """
         _output_file_path = self.__file_path if file_path is None else file_path
         if _output_file_path is None:
-            raise RestixException(E_FILE_NAME_MISSING)
+            raise ArestixException(E_FILE_NAME_MISSING)
         try:
             with open(_output_file_path, 'wb') as _f:
                 tomli_w.dump(self, _f)
         except IOError | OSError as _e:
-            raise RestixException(E_WRITE_FILE_FAILED, _output_file_path, str(_e))
+            raise ArestixException(E_WRITE_FILE_FAILED, _output_file_path, str(_e))
 
     def _group(self, group_name: str) -> dict:
         """
@@ -213,9 +213,9 @@ class LocalConfig(dict):
     @classmethod
     def from_file(cls: Self, file_path: str) -> Self:
         """
-        Erzeugt die lokale restix-Konfiguration aus einer TOML-Datei.
+        Erzeugt die lokale arestix-Konfiguration aus einer TOML-Datei.
         :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
-        :returns: lokale restix-Konfiguration.
+        :returns: lokale arestix-Konfiguration.
         :raises RestixException: falls die Datei nicht gelesen oder verarbeitet werden kann
         """
         _file_contents = ''
@@ -224,16 +224,16 @@ class LocalConfig(dict):
             with open(_file_path, 'r') as _f:
                 _file_contents = _f.read()
         except Exception as e:
-            raise RestixException(E_CFG_READ_FILE_FAILED, _file_path, e)
+            raise ArestixException(E_CFG_READ_FILE_FAILED, _file_path, e)
         return LocalConfig.from_str(_file_contents, _file_path)
 
     @classmethod
     def from_str(cls: Self, data: str, file_path: str) -> Self:
         """
-        Erzeugt die lokale restix-Konfiguration aus einem TOML-String.
+        Erzeugt die lokale arestix-Konfiguration aus einem TOML-String.
         :param data: die TOML-Daten
         :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
-        :returns: lokale restix-Konfiguration.
+        :returns: lokale arestix-Konfiguration.
         :raises RestixException: falls der String nicht verarbeitet werden kann
         """
         try:
@@ -242,7 +242,7 @@ class LocalConfig(dict):
             _cfg = LocalConfig(_toml_data, file_path, _warnings)
             return _cfg
         except Exception as e:
-            raise RestixException(E_CFG_READ_FILE_FAILED, file_path, e)
+            raise ArestixException(E_CFG_READ_FILE_FAILED, file_path, e)
 
     @classmethod
     def replace_variables(cls: Self, element: dict|list|str, variables: dict) -> dict|list|str:
@@ -267,59 +267,59 @@ class LocalConfig(dict):
 
 def config_root_path() -> str:
     """
-    Gibt das Wurzelverzeichnis der restix-Konfiguration zurück.
+    Gibt das Wurzelverzeichnis der arestix-Konfiguration zurück.
     Falls die Umgebungsvariable RESTIX_CONFIG_PATH definiert und ein Verzeichnis ist, wird dieses Verzeichnis
-    zurückgegeben. Ansonsten wird das Standardverzeichnis '.config/restix' im Home-Verzeichnis des Users zurückgegeben.
-    :returns: Wurzelverzeichnis der restix-Konfiguration
+    zurückgegeben. Ansonsten wird das Standardverzeichnis '.config/arestix' im Home-Verzeichnis des Users zurückgegeben.
+    :returns: Wurzelverzeichnis der arestix-Konfiguration
     :raises RestixException: Umgebungsvariable RESTIX_CONFIG_PATH ist definiert, aber kein Verzeichnis,
                              oder Umgebungsvariable RESTIX_CONFIG_PATH ist **nicht** definiert und das
                              Standardverzeichnis existiert nicht
     """
-    _config_path = os.environ.get(ENVA_RESTIX_CONFIG_PATH)
+    _config_path = os.environ.get(ENVA_ARESTIX_CONFIG_PATH)
     if _config_path is not None:
         _config_path = full_path_of(_config_path)
         if not os.path.isdir(_config_path):
-            raise RestixException(E_CFG_CUSTOM_CONFIG_ROOT_NOT_FOUND, _config_path, ENVA_RESTIX_CONFIG_PATH)
+            raise ArestixException(E_CFG_CUSTOM_CONFIG_ROOT_NOT_FOUND, _config_path, ENVA_ARESTIX_CONFIG_PATH)
         return _config_path
     _home_dir = os.path.expanduser('~')
-    _config_path = os.path.join(_home_dir, *RESTIX_CONFIG_SUBDIR)
+    _config_path = os.path.join(_home_dir, *ARESTIX_CONFIG_SUBDIR)
     if not os.path.isdir(_config_path):
-        raise RestixException(E_CFG_DEFAULT_CONFIG_ROOT_NOT_FOUND, _config_path)
+        raise ArestixException(E_CFG_DEFAULT_CONFIG_ROOT_NOT_FOUND, _config_path)
     return _config_path
 
 
 def create_config_root() -> str:
     """
-    Erzeugt das restix-Konfigurationsverzeichnis.
+    Erzeugt das arestix-Konfigurationsverzeichnis.
     Falls Umgebungsvariable RESTIX_CONFIG_PATH gesetzt ist, wird dieses als Verzeichnisname benutzt, ansonsten wird
-    das Verzeichnis $HOME/.config/restix erzeugt.
-    :returns: restix-Konfigurationsverzeichnis mit vollständigem Pfad.
+    das Verzeichnis $HOME/.config/arestix erzeugt.
+    :returns: arestix-Konfigurationsverzeichnis mit vollständigem Pfad.
     :raises RestixException: falls das Erstellen fehlschlägt
     """
-    _config_path = os.environ.get(ENVA_RESTIX_CONFIG_PATH)
+    _config_path = os.environ.get(ENVA_ARESTIX_CONFIG_PATH)
     if _config_path is None:
-        _config_path = os.path.join(os.path.expanduser('~'), RESTIX_CONFIG_SUBDIR)
+        _config_path = os.path.join(os.path.expanduser('~'), ARESTIX_CONFIG_SUBDIR)
     _config_path = full_path_of(_config_path)
     try:
         os.makedirs(_config_path, 0o755, True)
         _source_path = pathlib.Path(__file__).parent.resolve()
         # für wheel templates path anpassen !
         #_templates_path = os.path.abspath(os.path.join(_source_path, '..', RESTIX_TEMPLATES_DIR))
-        _templates_path = os.path.abspath(os.path.join(_source_path, '..', '..', '..', RESTIX_TEMPLATES_DIR))
-        shutil.copy(os.path.join(_templates_path, RESTIX_CONFIG_FN), _config_path)
-        with open(os.path.join(_templates_path, RESTIX_DEFAULT_INCLUDES_FN), 'r') as _includes_template:
+        _templates_path = os.path.abspath(os.path.join(_source_path, '..', '..', '..', ARESTIX_TEMPLATES_DIR))
+        shutil.copy(os.path.join(_templates_path, ARESTIX_CONFIG_FN), _config_path)
+        with open(os.path.join(_templates_path, ARESTIX_DEFAULT_INCLUDES_FN), 'r') as _includes_template:
             _contents = _includes_template.read()
             _contents = _contents.replace(f'${{{CFG_VAR_USER}}}', current_user())
-            with open(os.path.join(_config_path, RESTIX_DEFAULT_INCLUDES_FN), 'w') as _default_includes_file:
+            with open(os.path.join(_config_path, ARESTIX_DEFAULT_INCLUDES_FN), 'w') as _default_includes_file:
                 _default_includes_file.write(_contents)
     except OSError as _e:
-        raise RestixException(E_CFG_CREATE_CONFIG_ROOT_FAILED, _config_path, str(_e))
+        raise ArestixException(E_CFG_CREATE_CONFIG_ROOT_FAILED, _config_path, str(_e))
     return _config_path
 
 
 def validate_config(data: dict, file_path: str) -> list[str]:
     """
-    Prüft, ob eine restix-Konfiguration gültig ist.
+    Prüft, ob eine arestix-Konfiguration gültig ist.
     :param data: die TOML-Daten der Konfiguration
     :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
     :returns: lokalisierte Warnungen.
@@ -341,16 +341,16 @@ def validate_config(data: dict, file_path: str) -> list[str]:
     # Prüfen, ob alle notwendigen Elemente definiert wurden
     for _mandatory_grp in _META_ROOT.keys():
         if _mandatory_grp not in data.keys():
-            raise RestixException(E_CFG_MANDATORY_GRP_MISSING, _mandatory_grp, _file_name)
+            raise ArestixException(E_CFG_MANDATORY_GRP_MISSING, _mandatory_grp, _file_name)
     _warnings = [localized_message(W_CFG_ELEM_IGNORED, _elem) for _elem in _unsupported_items]
     # Prüfen, ob es mehrfach definierte Groups oder ungültige Referenzen gibt
     _groups = extract_groups(data, file_path)
     for _target_alias, _target_data in _groups.get(CFG_GROUP_TARGET).items():
         if _target_data[CFG_PAR_SCOPE] not in _groups.get(CFG_GROUP_SCOPE).keys():
-            raise RestixException(E_CFG_INVALID_SCOPE_REF, _target_alias, _target_data[CFG_PAR_SCOPE], _file_name)
+            raise ArestixException(E_CFG_INVALID_SCOPE_REF, _target_alias, _target_data[CFG_PAR_SCOPE], _file_name)
         if _target_data[CFG_PAR_CREDENTIALS] not in _groups.get(CFG_GROUP_CREDENTIALS).keys():
-            raise RestixException(E_CFG_INVALID_CREDENTIALS_REF, _target_alias,
-                                  _target_data[CFG_PAR_CREDENTIALS], _file_name)
+            raise ArestixException(E_CFG_INVALID_CREDENTIALS_REF, _target_alias,
+                                   _target_data[CFG_PAR_CREDENTIALS], _file_name)
     # nicht unterstützte Elemente aus der Konfiguration entfernen
     for _item in _unsupported_items:
         _dot_pos = _item.rfind('.')
@@ -388,7 +388,7 @@ def check_element(qualified_element_name: str, element_value: dict|list|str, ele
         _vars = re.findall(r'\$\{([A-Z_])}', element_value.upper())
         for _var in _vars:
             if _var not in CFG_VARS:
-                raise RestixException(E_CFG_INVALID_VARIABLE, _var)
+                raise ArestixException(E_CFG_INVALID_VARIABLE, _var)
     elif _expected_element_type == 't':
         # dict
         for _sub_element_name, _sub_element_value in element_value.items():
@@ -412,7 +412,7 @@ def check_element(qualified_element_name: str, element_value: dict|list|str, ele
                     _actual_value = element_value.get(_ref_par_name)
                     if _actual_value not in _ref_par_values:
                         continue
-                raise RestixException(E_CFG_MANDATORY_ELEM_MISSING, qualified_element_name, _k)
+                raise ArestixException(E_CFG_MANDATORY_ELEM_MISSING, qualified_element_name, _k)
     return _unsupported_elements
 
 
@@ -429,27 +429,27 @@ def check_element_type(element_name: str, expected_type: str, par_value: dict|li
     if expected_type.startswith('s'):
         # string
         if type(par_value) is not str:
-            raise RestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'string', file_name)
+            raise ArestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'string', file_name)
         if expected_type.find(':') > 0:
             _allowed_values = expected_type[2:].split(',')
             if par_value.lower() not in _allowed_values:
-                raise RestixException(E_CFG_INVALID_ELEM_VALUE, element_name, expected_type[2:], file_name)
+                raise ArestixException(E_CFG_INVALID_ELEM_VALUE, element_name, expected_type[2:], file_name)
         return
     if expected_type == 't':
         # table
         if type(par_value) is not dict:
-            raise RestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'table', file_name)
+            raise ArestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'table', file_name)
         return
     if expected_type.startswith('a'):
         # array
         if type(par_value) is not list:
-            raise RestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'array', file_name)
+            raise ArestixException(E_CFG_INVALID_ELEM_TYPE, element_name, 'array', file_name)
         for _i, _item_value in enumerate(par_value):
             _item_name = f'{element_name}.[{_i}]'
             check_element_type(_item_name, expected_type[1:], _item_value, file_name)
         return
     _reason = localized_message(E_CFG_META_DESC_MISSING, expected_type)
-    raise RestixException(E_INTERNAL_ERROR, _reason)
+    raise ArestixException(E_INTERNAL_ERROR, _reason)
 
 
 def extract_groups(data: dict, file_path: str) -> dict:
@@ -475,7 +475,7 @@ def extract_groups(data: dict, file_path: str) -> dict:
                     continue
                 if _attr_desc[2]:
                     if _element_value in _element_names:
-                        raise RestixException(E_CFG_DUPLICATE_GROUP, _grp_name, _element_value, _file_name)
+                        raise ArestixException(E_CFG_DUPLICATE_GROUP, _grp_name, _element_value, _file_name)
                     _element_names.add(_element_value)
                     _groups[_grp_name][_element_value] = _grp_item
     return _groups

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Zentraler Arbeitsbereich der restix GUI.
+Zentraler Arbeitsbereich der arestix GUI.
 """
 
 import os.path
@@ -41,29 +41,29 @@ import os.path
 from PySide6.QtCore import QPoint
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizePolicy, QMenu
 
-from restix.core import *
-from restix.core.config import LocalConfig
-from restix.core.messages import *
-from restix.gui import *
-from restix.gui.backup_pane import BackupPane
-from restix.gui.configuration_pane import ConfigurationPane
-from restix.gui.maintenance_pane import MaintenancePane
-from restix.gui.model import ConfigModelFactory
-from restix.gui.panes import ActionSelectionPane
-from restix.gui.dialogs import AboutDialog, PdfViewerDialog
-from restix.gui.restore_pane import RestorePane
-from restix.gui.settings import GuiSettings
+from arestix.core import *
+from arestix.core.config import LocalConfig
+from arestix.core.messages import *
+from arestix.gui import *
+from arestix.gui.backup_pane import BackupPane
+from arestix.gui.configuration_pane import ConfigurationPane
+from arestix.gui.maintenance_pane import MaintenancePane
+from arestix.gui.model import ConfigModelFactory
+from arestix.gui.panes import ActionSelectionPane
+from arestix.gui.dialogs import AboutDialog, PdfViewerDialog
+from arestix.gui.restore_pane import RestorePane
+from arestix.gui.settings import GuiSettings
 
 
 class CentralPane(QWidget):
     """
-    Arbeitsbereich der restix GUI.
+    Arbeitsbereich der arestix GUI.
     """
     def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
         :param parent: das Hauptfenster
-        :param local_config: lokale restix-Konfiguration
+        :param local_config: lokale arestix-Konfiguration
         :param gui_settings: die personalisierten GUI-Einstellungen
         """
         super().__init__(parent)
@@ -136,11 +136,11 @@ class CentralPane(QWidget):
 
     def _show_manual(self):
         """
-        Zeigt das restix-Benutzerhandbuch an.
+        Zeigt das arestix-Benutzerhandbuch an.
         """
         _locale = platform_locale()
         _cur_dir = str(os.path.dirname(__file__))
-        _assets_path = os.path.join(_cur_dir, RESTIX_ASSETS_DIR)
+        _assets_path = os.path.join(_cur_dir, ARESTIX_ASSETS_DIR)
         _manual_file_path = os.path.join(_assets_path, f'{USER_MANUAL_STEM}{_locale}.pdf')
         if not os.path.isfile(_manual_file_path):
             _manual_file_path = os.path.join(_assets_path, f'{USER_MANUAL_STEM}en.pdf')
@@ -149,11 +149,11 @@ class CentralPane(QWidget):
 
     def _show_about(self):
         """
-        Zeigt ein Dialogfenster mit Informationen über die restix-Applikation an.
+        Zeigt ein Dialogfenster mit Informationen über die arestix-Applikation an.
         """
         _about_dlg = AboutDialog(self)
         _about_dlg.exec()
 
 
-_WELCOME_PANE_STYLE = f'border-image: url({RESTIX_ASSETS_DIR}:restix-aq.jpg)'
+_WELCOME_PANE_STYLE = f'border-image: url({ARESTIX_ASSETS_DIR}:arestix-aq.jpg)'
 _STANDARD_PANE_STYLE = 'background-color: #eeeeee'

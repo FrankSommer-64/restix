@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -32,7 +32,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -----------------------------------------------------------------------------------------------
 
-# restix Version
+# arestix Version
 VERSION = '0.9'
 
 # Anfang des Dateinamens für die lokalisierten Benutzerhandbücher
@@ -40,27 +40,27 @@ USER_MANUAL_STEM = 'user_manual_'
 
 # Umgebungsvariablen
 ENVA_HOME = 'HOME'
-ENVA_RESTIX_CONFIG_PATH = 'RESTIX_CONFIG_PATH'
+ENVA_ARESTIX_CONFIG_PATH = 'ARESTIX_CONFIG_PATH'
 ENVA_USER = 'USER'
 ENVA_WIN_HOME = 'HOMEPATH'
 ENVA_WIN_LOCAL_APP_DATA = 'LOCALAPPDATA'
 ENVA_WIN_USER = 'USERNAME'
 
 # Unterverzeichnis für Bilder und die Benutzerhandbücher
-RESTIX_ASSETS_DIR = 'assets'
+ARESTIX_ASSETS_DIR = 'assets'
 
 # Vorlagen der Konfigurationsdateien
-RESTIX_TEMPLATES_DIR = 'templates'
-RESTIX_DEFAULT_INCLUDES_FN = 'default.list'
+ARESTIX_TEMPLATES_DIR = 'templates'
+ARESTIX_DEFAULT_INCLUDES_FN = 'default.list'
 
 # Dateiname für die persönlichen Einstellungen der GUI
-RESTIX_GUI_SETTINGS_FILE_PATH = '~/.restix'
+ARESTIX_GUI_SETTINGS_FILE_PATH = '~/.arestix'
 
-# Name der restix-Konfigurationsdatei
-RESTIX_CONFIG_FN = 'config.toml'
+# Name der arestix-Konfigurationsdatei
+ARESTIX_CONFIG_FN = 'config.toml'
 
-# Default-Unterverzeichnis für die restix-Konfiguration
-RESTIX_CONFIG_SUBDIR = ['.config', 'restix']
+# Default-Unterverzeichnis für die arestix-Konfiguration
+ARESTIX_CONFIG_SUBDIR = ['.config', 'arestix']
 
 # Parameter in der Konfigurationsdatei
 CFG_GROUP_CREDENTIALS = 'credentials'
@@ -83,13 +83,13 @@ CFG_VALUE_CREDENTIALS_TYPE_TOKEN = 'token'
 CFG_CREDENTIAL_TYPES = [CFG_VALUE_CREDENTIALS_TYPE_FILE, CFG_VALUE_CREDENTIALS_TYPE_PROMPT,
                         CFG_VALUE_CREDENTIALS_TYPE_TEXT, CFG_VALUE_CREDENTIALS_TYPE_TOKEN]
 
-# unterstützte Variablen in der restix-Konfigurationsdatei
+# unterstützte Variablen in der arestix-Konfigurationsdatei
 CFG_VAR_HOST = 'HOST'
 CFG_VAR_USER = 'USER'
 CFG_VAR_YEAR = 'YEAR'
 CFG_VARS = {CFG_VAR_HOST, CFG_VAR_USER, CFG_VAR_YEAR}
 
-# Befehle der restix Kommando-Zeile
+# Befehle der arestix Kommando-Zeile
 CLI_COMMAND_BACKUP = 'backup'
 CLI_COMMAND_CLEANUP = 'cleanup'
 CLI_COMMAND_FIND = 'find'

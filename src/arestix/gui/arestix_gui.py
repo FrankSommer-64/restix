@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Hauptprogramm der restix GUI.
+Hauptprogramm der arestix GUI.
 """
 
 import os
@@ -42,27 +42,27 @@ import sys
 from PySide6.QtCore import QDir
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from restix.core import RESTIX_ASSETS_DIR, RESTIX_CONFIG_FN
-from restix.core.messages import (localized_label, localized_message, I_GUI_CONFIG_PROBLEM, I_GUI_CONFIG_WARNING,
-                                  I_GUI_CREATE_CONFIG_ROOT, L_MBOX_TITLE_INFO, L_MBOX_TITLE_ERROR)
-from restix.core.config import config_root_path, create_config_root, LocalConfig
-from restix.core.restix_exception import RestixException
-from restix.gui.mainwindow import MainWindow
+from arestix.core import ARESTIX_ASSETS_DIR, ARESTIX_CONFIG_FN
+from arestix.core.messages import (localized_label, localized_message, I_GUI_CONFIG_PROBLEM, I_GUI_CONFIG_WARNING,
+                                   I_GUI_CREATE_CONFIG_ROOT, L_MBOX_TITLE_INFO, L_MBOX_TITLE_ERROR)
+from arestix.core.config import config_root_path, create_config_root, LocalConfig
+from arestix.core.arestix_exception import ArestixException
+from arestix.gui.mainwindow import MainWindow
 
 
 def gui_main():
     """
-    Hauptprogramm der restix GUI.
+    Hauptprogramm der arestix GUI.
     """
     try:
         # Verzeichnis mit den GUI assets (Hintergrundbilder, ...) zum QT-Suchpfad hinzufügen
-        _images_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), RESTIX_ASSETS_DIR)
-        QDir.addSearchPath(RESTIX_ASSETS_DIR, _images_path)
+        _images_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ARESTIX_ASSETS_DIR)
+        QDir.addSearchPath(ARESTIX_ASSETS_DIR, _images_path)
         app = QApplication(sys.argv)
         try:
-            # Verzeichnis mit der restix-Konfiguration ermitteln
+            # Verzeichnis mit der arestix-Konfiguration ermitteln
             _config_root_path = config_root_path()
-        except RestixException as _e:
+        except ArestixException as _e:
             # kein Konfigurationsverzeichnis gefunden, Fehlermeldung anzeigen und anbieten, das Verzeichnis mit
             # Standardeinstellungen anzulegen
             _buttons = QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
@@ -74,20 +74,20 @@ def gui_main():
             # Konfigurationsverzeichnis anlegen
             _config_root_path = create_config_root()
 
-        # lokale restix-Konfiguration einlesen
+        # lokale arestix-Konfiguration einlesen
         try:
-            _restix_config = LocalConfig.from_file(os.path.join(_config_root_path, RESTIX_CONFIG_FN))
-            if _restix_config.has_warnings():
-                # beim Lesen der restix-Konfiguration gab es Probleme, Informationen dazu in einer Message-Box anzeigen
+            _arestix_config = LocalConfig.from_file(os.path.join(_config_root_path, ARESTIX_CONFIG_FN))
+            if _arestix_config.has_warnings():
+                # beim Lesen der arestix-Konfiguration gab es Probleme, Informationen dazu in einer Message-Box anzeigen
                 _show_mbox(QMessageBox.Icon.Information, L_MBOX_TITLE_INFO, I_GUI_CONFIG_WARNING,
-                           os.linesep.join(_restix_config.warnings()), QMessageBox.StandardButton.Ok)
-        except RestixException as _e:
+                           os.linesep.join(_arestix_config.warnings()), QMessageBox.StandardButton.Ok)
+        except ArestixException as _e:
             _show_mbox(QMessageBox.Icon.Critical, L_MBOX_TITLE_ERROR, I_GUI_CONFIG_PROBLEM,
                        str(_e), QMessageBox.StandardButton.Ok)
             sys.exit(1)
 
-        # restix GUI starten
-        main_win = MainWindow(_restix_config)
+        # arestix GUI starten
+        main_win = MainWindow(_arestix_config)
         main_win.show()
         app.aboutToQuit.connect(main_win.save_settings)
         sys.exit(app.exec())

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Daten für alle restix-Aktionen.
+Daten für alle arestix-Aktionen.
 """
 
 from typing import Self
@@ -44,17 +44,17 @@ import re
 import shlex
 import tempfile
 
-from restix.core import *
-from restix.core import OPTION_AUTO_CREATE, OPTION_PATTERN
-from restix.core.config import LocalConfig, config_root_path
-from restix.core.messages import *
-from restix.core.restix_exception import RestixException
-from restix.core.util import current_user
+from arestix.core import *
+from arestix.core import OPTION_AUTO_CREATE, OPTION_PATTERN
+from arestix.core.config import LocalConfig, config_root_path
+from arestix.core.messages import *
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.util import current_user
 
 
-class RestixAction:
+class ArestixAction:
     """
-    Datenklasse mit allen Informationen, die zum Ausführen einer restix-Aktion benötigt werden.
+    Datenklasse mit allen Informationen, die zum Ausführen einer arestix-Aktion benötigt werden.
     """
     def __init__(self, action_id: str, target_alias: str):
         """
@@ -98,13 +98,13 @@ class RestixAction:
         """
         if option_value is None: return
         if option_name not in _STD_OPTIONS and option_name not in _ACTION_OPTIONS.get(self.__action_id):
-            raise RestixException(E_INVALID_OPTION, option_name)
+            raise ArestixException(E_INVALID_OPTION, option_name)
         if isinstance(option_value, str):
             # ggf. Variablen ersetzen
             for _var_name in CFG_VARS:
                 _var_value = self.option(f'--{_var_name.lower()}')
                 if _var_value is None:
-                    raise RestixException(E_RESTIX_VAR_NOT_DEFINED, _var_name)
+                    raise ArestixException(E_ARESTIX_VAR_NOT_DEFINED, _var_name)
                 option_value = option_value.replace(f'${{{_var_name}}}', str(_var_value))
         if option_name == OPTION_REPO:
             _repo_path = os.path.join(option_value, self.option(OPTION_USER), self.option(OPTION_HOST),
@@ -113,35 +113,35 @@ class RestixAction:
             return
         if option_name == OPTION_BATCH or option_name == OPTION_DRY_RUN:
             if not isinstance(option_value, bool):
-                raise RestixException(E_BOOL_OPT_REQUIRED, option_name)
+                raise ArestixException(E_BOOL_OPT_REQUIRED, option_name)
         elif (option_name == OPTION_PASSWORD_FILE or option_name == OPTION_FILES_FROM or
               option_name == OPTION_INCLUDE_FILE or option_name == OPTION_EXCLUDE_FILE):
             if not os.path.isfile(option_value):
-                raise RestixException(E_FILE_OPT_REQUIRED, option_value, option_name)
+                raise ArestixException(E_FILE_OPT_REQUIRED, option_value, option_name)
         elif option_name == OPTION_RESTORE_PATH:
             # restore path muss ein existierendes Verzeichnis sein
             try:
                 _path = os.path.abspath(option_value)
                 if not os.path.exists(_path):
-                    raise RestixException(E_CLI_NON_EXISTING_PATH, option_value, option_name)
+                    raise ArestixException(E_CLI_NON_EXISTING_PATH, option_value, option_name)
                 if not os.path.isdir(_path):
-                    raise RestixException(E_CLI_PATH_IS_NOT_DIR, option_value, option_name)
+                    raise ArestixException(E_CLI_PATH_IS_NOT_DIR, option_value, option_name)
                 self.__options[option_name] = _path
                 return
             except Exception as _e:
-                raise RestixException(E_CLI_INVALID_PATH_SPEC, option_name, _e)
+                raise ArestixException(E_CLI_INVALID_PATH_SPEC, option_name, _e)
         elif option_name == OPTION_HOST:
             # grosszügiger Check, aber genug um bösartige Werte zu verhindern
             if not re.match(r'^[a-z0-9\-_.]+$', option_value, re.IGNORECASE):
-                raise RestixException(E_INVALID_HOSTNAME, option_value)
+                raise ArestixException(E_INVALID_HOSTNAME, option_value)
         elif option_name == OPTION_SNAPSHOT:
             # Snapshot-IDs ist entweder 'latest' oder eine Hexadezimalzahl
             if option_value != 'latest' and not re.match(r'^[a-f0-9]+$', option_value, re.IGNORECASE):
-                raise RestixException(E_INVALID_SNAPSHOT_ID, option_value)
+                raise ArestixException(E_INVALID_SNAPSHOT_ID, option_value)
         elif option_name == OPTION_YEAR:
             # Jahr muss aus vier Ziffern bestehen
             if not re.match(r'^[0-9]{4}$', option_value, re.IGNORECASE):
-                raise RestixException(E_INVALID_YEAR, option_value)
+                raise ArestixException(E_INVALID_YEAR, option_value)
         self.__options[option_name] = option_value
 
     def verify_mandatory_options(self):
@@ -160,7 +160,7 @@ class RestixAction:
             return
         for _option in _mandatory_options:
             if self.option(_option) is None:
-                raise RestixException(E_MANDATORY_OPTION_MISSING, _option)
+                raise ArestixException(E_MANDATORY_OPTION_MISSING, _option)
 
     def to_restic_command(self) -> list[str]:
         """
@@ -205,7 +205,7 @@ class RestixAction:
         """
         :returns: Init-Aktion aus dieser Aktion.
         """
-        _init_action = RestixAction(ACTION_INIT, self.target_alias())
+        _init_action = ArestixAction(ACTION_INIT, self.target_alias())
         _init_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
         _init_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
         return _init_action
@@ -214,7 +214,7 @@ class RestixAction:
         """
         :returns: Snapshots-Aktion aus dieser Aktion.
         """
-        _snapshots_action = RestixAction(ACTION_SNAPSHOTS, self.target_alias())
+        _snapshots_action = ArestixAction(ACTION_SNAPSHOTS, self.target_alias())
         _snapshots_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
         _snapshots_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
         _snapshots_action.__options[OPTION_JSON] = True
@@ -223,13 +223,13 @@ class RestixAction:
     def set_basic_options(self, local_config: LocalConfig, options: dict | None):
         """
         Setzt die Optionen, die restic immer benötigt sowie die angegebenen benutzerdefinierten Optionen.
-        :param local_config: die restix-Konfiguration
+        :param local_config: die arestix-Konfiguration
         :param options: ggf. zusätzliche Optionen
         """
         # restic-Repository setzen
         _target = local_config.targets().get(self.target_alias())
         if _target is None:
-            raise RestixException(E_RESTIX_TARGET_NOT_DEFINED, self.target_alias())
+            raise ArestixException(E_ARESTIX_TARGET_NOT_DEFINED, self.target_alias())
         self.set_option(OPTION_REPO, _target.get(CFG_PAR_LOCATION))
         # Zugangsdaten setzen
         _credentials = local_config.credentials_for_target(self.target_alias())
@@ -243,7 +243,7 @@ class RestixAction:
     def set_scope_options(self, scope: dict):
         """
         Setzt die Optionen für die zu sichernden und zu ignorierenden Daten.
-        :param scope: der Backup-Umfang aus der restix-Konfiguration
+        :param scope: der Backup-Umfang aus der arestix-Konfiguration
         """
         _includes_file_path = self._full_filename_of(scope.get(CFG_PAR_INCLUDES))
         self.set_option(OPTION_FILES_FROM, _includes_file_path)
@@ -283,12 +283,12 @@ class RestixAction:
         """
         :param action_id: ID der Aktion
         :param target_alias: Aliasname des Backup-Ziels
-        :param local_config: restix-Konfiguration
+        :param local_config: arestix-Konfiguration
         :param options: ggf. zusätzliche Optionen
         :returns: vollständige Beschreibung der Aktion zur Ausführung mit restic.
         :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
-        _action = RestixAction(action_id, target_alias)
+        _action = ArestixAction(action_id, target_alias)
         # Standard-Optionen setzen
         _action.set_basic_options(local_config, options)
         if action_id == ACTION_BACKUP:
@@ -331,19 +331,19 @@ class RestixAction:
                 if (_arg == OPTION_HOST or _arg == OPTION_PATTERN or _arg == OPTION_RESTORE_PATH or
                         _arg == OPTION_SNAPSHOT or _arg == OPTION_YEAR):
                     if _arg in _specified_options:
-                        raise RestixException(E_CLI_DUP_OPTION, _arg)
+                        raise ArestixException(E_CLI_DUP_OPTION, _arg)
                     _option_value_expected = _arg
                     _specified_options.add(_arg)
                     continue
-                raise RestixException(E_CLI_INVALID_OPTION, _arg)
+                raise ArestixException(E_CLI_INVALID_OPTION, _arg)
             if not _action_processed:
                 if _option_values.get(OPTION_HELP):
                     # bei help kommt hier der Befehl, zu dem Hilfe angezeigt werden soll
-                    _action = RestixAction(ACTION_HELP, '')
+                    _action = ArestixAction(ACTION_HELP, '')
                     _action.set_option(OPTION_HELP, _arg)
                     return _action
                 if _arg not in ALL_CLI_COMMANDS:
-                    raise RestixException(E_CLI_INVALID_COMMAND, _arg)
+                    raise ArestixException(E_CLI_INVALID_COMMAND, _arg)
                 if _arg == CLI_COMMAND_CLEANUP:
                     _action_id = ACTION_FORGET
                     _option_values[OPTION_KEEP_MONTHLY] = '1'
@@ -356,12 +356,12 @@ class RestixAction:
                 _target = _arg
                 _target_processed = True
                 continue
-            raise RestixException(E_CLI_TOO_MANY_ARGS, _arg)
+            raise ArestixException(E_CLI_TOO_MANY_ARGS, _arg)
         if not _action_processed:
-            raise RestixException(E_CLI_COMMAND_MISSING)
+            raise ArestixException(E_CLI_COMMAND_MISSING)
         if _target is None and _action_id != CLI_COMMAND_TARGETS:
-            raise RestixException(E_CLI_TARGET_MISSING, _action_id)
-        _action = RestixAction(_action_id, _target)
+            raise ArestixException(E_CLI_TARGET_MISSING, _action_id)
+        _action = ArestixAction(_action_id, _target)
         for _k, _v in _option_values.items():
             _action.set_option(_k, _v)
         return _action

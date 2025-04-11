@@ -19,8 +19,8 @@ e-internal-error Interner Fehler: {0}.
 e-mandatory-option-missing Notwendige Option {0} nicht angegeben.
 e-no-snapshot-desc-from-restic Keine Snapshot-Beschreibung von restic bekommen.
 e-repo-does-not-exist restic-Repository {0} existiert nicht.
-e-restix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
-e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
+e-arestix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
+e-arestix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 e-write-file-failed Fehler beim Schreiben der Datei {0}: {1}.
 i-dry-run-create-repo Werde Repository {0} anlegen.
 i-running-restic-cmd restic-Befehl: {0}
@@ -50,53 +50,53 @@ t-cli-confirm-cleanup Lösche alle Snapshots bis auf einen pro Monat von Reposit
 t-cli-confirm-init Initialisiere Repository {0}.
 t-cli-confirm-restore Restore Snapshot {0} von Repository {1} nach {2}.
 t-cli-help-backup Lokale Daten in restic-Repository sichern\n \
-    Befehl: restix backup [Optionen] Backup-Ziel\n \
+    Befehl: arestix backup [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
     --dry-run * simulierter Lauf, keine Datenübertragung ins Repository\n           \
     --auto-create * Repository automatisch anlegen, falls es nicht existiert\n \
-    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der arestix-Konfigurationsdatei
 t-cli-help-cleanup Snapshots bis auf einen pro Monat aus restic-Repository entfernen\n \
-    Befehl: restix cleanup [Optionen] Backup-Ziel\n \
+    Befehl: arestix cleanup [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
     --dry-run * simulierter Lauf, kein Löschen von Daten im Repository\n           \
     --host Hostname * Repository für den angegebenen Host verwenden\n           \
     --year Jahr * Repository für das angegebene Jahr verwenden\n \
-    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der arestix-Konfigurationsdatei
 t-cli-help-find Elemente in restic-Repository suchen\n \
-    Befehl: restix find [Optionen] Backup-Ziel\n \
+    Befehl: arestix find [Optionen] Backup-Ziel\n \
     Optionen: --pattern Pattern - Pattern für die zu suchenden Elemente\n           \
     --snapshot Snapshot * Snapshot (ID oder latest)\n           \
     --host Hostname * Repository für den angegebenen Host verwenden\n           \
     --year Jahr * Repository für das angegebene Jahr verwenden\n \
-    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der arestix-Konfigurationsdatei
 t-cli-help-init Neues restic-Repository anlegen\n \
-    Befehl: restix init [Optionen] Backup-Ziel\n \
+    Befehl: arestix init [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n \
-    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der arestix-Konfigurationsdatei
 t-cli-help-ls Elemente aus restic-Repository anzeigen\n \
-    Befehl: restix ls [Optionen] Backup-Ziel\n \
+    Befehl: arestix ls [Optionen] Backup-Ziel\n \
     Optionen: --snapshot Snapshot * Snapshot, aus dem die Daten angezeigt werden sollen (ID oder latest)\n           \
     --host Hostname * Repository für den angegebenen Host verwenden\n           \
     --year Jahr * Repository für das angegebene Jahr verwenden\n \
-    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der arestix-Konfigurationsdatei
 t-cli-help-restore Daten aus restic-Repository wiederherstellen\n \
-    Befehl: restix restore [Optionen] Backup-Ziel\n \
+    Befehl: arestix restore [Optionen] Backup-Ziel\n \
     Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
     --dry-run * simulierter Lauf, keine Änderungen am Repository und im lokalen Dateisystem\n           \
     --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
     --restore-path Verzeichnis * Verzeichnis, in das die wiederhergestellten Daten geschrieben werden sollen\n           \
     --snapshot Snapshot * Snapshot (ID oder latest)\n           \
     --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
-    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der arestix-Konfigurationsdatei
 t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
-    Befehl: restix snapshots [Optionen] Backup-Ziel\n \
+    Befehl: arestix snapshots [Optionen] Backup-Ziel\n \
     Optionen: --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
     --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
-    Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
+    Backup-Ziel: Aliasname aus der arestix-Konfigurationsdatei
 t-cli-prompt-for-confirmation OK (j/n)?
-t-cli-usage-info Aufruf: restix Befehl [Optionen] [Backup-Ziel]\n \
+t-cli-usage-info Aufruf: arestix Befehl [Optionen] [Backup-Ziel]\n \
     Befehle: backup | cleanup | find | init | ls | restore | snapshots | targets\n \
-    Hilfe zu jedem Befehl mit restix --help <Befehl>
+    Hilfe zu jedem Befehl mit arestix --help <Befehl>
 t-cli-yes-char j
 
 # CLI messages
@@ -107,7 +107,7 @@ e-cli-invalid-option Die Option {0} ist ungültig.
 e-cli-invalid-path-spec Ungültige Pfadangabe für Option {0}: {1}.
 e-cli-non-existing-path Pfad {0} für Option {1} existiert nicht.
 e-cli-path-is-not-dir Pfad {0} für Option {1} ist kein Verzeichnis.
-e-cli-restix-command-failed +++ Befehl fehlgeschlagen +++
+e-cli-arestix-command-failed +++ Befehl fehlgeschlagen +++
 e-cli-target-missing Für Aktion {0} wurde kein Alias für das restic-Repository angegeben.
 e-cli-too-many-args Zu viele Argumente angegeben, {0} kann nicht verarbeitet werden.
 
@@ -123,15 +123,15 @@ e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort
 # GUI Ausgaben
 i-gui-about-detail-text Version {0}\nQt-Version {1}
 i-gui-about-info-text Copyright (c) 2025 Frank Sommer
-i-gui-about-text restix - Datensicherung auf restic-Basis
-i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
-i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
+i-gui-about-text arestix - Datensicherung auf restic-Basis
+i-gui-config-problem Es wurden Probleme in der arestix-Konfiguration erkannt:
+i-gui-config-warning Es wurden Warnungen in der arestix-Konfiguration erkannt:
 i-gui-confirm-remove {0} wirklich löschen ?
 i-gui-create-config-root Konfigurationsverzeichnis anlegen ?
 i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-credential-exists Zugriffsdaten mit Alias '{0}' existieren bereits.
 i-gui-data-restored Daten aus Repository {0} wiederhergestellt.
-i-gui-local-config-changed restix-Konfiguration wurde verändert.
+i-gui-local-config-changed arestix-Konfiguration wurde verändert.
 i-gui-no-credential-type-specified Kein Zugriffsdaten-Typ ausgewählt.
 i-gui-no-includes-specified Keine zu sichernden Elemente ausgewählt.
 i-gui-no-name-specified Kein Name angegeben.
@@ -200,23 +200,23 @@ l-update Aktualisieren
 l-year Jahr
 
 # GUI Widget Labels
-l-dlg-title-about Über restix
+l-dlg-title-about Über arestix
 l-dlg-title-new-credentials Neue Zugriffsdaten
 l-dlg-title-new-scope Neuer Sicherungsumfang
 l-dlg-title-new-target Neues Sicherungsziel
 l-dlg-title-rename-element {0} umbenennen
-l-dlg-title-save-local-config Lokale restix-Konfiguration speichern
+l-dlg-title-save-local-config Lokale arestix-Konfiguration speichern
 l-dlg-title-scope-editor Backup-Umfang festlegen
 l-dlg-title-select-excludes-file Excludes-Datei auswählen
 l-dlg-title-select-file Dateiname auswählen
 l-dlg-title-select-includes-file Includes-Datei auswählen
 l-dlg-title-snapshot-viewer Snapshot {0} für Host {1} ({2})
 l-dlg-title-user-manual Benutzerhandbuch
-l-main-win-title restix
+l-main-win-title arestix
 l-mbox-title-error Fehler
 l-mbox-title-info Information
 l-mbox-title-warning Warnung
-l-menu-about Über restix
+l-menu-about Über arestix
 l-menu-remove Löschen
 l-menu-rename Umbenennen...
 l-menu-user-manual Benutzerhandbuch

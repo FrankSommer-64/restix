@@ -38,8 +38,8 @@ Modelliert Snapshots von restic Repositories.
 
 from datetime import datetime
 
-from restix.core import *
-from restix.core.messages import *
+from arestix.core import *
+from arestix.core.messages import *
 
 
 class SnapshotElement:

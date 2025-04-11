@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis
+# arestix - Datensicherung auf restic-Basis
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -38,7 +38,7 @@ Lokalisierte Nachrichten.
 
 import os
 
-from restix.core.util import platform_locale
+from arestix.core.util import platform_locale
 
 # Allgemeine Nachrichten
 E_ALIAS_NAME_ALREADY_USED = 'e-alias-name-already-used'
@@ -61,8 +61,8 @@ E_INVALID_YEAR = 'e-invalid-year'
 E_MANDATORY_OPTION_MISSING = 'e-mandatory-option-missing'
 E_NO_SNAPSHOT_DESC_FROM_RESTIC = 'e-no-snapshot-desc-from-restic'
 E_REPO_DOES_NOT_EXIST = 'e-repo-does-not-exist'
-E_RESTIX_TARGET_NOT_DEFINED = 'e-restix-target-not-defined'
-E_RESTIX_VAR_NOT_DEFINED = 'e-restix-var-not-defined'
+E_ARESTIX_TARGET_NOT_DEFINED = 'e-arestix-target-not-defined'
+E_ARESTIX_VAR_NOT_DEFINED = 'e-arestix-var-not-defined'
 E_WRITE_FILE_FAILED = 'e-write-file-failed'
 I_DRY_RUN_CREATE_REPO = 'i-dry-run-create-repo'
 I_RUNNING_RESTIC_CMD = 'i-running-restic-cmd'
@@ -110,7 +110,7 @@ E_CLI_INVALID_OPTION = 'e-cli-invalid-option'
 E_CLI_INVALID_PATH_SPEC = 'e-cli-invalid-path-spec'
 E_CLI_NON_EXISTING_PATH = 'e-cli-non-existing-path'
 E_CLI_PATH_IS_NOT_DIR = 'e-cli-path-is-not-dir'
-E_CLI_RESTIX_COMMAND_FAILED = 'e-cli-restix-command-failed'
+E_CLI_ARESTIX_COMMAND_FAILED = 'e-cli-arestix-command-failed'
 E_CLI_TARGET_MISSING = 'e-cli-target-missing'
 E_CLI_TOO_MANY_ARGS = 'e-cli-too-many-args'
 
@@ -266,7 +266,7 @@ W_GUI_WRITE_GUI_SETTINGS_FAILED = 'w-gui-write-gui-settings-failed'
 # internal
 _MSG_FILE_NAME_FMT = 'messages_{0}.txt'
 _DEFAULT_LOCALE = 'en'
-_EMSG_INST_CORRUPT = 'restix installation is corrupt: {0}'
+_EMSG_INST_CORRUPT = 'arestix installation is corrupt: {0}'
 _EMSG_NO_MSG_FILE_FOUND = 'Could not find localized message definition files'
 _EMSG_READ_MSG_FILE_FAILED = 'Could not read localized message definition file {0}: {1}'
 

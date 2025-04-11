@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -41,15 +41,15 @@ import platform
 from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox
 
-from restix.core import *
-from restix.core.action import RestixAction
-from restix.core.config import LocalConfig
-from restix.core.messages import *
-from restix.core.restix_exception import RestixException
-from restix.gui import GROUP_BOX_STYLE, PAST_YEARS_COUNT
-from restix.gui.panes import create_combo, create_checkbox, create_text, ResticActionPane
-from restix.gui.settings import GuiSettings
-from restix.gui.worker import Worker
+from arestix.core import *
+from arestix.core.action import ArestixAction
+from arestix.core.config import LocalConfig
+from arestix.core.messages import *
+from arestix.core.arestix_exception import ArestixException
+from arestix.gui import GROUP_BOX_STYLE, PAST_YEARS_COUNT
+from arestix.gui.panes import create_combo, create_checkbox, create_text, ResticActionPane
+from arestix.gui.settings import GuiSettings
+from arestix.gui.worker import Worker
 
 
 class MaintenanceOptionsPane(QGroupBox):
@@ -96,8 +96,8 @@ class MaintenancePane(ResticActionPane):
     def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: die zentrale restix Pane
-        :param local_config: lokale restix-Konfiguration
+        :param parent: die zentrale arestix Pane
+        :param local_config: lokale arestix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
         super().__init__(parent, [L_DO_INIT_REPO, L_DO_YEAR_END], [T_DO_MNT_INIT_REPO, T_DO_MNT_YEAR_END],
@@ -115,12 +115,12 @@ class MaintenancePane(ResticActionPane):
         """
         super().start_button_clicked()
         try:
-            _init_action = RestixAction.for_action_id(ACTION_INIT, self.selected_target[CFG_PAR_ALIAS],
-                                                      self.restix_config)
+            _init_action = ArestixAction.for_action_id(ACTION_INIT, self.selected_target[CFG_PAR_ALIAS],
+                                                       self.restix_config)
             self.__worker = Worker.for_action(_init_action)
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result,
                                           self.handle_error)
-        except RestixException as _e:
+        except ArestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
             return
         QThreadPool.globalInstance().start(self.__worker)
@@ -132,14 +132,14 @@ class MaintenancePane(ResticActionPane):
         super().start_button_clicked()
         try:
             _options = self.__options_pane.selected_options()
-            _forget_action = RestixAction.for_action_id(ACTION_FORGET, self.selected_target[CFG_PAR_ALIAS],
-                                                        self.restix_config, _options)
+            _forget_action = ArestixAction.for_action_id(ACTION_FORGET, self.selected_target[CFG_PAR_ALIAS],
+                                                         self.restix_config, _options)
             _forget_action.set_option(OPTION_KEEP_MONTHLY, '1')
             _forget_action.set_option(OPTION_PRUNE, True)
             self.__worker = Worker.for_action(_forget_action)
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result,
                                           self.handle_error)
-        except RestixException as _e:
+        except ArestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
             return
         QThreadPool.globalInstance().start(self.__worker)

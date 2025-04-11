@@ -19,8 +19,8 @@ e-internal-error Internal error: {0}.
 e-mandatory-option-missing Mandatory option {0} not specified.
 e-no-snapshot-desc-from-restic Did not get snapshot description from restic.
 e-repo-does-not-exist restic repository {0} doesn't exist.
-e-restix-target-not-defined Alias for restic repository {0} is not configured.
-e-restix-var-not-defined Undefined variable {0} in configuration file.
+e-arestix-target-not-defined Alias for restic repository {0} is not configured.
+e-arestix-var-not-defined Undefined variable {0} in configuration file.
 e-write-file-failed Error writing file {0}: {1}.
 i-dry-run-create-repo Will create repository {0}.
 i-running-restic-cmd restic command: {0}
@@ -50,53 +50,53 @@ t-cli-confirm-cleanup Remove all snapshots except one per month from repository 
 t-cli-confirm-init Initialise repository {0}.
 t-cli-confirm-restore Restore snapshot {0} from repository {1} to {2}.
 t-cli-help-backup Backup local data to restic repository\n \
-    Command: restix backup [options] backup-target\n \
+    Command: arestix backup [options] backup-target\n \
     Options: --batch * execute restic command without confirmation\n           \
     --dry-run * simulate execution only, no data transferred to repository\n           \
     --auto-create * create repository automatically, if it doesn't exist\n \
-    Backup-target: Alias name from restix configuration file
+    Backup-target: Alias name from arestix configuration file
 t-cli-help-cleanup Remove snapshots except one per month from restic repository\n \
-    Command: restix cleanup  [options] backup-target\n \
+    Command: arestix cleanup  [options] backup-target\n \
     Options: --batch * execute restic command without confirmation\n \
     --dry-run * simulate execution only, no data removed from repository\n           \
     --host hostname * Use repository for specified host\n           \
     --year year * Use repository for specified year\n \
-    Backup-target: Alias name from restix configuration file
+    Backup-target: Alias name from arestix configuration file
 t-cli-help-find Search elements in restic repository\n \
-    Command: restix find [options] backup-target\n \
+    Command: arestix find [options] backup-target\n \
     Options: --pattern pattern - Search pattern for the elements\n           \
     --snapshot snapshot * Snapshot (ID or latest)\n           \
     --host hostname * Use repository for specified host\n           \
     --year year * Use repository for specified year\n \
-    Backup-target: Alias name from restix configuration file
+    Backup-target: Alias name from arestix configuration file
 t-cli-help-init Create new restic repository\n \
-    Command: restix init [options] backup-target\n \
+    Command: arestix init [options] backup-target\n \
     Options: --batch * execute restic command without confirmation\n \
-    Backup-target: Alias name from restix configuration file
+    Backup-target: Alias name from arestix configuration file
 t-cli-help-ls Show elements in restic repository\n \
-    Command: restix ls [options] backup-target\n \
+    Command: arestix ls [options] backup-target\n \
     Options: --snapshot snapshot * Snapshot where to take elements from (ID or latest)\n           \
     --host hostname * Use repository for specified host\n           \
     --year year * Use repository for specified year\n \
-    Backup-target: Alias name from restix configuration file
+    Backup-target: Alias name from arestix configuration file
 t-cli-help-restore Restore data from restic repository to local filesystem\n \
-    Command: restix restore [options] backup-target\n \
+    Command: arestix restore [options] backup-target\n \
     Options: --batch * execute restic command without confirmation\n           \
     --dry-run * simulate execution only, no data copied from repository\n           \
     --host hostname * Use repository for specified host\n           \
     --restore-path path * Root directory, where to copy data from repository\n           \
     --snapshot snapshot * Snapshot (ID or latest)\n           \
     --year year * Use repository for specified year\n \
-    Backup-target: Alias name from restix configuration file
+    Backup-target: Alias name from arestix configuration file
 t-cli-help-snapshots Show snapshots of a restic repository\n \
-    Command: restix snapshots [options] backup-target\n \
+    Command: arestix snapshots [options] backup-target\n \
     Options: --host hostname * Use repository for specified host\n           \
     --year year * Use repository for specified year\n \
-    Backup-target: Alias name from restix configuration file
+    Backup-target: Alias name from arestix configuration file
 t-cli-prompt-for-confirmation OK (y/n)?
-t-cli-usage-info Usage: restix command [options] [backup-target]\n \
+t-cli-usage-info Usage: arestix command [options] [backup-target]\n \
     Commands: backup | cleanup | find | init | ls | restore | snapshots | targets\n \
-    For help on each command use restix --help <command>
+    For help on each command use arestix --help <command>
 t-cli-yes-char y
 
 # CLI messages
@@ -107,7 +107,7 @@ e-cli-invalid-option Invalid option {0}.
 e-cli-invalid-path-spec Invalid path for option {0}: {1}.
 e-cli-non-existing-path Path {0} for option {1} does not exist.
 e-cli-path-is-not-dir Path {0} for option {1} is not a directory.
-e-cli-restix-command-failed +++ Command failed +++
+e-cli-arestix-command-failed +++ Command failed +++
 e-cli-target-missing Action {0} requires an alias name for the backup target.
 e-cli-too-many-args Too many arguments given, cannot process '{0}'.
 
@@ -123,15 +123,15 @@ e-restic-repo-wrong-password restic command {0} failed: wrong password.
 # GUI messages
 i-gui-about-detail-text Version {0}\nQt-Version {1}
 i-gui-about-info-text Copyright (c) 2025 Frank Sommer
-i-gui-about-text restix - Backup and restore based on restic
-i-gui-config-problem Problems in restix configuration detected:
-i-gui-config-warning Warnings in restix configuration detected:
+i-gui-about-text arestix - Backup and restore based on restic
+i-gui-config-problem Problems in arestix configuration detected:
+i-gui-config-warning Warnings in arestix configuration detected:
 i-gui-confirm-remove Are you sure to remove {0} ?
 i-gui-create-config-root x
 i-gui-creating-repo Create restic repository {0}.
 i-gui-credential-exists Credentials with alias name '{0}' already exist.
 i-gui-data-restored Data restored from repository {0}.
-i-gui-local-config-changed restix configuration has been changed.
+i-gui-local-config-changed arestix configuration has been changed.
 i-gui-no-credential-type-specified No credentials type selected.
 i-gui-no-includes-specified No files to include in backup selected.
 i-gui-no-name-specified No alias name specified.
@@ -200,23 +200,23 @@ l-update Update
 l-year Year
 
 # GUI widget labels
-l-dlg-title-about About restix
+l-dlg-title-about About arestix
 l-dlg-title-new-credentials New credentials
 l-dlg-title-new-scope New backup scope
 l-dlg-title-new-target New backup target
 l-dlg-title-rename-element Rename {0}
-l-dlg-title-save-local-config Save local restix configuration
+l-dlg-title-save-local-config Save local arestix configuration
 l-dlg-title-scope-editor Specify backup scope
 l-dlg-title-select-excludes-file Select excludes file
 l-dlg-title-select-file Select file name
 l-dlg-title-select-includes-file Select includes file
 l-dlg-title-snapshot-viewer Snapshot {0} for host {1} ({2})
 l-dlg-title-user-manual User manual
-l-main-win-title restix
+l-main-win-title arestix
 l-mbox-title-error Error
 l-mbox-title-info Information
 l-mbox-title-warning Warning
-l-menu-about About restix
+l-menu-about About arestix
 l-menu-remove Remove
 l-menu-rename Rename...
 l-menu-user-manual User manual...

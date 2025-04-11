@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Persönliche Einstellungen der restix GUI.
+Persönliche Einstellungen der arestix GUI.
 """
 
 import os
@@ -45,14 +45,14 @@ from typing import Self
 from PySide6 import QtGui
 from PySide6.QtCore import QRect
 
-from restix.core import RESTIX_GUI_SETTINGS_FILE_PATH
-from restix.core.restix_exception import RestixException
-from restix.core.messages import W_GUI_WRITE_GUI_SETTINGS_FAILED
+from arestix.core import ARESTIX_GUI_SETTINGS_FILE_PATH
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.messages import W_GUI_WRITE_GUI_SETTINGS_FAILED
 
 
 class GuiSettings(dict):
     """
-    Speichert die benutzerspezifischen Einstellungen der restix-GUI.
+    Speichert die benutzerspezifischen Einstellungen der arestix-GUI.
     """
     def __init__(self):
         """
@@ -91,7 +91,7 @@ class GuiSettings(dict):
         self[_KEY_WIN_GEOMETRY] = (geometry.x(), geometry.y(), geometry.width(), geometry.height())
         self.__is_modified = True
 
-    def save(self, file_path: str = os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_PATH)):
+    def save(self, file_path: str = os.path.expanduser(ARESTIX_GUI_SETTINGS_FILE_PATH)):
         """
         Speichert die Einstellungen in einer Datei.
         :param file_path: Dateiname inklusive Pfad.
@@ -103,24 +103,24 @@ class GuiSettings(dict):
             with open(file_path, 'wb') as _f:
                 tomli_w.dump(self, _f)
         except (IOError, OSError, TypeError, ValueError) as e:
-            raise RestixException(W_GUI_WRITE_GUI_SETTINGS_FAILED, file_path, str(e))
+            raise ArestixException(W_GUI_WRITE_GUI_SETTINGS_FAILED, file_path, str(e))
 
     @classmethod
     def default(cls: Self) -> Self:
         """
-        :returns: Standard-Einstellungen der restix-GUI.
+        :returns: Standard-Einstellungen der arestix-GUI.
         """
         _settings = GuiSettings()
         _settings.set_win_geometry(_default_win_geometry())
         return _settings
 
     @classmethod
-    def from_file(cls: Self, file_path: str = os.path.expanduser(RESTIX_GUI_SETTINGS_FILE_PATH)) -> Self:
+    def from_file(cls: Self, file_path: str = os.path.expanduser(ARESTIX_GUI_SETTINGS_FILE_PATH)) -> Self:
         """
         Liest die Einstellungen aus Datei.
         Gibt die Standard-Einstellungen zurück, falls die Datei nicht gelesen werden kann.
         :param file_path: Dateiname inklusive Pfad.
-        :returns: Einstellungen der restix-GUI.
+        :returns: Einstellungen der arestix-GUI.
         """
         try:
             with open(file_path, 'rb') as _f:

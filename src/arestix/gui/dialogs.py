@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Dialogfenster für die restix GUI.
+Dialogfenster für die arestix GUI.
 """
 import datetime
 import math
@@ -47,12 +47,12 @@ from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
                                QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit,
                                QTreeWidget, QTreeWidgetItem, QStyle, QFileDialog)
 
-from restix.core import *
-from restix.core.action import RestixAction
-from restix.core.config import LocalConfig
-from restix.core.messages import *
-from restix.core.restic_interface import find_snapshot_elements, list_snapshot_elements
-from restix.core.snapshot import Snapshot
+from arestix.core import *
+from arestix.core.action import ArestixAction
+from arestix.core.config import LocalConfig
+from arestix.core.messages import *
+from arestix.core.restic_interface import find_snapshot_elements, list_snapshot_elements
+from arestix.core.snapshot import Snapshot
 
 
 class SnapshotViewerDialog(QDialog):
@@ -68,7 +68,7 @@ class SnapshotViewerDialog(QDialog):
         :param parent: übergeordnetes Widget
         :param snapshot_id: ID des restic Snapshots.
         :param target_alias: Alias des Backup-Ziels.
-        :param local_config: lokale restix-Konfiguration.
+        :param local_config: lokale arestix-Konfiguration.
         :param hostname: Hostname, für den der Snapshot angelegt wurde.
         :param year: Jahr des restic Snapshots.
         """
@@ -175,7 +175,7 @@ class SnapshotViewerDialog(QDialog):
         """
         _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id,
                     OPTION_JSON: True}
-        _action = RestixAction.for_action_id(ACTION_LS, self.__target_alias, self.__local_config, _options)
+        _action = ArestixAction.for_action_id(ACTION_LS, self.__target_alias, self.__local_config, _options)
         _snapshot = list_snapshot_elements(_action)
         _element_tree = _snapshot.element_tree()
         _tree_items = self._tree_items_for(_element_tree, os.sep)
@@ -188,7 +188,7 @@ class SnapshotViewerDialog(QDialog):
         """
         _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id,
                     OPTION_JSON: True, OPTION_PATTERN: self.__search_field.text()}
-        _action = RestixAction.for_action_id(ACTION_FIND, self.__target_alias, self.__local_config, _options)
+        _action = ArestixAction.for_action_id(ACTION_FIND, self.__target_alias, self.__local_config, _options)
         _elements = find_snapshot_elements(_action)
         _snapshot = Snapshot(self.__snapshot_id, datetime.datetime.now(), '')
         _snapshot.add_elements(_elements)
@@ -280,7 +280,7 @@ class PdfViewerDialog(QDialog):
 
 class AboutDialog(QDialog):
     """
-    Zeigt Informationen über restix an.
+    Zeigt Informationen über arestix an.
     """
     def __init__(self, parent: QWidget):
         """
@@ -379,7 +379,7 @@ class AboutDialog(QDialog):
 
 class SaveConfigDialog(QDialog):
     """
-    Auswahldialog beim Beenden, falls die lokale restix-Konfiguration geändert wurde.
+    Auswahldialog beim Beenden, falls die lokale arestix-Konfiguration geändert wurde.
     """
     def __init__(self, parent: QWidget):
         """

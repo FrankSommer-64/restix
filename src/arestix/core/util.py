@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Hilfsfunktionen für restix.
+Hilfsfunktionen für arestix.
 """
 
 from typing import NoReturn
@@ -70,7 +70,7 @@ def full_path_of(path_spec: str) -> str:
 def relative_config_path_of(file_path: str, config_dir_path: str) -> str | None:
     """
     :param file_path: Dateiname
-    :param config_dir_path: restix Konfigurationsverzeichnis
+    :param config_dir_path: arestix Konfigurationsverzeichnis
     :return: Dateiname mit Pfad relativ zum Konfigurationsverzeichnis, falls möglich
     """
     if file_path is None:
@@ -87,7 +87,7 @@ def relative_config_path_of(file_path: str, config_dir_path: str) -> str | None:
 def full_config_path_of(file_path: str, config_dir_path: str) -> str | None:
     """
     :param file_path: Dateiname
-    :param config_dir_path: restix Konfigurationsverzeichnis
+    :param config_dir_path: arestix Konfigurationsverzeichnis
     :return: Dateiname mit absolutem Pfad
     """
     if file_path is None:
@@ -181,7 +181,7 @@ def is_valid_hostname(value: str) -> bool:
 
 def installation_path() -> str:
     """
-    :returns: Installationspfad für restix.
+    :returns: Installationspfad für arestix.
     :raises RuntimeError: falls das lokale Betriebssystem nicht unterstützt wird.
     """
     _operating_system = platform.system().lower()
@@ -202,7 +202,7 @@ def _raise_exception(exception_id: str) -> NoReturn:
     raise RuntimeError(_msg)
 
 
-_LINUX_GLOB_INSTALLATION_PATH = '/opt/restix'
+_LINUX_GLOB_INSTALLATION_PATH = '/opt/arestix'
 
 _E_OS_NOT_SUPPORTED = 'e-os-not-supported'
 _ERROR_MSGS = {_E_OS_NOT_SUPPORTED: {'de': 'Betriebssystem wird nicht unterstützt',

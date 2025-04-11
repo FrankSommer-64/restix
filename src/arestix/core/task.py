@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -40,9 +40,9 @@ from abc import abstractmethod
 from typing import Any
 import threading
 
-from restix.core import SEVERITY_INFO, TASK_SUCCEEDED
-from restix.core.restix_exception import RestixException
-from restix.core.messages import localized_message, E_BACKGROUND_TASK_ABORTED
+from arestix.core import SEVERITY_INFO, TASK_SUCCEEDED
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.messages import localized_message, E_BACKGROUND_TASK_ABORTED
 
 
 class TaskProgress:
@@ -163,7 +163,7 @@ class TaskMonitor:
         :raises RestixException: falls die Task abgebrochen werden soll.
         """
         if self.abort_requested():
-            raise RestixException(E_BACKGROUND_TASK_ABORTED)
+            raise ArestixException(E_BACKGROUND_TASK_ABORTED)
 
     def log(self, msg_id: str, *msg_args: Any):
         """
@@ -191,4 +191,4 @@ class TaskMonitor:
             else:
                 self.__progress_handler.emit_progress(TaskProgress(50, severity, msg))
         if self.abort_requested():
-            raise RestixException(E_BACKGROUND_TASK_ABORTED)
+            raise ArestixException(E_BACKGROUND_TASK_ABORTED)

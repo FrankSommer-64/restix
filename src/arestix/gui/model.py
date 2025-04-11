@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Models der restix-Konfiguration zur Nutzung in der GUI.
+Models der arestix-Konfiguration zur Nutzung in der GUI.
 """
 import os.path
 from typing import Any
@@ -44,8 +44,8 @@ from PySide6.QtCore import Qt, QAbstractListModel, QModelIndex, QPersistentModel
 from PySide6.QtGui import QColorConstants
 from PySide6.QtWidgets import QFileSystemModel
 
-from restix.core import *
-from restix.core.config import LocalConfig
+from arestix.core import *
+from arestix.core.config import LocalConfig
 
 
 class CheckBoxFileSystemModel(QFileSystemModel):
@@ -298,8 +298,8 @@ class CheckBoxFileSystemModel(QFileSystemModel):
     @classmethod
     def _regex_patterns_for(cls, patterns: list[str]) -> list[re.Pattern]:
         """
-        Wandelt die Patterns für zu ignorierende Dateien aus der restix-Konfiguration in reguläre Ausdrücke um.
-        :param patterns: Patterns aus der restix-Konfiguration
+        Wandelt die Patterns für zu ignorierende Dateien aus der arestix-Konfiguration in reguläre Ausdrücke um.
+        :param patterns: Patterns aus der arestix-Konfiguration
         :return: Patterns als reguläre Ausdrücke
         """
         _regex_patterns = []
@@ -326,7 +326,7 @@ class ConfigGroupNamesModel(QAbstractListModel):
         """
         Konstruktor.
         :param group: Name der Group
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__()
         self.__group = group
@@ -399,7 +399,7 @@ class ConfigGroupModel(QAbstractItemModel):
         """
         Konstruktor.
         :param group: Name der Group
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__()
         self.__group = group
@@ -477,7 +477,7 @@ class CredentialNamesModel(ConfigGroupNamesModel):
     def __init__(self, configuration_data: LocalConfig):
         """
         Konstruktor.
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__(CFG_GROUP_CREDENTIALS, configuration_data)
 
@@ -489,7 +489,7 @@ class CredentialsModel(ConfigGroupModel):
     def __init__(self, configuration_data: LocalConfig):
         """
         Konstruktor.
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__(CFG_GROUP_CREDENTIALS, configuration_data)
 
@@ -501,7 +501,7 @@ class ScopeNamesModel(ConfigGroupNamesModel):
     def __init__(self, configuration_data: LocalConfig):
         """
         Konstruktor.
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__(CFG_GROUP_SCOPE, configuration_data)
 
@@ -513,7 +513,7 @@ class ScopeModel(ConfigGroupModel):
     def __init__(self, configuration_data: LocalConfig):
         """
         Konstruktor.
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__(CFG_GROUP_SCOPE, configuration_data)
 
@@ -525,7 +525,7 @@ class TargetNamesModel(ConfigGroupNamesModel):
     def __init__(self, configuration_data: LocalConfig):
         """
         Konstruktor.
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__(CFG_GROUP_TARGET, configuration_data)
 
@@ -537,20 +537,20 @@ class TargetModel(ConfigGroupModel):
     def __init__(self, configuration_data: LocalConfig):
         """
         Konstruktor.
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__(CFG_GROUP_TARGET, configuration_data)
 
 
 class ConfigModelFactory:
     """
-    Models für die gesamte restix-Konfiguration.
+    Models für die gesamte arestix-Konfiguration.
     """
 
     def __init__(self, configuration_data: LocalConfig):
         """
         Konstruktor.
-        :param configuration_data: die Daten aus der lokalen restix-Konfigurationsdatei
+        :param configuration_data: die Daten aus der lokalen arestix-Konfigurationsdatei
         """
         super().__init__()
         self.__data = configuration_data
@@ -599,6 +599,6 @@ class ConfigModelFactory:
 
     def configuration_data(self) -> LocalConfig:
         """
-        :returns: Lokale restix-Konfiguration
+        :returns: Lokale arestix-Konfiguration
         """
         return self.__data

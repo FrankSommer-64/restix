@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -40,13 +40,13 @@ GUI-Bereich für den Backup.
 from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QSizePolicy
 
-from restix.core import *
-from restix.core.action import RestixAction
-from restix.core.config import LocalConfig
-from restix.core.messages import *
-from restix.gui.panes import ResticActionPane, create_checkbox, GROUP_BOX_STYLE
-from restix.gui.settings import GuiSettings
-from restix.gui.worker import Worker
+from arestix.core import *
+from arestix.core.action import ArestixAction
+from arestix.core.config import LocalConfig
+from arestix.core.messages import *
+from arestix.gui.panes import ResticActionPane, create_checkbox, GROUP_BOX_STYLE
+from arestix.gui.settings import GuiSettings
+from arestix.gui.worker import Worker
 
 
 class BackupOptionsPane(QGroupBox):
@@ -83,8 +83,8 @@ class BackupPane(ResticActionPane):
     def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: die zentrale restix Pane
-        :param local_config: lokale restix-Konfiguration
+        :param parent: die zentrale arestix Pane
+        :param local_config: lokale arestix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
         super().__init__(parent, [L_DO_BACKUP], [T_DO_BAK_BACKUP], None, [self.start_button_clicked],
@@ -102,8 +102,8 @@ class BackupPane(ResticActionPane):
         """
         super().start_button_clicked()
         _options = self.__options_pane.selected_options()
-        _backup_action = RestixAction.for_action_id(ACTION_BACKUP, self.selected_target[CFG_PAR_ALIAS],
-                                                    self.restix_config, _options)
+        _backup_action = ArestixAction.for_action_id(ACTION_BACKUP, self.selected_target[CFG_PAR_ALIAS],
+                                                     self.restix_config, _options)
         self.__worker = Worker.for_action(_backup_action)
         self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
         QThreadPool.globalInstance().start(self.__worker)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,21 +33,21 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Command line interface für restix.
+Command line interface für arestix.
 """
 
 import datetime
 import platform
 import sys
 
-from restix.core import *
-from restix.core.action import RestixAction
-from restix.core.config import config_root_path, LocalConfig
-from restix.core.messages import *
-from restix.core.restix_exception import RestixException
-from restix.core.restic_interface import execute_restic_command
-from restix.core.task import TaskMonitor
-from restix.core.util import current_user
+from arestix.core import *
+from arestix.core.action import ArestixAction
+from arestix.core.config import config_root_path, LocalConfig
+from arestix.core.messages import *
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.restic_interface import execute_restic_command
+from arestix.core.task import TaskMonitor
+from arestix.core.util import current_user
 
 _COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_CLEANUP: T_CLI_HELP_CLEANUP,
                      CLI_COMMAND_FIND: T_CLI_HELP_FIND, CLI_COMMAND_INIT: T_CLI_HELP_INIT,
@@ -55,11 +55,11 @@ _COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_CLEANUP:
                      CLI_COMMAND_SNAPSHOTS: T_CLI_HELP_SHAPSHOTS}
 
 
-def read_restix_config_file(action: RestixAction) -> LocalConfig:
+def read_arestix_config_file(action: ArestixAction) -> LocalConfig:
     """
-    Liest die restix-Konfigurationsdatei und ersetzt darin enthaltene Variablen.
+    Liest die arestix-Konfigurationsdatei und ersetzt darin enthaltene Variablen.
     :param action: die auszuführende Aktion
-    :returns: restix-Konfiguration.
+    :returns: arestix-Konfiguration.
     :raises RestixException: falls die Datei nicht verarbeitet werden kann
     """
     _vars = {CFG_VAR_HOST: platform.node(), CFG_VAR_USER: current_user(),
@@ -70,11 +70,11 @@ def read_restix_config_file(action: RestixAction) -> LocalConfig:
     _year_opt = action.option(OPTION_YEAR)
     if _year_opt is not None:
         _vars[CFG_VAR_YEAR] = _year_opt
-    _local_config = LocalConfig.from_file(os.path.join(config_root_path(), RESTIX_CONFIG_FN))
+    _local_config = LocalConfig.from_file(os.path.join(config_root_path(), ARESTIX_CONFIG_FN))
     return _local_config.for_cli(_vars)
 
 
-def prompt_confirmation(action: RestixAction) -> bool:
+def prompt_confirmation(action: ArestixAction) -> bool:
     """
     Verlangt vom Benutzer eine Bestätigung der Aktion. Falls einer der Optionen --batch oder --dry-run gesetzt sind
     oder die Aktion keine Datenänderung bewirkt, ist keine Bestätigung nötig.
@@ -109,7 +109,7 @@ def prompt_confirmation(action: RestixAction) -> bool:
 
 def show_help(cmd: str = None):
     """
-    Zeigt Hilfe über restix oder einen speziellen Befehl an.
+    Zeigt Hilfe über arestix oder einen speziellen Befehl an.
     :param cmd: optional der Befehl, über den Hilfe angezeigt werden soll
     """
     if cmd is None or cmd not in _COMMAND_HELP_IDS:
@@ -120,8 +120,8 @@ def show_help(cmd: str = None):
 
 def show_targets(targets: dict):
     """
-    Zeigt die in der restix-Konfiguration definierten Backup-Ziele an.
-    :param targets: die Backup-Ziele aus der restix-Konfiguration
+    Zeigt die in der arestix-Konfiguration definierten Backup-Ziele an.
+    :param targets: die Backup-Ziele aus der arestix-Konfiguration
     """
     print()
     print(localized_message(T_CLI_BACKUP_TARGETS_HEADER))
@@ -136,17 +136,17 @@ def cli_main():
     """
     try:
         # interne Aktion aus den Daten der Kommandozeile erzeugen
-        _action = RestixAction.from_command_line(sys.argv[1:])
+        _action = ArestixAction.from_command_line(sys.argv[1:])
         if _action.action_id() == ACTION_HELP:
             show_help(_action.option(OPTION_HELP))
             sys.exit(0)
-    except RestixException as _e:
+    except ArestixException as _e:
         print(str(_e))
         show_help()
         sys.exit(1)
     try:
-        # restix-Konfiguration einlesen
-        _restix_config = read_restix_config_file(_action)
+        # arestix-Konfiguration einlesen
+        _restix_config = read_arestix_config_file(_action)
         if _action.action_id() == CLI_COMMAND_TARGETS:
             # Sonderfall Backup-Ziele anzeigen (resultiert nicht in einem restic-Befehl)
             show_targets(_restix_config.targets())
@@ -161,7 +161,7 @@ def cli_main():
         if prompt_confirmation(_action):
             execute_restic_command(_action.to_restic_command(), TaskMonitor())
     except Exception as _e:
-        print(localized_message(E_CLI_RESTIX_COMMAND_FAILED))
+        print(localized_message(E_CLI_ARESTIX_COMMAND_FAILED))
         print(f'> {_e}')
         print()
 

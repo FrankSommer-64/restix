@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -42,19 +42,19 @@ import tempfile
 from PySide6.QtCore import Qt, QThreadPool
 from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox, QRadioButton, QPushButton, QDialog
 
-from restix.core import *
-from restix.core.action import RestixAction
-from restix.core.config import LocalConfig
-from restix.core.messages import *
-from restix.core.restix_exception import RestixException
-from restix.core.restic_interface import determine_snapshots
-from restix.core.task import TaskMonitor
-from restix.gui import PAST_YEARS_COUNT
-from restix.gui.dialogs import SnapshotViewerDialog
-from restix.gui.panes import (ResticActionPane, create_combo, create_dir_selector, create_checkbox, create_text,
-                              GROUP_BOX_STYLE, option_label)
-from restix.gui.settings import GuiSettings
-from restix.gui.worker import Worker
+from arestix.core import *
+from arestix.core.action import ArestixAction
+from arestix.core.config import LocalConfig
+from arestix.core.messages import *
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.restic_interface import determine_snapshots
+from arestix.core.task import TaskMonitor
+from arestix.gui import PAST_YEARS_COUNT
+from arestix.gui.dialogs import SnapshotViewerDialog
+from arestix.gui.panes import (ResticActionPane, create_combo, create_dir_selector, create_checkbox, create_text,
+                               GROUP_BOX_STYLE, option_label)
+from arestix.gui.settings import GuiSettings
+from arestix.gui.worker import Worker
 
 
 class RestoreOptionsPane(QGroupBox):
@@ -65,7 +65,7 @@ class RestoreOptionsPane(QGroupBox):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
-        :param local_config: lokale restix-Konfiguration
+        :param local_config: lokale arestix-Konfiguration
         """
         super().__init__(localized_label(L_OPTIONS), parent)
         self.__local_config = local_config
@@ -120,7 +120,7 @@ class RestoreOptionsPane(QGroupBox):
         """
         _snapshot = self.__snapshot_combo.currentData()
         if _snapshot is None or len(_snapshot) == 0:
-            raise RestixException(E_GUI_NO_SNAPSHOT_SELECTED)
+            raise ArestixException(E_GUI_NO_SNAPSHOT_SELECTED)
         _options = {OPTION_SNAPSHOT: _snapshot, OPTION_YEAR: self.__year_combo.currentText(),
                     OPTION_DRY_RUN: self.__dry_run_option.isChecked()}
         _host = self.__host_text.text()
@@ -150,13 +150,13 @@ class RestoreOptionsPane(QGroupBox):
         try:
             self.clear_snapshot_combo()
             self.__target_alias = target[CFG_PAR_ALIAS]
-            _snapshots_action = RestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS],
-                                                           self.__local_config)
+            _snapshots_action = ArestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS],
+                                                            self.__local_config)
             _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
             _combo_data = [_s.combo_label() for _s in _snapshots]
             _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
             self.fill_snapshot_combo(_combo_data)
-        except RestixException as _e:
+        except ArestixException as _e:
             QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR),
                                  localized_message(E_RESTIC_CMD_FAILED, ACTION_SNAPSHOTS, str(_e)),
                                  QMessageBox.StandardButton.Ok)
@@ -190,8 +190,8 @@ class RestorePane(ResticActionPane):
     def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: die zentrale restix Pane
-        :param local_config: lokale restix-Konfiguration
+        :param parent: die zentrale arestix Pane
+        :param local_config: lokale arestix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
         super().__init__(parent, [L_DO_RESTORE], [T_RST_DO_RESTORE], self._target_selected,
@@ -209,8 +209,8 @@ class RestorePane(ResticActionPane):
         super().start_button_clicked()
         try:
             _options = self.__options_pane.selected_options()
-            _restore_action = RestixAction.for_action_id(ACTION_RESTORE, self.selected_target[CFG_PAR_ALIAS],
-                                                         self.restix_config, _options)
+            _restore_action = ArestixAction.for_action_id(ACTION_RESTORE, self.selected_target[CFG_PAR_ALIAS],
+                                                          self.restix_config, _options)
             _restore_action.set_option(OPTION_SNAPSHOT, _options.get(OPTION_SNAPSHOT))
             _restore_path = self.__options_pane.selected_restore_path()
             if _restore_path is not None and os.path.isdir(_restore_path):
@@ -223,7 +223,7 @@ class RestorePane(ResticActionPane):
                 _restore_action.set_option(OPTION_INCLUDE_FILE, _f.name)
             self.__worker = Worker.for_action(_restore_action)
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
-        except RestixException as _e:
+        except ArestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
             return
         QThreadPool.globalInstance().start(self.__worker)

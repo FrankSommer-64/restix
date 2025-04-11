@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,17 +33,17 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-restix-spezifische Exceptions.
+arestix-spezifische Exceptions.
 """
 
 from typing import Any
 
-from restix.core.messages import localized_message
+from arestix.core.messages import localized_message
 
 
-class RestixException(Exception):
+class ArestixException(Exception):
     """
-    restix-Exception.
+    arestix-Exception.
     """
     def __init__(self, exception_id: str, *args: Any):
         """

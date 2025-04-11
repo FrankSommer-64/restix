@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Editoren für die restix GUI.
+Editoren für die arestix GUI.
 """
 import os.path
 
@@ -41,9 +41,9 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QDialog, QPushButton, QVBoxLayout, QHBoxLayout, QTreeView, QMessageBox, \
     QFileDialog
 
-from restix.core.messages import *
-from restix.core.util import full_config_path_of
-from restix.gui.model import CheckBoxFileSystemModel
+from arestix.core.messages import *
+from arestix.core.util import full_config_path_of
+from arestix.gui.model import CheckBoxFileSystemModel
 
 
 class CheckBoxFileViewer(QTreeView):
@@ -86,7 +86,7 @@ class ScopeEditor(QDialog):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param config_path: Verzeichnis der lokalen restix-Konfiguration.
+        :param config_path: Verzeichnis der lokalen arestix-Konfiguration.
         :param includes_file_path: Pfad und Name der Datei, in der die einzuschliessenden Elemente enthalten sind.
         :param excludes_file_path: Pfad und Name der Datei mit den auszuschliessenden Elementen.
         :param ignore_list: Patterns zu ignorierender Elemente.
@@ -191,7 +191,7 @@ class ScopeEditor(QDialog):
     def _read_file(self, file_path) -> list[str]:
         """
         Liest eine Datei mit includes oder excludes ein. Falls der Dateiname nicht absolut angegeben wurde, wird diese
-        unterhalb des restix-Konfigurationsverzeichnisses gesucht.
+        unterhalb des arestix-Konfigurationsverzeichnisses gesucht.
         :param file_path: Dateiname
         :returns: zeilenweiser Inhalt der Datei
         """

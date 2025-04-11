@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-GUI-Bereich für die restix-Konfiguration.
+GUI-Bereich für die arestix-Konfiguration.
 """
 
 from typing import Callable
@@ -43,14 +43,14 @@ from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QCo
                                QLabel, QLineEdit, QSizePolicy, QPushButton, QTextEdit, QDialog, QTabWidget,
                                QMenu, QMessageBox, QListView)
 
-from restix.core import *
-from restix.core.config import LocalConfig
-from restix.core.messages import *
-from restix.core.restix_exception import RestixException
-from restix.core.util import relative_config_path_of
-from restix.gui import *
-from restix.gui.editors import ScopeEditor
-from restix.gui.model import ConfigModelFactory
+from arestix.core import *
+from arestix.core.config import LocalConfig
+from arestix.core.messages import *
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.util import relative_config_path_of
+from arestix.gui import *
+from arestix.gui.editors import ScopeEditor
+from arestix.gui.model import ConfigModelFactory
 
 
 class CredentialsDetailPane(QListView):
@@ -164,7 +164,7 @@ class RenameElementDialog(QDialog):
         :param parent: übergeordnetes Widget
         :param group: Gruppe des Elements
         :param current_alias: aktueller Aliasname des Elements
-        :param local_config: lokale restix-Konfiguration
+        :param local_config: lokale arestix-Konfiguration
         """
         super().__init__(parent)
         self.__group = group
@@ -218,7 +218,7 @@ class RenameElementDialog(QDialog):
             return
         try:
             self.__local_config.pre_check_rename(self.__group, _old_alias, _new_alias)
-        except RestixException as _e:
+        except ArestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                     str(_e),
                                     QMessageBox.StandardButton.Ok)
@@ -475,7 +475,7 @@ class ElementSelectorPane(QWidget):
         _local_config = self.__model_factory.configuration_data()
         try:
             _local_config.pre_check_remove(self.__group, _element_alias)
-        except RestixException as _e:
+        except ArestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                     str(_e),
                                     QMessageBox.StandardButton.Ok)
@@ -541,7 +541,7 @@ class ScopeDetailPane(QListView):
         """
         Konstruktor.
         :param parent: übergeordnete Pane
-        :param config_path: Verzeichnis der lokalen restix-Konfiguration
+        :param config_path: Verzeichnis der lokalen arestix-Konfiguration
         :param include_name: zeigt an, ob ein Eingabefeld für den Aliasnamen vorhanden sein soll
         """
         super().__init__(parent)
@@ -786,13 +786,13 @@ class TargetPane(QGroupBox):
 
 class ConfigurationPane(QTabWidget):
     """
-    Pane für die restix-Konfiguration.
+    Pane für die arestix-Konfiguration.
     Enthält je ein Tab für Zugangsdaten, Backup-Umfänge und Backup-Ziele.
     """
     def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
-        :param parent: die zentrale restix Pane
+        :param parent: die zentrale arestix Pane
         :param model_factory: Factory für die Models
         """
         super().__init__(parent, tabsClosable=False)

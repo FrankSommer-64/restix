@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Zusammengesetzte Bereiche der restix GUI.
+Zusammengesetzte Bereiche der arestix GUI.
 """
 
 
@@ -47,17 +47,17 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox,
                                QComboBox, QLineEdit, QFileDialog)
 
-from restix.core import *
-from restix.core.config import LocalConfig
-from restix.core.messages import *
-from restix.core.task import TaskProgress, TaskResult
-from restix.gui import *
-from restix.gui.settings import GuiSettings
+from arestix.core import *
+from arestix.core.config import LocalConfig
+from arestix.core.messages import *
+from arestix.core.task import TaskProgress, TaskResult
+from arestix.gui import *
+from arestix.gui.settings import GuiSettings
 
 
 class TargetModel(QAbstractTableModel):
     """
-    Model für die Backup-Ziele der restix-Konfiguration.
+    Model für die Backup-Ziele der arestix-Konfiguration.
     """
     ATTR_NAMES = (CFG_PAR_ALIAS, CFG_PAR_COMMENT, CFG_PAR_LOCATION, CFG_PAR_SCOPE, CFG_PAR_CREDENTIALS)
     HEADER_TEXTS = (L_ALIAS, L_COMMENT, L_LOCATION, L_SCOPE, L_CREDENTIALS)
@@ -65,7 +65,7 @@ class TargetModel(QAbstractTableModel):
     def __init__(self, local_config: LocalConfig, edit: bool = False):
         """
         Konstruktor.
-        :param local_config: die restix-Konfiguration
+        :param local_config: die arestix-Konfiguration
         :param edit: True, falls die Backup-Ziele bearbeitet werden sollen; False, falls sie nur angezeigt werden sollen
         """
         super().__init__()
@@ -123,7 +123,7 @@ class TargetTableView(QTableView):
         """
         Konstruktor.
         :param parent: das übergeordnete Widget
-        :param local_config: die restix-Konfiguration
+        :param local_config: die arestix-Konfiguration
         """
         super().__init__(parent)
         self._model = TargetModel(local_config)
@@ -178,7 +178,7 @@ class ImageButton(QPushButton):
             self.__signals.menu_triggered.connect(click_handler)
         else:
             self.__signals.clicked.connect(click_handler)
-        self.setStyleSheet(f'background-image : url({RESTIX_ASSETS_DIR}:{image_url}); border-width: 2px; border-color: black; border-style: solid')
+        self.setStyleSheet(f'background-image : url({ARESTIX_ASSETS_DIR}:{image_url}); border-width: 2px; border-color: black; border-style: solid')
         self.setMinimumSize(QSize(128, 128))
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
@@ -284,7 +284,7 @@ class ActionSelectionPane(QWidget):
     def __init__(self, parent: QWidget, actions: (str, str, (), bool)):
         """
         Konstruktor.
-        :param parent: die zentrale restix Pane
+        :param parent: die zentrale arestix Pane
         :param actions: Beschreibung der Aktionen
         """
         super().__init__(parent)
@@ -404,7 +404,7 @@ class TargetSelectionPane(QGroupBox):
         """
         Konstruktor.
         :param parent: die übergeordnete Pane
-        :param local_config: lokale restix-Konfiguration
+        :param local_config: lokale arestix-Konfiguration
         :param settings: die GUI-Einstellungen des Benutzers
         :param target_selected_handler: Handler für die Auswahl eines Backup-Ziels
         """
@@ -436,12 +436,12 @@ class ResticActionPane(QWidget):
                  local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: die zentrale restix Pane
+        :param parent: die zentrale arestix Pane
         :param start_button_label_ids: ID der Beschriftungen für die Start-Buttons
         :param start_button_tooltip_ids: ID der Tooltips für die Start-Buttons
         :param target_selected_handler: Handler, wenn der Benutzer ein Backup-Ziel auswählt
         :param start_handlers: Click-Handler für jeden der Start-Buttons
-        :param local_config: lokale restix-Konfiguration
+        :param local_config: lokale arestix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)

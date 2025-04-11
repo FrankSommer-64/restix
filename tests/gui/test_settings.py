@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -41,14 +41,14 @@ import unittest
 
 from PySide6.QtCore import QRect
 
-from restix.core import RESTIX_GUI_SETTINGS_FILE_PATH
-from restix.gui.settings import GuiSettings
+from arestix.core import ARESTIX_GUI_SETTINGS_FILE_PATH
+from arestix.gui.settings import GuiSettings
 
-# Standard restix-Konfiguration für Unit-Tests
+# Standard arestix-Konfiguration für Unit-Tests
 STANDARD_TARGET = 'mytarget'
 
 # Name der Einstellungsdatei für Unit-Tests
-TEST_FILE_PATH = os.path.join(tempfile.gettempdir(), RESTIX_GUI_SETTINGS_FILE_PATH)
+TEST_FILE_PATH = os.path.join(tempfile.gettempdir(), ARESTIX_GUI_SETTINGS_FILE_PATH)
 
 
 class TestSettings(unittest.TestCase):

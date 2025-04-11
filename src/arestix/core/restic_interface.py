@@ -39,15 +39,15 @@ from datetime import datetime
 import json
 import subprocess
 
-from restix.core import *
-from restix.core.action import RestixAction
-from restix.core.messages import *
-from restix.core.restix_exception import RestixException
-from restix.core.snapshot import Snapshot, SnapshotElement
-from restix.core.task import TaskMonitor, TaskResult
+from arestix.core import *
+from arestix.core.action import ArestixAction
+from arestix.core.messages import *
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.snapshot import Snapshot, SnapshotElement
+from arestix.core.task import TaskMonitor, TaskResult
 
 
-def run_backup(action: RestixAction, task_monitor: TaskMonitor):
+def run_backup(action: ArestixAction, task_monitor: TaskMonitor):
     """
     Sichert lokale Daten in einem restic-Repository.
     :param action: die Daten des auszuführenden Backups.
@@ -97,7 +97,7 @@ def run_backup(action: RestixAction, task_monitor: TaskMonitor):
     return TaskResult(TASK_FAILED, '')
 
 
-def run_forget(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult:
+def run_forget(action: ArestixAction, task_monitor: TaskMonitor) -> TaskResult:
     """
     Löscht Snapshots aus einem Repository.
     :param action: die Daten des auszuführenden Forget-Befehls.
@@ -114,7 +114,7 @@ def run_forget(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult:
         return TaskResult(TASK_FAILED, str(_e))
 
 
-def run_init(action: RestixAction, task_monitor: TaskMonitor):
+def run_init(action: ArestixAction, task_monitor: TaskMonitor):
     """
     Legt ein neues restic-Repository an.
     :param action: die Daten für die Initialisierung.
@@ -130,7 +130,7 @@ def run_init(action: RestixAction, task_monitor: TaskMonitor):
         return TaskResult(TASK_FAILED, str(_e))
 
 
-def run_restore(action: RestixAction, task_monitor: TaskMonitor):
+def run_restore(action: ArestixAction, task_monitor: TaskMonitor):
     """
     Stellt lokale Daten aus einem restic-Repository wieder her.
     :param action: die Daten des auszuführenden Restores.
@@ -158,7 +158,7 @@ def run_restore(action: RestixAction, task_monitor: TaskMonitor):
         return TaskResult(TASK_FAILED, str(_e))
 
 
-def run_snapshots(action: RestixAction, task_monitor: TaskMonitor):
+def run_snapshots(action: ArestixAction, task_monitor: TaskMonitor):
     """
     Gibt alle Snapshots in einem Repository zurück.
     :param action: die Daten des auszuführenden Snapshot-Befehls.
@@ -224,11 +224,11 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     elif _rc == 130:
         _exception_id = E_RESTIC_CMD_INTERRUPTED
     else:
-        raise RestixException(E_RESTIC_CMD_FAILED, _restic_cmd, os.linesep.join(_err_info))
-    raise RestixException(_exception_id, _restic_cmd)
+        raise ArestixException(E_RESTIC_CMD_FAILED, _restic_cmd, os.linesep.join(_err_info))
+    raise ArestixException(_exception_id, _restic_cmd)
 
 
-def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list[Snapshot]:
+def determine_snapshots(action: ArestixAction, task_monitor: TaskMonitor) -> list[Snapshot]:
     """
     Ermittelt alle Snapshots in einem Repository für die GUI.
     :param action: Snapshot-Aktion
@@ -242,7 +242,7 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
         task_monitor.log_text(_stdout, SEVERITY_INFO)
         task_monitor.log_text(_stderr, SEVERITY_ERROR)
         _result = f'{_stderr}{os.linesep}{_stdout}'
-        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
+        raise ArestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
     _snapshots = []
     _result = json.loads(_stdout)
     for _element in _result:
@@ -256,7 +256,7 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
     return _snapshots
 
 
-def find_snapshot_elements(action: RestixAction) -> list[SnapshotElement]:
+def find_snapshot_elements(action: ArestixAction) -> list[SnapshotElement]:
     """
     :param action: find-Aktion
     :returns: gefundene Elemente im Snapshot.
@@ -266,7 +266,7 @@ def find_snapshot_elements(action: RestixAction) -> list[SnapshotElement]:
     _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
     if _rc != RESTIC_RC_OK:
         _result = f'{_stderr}{os.linesep}{_stdout}'
-        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
+        raise ArestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
     _elements = []
     _result = json.loads(_stdout)
     for _match in _result:
@@ -276,7 +276,7 @@ def find_snapshot_elements(action: RestixAction) -> list[SnapshotElement]:
     return _elements
 
 
-def list_snapshot_elements(action: RestixAction) -> Snapshot:
+def list_snapshot_elements(action: ArestixAction) -> Snapshot:
     """
     :param action: ls-Aktion
     :returns: Snapshot mit allen Elementen.
@@ -286,7 +286,7 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
     _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
     if _rc != RESTIC_RC_OK:
         _result = f'{_stderr}{os.linesep}{_stdout}'
-        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
+        raise ArestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
     _elements = []
     _snapshot = None
     for _line in _stdout.split(os.linesep):
@@ -303,14 +303,14 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
         elif _element.get(JSON_ATTR_STRUCT_TYPE) == JSON_STRUCT_TYPE_NODE:
             if _snapshot is None:
                 _reason = localized_message(E_NO_SNAPSHOT_DESC_FROM_RESTIC)
-                raise RestixException(E_RESTIC_CMD_FAILED, ACTION_SNAPSHOTS, _reason)
+                raise ArestixException(E_RESTIC_CMD_FAILED, ACTION_SNAPSHOTS, _reason)
             _snapshot.add_element(SnapshotElement(_element[JSON_ATTR_PATH], _element[JSON_ATTR_TYPE]))
         else:
             continue
     return _snapshot
 
 
-def _repo_status(action: RestixAction) -> int:
+def _repo_status(action: ArestixAction) -> int:
     """
     :param action: Backup-Aktion
     :returns: 1: repo existiert, 0: repo existiert nicht, andere Werte: Fehler bei restic-Befehl

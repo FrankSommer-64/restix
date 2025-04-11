@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# restix - Datensicherung auf restic-Basis.
+# arestix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -33,28 +33,28 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Hauptfenster der restix GUI.
+Hauptfenster der arestix GUI.
 """
 from copy import deepcopy
 
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QDialog
 
-from restix.core.config import LocalConfig
-from restix.core.restix_exception import RestixException
-from restix.core.messages import *
-from restix.gui.central_pane import CentralPane
-from restix.gui.dialogs import SaveConfigDialog
-from restix.gui.settings import GuiSettings
+from arestix.core.config import LocalConfig
+from arestix.core.arestix_exception import ArestixException
+from arestix.core.messages import *
+from arestix.gui.central_pane import CentralPane
+from arestix.gui.dialogs import SaveConfigDialog
+from arestix.gui.settings import GuiSettings
 
 
 class MainWindow(QMainWindow):
     """
-    Hauptfenster der restix GUI.
+    Hauptfenster der arestix GUI.
     """
     def __init__(self, local_config: LocalConfig):
         """
         Konstruktor.
-        :param local_config: lokale restix-Konfiguration
+        :param local_config: lokale arestix-Konfiguration
         """
         super().__init__()
         self.__config = local_config
@@ -70,20 +70,20 @@ class MainWindow(QMainWindow):
 
     def save_settings(self):
         """
-        Speichert die lokale restix-Konfiguration und die GUI-Einstellungen in einer Datei.
+        Speichert die lokale arestix-Konfiguration und die GUI-Einstellungen in einer Datei.
         """
         if self.__original_config != self.__config:
             _dlg = SaveConfigDialog(self)
             if _dlg.exec() == QDialog.DialogCode.Accepted:
                 try:
                     self.__config.to_file(_dlg.save_as_file_path())
-                except RestixException as _e:
+                except ArestixException as _e:
                     QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR), str(_e),
                                          QMessageBox.StandardButton.Ok)
         self.__settings.set_win_geometry(self.rect())
         try:
             self.__settings.save()
-        except RestixException as _e:
+        except ArestixException as _e:
             QMessageBox.warning(self, localized_label(L_MBOX_TITLE_WARNING), str(_e), QMessageBox.StandardButton.Ok)
 
 
