@@ -146,16 +146,16 @@ def cli_main():
         sys.exit(1)
     try:
         # arestix-Konfiguration einlesen
-        _restix_config = read_arestix_config_file(_action)
+        _arestix_config = read_arestix_config_file(_action)
         if _action.action_id() == CLI_COMMAND_TARGETS:
             # Sonderfall Backup-Ziele anzeigen (resultiert nicht in einem restic-Befehl)
-            show_targets(_restix_config.targets())
+            show_targets(_arestix_config.targets())
             sys.exit(0)
         # Repository und Zugangsdaten in die Aktion eintragen
         _target_alias = _action.target_alias()
-        _action.set_basic_options(_restix_config, None)
+        _action.set_basic_options(_arestix_config, None)
         if _action.action_id() == ACTION_BACKUP:
-            _action.set_scope_options(_restix_config.scope_for_target(_target_alias))
+            _action.set_scope_options(_arestix_config.scope_for_target(_target_alias))
         # Aktion ausführen
         _action.verify_mandatory_options()
         if prompt_confirmation(_action):

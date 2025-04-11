@@ -35,18 +35,18 @@ credentials = "standard"
 
 [[target]]
 alias = "target-dir"
-location = "/var/restix"
+location = "/var/arestix"
 scope = "full"
 credentials = "standard"
 
 [[target]]
 alias = "target-usbstick"
-location = "/media/${USER}/USBSAVE/restix"
+location = "/media/${USER}/USBSAVE/arestix"
 scope = "excludes-only"
 credentials = "standard"
 
 [[target]]
 alias = "target-exthdd"
-location = "/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix"
+location = "/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/arestix"
 scope = "ignores-only"
 credentials = "standard"

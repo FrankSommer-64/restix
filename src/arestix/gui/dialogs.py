@@ -290,13 +290,13 @@ class AboutDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(localized_label(L_DLG_TITLE_ABOUT))
         _parent_rect = parent.contentsRect()
-        self.setGeometry(_parent_rect.x() + _ABOUT_DIALOG_OFFSET, _parent_rect.y() + _RESTIX_IMAGE_SIZE,
+        self.setGeometry(_parent_rect.x() + _ABOUT_DIALOG_OFFSET, _parent_rect.y() + _ARESTIX_IMAGE_SIZE,
                          _ABOUT_DIALOG_WIDTH, _ABOUT_DIALOG_HEIGHT)
         self.setStyleSheet(_STYLE_WHITE_BG)
         _dlg_layout = QGridLayout()
         _dlg_layout.setSpacing(10)
         self.__issai_image = QLabel()
-        _pixmap = QPixmap(_RESTIX_IMAGE_SIZE, _RESTIX_IMAGE_SIZE)
+        _pixmap = QPixmap(_ARESTIX_IMAGE_SIZE, _ARESTIX_IMAGE_SIZE)
         _pixmap.fill(QColorConstants.White)
         self.__issai_image.setPixmap(_pixmap)
         _dlg_layout.addWidget(self.__issai_image, 0, 0, 4, 1)
@@ -322,7 +322,7 @@ class AboutDialog(QDialog):
         _rect = _pixmap.rect()
         # draw background regions
         _center = QPoint(_rect.x() + (_rect.width() >> 1), _rect.y() + (_rect.height() >> 1))
-        _radius = (min(_rect.width(), _rect.height()) >> 1) - _RESTIX_IMAGE_SPACING
+        _radius = (min(_rect.width(), _rect.height()) >> 1) - _ARESTIX_IMAGE_SPACING
         _gradient = QRadialGradient(_center, _radius)
         _gradient.setColorAt(0.1, _bright_yellow)
         _gradient.setColorAt(0.5, QColorConstants.Yellow)
@@ -459,8 +459,8 @@ def exception_box(icon, reason, question, buttons, default_button):
 _ABOUT_DIALOG_HEIGHT = 320
 _ABOUT_DIALOG_OFFSET = 80
 _ABOUT_DIALOG_WIDTH = 560
-_RESTIX_IMAGE_SIZE = 256
-_RESTIX_IMAGE_SPACING = 16
+_ARESTIX_IMAGE_SIZE = 256
+_ARESTIX_IMAGE_SPACING = 16
 _PDF_VIEWER_HEIGHT = 720
 _PDF_VIEWER_OFFSET = 10
 _PDF_VIEWER_WIDTH = 640

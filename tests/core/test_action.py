@@ -122,8 +122,8 @@ class TestAction(unittest.TestCase):
         :returns: Standard arestix-Konfiguration für Unit-Tests
         """
         _config_file_path = os.path.join(TestAction.unit_test_home(), ARESTIX_CONFIG_FN)
-        _restix_config = LocalConfig.from_file(_config_file_path)
-        return _restix_config
+        _arestix_config = LocalConfig.from_file(_config_file_path)
+        return _arestix_config
 
     @staticmethod
     def unit_test_home() -> str:
