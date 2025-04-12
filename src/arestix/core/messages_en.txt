@@ -166,6 +166,7 @@ l-do-year-end Year end
 l-dry-run Dry run
 l-edit Edit
 l-element Element
+l-enter-password Please enter password:
 l-exit Exit
 l-file-name File name
 l-files-n-dirs Files and directories
@@ -205,6 +206,7 @@ l-dlg-title-about About arestix
 l-dlg-title-new-credentials New credentials
 l-dlg-title-new-scope New backup scope
 l-dlg-title-new-target New backup target
+l-dlg-title-password Password
 l-dlg-title-rename-element Rename {0}
 l-dlg-title-save-local-config Save local arestix configuration
 l-dlg-title-scope-editor Specify backup scope

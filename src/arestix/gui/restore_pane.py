@@ -50,7 +50,7 @@ from arestix.core.arestix_exception import ArestixException
 from arestix.core.restic_interface import determine_snapshots
 from arestix.core.task import TaskMonitor
 from arestix.gui import PAST_YEARS_COUNT
-from arestix.gui.dialogs import SnapshotViewerDialog
+from arestix.gui.dialogs import SnapshotViewerDialog, PasswordDialog
 from arestix.gui.panes import (ResticActionPane, create_combo, create_dir_selector, create_checkbox, create_text,
                                GROUP_BOX_STYLE, option_label)
 from arestix.gui.settings import GuiSettings
@@ -71,6 +71,7 @@ class RestoreOptionsPane(QGroupBox):
         self.__local_config = local_config
         self.__target_alias = None
         self.__selected_elements = None
+        self.__pw = ''
         self.setStyleSheet(GROUP_BOX_STYLE)
         _layout = QGridLayout()
         _layout.setColumnStretch(3, 1)
@@ -150,8 +151,16 @@ class RestoreOptionsPane(QGroupBox):
         try:
             self.clear_snapshot_combo()
             self.__target_alias = target[CFG_PAR_ALIAS]
+            _options = None
+            _credentials = self.__local_config.credentials_for_target(self.__target_alias)
+            if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
+                # Passwort einlesen
+                _pw_dlg = PasswordDialog(self)
+                if _pw_dlg.exec_() == QDialog.DialogCode.Accepted:
+                    self.__pw = _pw_dlg.password()
+                    _options = {OPTION_PASSWORD: self.__pw}
             _snapshots_action = ArestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS],
-                                                            self.__local_config)
+                                                            self.__local_config, _options)
             _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
             _combo_data = [_s.combo_label() for _s in _snapshots]
             _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
@@ -177,7 +186,7 @@ class RestoreOptionsPane(QGroupBox):
             return
         self.__some_radio.setChecked(True)
         _snapshot_viewer = SnapshotViewerDialog(self, _snapshot_id, self.__target_alias, self.__local_config,
-                                                self.__host_text.text(), self.__year_combo.currentText())
+                                                self.__host_text.text(), self.__year_combo.currentText(), self.__pw)
         if _snapshot_viewer.exec_() != QDialog.DialogCode.Accepted:
             return
         self.__selected_elements = _snapshot_viewer.selected_elements()
@@ -206,11 +215,15 @@ class RestorePane(ResticActionPane):
         """
         Wird aufgerufen, wenn der 'Start Restore'-Button geklickt wurde.
         """
-        super().start_button_clicked()
+        _ok, _pw = super().start_button_clicked()
+        if not _ok:
+            return
         try:
             _options = self.__options_pane.selected_options()
+            if _pw is not None:
+                _options[OPTION_PASSWORD] = _pw
             _restore_action = ArestixAction.for_action_id(ACTION_RESTORE, self.selected_target[CFG_PAR_ALIAS],
-                                                          self.restix_config, _options)
+                                                          self.arestix_config, _options)
             _restore_action.set_option(OPTION_SNAPSHOT, _options.get(OPTION_SNAPSHOT))
             _restore_path = self.__options_pane.selected_restore_path()
             if _restore_path is None:

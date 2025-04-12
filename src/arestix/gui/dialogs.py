@@ -62,7 +62,7 @@ class SnapshotViewerDialog(QDialog):
     Ermöglicht die Auswahl einzelner Elemente für die Wiederherstellung.
     """
     def __init__(self, parent: QWidget, snapshot_id: str, target_alias: str,
-                 local_config: LocalConfig, hostname: str, year: str):
+                 local_config: LocalConfig, hostname: str, year: str, pw: str):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
@@ -79,6 +79,7 @@ class SnapshotViewerDialog(QDialog):
         self.__hostname = hostname
         self.__year = year
         self.__selected_elements = []
+        self.__pw = pw
         self.setWindowTitle(localized_message(L_DLG_TITLE_SNAPSHOT_VIEWER, snapshot_id, hostname, year))
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _SNAPSHOT_VIEWER_OFFSET, _parent_rect.y() + _SNAPSHOT_VIEWER_OFFSET,
@@ -175,6 +176,8 @@ class SnapshotViewerDialog(QDialog):
         """
         _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id,
                     OPTION_JSON: True}
+        if self.__pw is not None:
+            _options[OPTION_PASSWORD] = self.__pw
         _action = ArestixAction.for_action_id(ACTION_LS, self.__target_alias, self.__local_config, _options)
         _snapshot = list_snapshot_elements(_action)
         _element_tree = _snapshot.element_tree()
@@ -188,6 +191,8 @@ class SnapshotViewerDialog(QDialog):
         """
         _options = {OPTION_HOST: self.__hostname, OPTION_YEAR: self.__year, OPTION_SNAPSHOT: self.__snapshot_id,
                     OPTION_JSON: True, OPTION_PATTERN: self.__search_field.text()}
+        if self.__pw is not None:
+            _options[OPTION_PASSWORD] = self.__pw
         _action = ArestixAction.for_action_id(ACTION_FIND, self.__target_alias, self.__local_config, _options)
         _elements = find_snapshot_elements(_action)
         _snapshot = Snapshot(self.__snapshot_id, datetime.datetime.now(), '')
@@ -429,6 +434,48 @@ class SaveConfigDialog(QDialog):
         self.accept()
 
 
+class PasswordDialog(QDialog):
+    """
+    Dialog zum Einlesen eines Passworts.
+    """
+    def __init__(self, parent: QWidget):
+        """
+        Konstruktor.
+        :param parent: das übergeordnete Widget
+        """
+        super().__init__(parent)
+        self.__password = ''
+        self.setWindowTitle(localized_label(L_DLG_TITLE_PASSWORD))
+        _parent_rect = parent.contentsRect()
+        self.setGeometry(_parent_rect.x() + _PASSWORD_DIALOG_OFFSET, _parent_rect.y() + _PASSWORD_DIALOG_OFFSET,
+                         _PASSWORD_DIALOG_WIDTH, _PASSWORD_DIALOG_HEIGHT)
+        self.setStyleSheet(_STYLE_WHITE_BG)
+        _layout = QGridLayout(self)
+        _layout.setSpacing(10)
+        _layout.addWidget(QLabel(localized_label(L_ENTER_PASSWORD)), 0, 0)
+        self.__password_text = QLineEdit('', echoMode=QLineEdit.EchoMode.Password)
+        _layout.addWidget(self.__password_text, 0, 1)
+        _ok_button = QPushButton(localized_label(L_OK))
+        _ok_button.clicked.connect(self._ok_button_clicked)
+        _layout.addWidget(_ok_button, 1, 0)
+        _cancel_button = QPushButton(localized_label(L_CANCEL))
+        _cancel_button.clicked.connect(self.reject)
+        _layout.addWidget(_cancel_button, 1, 1)
+
+    def password(self) -> str:
+        """
+        :returns: Eingegebenes Passwort
+        """
+        return self.__password
+
+    def _ok_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den "OK"-Button geklickt hat.
+        """
+        self.__password = self.__password_text.text()
+        self.accept()
+
+
 def exception_box(icon, reason, question, buttons, default_button):
     """
     Creates and returns a message box in reaction to an exception.
@@ -461,6 +508,9 @@ _ABOUT_DIALOG_OFFSET = 80
 _ABOUT_DIALOG_WIDTH = 560
 _ARESTIX_IMAGE_SIZE = 256
 _ARESTIX_IMAGE_SPACING = 16
+_PASSWORD_DIALOG_HEIGHT = 240
+_PASSWORD_DIALOG_OFFSET = 80
+_PASSWORD_DIALOG_WIDTH = 360
 _PDF_VIEWER_HEIGHT = 720
 _PDF_VIEWER_OFFSET = 10
 _PDF_VIEWER_WIDTH = 640

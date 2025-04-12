@@ -238,6 +238,7 @@ def determine_snapshots(action: ArestixAction, task_monitor: TaskMonitor) -> lis
     """
     _silent_monitor = TaskMonitor(None, True)
     _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
+    action.action_executed()
     if _rc != RESTIC_RC_OK:
         task_monitor.log_text(_stdout, SEVERITY_INFO)
         task_monitor.log_text(_stderr, SEVERITY_ERROR)
@@ -266,6 +267,7 @@ def find_snapshot_elements(action: ArestixAction) -> list[SnapshotElement]:
     """
     _silent_monitor = TaskMonitor(None, True)
     _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
+    action.action_executed()
     if _rc != RESTIC_RC_OK:
         _result = f'{_stderr}{os.linesep}{_stdout}'
         raise ArestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
@@ -286,6 +288,7 @@ def list_snapshot_elements(action: ArestixAction) -> Snapshot:
     """
     _silent_monitor = TaskMonitor(None, True)
     _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
+    action.action_executed()
     if _rc != RESTIC_RC_OK:
         _result = f'{_stderr}{os.linesep}{_stdout}'
         raise ArestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)

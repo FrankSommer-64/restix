@@ -239,6 +239,16 @@ class ArestixAction:
         _credentials = local_config.credentials_for_target(self.target_alias())
         if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_FILE:
             self.set_option(OPTION_PASSWORD_FILE, self._full_filename_of(_credentials.get(CFG_PAR_VALUE)))
+        elif _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_TEXT:
+            _f = tempfile.NamedTemporaryFile('wt', delete=False)
+            _f.write(_credentials.get(CFG_PAR_VALUE))
+            _f.close()
+            self.set_option(OPTION_PASSWORD_FILE, _f.name, True)
+        elif _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
+            _f = tempfile.NamedTemporaryFile('wt', delete=False)
+            _f.write(options.get(OPTION_PASSWORD))
+            _f.close()
+            self.set_option(OPTION_PASSWORD_FILE, _f.name, True)
         # eventuell die angegebenen Optionen übernehmen
         if options is not None:
             for _k, _v in options.items():
@@ -383,7 +393,7 @@ class ArestixAction:
         return _action
 
 
-_STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD_FILE}
+_STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD, OPTION_PASSWORD_FILE}
 _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_BATCH, OPTION_DRY_RUN,
                                    OPTION_EXCLUDE_FILE, OPTION_FILES_FROM},
                    ACTION_FIND: {OPTION_HOST, OPTION_PATTERN, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},

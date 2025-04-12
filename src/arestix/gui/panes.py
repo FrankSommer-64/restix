@@ -45,13 +45,14 @@ from PySide6.QtGui import QMouseEvent, QBrush, QFont
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
                                QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox,
-                               QComboBox, QLineEdit, QFileDialog)
+                               QComboBox, QLineEdit, QFileDialog, QDialog)
 
 from arestix.core import *
 from arestix.core.config import LocalConfig
 from arestix.core.messages import *
 from arestix.core.task import TaskProgress, TaskResult
 from arestix.gui import *
+from arestix.gui.dialogs import PasswordDialog
 from arestix.gui.settings import GuiSettings
 
 
@@ -445,7 +446,7 @@ class ResticActionPane(QWidget):
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)
-        self.restix_config = local_config
+        self.arestix_config = local_config
         self.__target_selected_handler = target_selected_handler
         self.selected_target = None
         self.pane_layout = QGridLayout(self)
@@ -463,19 +464,29 @@ class ResticActionPane(QWidget):
         self.pane_layout.addWidget(self.message_pane, 2, 0, 1, -1)
         self.setLayout(self.pane_layout)
 
-    def start_button_clicked(self) -> dict | None:
+    def start_button_clicked(self) -> tuple[bool, str]:
         """
         Wird aufgerufen, wenn einer der 'Start'-Buttons geklickt wurde.
-        :returns: Daten des ausgewählten Backup-Ziels
+        :returns: Prüfung ok, bei credentials-Typ prompt eingegebenes Passwort; ansonsten None
         """
         if self.selected_target is None:
+            # ohne Backup-Ziel geht nichts
             _rc = QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
                                           localized_message(I_GUI_NO_TARGET_SELECTED),
                                           QMessageBox.StandardButton.Ok)
-            return None
+            return False, ''
+        _pw = None
+        _credentials = self.arestix_config.credentials_for_target(self.selected_target[CFG_PAR_ALIAS])
+        if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
+            # Passwort einlesen
+            _pw_dlg = PasswordDialog(self)
+            if _pw_dlg.exec_() == QDialog.DialogCode.Accepted:
+                _pw = _pw_dlg.password()
+            else:
+                return False, ''
         self.message_pane.clear()
         self.button_pane.action_started()
-        return self.selected_target
+        return True, _pw
 
     def cancel_button_clicked(self):
         """

@@ -166,6 +166,7 @@ l-do-year-end Jahresabschluss
 l-dry-run Dry run
 l-edit Editieren
 l-element Element
+l-enter-password Bitte Passwort eingeben:
 l-exit Beenden
 l-file-name Dateiname
 l-files-n-dirs Dateien und Verzeichnisse
@@ -205,6 +206,7 @@ l-dlg-title-about Über arestix
 l-dlg-title-new-credentials Neue Zugriffsdaten
 l-dlg-title-new-scope Neuer Sicherungsumfang
 l-dlg-title-new-target Neues Sicherungsziel
+l-dlg-title-password Passwort
 l-dlg-title-rename-element {0} umbenennen
 l-dlg-title-save-local-config Lokale arestix-Konfiguration speichern
 l-dlg-title-scope-editor Backup-Umfang festlegen

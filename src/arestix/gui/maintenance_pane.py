@@ -113,10 +113,15 @@ class MaintenancePane(ResticActionPane):
         """
         Wird aufgerufen, wenn der 'Repository anlegen'-Button geklickt wurde.
         """
-        super().start_button_clicked()
+        _ok, _pw = super().start_button_clicked()
+        if not _ok:
+            return
+        _options = None if _pw is None else {OPTION_PASSWORD: _pw}
         try:
             _init_action = ArestixAction.for_action_id(ACTION_INIT, self.selected_target[CFG_PAR_ALIAS],
-                                                       self.restix_config)
+                                                       self.arestix_config, _options)
+            if _pw is not None:
+                _init_action.set_option(OPTION_PASSWORD, _pw)
             self.__worker = Worker.for_action(_init_action)
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result,
                                           self.handle_error)
@@ -129,11 +134,15 @@ class MaintenancePane(ResticActionPane):
         """
         Wird aufgerufen, wenn der 'Jahresabschluss'-Button geklickt wurde.
         """
-        super().start_button_clicked()
+        _ok, _pw = super().start_button_clicked()
+        if not _ok:
+            return
         try:
             _options = self.__options_pane.selected_options()
+            if _pw is not None:
+                _options[OPTION_PASSWORD] = _pw
             _forget_action = ArestixAction.for_action_id(ACTION_FORGET, self.selected_target[CFG_PAR_ALIAS],
-                                                         self.restix_config, _options)
+                                                         self.arestix_config, _options)
             _forget_action.set_option(OPTION_KEEP_MONTHLY, '1')
             _forget_action.set_option(OPTION_PRUNE, True)
             self.__worker = Worker.for_action(_forget_action)

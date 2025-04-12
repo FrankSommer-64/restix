@@ -100,10 +100,14 @@ class BackupPane(ResticActionPane):
         """
         Wird aufgerufen, wenn der 'Start Backup'-Button geklickt wurde.
         """
-        super().start_button_clicked()
+        _ok, _pw = super().start_button_clicked()
+        if not _ok:
+            return
         _options = self.__options_pane.selected_options()
+        if _pw is not None:
+            _options[OPTION_PASSWORD] = _pw
         _backup_action = ArestixAction.for_action_id(ACTION_BACKUP, self.selected_target[CFG_PAR_ALIAS],
-                                                     self.restix_config, _options)
+                                                     self.arestix_config, _options)
         self.__worker = Worker.for_action(_backup_action)
         self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
         QThreadPool.globalInstance().start(self.__worker)
