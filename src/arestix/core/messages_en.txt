@@ -49,6 +49,7 @@ t-cli-confirm-backup Backup to repository {0}.
 t-cli-confirm-cleanup Remove all snapshots except one per month from repository {0}.
 t-cli-confirm-init Initialise repository {0}.
 t-cli-confirm-restore Restore snapshot {0} from repository {1} to {2}.
+t-cli-enter-password Please enter password >
 t-cli-help-backup Backup local data to restic repository\n \
     Command: arestix backup [options] backup-target\n \
     Options: --batch * execute restic command without confirmation\n           \

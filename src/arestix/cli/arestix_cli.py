@@ -37,6 +37,7 @@ Command line interface für arestix.
 """
 
 import datetime
+import getpass
 import platform
 import sys
 
@@ -153,7 +154,13 @@ def cli_main():
             sys.exit(0)
         # Repository und Zugangsdaten in die Aktion eintragen
         _target_alias = _action.target_alias()
-        _action.set_basic_options(_arestix_config, None)
+        _options = None
+        _credentials = _arestix_config.credentials_for_target(_target_alias)
+        if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
+            # Passwort einlesen
+            _pw = getpass.getpass(localized_message(T_CLI_ENTER_PASSWORD))
+            _options = {OPTION_PASSWORD: _pw}
+        _action.set_basic_options(_arestix_config, _options)
         if _action.action_id() == ACTION_BACKUP:
             _action.set_scope_options(_arestix_config.scope_for_target(_target_alias))
         # Aktion ausführen
