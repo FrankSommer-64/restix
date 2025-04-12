@@ -118,6 +118,7 @@ class Worker(QRunnable, TaskExecutor):
             _ex = ArestixException(E_BACKGROUND_TASK_FAILED, str(_e))
             self.__signals.error.emit(_ex)
         self.__signals.finished.emit()
+        self.__args[0].action_executed()
 
     def emit_progress(self, progress_data: TaskProgress):
         """

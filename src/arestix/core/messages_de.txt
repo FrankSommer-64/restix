@@ -138,6 +138,7 @@ i-gui-no-name-specified Kein Name angegeben.
 i-gui-no-snapshot-selected Kein Snapshot ausgewählt
 i-gui-no-target-selected Kein Backup-Ziel ausgewählt
 i-gui-repo-created restic-Repository {0} erfolgreich angelegt.
+i-gui-restore-path-is-not-dir Zielpfad für die Wiederherstellung {0} ist kein Verzeichnis.
 i-gui-restoring-all-data Stelle alle Daten aus Repository {0} wieder her.
 i-gui-restoring-all-data-to-path Kopiere alle Daten aus Repository {0} in Verzeichnis {1}.
 i-gui-restoring-some-data Stelle ausgewählte Daten aus Repository {0} wieder her.

@@ -56,7 +56,7 @@ import sys
 
 MSG_CODE_DEF_PATTERN = r"^([EILTW]_\w+)\s*=\s*'(.*)'"
 LOC_TEXT_PATTERN = r"^([eiltw]\-[a-z0-9\-]*?)\s+(.*)$"
-MSG_CODE_PATTERN = re.compile(r"\b([EILTW]\_\w+)\b")
+MSG_CODE_PATTERN = re.compile(r"\b([EILTW]_\w+)\b")
 
 
 class MessageCodeVisitor(ast.NodeVisitor):
@@ -137,7 +137,7 @@ class MessageCodeVisitor(ast.NodeVisitor):
                         _exc_type = ev.id
                     if ek == 'args':
                         _exc_args = ev
-        if _exc_type == 'RestixException':
+        if _exc_type == 'ArestixException':
             _msg_code = '-'
             if isinstance(_exc_args[0], ast.Name):
                 if MSG_CODE_PATTERN.match(_exc_args[0].id):
@@ -335,9 +335,9 @@ if __name__ == '__main__':
         if _lang is None:
             raise RuntimeError('Umgebungsvariable LANG ist nicht definiert')
         _locale = _lang[:2].lower()
-        _source_path = os.environ.get('RESTIX_SOURCE_PATH')
+        _source_path = os.environ.get('ARESTIX_SOURCE_PATH')
         if _source_path is None:
-            raise RuntimeError('Umgebungsvariable RESTIX_SOURCE_PATH ist nicht definiert')
+            raise RuntimeError('Umgebungsvariable ARESTIX_SOURCE_PATH ist nicht definiert')
         _core_package_path = os.path.join(_source_path, 'arestix', 'core')
         _message_file_path = os.path.join(_core_package_path, 'messages.py')
         _localized_message_file_path = os.path.join(_core_package_path, f'messages_{_locale}.txt')

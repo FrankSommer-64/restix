@@ -111,7 +111,7 @@ class RestoreOptionsPane(QGroupBox):
         """
         self.__snapshot_combo.addItems(snapshots)
         for _i, _snapshot in enumerate(snapshots):
-            _snapshot_id = _snapshot.split(' ')[-1]
+            _snapshot_id = _snapshot.split(' ')[0]
             self.__snapshot_combo.setItemData(_i, _snapshot_id)
 
     def selected_options(self) -> dict:
@@ -213,14 +213,19 @@ class RestorePane(ResticActionPane):
                                                           self.restix_config, _options)
             _restore_action.set_option(OPTION_SNAPSHOT, _options.get(OPTION_SNAPSHOT))
             _restore_path = self.__options_pane.selected_restore_path()
-            if _restore_path is not None and os.path.isdir(_restore_path):
-                _restore_action.set_option(OPTION_RESTORE_PATH, _restore_path)
+            if _restore_path is None:
+                _restore_action.set_option(OPTION_RESTORE_PATH, os.sep)
+            else:
+                if os.path.isdir(_restore_path):
+                    _restore_action.set_option(OPTION_RESTORE_PATH, _restore_path)
+                else:
+                    raise ArestixException(I_GUI_RESTORE_PATH_IS_NOT_DIR, _restore_path)
             _selected_elements = self.__options_pane.selected_elements()
             if _selected_elements is not None and len(_selected_elements) > 0:
                 _f = tempfile.NamedTemporaryFile('wt', delete=False)
                 for _element in _selected_elements:
                     _f.write(f'{_element}{os.linesep}')
-                _restore_action.set_option(OPTION_INCLUDE_FILE, _f.name)
+                _restore_action.set_option(OPTION_INCLUDE_FILE, _f.name, True)
             self.__worker = Worker.for_action(_restore_action)
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
         except ArestixException as _e:

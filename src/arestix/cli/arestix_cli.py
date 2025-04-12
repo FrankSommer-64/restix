@@ -164,6 +164,7 @@ def cli_main():
         print(localized_message(E_CLI_ARESTIX_COMMAND_FAILED))
         print(f'> {_e}')
         print()
+    _action.action_executed()
 
 
 if __name__ == "__main__":

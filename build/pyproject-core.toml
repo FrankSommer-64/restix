@@ -25,7 +25,7 @@ classifiers = [
 ]
 
 [project.scripts]
-restix = "arestix.cli.arestix_cli:cli_main"
+arestix = "arestix.cli.arestix_cli:cli_main"
 
 [project.urls]
 Homepage = "https://github.com/frsommer64/arestix"
@@ -52,4 +52,4 @@ exclude = ["/src/arestix/gui"]
 "templates" = "arestix/templates"
 
 [tool.hatch.version]
-path = "src/restix/core/__init__.py"
+path = "src/arestix/core/__init__.py"

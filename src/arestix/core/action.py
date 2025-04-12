@@ -67,6 +67,7 @@ class ArestixAction:
         self.__config_path = config_root_path()
         self.__options = {OPTION_HOST: platform.node(), OPTION_YEAR: str(datetime.date.today().year),
                           OPTION_USER: current_user(), OPTION_DRY_RUN: False, OPTION_BATCH: False}
+        self.__temp_files = []
 
     def action_id(self) -> str:
         """
@@ -88,15 +89,18 @@ class ArestixAction:
         _value = self.__options.get(option_name)
         return _value
 
-    def set_option(self, option_name: str, option_value: bool | str):
+    def set_option(self, option_name: str, option_value: bool | str, value_is_temp_file: bool = False):
         """
         Setzt die angegebene Option.
         Dateinamen müssen mit vollständigem Pfad angegeben werden.
         Bei benutzerdefinierten Angaben für Host und Jahr müssen diese als erste Optionen gesetzt werden.
         :param option_name: der Name der Option
         :param option_value: der Wert der Option
+        :param value_is_temp_file: zeigt an, ob der übergebene Wert eine temporäre Datei ist
         """
         if option_value is None: return
+        if value_is_temp_file:
+            self.__temp_files.append(option_value)
         if option_name not in _STD_OPTIONS and option_name not in _ACTION_OPTIONS.get(self.__action_id):
             raise ArestixException(E_INVALID_OPTION, option_name)
         if isinstance(option_value, str):
@@ -262,7 +266,19 @@ class ArestixAction:
                 with open(self._full_filename_of(_excludes_file_name), 'r') as _exclude_file:
                     _excludes = _exclude_file.readlines()
                 _f.writelines(_excludes)
-            self.set_option(OPTION_EXCLUDE_FILE, _f.name)
+            self.set_option(OPTION_EXCLUDE_FILE, _f.name, True)
+
+    def action_executed(self):
+        """
+        Wird von der restic-Schnittstelle aufgerufen, nachdem die Aktion ausgeführt wurde.
+        Löscht alle temporären Dateien.
+        """
+        for _f in self.__temp_files:
+            try:
+                os.remove(_f)
+            except (IOError, OSError):
+                pass
+        self.__temp_files = []
 
     def _full_filename_of(self, file_name: str) -> str:
         """

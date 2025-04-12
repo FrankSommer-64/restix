@@ -138,6 +138,7 @@ i-gui-no-name-specified No alias name specified.
 i-gui-no-snapshot-selected No snapshot selected
 i-gui-no-target-selected No backup target selected
 i-gui-repo-created Successfully created restic repository {0}.
+i-gui-restore-path-is-not-dir Restore target path {0} is not a directory.
 i-gui-restoring-all-data Restoring all data from repository {0}.
 i-gui-restoring-all-data-to-path Restoring all data from repository {0} to directory {1}.
 i-gui-restoring-some-data Restoring selected data from repository {0} .
