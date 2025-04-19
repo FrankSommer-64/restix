@@ -1,0 +1,57 @@
+# arestix with all features
+[project]
+name = "arestix"
+dynamic = ["version"]
+authors = [
+    {name="Frank Sommer", email="Frank.Sommer@sherpa-software.de"}
+]
+maintainers = [
+    {name="Frank Sommer", email="Frank.Sommer@sherpa-software.de"}
+]
+description = "Backup and restore system based on restic"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "PySide6",
+    "tomli",
+    "tomli_w"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: System :: Archiving",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+[project.gui-scripts]
+restix_gui = "arestix.gui.arestix_gui:gui_main"
+
+[project.scripts]
+restix = "arestix.cli.arestix_cli:cli_main"
+
+[project.urls]
+Homepage = "https://github.com/frsommer64/arestix"
+Issues = "https://github.com/frsommer64/arestixissues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.git",
+    "/.pytest_cache",
+    "/.idea",
+    "/.venv"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/arestix"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"templates" = "arestix/templates"
+
+[tool.hatch.version]
+path = "src/arestix/core/__init__.py"

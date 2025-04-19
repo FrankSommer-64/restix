@@ -123,8 +123,9 @@ e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort
 
 # GUI Ausgaben
 i-gui-about-detail-text Version {0}\nQt-Version {1}
-i-gui-about-info-text Copyright (c) 2025 Frank Sommer
-i-gui-about-text arestix - Datensicherung auf restic-Basis
+i-gui-arestix-info arestix - Datensicherung auf restic-Basis
+i-gui-arestix-link <a href='https://github.com/frsommer64/arestix'>Webseite</a>
+i-gui-arestix-copyright Copyright (c) 2025 Frank Sommer
 i-gui-config-problem Es wurden Probleme in der arestix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der arestix-Konfiguration erkannt:
 i-gui-confirm-remove {0} wirklich löschen ?
@@ -132,12 +133,22 @@ i-gui-create-config-root Konfigurationsverzeichnis anlegen ?
 i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-credential-exists Zugriffsdaten mit Alias '{0}' existieren bereits.
 i-gui-data-restored Daten aus Repository {0} wiederhergestellt.
+i-gui-icons-copyright  Copyright (C) 2007 Nuno Pinheiro <nuno@oxygen-icons.org>\n\
+Copyright (C) 2007 David Vignoni <david@icon-king.com>\n\
+Copyright (C) 2007 David Miller <miller@oxygen-icons.org>\n\
+Copyright (C) 2007 Johann Ollivier Lapeyre <johann@oxygen-icons.org>\n\
+Copyright (C) 2007 Kenneth Wimer <kwwii@bootsplash.org>\n\
+Copyright (C) 2007 Riccardo Iaconelli <riccardo@oxygen-icons.org>
+i-gui-icons-info KDE Oxygen Icon Theme
+i-gui-icons-link <a href='https://github.com/KDE/oxygen-icons'>Webseite</a>
 i-gui-local-config-changed arestix-Konfiguration wurde verändert.
 i-gui-no-credential-type-specified Kein Zugriffsdaten-Typ ausgewählt.
 i-gui-no-includes-specified Keine zu sichernden Elemente ausgewählt.
 i-gui-no-name-specified Kein Name angegeben.
 i-gui-no-snapshot-selected Kein Snapshot ausgewählt
 i-gui-no-target-selected Kein Backup-Ziel ausgewählt
+i-gui-pyside-info Qt GUI-Bibliothek
+i-gui-pyside-link <a href='https://wiki.qt.io/PySide6'>Webseite</a>
 i-gui-repo-created restic-Repository {0} erfolgreich angelegt.
 i-gui-restore-path-is-not-dir Zielpfad für die Wiederherstellung {0} ist kein Verzeichnis.
 i-gui-restoring-all-data Stelle alle Daten aus Repository {0} wieder her.
@@ -147,11 +158,17 @@ i-gui-restoring-some-data-to-path Kopiere alle ausgewählte aus Repository {0} i
 i-gui-scope-exists Sicherungsumfang mit Alias '{0}' existiert bereits.
 i-gui-target-exists Sicherungsziel mit Alias '{0}' existiert bereits.
 i-gui-task-finished Hintergrund-Task beendet {0}.
+i-gui-toml-lib-copyright Copyright (c) 2021 Taneli Hukkinen
+i-gui-toml-lib-info Python TOML-Bibliotheken
+i-gui-tomli-link <a href='https://github.com/hukkin/tomli'>Webseite</a>
+i-gui-tomliw-link <a href='https://github.com/hukkin/tomli-w'>Webseite</a>
+i-gui-version Version {0}
 
 # GUI Labels
 l-add Hinzufügen
 l-adopt-selection Ausgewählte Elemente übernehmen
 l-alias Aliasname
+l-arestix Arestix
 l-auto-create Repository automatisch anlegen
 l-cancel Abbrechen
 l-comment Beschreibung
@@ -172,9 +189,11 @@ l-exit Beenden
 l-file-name Dateiname
 l-files-n-dirs Dateien und Verzeichnisse
 l-full vollständig
-l-help Hilfe
 l-host Hostname
 l-ignores Ignorierte Elemente
+l-info Info
+l-libraries Verwendete Bibliotheken
+l-license Lizenz
 l-location Ort
 l-maintenance Wartung
 l-mandatory-snapshot * Snapshot

@@ -123,8 +123,9 @@ e-restic-repo-wrong-password restic command {0} failed: wrong password.
 
 # GUI messages
 i-gui-about-detail-text Version {0}\nQt-Version {1}
-i-gui-about-info-text Copyright (c) 2025 Frank Sommer
-i-gui-about-text arestix - Backup and restore based on restic
+i-gui-arestix-info arestix - Backup and restore based on restic
+i-gui-arestix-link <a href='https://github.com/frsommer64/arestix'>Web site</a>
+i-gui-arestix-copyright Copyright (c) 2025 Frank Sommer
 i-gui-config-problem Problems in arestix configuration detected:
 i-gui-config-warning Warnings in arestix configuration detected:
 i-gui-confirm-remove Are you sure to remove {0} ?
@@ -132,12 +133,22 @@ i-gui-create-config-root x
 i-gui-creating-repo Create restic repository {0}.
 i-gui-credential-exists Credentials with alias name '{0}' already exist.
 i-gui-data-restored Data restored from repository {0}.
+i-gui-icons-copyright  Copyright (C) 2007 Nuno Pinheiro <nuno@oxygen-icons.org>\n\
+Copyright (C) 2007 David Vignoni <david@icon-king.com>\n\
+Copyright (C) 2007 David Miller <miller@oxygen-icons.org>\n\
+Copyright (C) 2007 Johann Ollivier Lapeyre <johann@oxygen-icons.org>\n\
+Copyright (C) 2007 Kenneth Wimer <kwwii@bootsplash.org>\n\
+Copyright (C) 2007 Riccardo Iaconelli <riccardo@oxygen-icons.org>
+i-gui-icons-info KDE Oxygen Icon Theme
+i-gui-icons-link <a href='https://github.com/KDE/oxygen-icons'>Web site</a>
 i-gui-local-config-changed arestix configuration has been changed.
 i-gui-no-credential-type-specified No credentials type selected.
 i-gui-no-includes-specified No files to include in backup selected.
 i-gui-no-name-specified No alias name specified.
 i-gui-no-snapshot-selected No snapshot selected
 i-gui-no-target-selected No backup target selected
+i-gui-pyside-info Qt GUI library
+i-gui-pyside-link <a href='https://wiki.qt.io/PySide6'>Web site</a>
 i-gui-repo-created Successfully created restic repository {0}.
 i-gui-restore-path-is-not-dir Restore target path {0} is not a directory.
 i-gui-restoring-all-data Restoring all data from repository {0}.
@@ -147,11 +158,17 @@ i-gui-restoring-some-data-to-path Restoring selected data from repository {0} to
 i-gui-scope-exists Scope with alias name '{0}' already exists.
 i-gui-target-exists Backup target with alias name '{0}' already exists.
 i-gui-task-finished Background task finished {0}.
+i-gui-toml-lib-copyright Copyright (c) 2021 Taneli Hukkinen
+i-gui-toml-lib-info Python TOML libraries
+i-gui-tomli-link <a href='https://github.com/hukkin/tomli'>Web site</a>
+i-gui-tomliw-link <a href='https://github.com/hukkin/tomli-w'>Web site</a>
+i-gui-version Version {0}
 
 # GUI labels
 l-add Add
 l-adopt-selection Adopt selected elements
 l-alias Alias name
+l-arestix Arestix
 l-auto-create Automatically create repository
 l-cancel Cancel
 l-comment Comment
@@ -172,9 +189,11 @@ l-exit Exit
 l-file-name File name
 l-files-n-dirs Files and directories
 l-full full
-l-help Help
 l-host Host name
 l-ignores Ignored elements
+l-info Info
+l-libraries Used libraries
+l-license License
 l-location Location
 l-maintenance Maintenance
 l-mandatory-snapshot * Snapshot

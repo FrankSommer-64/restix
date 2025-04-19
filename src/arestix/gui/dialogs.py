@@ -36,16 +36,17 @@
 Dialogfenster für die arestix GUI.
 """
 import datetime
-import math
+import os.path
+import tomli
+import tomli_w
 
 from PySide6 import QtCore
-from PySide6.QtCore import qVersion, Qt, QPoint
-from PySide6.QtGui import QPainter, QBrush, QColor, QColorConstants, QPen, QRadialGradient, QPixmap
+from PySide6.QtCore import qVersion, Qt
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
                                QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit,
-                               QTreeWidget, QTreeWidgetItem, QStyle, QFileDialog)
+                               QTreeWidget, QTreeWidgetItem, QStyle, QFileDialog, QFrame)
 
 from arestix.core import *
 from arestix.core.action import ArestixAction
@@ -53,6 +54,7 @@ from arestix.core.config import LocalConfig
 from arestix.core.messages import *
 from arestix.core.restic_interface import find_snapshot_elements, list_snapshot_elements
 from arestix.core.snapshot import Snapshot
+from arestix.gui import GROUP_BOX_STYLE
 
 
 class SnapshotViewerDialog(QDialog):
@@ -298,88 +300,125 @@ class AboutDialog(QDialog):
         self.setGeometry(_parent_rect.x() + _ABOUT_DIALOG_OFFSET, _parent_rect.y() + _ARESTIX_IMAGE_SIZE,
                          _ABOUT_DIALOG_WIDTH, _ABOUT_DIALOG_HEIGHT)
         self.setStyleSheet(_STYLE_WHITE_BG)
-        _dlg_layout = QGridLayout()
+        _dlg_layout = QGridLayout(self)
         _dlg_layout.setSpacing(10)
-        self.__issai_image = QLabel()
-        _pixmap = QPixmap(_ARESTIX_IMAGE_SIZE, _ARESTIX_IMAGE_SIZE)
-        _pixmap.fill(QColorConstants.White)
-        self.__issai_image.setPixmap(_pixmap)
-        _dlg_layout.addWidget(self.__issai_image, 0, 0, 4, 1)
-        _dlg_layout.addWidget(QLabel(localized_message(I_GUI_ABOUT_TEXT)), 0, 1,
-                              Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignBottom)
-        _dlg_layout.addWidget(QLabel(localized_message(I_GUI_ABOUT_DETAIL_TEXT, VERSION, qVersion())),
-                              1, 1, Qt.AlignmentFlag.AlignCenter)
-        _dlg_layout.addWidget(QLabel(localized_message(I_GUI_ABOUT_INFO_TEXT)), 2, 1,
-                              Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+        _arestix_image = QWidget()
+        _arestix_image.setFixedSize(_ARESTIX_IMAGE_SIZE, _ARESTIX_IMAGE_SIZE)
+        _arestix_image.setStyleSheet(_STYLE_ARESTIX_IMAGE)
+        _dlg_layout.addWidget(_arestix_image, 0, 0, 3, 1)
+        _dlg_layout.addWidget(self._arestix_group_box(), 0, 1, Qt.AlignmentFlag.AlignTop)
+        _dlg_layout.addWidget(self._third_party_group_box(), 1, 1, Qt.AlignmentFlag.AlignBottom)
         _ok_button = QPushButton(localized_label(L_OK))
         _ok_button.clicked.connect(self.close)
-        _dlg_layout.addWidget(_ok_button, 3, 1, 1, 1, Qt.AlignmentFlag.AlignCenter)
-        self.setLayout(_dlg_layout)
-        self._draw_image()
+        _dlg_layout.addWidget(_ok_button, 2, 0, 1, 2, Qt.AlignmentFlag.AlignCenter)
 
-    def _draw_image(self):
+    def _arestix_group_box(self) -> QGroupBox:
         """
-        Draws an issai fruit image.
+        :return: GroupBox für die Informationen zur arestix-Applikation
         """
-        _pixmap = self.__issai_image.pixmap()
-        painter = QPainter(_pixmap)
-        _bright_yellow = QColor(0xff, 0xee, 0xcc)
-        _rect = _pixmap.rect()
-        # draw background regions
-        _center = QPoint(_rect.x() + (_rect.width() >> 1), _rect.y() + (_rect.height() >> 1))
-        _radius = (min(_rect.width(), _rect.height()) >> 1) - _ARESTIX_IMAGE_SPACING
-        _gradient = QRadialGradient(_center, _radius)
-        _gradient.setColorAt(0.1, _bright_yellow)
-        _gradient.setColorAt(0.5, QColorConstants.Yellow)
-        _gradient.setColorAt(1.0, QColorConstants.DarkGreen)
-        painter.setPen(QPen(QColorConstants.DarkGray, 2, Qt.PenStyle.SolidLine))
-        painter.setBrush(QBrush(_gradient))
-        painter.drawEllipse(_center, _radius, _radius)
-        # draw beams
-        _inner_radius = _radius * 0.3
-        _outer_radius = _radius * 0.9
-        _step = math.pi / 10.0
-        _inner_beam_width = math.pi / 50
-        _outer_beam_width = _inner_beam_width / 3
-        _angle = 0.0
-        painter.setPen(QPen(QColorConstants.Yellow, 1, Qt.PenStyle.SolidLine))
-        while _angle < 2 * math.pi:
-            _inner_x = int(_center.x() + _inner_radius * math.cos(_angle))
-            _inner_y = int(_center.y() + _inner_radius * math.sin(_angle))
-            _inner_x1 = int(_center.x() + _inner_radius * math.cos(_angle-_inner_beam_width))
-            _inner_y1 = int(_center.y() + _inner_radius * math.sin(_angle-_inner_beam_width))
-            _inner_x2 = int(_center.x() + _inner_radius * math.cos(_angle+_inner_beam_width))
-            _inner_y2 = int(_center.y() + _inner_radius * math.sin(_angle+_inner_beam_width))
-            _outer_x1 = int(_center.x() + _outer_radius * math.cos(_angle-_outer_beam_width))
-            _outer_y1 = int(_center.y() + _outer_radius * math.sin(_angle-_outer_beam_width))
-            _outer_x2 = int(_center.x() + _outer_radius * math.cos(_angle+_outer_beam_width))
-            _outer_y2 = int(_center.y() + _outer_radius * math.sin(_angle+_outer_beam_width))
-            _beam_gradient = QRadialGradient(QPoint(_inner_x, _inner_y), _outer_radius - _inner_radius)
-            _beam_gradient.setColorAt(0.3, QColorConstants.Yellow)
-            _beam_gradient.setColorAt(1.0, _bright_yellow)
-            painter.setBrush(QBrush(_beam_gradient))
-            painter.drawPolygon([QPoint(_inner_x1, _inner_y1), QPoint(_outer_x1, _outer_y1),
-                                 QPoint(_outer_x2, _outer_y2), QPoint(_inner_x2, _inner_y2)])
-            _angle += _step
-        # draw pits
-        _pit_radius = _radius * 0.45
-        _pit_width = int(_radius * 0.08)
-        _pit_height = int(_pit_width / 4)
-        _angle = math.pi / 20.0
-        _pit_color = QColor(0x44, 0x22, 0x55)
-        painter.setPen(QPen(_pit_color, 1, Qt.PenStyle.SolidLine))
-        painter.setBrush(QBrush(_pit_color))
-        while _angle < 2 * math.pi:
-            _pit_x = int(_center.x() + _pit_radius * math.cos(_angle))
-            _pit_y = int(_center.y() + _pit_radius * math.sin(_angle))
-            painter.save()
-            painter.translate(QPoint(_pit_x, _pit_y))
-            painter.rotate(_angle * 180 / math.pi)
-            painter.drawEllipse(QPoint(0, 0), _pit_width, _pit_height)
-            painter.restore()
-            _angle += _step
-        painter.end()
-        self.__issai_image.setPixmap(_pixmap)
+        _group_box = QGroupBox(localized_label(L_ARESTIX))
+        _group_box.setStyleSheet(GROUP_BOX_STYLE)
+        _grp_layout = QGridLayout(_group_box)
+        _grp_layout.setContentsMargins(10, 20, 10, 10)
+        _arestix_info = QLabel(localized_message(I_GUI_ARESTIX_INFO))
+        _arestix_info.setStyleSheet(_STYLE_BOLD_TEXT)
+        _grp_layout.addWidget(_arestix_info, 0, 0, 1, 4)
+        _arestix_copyright = QLabel(localized_message(I_GUI_ARESTIX_COPYRIGHT))
+        _grp_layout.addWidget(_arestix_copyright, 1, 0, 1, 4)
+        _arestix_version = QLabel(localized_message(I_GUI_VERSION, VERSION))
+        _grp_layout.addWidget(_arestix_version, 2, 1)
+        _arestix_license = QPushButton(localized_label(L_LICENSE))
+        _arestix_license.clicked.connect(self._show_mit_license)
+        _grp_layout.addWidget(_arestix_license, 2, 2)
+        _arestix_link = QLabel(localized_label(I_GUI_ARESTIX_LINK), openExternalLinks=True)
+        _grp_layout.addWidget(_arestix_link, 2, 3)
+        return _group_box
+
+    def _third_party_group_box(self) -> QGroupBox:
+        """
+        :return: GroupBox für die Informationen zu verwendeten Bibliotheken
+        """
+        _group_box = QGroupBox(localized_label(L_LIBRARIES))
+        _group_box.setStyleSheet(GROUP_BOX_STYLE)
+        _grp_layout = QGridLayout(_group_box)
+        _grp_layout.setContentsMargins(10, 20, 10, 10)
+        _pyside_info = QLabel(localized_label(I_GUI_PYSIDE_INFO))
+        _pyside_info.setStyleSheet(_STYLE_BOLD_TEXT)
+        _grp_layout.addWidget(_pyside_info, 0, 0, 1, 4)
+        _pyside_text = QLabel('PySide 6')
+        _grp_layout.addWidget(_pyside_text, 1, 0)
+        _pyside_version = QLabel(localized_message(I_GUI_VERSION, qVersion()))
+        _grp_layout.addWidget(_pyside_version, 1, 1)
+        _pyside_license = QPushButton(localized_label(L_LICENSE))
+        _pyside_license.clicked.connect(self._show_lgpl_license)
+        _grp_layout.addWidget(_pyside_license, 1, 2)
+        _pyside_link = QLabel(localized_label(I_GUI_PYSIDE_LINK))
+        _pyside_link.setOpenExternalLinks(True)
+        _grp_layout.addWidget(_pyside_link, 1, 3)
+        _grp_layout.addWidget(QFrame(frameShape=QFrame.Shape.HLine), 2, 0, 1, 4)
+
+        _toml_lib_info = QLabel(localized_label(I_GUI_TOML_LIB_INFO))
+        _toml_lib_info.setStyleSheet(_STYLE_BOLD_TEXT)
+        _grp_layout.addWidget(_toml_lib_info, 3, 0, 1, 4)
+        _toml_copyright = QLabel(localized_label(I_GUI_TOML_LIB_COPYRIGHT))
+        _grp_layout.addWidget(_toml_copyright, 4, 0, 1, 4)
+        _tomli_text = QLabel('tomli')
+        _grp_layout.addWidget(_tomli_text, 5, 0)
+        _tomli_version = QLabel(localized_message(I_GUI_VERSION, tomli.__version__))
+        _grp_layout.addWidget(_tomli_version, 5, 1)
+        _tomli_license = QPushButton(localized_label(L_LICENSE))
+        _tomli_license.clicked.connect(self._show_mit_license)
+        _grp_layout.addWidget(_tomli_license, 5, 2)
+        _tomli_link = QLabel(localized_label(I_GUI_TOMLI_LINK))
+        _tomli_link.setOpenExternalLinks(True)
+        _grp_layout.addWidget(_tomli_link, 5, 3)
+        _tomliw_text = QLabel('tomli_w')
+        _grp_layout.addWidget(_tomliw_text, 6, 0)
+        _tomliw_version = QLabel(localized_message(I_GUI_VERSION, tomli_w.__version__))
+        _grp_layout.addWidget(_tomliw_version, 6, 1)
+        _tomliw_license = QPushButton(localized_label(L_LICENSE))
+        _tomliw_license.clicked.connect(self._show_mit_license)
+        _grp_layout.addWidget(_tomliw_license, 6, 2)
+        _tomliw_link = QLabel(localized_label(I_GUI_TOMLIW_LINK))
+        _tomliw_link.setOpenExternalLinks(True)
+        _grp_layout.addWidget(_tomliw_link, 6, 3)
+        _grp_layout.addWidget(QFrame(frameShape=QFrame.Shape.HLine), 7, 0, 1, 4)
+
+        _icons_info = QLabel(localized_message(I_GUI_ICONS_INFO))
+        _icons_info.setStyleSheet(_STYLE_BOLD_TEXT)
+        _grp_layout.addWidget(_icons_info, 8, 0, 1, 4)
+        _icons_copyright = QLabel(localized_message(I_GUI_ICONS_COPYRIGHT))
+        _grp_layout.addWidget(_icons_copyright, 9, 0, 1, 4)
+        _icons_license = QPushButton(localized_label(L_LICENSE))
+        _icons_license.clicked.connect(self._show_lgpl_license)
+        _grp_layout.addWidget(_icons_license, 10, 2)
+        _icons_link = QLabel(localized_label(I_GUI_ICONS_LINK))
+        _icons_link.setOpenExternalLinks(True)
+        _grp_layout.addWidget(_icons_link, 10, 3)
+        return _group_box
+
+    def _show_lgpl_license(self):
+        """
+        Zeigt die LGPL Lizenz-Datei an.
+        """
+        self._show_license(_LGPL_LICENSE_FILE_NAME)
+
+    def _show_mit_license(self):
+        """
+        Zeigt die MIT Lizenz-Datei an.
+        """
+        self._show_license(_MIT_LICENSE_FILE_NAME)
+
+    def _show_license(self, license_file_name: str):
+        """
+        Zeigt eine Lizenz-Datei an.
+        :param license_file_name: Name der Lizenz-Datei
+        """
+        _license_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath('.'))))
+        _license_file_path = os.path.join(_license_dir, license_file_name)
+        with open(_license_file_path, 'r') as _f:
+            _contents = _f.read()
+            QMessageBox.information(self, localized_label(L_LICENSE), _contents, QMessageBox.StandardButton.Ok)
 
 
 class SaveConfigDialog(QDialog):
@@ -503,10 +542,10 @@ def exception_box(icon, reason, question, buttons, default_button):
     return _msg_box
 
 
-_ABOUT_DIALOG_HEIGHT = 320
+_ABOUT_DIALOG_HEIGHT = 480
 _ABOUT_DIALOG_OFFSET = 80
-_ABOUT_DIALOG_WIDTH = 560
-_ARESTIX_IMAGE_SIZE = 256
+_ABOUT_DIALOG_WIDTH = 800
+_ARESTIX_IMAGE_SIZE = 192
 _ARESTIX_IMAGE_SPACING = 16
 _PASSWORD_DIALOG_HEIGHT = 240
 _PASSWORD_DIALOG_OFFSET = 80
@@ -524,6 +563,10 @@ _SNAPSHOT_VIEWER_HEIGHT = 720
 _SNAPSHOT_VIEWER_OFFSET = 10
 _SNAPSHOT_VIEWER_WIDTH = 640
 
+_LGPL_LICENSE_FILE_NAME = 'LGPL-LICENSE'
+_MIT_LICENSE_FILE_NAME = 'LICENSE'
+
+_STYLE_ARESTIX_IMAGE = f'border-image: url({ARESTIX_ASSETS_DIR}:arestix.jpg)'
 _STYLE_INPUT_FIELD = 'background-color: #ffffcc'
 _STYLE_WHITE_BG = 'background-color: white'
 _STYLE_BOLD_TEXT = 'font-weight: bold'

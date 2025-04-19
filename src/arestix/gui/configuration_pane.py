@@ -614,7 +614,7 @@ class ScopeDetailPane(QListView):
         _ignores = self.__ignores_list.toPlainText().split(os.linesep)
         _scope_editor = ScopeEditor(self, self.__config_path, self.__includes_file_name, self.__excludes_file_name,
                                     _ignores)
-        if _scope_editor.exec_() != QDialog.DialogCode.Accepted:
+        if _scope_editor.exec() != QDialog.DialogCode.Accepted:
             return
         _editor_includes_file_name, _editor_excludes_file_name = _scope_editor.scope_files()
         self.__includes_file_name = relative_config_path_of(_editor_includes_file_name, self.__config_path)

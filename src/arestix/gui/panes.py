@@ -290,11 +290,18 @@ class ActionSelectionPane(QWidget):
         """
         super().__init__(parent)
         _layout = QHBoxLayout()
-        _layout.setSpacing(0)
+        _layout.setSpacing(10)
         _layout.setContentsMargins(0, 0, 0, 0)
-        for _action in actions:
+        _layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        for _i, _action in enumerate(actions):
             _url, _label, _slot, _triggers_menu = _action
-            _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu))
+            if _i == 0:
+                _align = Qt.AlignmentFlag.AlignLeft
+            elif _i == len(actions) - 1:
+                _align = Qt.AlignmentFlag.AlignRight
+            else:
+                _align = Qt.AlignmentFlag.AlignCenter
+            _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu), _align)
         self.setLayout(_layout)
         self.setStyleSheet('background-color: white')
 
@@ -480,7 +487,7 @@ class ResticActionPane(QWidget):
         if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
             # Passwort einlesen
             _pw_dlg = PasswordDialog(self)
-            if _pw_dlg.exec_() == QDialog.DialogCode.Accepted:
+            if _pw_dlg.exec() == QDialog.DialogCode.Accepted:
                 _pw = _pw_dlg.password()
             else:
                 return False, ''

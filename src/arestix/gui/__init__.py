@@ -51,12 +51,12 @@ GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius:
                   'QGroupBox::title {color: blue; subcontrol-origin: margin; left: 7px; padding: 0 5px 0 5px;}'
 
 # Icons
-BUTTON_ICON_BACKUP = 'backup_icon.png'
-BUTTON_ICON_CONFIGURATION = 'configuration_icon.png'
-BUTTON_ICON_EXIT = 'exit_icon.png'
-BUTTON_ICON_HELP = 'help_icon.png'
-BUTTON_ICON_MAINTENANCE = 'maintenance_icon.png'
-BUTTON_ICON_RESTORE = 'restore_icon.png'
+BUTTON_ICON_BACKUP = 'svn-commit.png'
+BUTTON_ICON_CONFIGURATION = 'configure.png'
+BUTTON_ICON_EXIT = 'application-exit.png'
+BUTTON_ICON_INFO = 'dialog-information.png'
+BUTTON_ICON_MAINTENANCE = 'system-run.png'
+BUTTON_ICON_RESTORE = 'svn-update.png'
 
 # Style für die Buttons in der Hauptauswahl
 IMAGE_BUTTON_LABEL_STYLE = 'font-weight: bold'

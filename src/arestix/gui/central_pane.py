@@ -77,7 +77,7 @@ class CentralPane(QWidget):
                     (BUTTON_ICON_RESTORE, L_RESTORE, self._restore_selected, False),
                     (BUTTON_ICON_MAINTENANCE, L_MAINTENANCE, self._maintenance_selected, False),
                     (BUTTON_ICON_CONFIGURATION, L_CONFIGURATION, self._config_selected, False),
-                    (BUTTON_ICON_HELP, L_HELP, self._help_selected, True),
+                    (BUTTON_ICON_INFO, L_INFO, self._info_selected, True),
                     (BUTTON_ICON_EXIT, L_EXIT, QApplication.instance().quit, False))
         self._layout.addWidget(ActionSelectionPane(self, _actions))
         _welcome_pane = QWidget(self)
@@ -112,9 +112,9 @@ class CentralPane(QWidget):
         """
         self._activate_pane(ConfigurationPane(self, self.__model_factory))
 
-    def _help_selected(self, mouse_x: int, mouse_y: int):
+    def _info_selected(self, mouse_x: int, mouse_y: int):
         """
-        Zeigt das Hilfe-Menü an.
+        Zeigt das Info-Menü an.
         :param mouse_x: X-Position des Mausklicks
         :param mouse_y: Y-Position des Mausklicks
         """
@@ -155,5 +155,5 @@ class CentralPane(QWidget):
         _about_dlg.exec()
 
 
-_WELCOME_PANE_STYLE = f'border-image: url({ARESTIX_ASSETS_DIR}:arestix-aq.jpg)'
+_WELCOME_PANE_STYLE = f'border-image: url({ARESTIX_ASSETS_DIR}:arestix.jpg)'
 _STANDARD_PANE_STYLE = 'background-color: #eeeeee'

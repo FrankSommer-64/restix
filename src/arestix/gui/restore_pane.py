@@ -156,7 +156,7 @@ class RestoreOptionsPane(QGroupBox):
             if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
                 # Passwort einlesen
                 _pw_dlg = PasswordDialog(self)
-                if _pw_dlg.exec_() == QDialog.DialogCode.Accepted:
+                if _pw_dlg.exec() == QDialog.DialogCode.Accepted:
                     self.__pw = _pw_dlg.password()
                     _options = {OPTION_PASSWORD: self.__pw}
             _snapshots_action = ArestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS],
@@ -187,7 +187,7 @@ class RestoreOptionsPane(QGroupBox):
         self.__some_radio.setChecked(True)
         _snapshot_viewer = SnapshotViewerDialog(self, _snapshot_id, self.__target_alias, self.__local_config,
                                                 self.__host_text.text(), self.__year_combo.currentText(), self.__pw)
-        if _snapshot_viewer.exec_() != QDialog.DialogCode.Accepted:
+        if _snapshot_viewer.exec() != QDialog.DialogCode.Accepted:
             return
         self.__selected_elements = _snapshot_viewer.selected_elements()
 
