@@ -40,13 +40,15 @@ import os.path
 import tomli
 import tomli_w
 
+from typing import Callable
+
 from PySide6 import QtCore
 from PySide6.QtCore import qVersion, Qt
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
                                QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit,
-                               QTreeWidget, QTreeWidgetItem, QStyle, QFileDialog, QFrame)
+                               QTreeWidget, QTreeWidgetItem, QStyle, QFileDialog, QFrame, QTextEdit)
 
 from arestix.core import *
 from arestix.core.action import ArestixAction
@@ -54,7 +56,30 @@ from arestix.core.config import LocalConfig
 from arestix.core.messages import *
 from arestix.core.restic_interface import find_snapshot_elements, list_snapshot_elements
 from arestix.core.snapshot import Snapshot
-from arestix.gui import GROUP_BOX_STYLE
+from arestix.gui import GROUP_BOX_STYLE, ACTION_BUTTON_STYLE
+
+
+class TextFileViewerDialog(QDialog):
+    """
+    Zeigt den Inhalt einer Textdatei an.
+    Wird für die Lizenzen benötigt.
+    """
+    def __init__(self, parent: QWidget, title_id: str, text: str):
+        """
+        Konstruktor.
+        :param parent: übergeordnetes Widget
+        :param title_id: Resource-ID der Fensterüberschrift
+        :param text: anzuzeigender Text
+        """
+        super().__init__(parent)
+        self.setWindowTitle(localized_label(title_id))
+        _parent_rect = parent.contentsRect()
+        self.setGeometry(_parent_rect.x() + _TEXT_FILE_VIEWER_OFFSET, _parent_rect.y() + _TEXT_FILE_VIEWER_OFFSET,
+                         _TEXT_FILE_VIEWER_WIDTH, _TEXT_FILE_VIEWER_HEIGHT)
+        self.setStyleSheet(_STYLE_WHITE_BG)
+        _layout = QVBoxLayout(self)
+        _text = QTextEdit(self, plainText=text, readOnly=True)
+        _layout.addWidget(_text)
 
 
 class SnapshotViewerDialog(QDialog):
@@ -305,10 +330,11 @@ class AboutDialog(QDialog):
         _arestix_image = QWidget()
         _arestix_image.setFixedSize(_ARESTIX_IMAGE_SIZE, _ARESTIX_IMAGE_SIZE)
         _arestix_image.setStyleSheet(_STYLE_ARESTIX_IMAGE)
-        _dlg_layout.addWidget(_arestix_image, 0, 0, 3, 1)
+        _dlg_layout.addWidget(_arestix_image, 0, 0, 3, 1, Qt.AlignmentFlag.AlignTop)
         _dlg_layout.addWidget(self._arestix_group_box(), 0, 1, Qt.AlignmentFlag.AlignTop)
         _dlg_layout.addWidget(self._third_party_group_box(), 1, 1, Qt.AlignmentFlag.AlignBottom)
         _ok_button = QPushButton(localized_label(L_OK))
+        _ok_button.setStyleSheet(ACTION_BUTTON_STYLE)
         _ok_button.clicked.connect(self.close)
         _dlg_layout.addWidget(_ok_button, 2, 0, 1, 2, Qt.AlignmentFlag.AlignCenter)
 
@@ -320,18 +346,10 @@ class AboutDialog(QDialog):
         _group_box.setStyleSheet(GROUP_BOX_STYLE)
         _grp_layout = QGridLayout(_group_box)
         _grp_layout.setContentsMargins(10, 20, 10, 10)
-        _arestix_info = QLabel(localized_message(I_GUI_ARESTIX_INFO))
-        _arestix_info.setStyleSheet(_STYLE_BOLD_TEXT)
-        _grp_layout.addWidget(_arestix_info, 0, 0, 1, 4)
-        _arestix_copyright = QLabel(localized_message(I_GUI_ARESTIX_COPYRIGHT))
-        _grp_layout.addWidget(_arestix_copyright, 1, 0, 1, 4)
-        _arestix_version = QLabel(localized_message(I_GUI_VERSION, VERSION))
-        _grp_layout.addWidget(_arestix_version, 2, 1)
-        _arestix_license = QPushButton(localized_label(L_LICENSE))
-        _arestix_license.clicked.connect(self._show_mit_license)
-        _grp_layout.addWidget(_arestix_license, 2, 2)
-        _arestix_link = QLabel(localized_label(I_GUI_ARESTIX_LINK), openExternalLinks=True)
-        _grp_layout.addWidget(_arestix_link, 2, 3)
+        _row = 0
+        _row += AboutDialog._create_component_header(_grp_layout, _row, I_GUI_ARESTIX_INFO, I_GUI_ARESTIX_COPYRIGHT)
+        AboutDialog._create_component_part(_grp_layout, _row, None, VERSION, self._show_mit_license,
+                                           I_GUI_ARESTIX_LINK, _URL_ARESTIX)
         return _group_box
 
     def _third_party_group_box(self) -> QGroupBox:
@@ -342,60 +360,71 @@ class AboutDialog(QDialog):
         _group_box.setStyleSheet(GROUP_BOX_STYLE)
         _grp_layout = QGridLayout(_group_box)
         _grp_layout.setContentsMargins(10, 20, 10, 10)
-        _pyside_info = QLabel(localized_label(I_GUI_PYSIDE_INFO))
-        _pyside_info.setStyleSheet(_STYLE_BOLD_TEXT)
-        _grp_layout.addWidget(_pyside_info, 0, 0, 1, 4)
-        _pyside_text = QLabel('PySide 6')
-        _grp_layout.addWidget(_pyside_text, 1, 0)
-        _pyside_version = QLabel(localized_message(I_GUI_VERSION, qVersion()))
-        _grp_layout.addWidget(_pyside_version, 1, 1)
-        _pyside_license = QPushButton(localized_label(L_LICENSE))
-        _pyside_license.clicked.connect(self._show_lgpl_license)
-        _grp_layout.addWidget(_pyside_license, 1, 2)
-        _pyside_link = QLabel(localized_label(I_GUI_PYSIDE_LINK))
-        _pyside_link.setOpenExternalLinks(True)
-        _grp_layout.addWidget(_pyside_link, 1, 3)
-        _grp_layout.addWidget(QFrame(frameShape=QFrame.Shape.HLine), 2, 0, 1, 4)
-
-        _toml_lib_info = QLabel(localized_label(I_GUI_TOML_LIB_INFO))
-        _toml_lib_info.setStyleSheet(_STYLE_BOLD_TEXT)
-        _grp_layout.addWidget(_toml_lib_info, 3, 0, 1, 4)
-        _toml_copyright = QLabel(localized_label(I_GUI_TOML_LIB_COPYRIGHT))
-        _grp_layout.addWidget(_toml_copyright, 4, 0, 1, 4)
-        _tomli_text = QLabel('tomli')
-        _grp_layout.addWidget(_tomli_text, 5, 0)
-        _tomli_version = QLabel(localized_message(I_GUI_VERSION, tomli.__version__))
-        _grp_layout.addWidget(_tomli_version, 5, 1)
-        _tomli_license = QPushButton(localized_label(L_LICENSE))
-        _tomli_license.clicked.connect(self._show_mit_license)
-        _grp_layout.addWidget(_tomli_license, 5, 2)
-        _tomli_link = QLabel(localized_label(I_GUI_TOMLI_LINK))
-        _tomli_link.setOpenExternalLinks(True)
-        _grp_layout.addWidget(_tomli_link, 5, 3)
-        _tomliw_text = QLabel('tomli_w')
-        _grp_layout.addWidget(_tomliw_text, 6, 0)
-        _tomliw_version = QLabel(localized_message(I_GUI_VERSION, tomli_w.__version__))
-        _grp_layout.addWidget(_tomliw_version, 6, 1)
-        _tomliw_license = QPushButton(localized_label(L_LICENSE))
-        _tomliw_license.clicked.connect(self._show_mit_license)
-        _grp_layout.addWidget(_tomliw_license, 6, 2)
-        _tomliw_link = QLabel(localized_label(I_GUI_TOMLIW_LINK))
-        _tomliw_link.setOpenExternalLinks(True)
-        _grp_layout.addWidget(_tomliw_link, 6, 3)
-        _grp_layout.addWidget(QFrame(frameShape=QFrame.Shape.HLine), 7, 0, 1, 4)
-
-        _icons_info = QLabel(localized_message(I_GUI_ICONS_INFO))
-        _icons_info.setStyleSheet(_STYLE_BOLD_TEXT)
-        _grp_layout.addWidget(_icons_info, 8, 0, 1, 4)
-        _icons_copyright = QLabel(localized_message(I_GUI_ICONS_COPYRIGHT))
-        _grp_layout.addWidget(_icons_copyright, 9, 0, 1, 4)
-        _icons_license = QPushButton(localized_label(L_LICENSE))
-        _icons_license.clicked.connect(self._show_lgpl_license)
-        _grp_layout.addWidget(_icons_license, 10, 2)
-        _icons_link = QLabel(localized_label(I_GUI_ICONS_LINK))
-        _icons_link.setOpenExternalLinks(True)
-        _grp_layout.addWidget(_icons_link, 10, 3)
+        _row = 0
+        _row += AboutDialog._create_component_header(_grp_layout, _row, I_GUI_PYSIDE_INFO, None)
+        _row += AboutDialog._create_component_part(_grp_layout, _row, _COMPONENT_PART_PYSIDE, qVersion(),
+                                                   self._show_lgpl_license, I_GUI_PYSIDE_LINK, _URL_PYSIDE)
+        _grp_layout.addWidget(QFrame(frameShape=QFrame.Shape.HLine, frameShadow=QFrame.Shadow.Sunken, lineWidth=1),
+                              _row, 0, 1, 4)
+        _row += 1
+        _row += AboutDialog._create_component_header(_grp_layout, _row, I_GUI_TOML_LIB_INFO, I_GUI_TOML_LIB_COPYRIGHT)
+        _row += AboutDialog._create_component_part(_grp_layout, _row, _COMPONENT_PART_TOMLI, tomli.__version__,
+                                                   self._show_mit_license, I_GUI_TOMLI_LINK, _URL_TOMLI)
+        _row += AboutDialog._create_component_part(_grp_layout, _row, _COMPONENT_PART_TOMLI_W, tomli_w.__version__,
+                                                   self._show_mit_license, I_GUI_TOMLIW_LINK, _URL_TOMLI_W)
+        _grp_layout.addWidget(QFrame(frameShape=QFrame.Shape.HLine, frameShadow=QFrame.Shadow.Sunken, lineWidth=1),
+                              _row, 0, 1, 4)
+        _row += 1
+        _row += AboutDialog._create_component_header(_grp_layout, _row, I_GUI_ICONS_INFO, I_GUI_ICONS_COPYRIGHT)
+        _row += AboutDialog._create_component_part(_grp_layout, _row, None, None,
+                                                   self._show_lgpl_license, I_GUI_ICONS_LINK, _URL_ICONS)
         return _group_box
+
+    @classmethod
+    def _create_component_header(cls, layout: QGridLayout, row: int, info_id: str, copyright_id: str | None) -> int:
+        """
+        Erzeugt die Header-Zeilen für die About-Informationen einer Komponente.
+        :param row: nächste freie Zeile im Layout
+        :param info_id: Resource-ID für den Namen des Komponenten-Teils
+        :param copyright_id: Resource-ID für das Copyright des Komponenten-Teils
+        :returns: Anzahl der erzeugten Zeilen im Layout
+        """
+        _component_row = row
+        _component_info = QLabel(localized_message(info_id))
+        _component_info.setStyleSheet(_STYLE_BOLD_TEXT)
+        layout.addWidget(_component_info, _component_row, 0, 1, 4)
+        _component_row += 1
+        if copyright_id is not None:
+            _copyright = QLabel(localized_message(copyright_id), textFormat=Qt.TextFormat.PlainText)
+            layout.addWidget(_copyright, _component_row, 0, 1, 4)
+            _component_row += 1
+        return _component_row - row
+
+    @classmethod
+    def _create_component_part(cls, layout: QGridLayout, row: int, part_name: str | None,
+                               version: str | None, license_slot: Callable, link_url_id: str, link_tooltip: str) -> int:
+        """
+        Erzeugt die About-Informationen für einen Teil einer Komponente.
+        :param row: nächste freie Zeile im Layout
+        :param part_name: Name des Komponenten-Teils
+        :param version: Version des Komponenten-Teils
+        :param license_slot: Funktion zum Anzeigen des Lizenz-Texts
+        :param link_url_id: Resource-ID der URL zur Homepage des Komponenten-Teils
+        :param link_tooltip: Tooltip mit der URL zur Homepage des Komponenten-Teils
+        :returns: Anzahl der erzeugten Zeilen im Layout
+        """
+        if part_name is not None:
+            layout.addWidget(QLabel(part_name), row, 0, Qt.AlignmentFlag.AlignRight)
+        if version is not None:
+            _version_text = QLabel(localized_message(I_GUI_VERSION, version))
+            layout.addWidget(_version_text, row, 1, Qt.AlignmentFlag.AlignHCenter)
+        _license = QPushButton(localized_label(L_LICENSE))
+        _license.clicked.connect(license_slot)
+        layout.addWidget(_license, row, 2, Qt.AlignmentFlag.AlignHCenter)
+        _link = QLabel(localized_label(link_url_id), openExternalLinks=True)
+        _link.setToolTip(link_tooltip)
+        layout.addWidget(_link, row, 3, Qt.AlignmentFlag.AlignHCenter)
+        return 1
 
     def _show_lgpl_license(self):
         """
@@ -418,7 +447,8 @@ class AboutDialog(QDialog):
         _license_file_path = os.path.join(_license_dir, license_file_name)
         with open(_license_file_path, 'r') as _f:
             _contents = _f.read()
-            QMessageBox.information(self, localized_label(L_LICENSE), _contents, QMessageBox.StandardButton.Ok)
+            _viewer = TextFileViewerDialog(self, L_LICENSE, _contents)
+            _viewer.exec()
 
 
 class SaveConfigDialog(QDialog):
@@ -562,9 +592,22 @@ _SCOPE_EDITOR_WIDTH = 1200
 _SNAPSHOT_VIEWER_HEIGHT = 720
 _SNAPSHOT_VIEWER_OFFSET = 10
 _SNAPSHOT_VIEWER_WIDTH = 640
+_TEXT_FILE_VIEWER_HEIGHT = 720
+_TEXT_FILE_VIEWER_OFFSET = 10
+_TEXT_FILE_VIEWER_WIDTH = 640
 
 _LGPL_LICENSE_FILE_NAME = 'LGPL-LICENSE'
 _MIT_LICENSE_FILE_NAME = 'LICENSE'
+
+_COMPONENT_PART_PYSIDE = 'PySide 6'
+_COMPONENT_PART_TOMLI = 'tomli'
+_COMPONENT_PART_TOMLI_W = 'tomli_w'
+
+_URL_ARESTIX = 'https://github.com/frsommer64/arestix'
+_URL_ICONS = 'https://github.com/KDE/oxygen-icons'
+_URL_PYSIDE = 'https://wiki.qt.io/PySide6'
+_URL_TOMLI = 'https://github.com/hukkin/tomli'
+_URL_TOMLI_W = 'https://github.com/hukkin/tomli-w'
 
 _STYLE_ARESTIX_IMAGE = f'border-image: url({ARESTIX_ASSETS_DIR}:arestix.jpg)'
 _STYLE_INPUT_FIELD = 'background-color: #ffffcc'

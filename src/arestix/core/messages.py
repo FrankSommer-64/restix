@@ -128,7 +128,6 @@ E_RESTIC_REPO_WRONG_PASSWORD = 'e-restic-repo-wrong-password'
 E_GUI_NO_SNAPSHOT_SELECTED = 'e-gui-no-snapshot-selected'
 
 # GUI Ausgaben
-I_GUI_ABOUT_DETAIL_TEXT = 'i-gui-about-detail-text'
 I_GUI_ARESTIX_INFO = 'i-gui-arestix-info'
 I_GUI_ARESTIX_LINK = 'i-gui-arestix-link'
 I_GUI_ARESTIX_COPYRIGHT = 'i-gui-arestix-copyright'

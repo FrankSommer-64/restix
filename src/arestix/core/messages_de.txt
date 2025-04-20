@@ -122,7 +122,6 @@ e-restic-repo-lock-failed restic-Befehl {0} fehlgeschlagen: Repository konnte ni
 e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort für das Repository.
 
 # GUI Ausgaben
-i-gui-about-detail-text Version {0}\nQt-Version {1}
 i-gui-arestix-info arestix - Datensicherung auf restic-Basis
 i-gui-arestix-link <a href='https://github.com/frsommer64/arestix'>Webseite</a>
 i-gui-arestix-copyright Copyright (c) 2025 Frank Sommer
