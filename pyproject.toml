@@ -1,6 +1,6 @@
-# arestix with all features
+# arestix without GUI
 [project]
-name = "arestix"
+name = "arestix_core"
 dynamic = ["version"]
 authors = [
     {name="Frank Sommer", email="Frank.Sommer@sherpa-software.de"}
@@ -12,7 +12,6 @@ description = "Backup and restore system based on restic"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-    "PySide6",
     "tomli",
     "tomli_w"
 ]
@@ -25,11 +24,8 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 
-[project.gui-scripts]
-restix_gui = "arestix.gui.arestix_gui:gui_main"
-
 [project.scripts]
-restix = "arestix.cli.arestix_cli:cli_main"
+arestix = "arestix.cli.arestix_cli:cli_main"
 
 [project.urls]
 Homepage = "https://github.com/frsommer64/arestix"
@@ -44,11 +40,13 @@ exclude = [
     "/.git",
     "/.pytest_cache",
     "/.idea",
-    "/.venv"
+    "/.venv",
+    "/src/arestix/gui"
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/arestix"]
+exclude = ["/src/arestix/gui"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "templates" = "arestix/templates"

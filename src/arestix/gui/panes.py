@@ -43,7 +43,7 @@ from collections.abc import Callable
 from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel, QModelIndex
 from PySide6.QtGui import QMouseEvent, QBrush, QFont
 from PySide6.QtWidgets import (QWidget, QVBoxLayout,
-                               QPushButton, QLabel, QHBoxLayout, QSizePolicy, QGridLayout, QListWidget,
+                               QPushButton, QLabel, QSizePolicy, QGridLayout, QListWidget,
                                QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox,
                                QComboBox, QLineEdit, QFileDialog, QDialog)
 
@@ -228,7 +228,7 @@ class ImageButtonPane(QWidget):
         _layout.addWidget(self.__image_button)
         _label = QLabel(localized_label(label_id), self)
         _label.setStyleSheet(IMAGE_BUTTON_LABEL_STYLE)
-        _label.setMinimumWidth(128)
+        _label.setFixedWidth(128)
         _label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         _label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         _layout.addWidget(_label)
@@ -289,21 +289,18 @@ class ActionSelectionPane(QWidget):
         :param actions: Beschreibung der Aktionen
         """
         super().__init__(parent)
-        _layout = QHBoxLayout()
+        _layout = QGridLayout(self)
         _layout.setSpacing(10)
         _layout.setContentsMargins(0, 0, 0, 0)
-        _layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        for _i, _action in enumerate(actions):
-            _url, _label, _slot, _triggers_menu = _action
-            if _i == 0:
-                _align = Qt.AlignmentFlag.AlignLeft
-            elif _i == len(actions) - 1:
-                _align = Qt.AlignmentFlag.AlignRight
-            else:
-                _align = Qt.AlignmentFlag.AlignCenter
-            _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu), _align)
-        self.setLayout(_layout)
-        self.setStyleSheet('background-color: white')
+        _url, _label, _slot, _triggers_menu = actions[0]
+        _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu), 0, 0, Qt.AlignmentFlag.AlignLeft)
+        for _i in range(1, len(actions) - 1):
+            _url, _label, _slot, _triggers_menu = actions[_i]
+            _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu), 0, _i,
+                              Qt.AlignmentFlag.AlignHCenter)
+        _url, _label, _slot, _triggers_menu = actions[len(actions) - 1]
+        _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu), 0, len(actions) - 1,
+                          Qt.AlignmentFlag.AlignRight)
 
 
 class MessagePane(QWidget):

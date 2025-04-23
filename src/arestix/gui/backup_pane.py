@@ -36,15 +36,15 @@
 GUI-Bereich für den Backup.
 """
 
-
 from PySide6.QtCore import Qt, QThreadPool
-from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QSizePolicy
+from PySide6.QtWidgets import QGridLayout, QGroupBox, QSizePolicy, QWidget
 
 from arestix.core import *
 from arestix.core.action import ArestixAction
 from arestix.core.config import LocalConfig
 from arestix.core.messages import *
-from arestix.gui.panes import ResticActionPane, create_checkbox, GROUP_BOX_STYLE
+from arestix.gui import WIDE_CONTENT_MARGIN
+from arestix.gui.panes import create_checkbox, GROUP_BOX_STYLE, ResticActionPane
 from arestix.gui.settings import GuiSettings
 from arestix.gui.worker import Worker
 
@@ -62,7 +62,7 @@ class BackupOptionsPane(QGroupBox):
         self.setStyleSheet(GROUP_BOX_STYLE)
         _layout = QGridLayout()
         _layout.setColumnStretch(3, 1)
-        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__auto_create_option = create_checkbox(_layout, L_AUTO_CREATE, T_OPT_BAK_AUTO_CREATE, True)
         self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_BAK_DRY_RUN, False)
@@ -83,14 +83,13 @@ class BackupPane(ResticActionPane):
     def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: die zentrale arestix Pane
+        :param parent: zentrale arestix Pane
         :param local_config: lokale arestix-Konfiguration
-        :param gui_settings: die GUI-Einstellungen des Benutzers
+        :param gui_settings: GUI-Einstellungen des Benutzers
         """
         super().__init__(parent, [L_DO_BACKUP], [T_DO_BAK_BACKUP], None, [self.start_button_clicked],
                          local_config, gui_settings)
         self.__worker = None
-        # option pane
         self.__options_pane = BackupOptionsPane(self)
         self.pane_layout.addWidget(self.__options_pane, 0, 1)
         self.setLayout(self.pane_layout)

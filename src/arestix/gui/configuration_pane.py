@@ -44,9 +44,9 @@ from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QCo
                                QMenu, QMessageBox, QListView)
 
 from arestix.core import *
+from arestix.core.arestix_exception import ArestixException
 from arestix.core.config import LocalConfig
 from arestix.core.messages import *
-from arestix.core.arestix_exception import ArestixException
 from arestix.core.util import relative_config_path_of
 from arestix.gui import *
 from arestix.gui.editors import ScopeEditor

@@ -55,7 +55,7 @@ def gui_main():
     Hauptprogramm der arestix GUI.
     """
     try:
-        # Verzeichnis mit den GUI assets (Hintergrundbilder, ...) zum QT-Suchpfad hinzufügen
+        # Verzeichnis mit den GUI assets (Hintergrundbilder, Handbuch) zum QT-Suchpfad hinzufügen
         _images_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ARESTIX_ASSETS_DIR)
         QDir.addSearchPath(ARESTIX_ASSETS_DIR, _images_path)
         app = QApplication(sys.argv)
@@ -70,7 +70,7 @@ def gui_main():
             _rc = _show_mbox(QMessageBox.Icon.Information, L_MBOX_TITLE_INFO, str(_e), _text, _buttons)
             if _rc == QMessageBox.StandardButton.Cancel:
                 # Abbruch durch Benutzer
-                return
+                sys.exit(1)
             # Konfigurationsverzeichnis anlegen
             _config_root_path = create_config_root()
 
@@ -102,10 +102,10 @@ def _show_mbox(icon: QMessageBox.Icon, title_id: str, text_id: str, info_text: s
                buttons: QMessageBox.StandardButton):
     """
     Zeigt eine Message-Box an.
-    :param icon: das Icon (Error, Warning, ...)
-    :param title_id: ID der Fenster-Überschrift des Dialogfensters
-    :param text_id: ID des Texts
-    :param info_text: vollständige Beschreibung
+    :param icon: Icon (Error, Warning, ...)
+    :param title_id: Resource-ID der Fenster-Überschrift des Dialogfensters
+    :param text_id: Resource-ID des Texts
+    :param info_text: lokalisierter detaillierter Text
     :param buttons: Kombination der anzuzeigenden Buttons
     """
     _mbox = QMessageBox()

@@ -46,6 +46,16 @@ CAPTION_STYLE = 'color: black; font-weight: bold'
 CONTEXT_MENU_STYLE = 'QMenu {background-color: #ABABAB; border: 1px solid black; margin: 2px;}' \
                      'QMenu::item:selected {color: white; background: darkblue;}'
 
+# Content margins
+DEFAULT_SPACING = 10
+SMALL_CONTENT_MARGIN = 5
+DEFAULT_CONTENT_MARGIN = 10
+WIDE_CONTENT_MARGIN = 20
+
+# Minimale Größe des GUI-Fensters
+MAIN_WIN_MIN_HEIGHT = 640
+MAIN_WIN_MIN_WIDTH = 6 * 128 + 64
+
 # Style für die Umrahmung aller GroupBoxes
 GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius: 6px; margin-top: 6px} ' \
                   'QGroupBox::title {color: blue; subcontrol-origin: margin; left: 7px; padding: 0 5px 0 5px;}'

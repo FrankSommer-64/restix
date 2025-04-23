@@ -39,7 +39,7 @@ Zentraler Arbeitsbereich der arestix GUI.
 import os.path
 
 from PySide6.QtCore import QPoint
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizePolicy, QMenu
+from PySide6.QtWidgets import QApplication, QMenu, QSizePolicy, QVBoxLayout, QWidget
 
 from arestix.core import *
 from arestix.core.config import LocalConfig
@@ -47,10 +47,10 @@ from arestix.core.messages import *
 from arestix.gui import *
 from arestix.gui.backup_pane import BackupPane
 from arestix.gui.configuration_pane import ConfigurationPane
+from arestix.gui.dialogs import AboutDialog, PdfViewerDialog
 from arestix.gui.maintenance_pane import MaintenancePane
 from arestix.gui.model import ConfigModelFactory
 from arestix.gui.panes import ActionSelectionPane
-from arestix.gui.dialogs import AboutDialog, PdfViewerDialog
 from arestix.gui.restore_pane import RestorePane
 from arestix.gui.settings import GuiSettings
 
@@ -62,17 +62,18 @@ class CentralPane(QWidget):
     def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: das Hauptfenster
+        :param parent: Hauptfenster
         :param local_config: lokale arestix-Konfiguration
-        :param gui_settings: die personalisierten GUI-Einstellungen
+        :param gui_settings: GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)
         self._local_config = local_config
         self._gui_settings = gui_settings
         self.__model_factory = ConfigModelFactory(local_config)
         self._layout = QVBoxLayout()
-        self._layout.setSpacing(10)
-        self._layout.setContentsMargins(5, 5, 5, 5)
+        self._layout.setSpacing(DEFAULT_SPACING)
+        self._layout.setContentsMargins(SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN,
+                                        SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
         _actions = ((BUTTON_ICON_BACKUP, L_BACKUP, self._backup_selected, False),
                     (BUTTON_ICON_RESTORE, L_RESTORE, self._restore_selected, False),
                     (BUTTON_ICON_MAINTENANCE, L_MAINTENANCE, self._maintenance_selected, False),
@@ -85,7 +86,6 @@ class CentralPane(QWidget):
         _welcome_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         self._layout.addWidget(_welcome_pane)
         self._work_pane = _welcome_pane
-        self.setStyleSheet(_STANDARD_PANE_STYLE)
         self.setLayout(self._layout)
 
     def _backup_selected(self):
@@ -119,14 +119,18 @@ class CentralPane(QWidget):
         :param mouse_y: Y-Position des Mausklicks
         """
         _context_menu = QMenu(self)
+        _context_menu.setStyleSheet(_INFO_MENU_STYLE)
+        _context_menu.setContentsMargins(DEFAULT_CONTENT_MARGIN, DEFAULT_CONTENT_MARGIN,
+                                         DEFAULT_CONTENT_MARGIN, DEFAULT_CONTENT_MARGIN)
         _context_menu.addAction(localized_label(L_MENU_USER_MANUAL)).triggered.connect(self._show_manual)
+        _context_menu.addSeparator()
         _context_menu.addAction(localized_label(L_MENU_ABOUT)).triggered.connect(self._show_about)
         _context_menu.exec(QPoint(mouse_x, mouse_y))
 
     def _activate_pane(self, pane: QWidget):
         """
         Zeigt die übergebene Pane als Work-Pane an.
-        :param pane: die neue Work-Pane
+        :param pane: neue Work-Pane
         """
         self._work_pane.hide()
         pane.show()
@@ -155,5 +159,8 @@ class CentralPane(QWidget):
         _about_dlg.exec()
 
 
+_INFO_MENU_STYLE = '''QMenu {background-color: #fcfcdd; border: 1px solid black}
+QMenu::item {font-size: 18px; font-weight: bold; margin: 8px}
+QMenu::item::selected {font-size: 18px; font-weight: bold; background-color: #4681be; color: white}
+'''
 _WELCOME_PANE_STYLE = f'border-image: url({ARESTIX_ASSETS_DIR}:arestix.jpg)'
-_STANDARD_PANE_STYLE = 'background-color: #eeeeee'
