@@ -71,7 +71,8 @@ BUTTON_ICON_MAINTENANCE = 'system-run.png'
 BUTTON_ICON_RESTORE = 'svn-update.png'
 
 #  Buttons in der Hauptauswahl
-IMAGE_BUTTON_LABEL_STYLE = 'font-weight: bold'
+IMAGE_BUTTON_LABEL_STYLE_ACTIVE = 'background-color: yellow; font-weight: bold'
+IMAGE_BUTTON_LABEL_STYLE_NORMAL = 'background-color: white; font-weight: bold'
 IMAGE_BUTTON_PANE_STYLE = 'background-color: white; border-width: 2px; border-color: black; border-style: solid'
 IMAGE_BUTTON_SIZE = 128
 

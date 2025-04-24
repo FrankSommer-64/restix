@@ -44,8 +44,6 @@ import pathlib
 import re
 import shutil
 
-from typing import Self
-
 import tomli
 import tomli_w
 
@@ -304,9 +302,7 @@ def create_config_root() -> str:
     try:
         os.makedirs(_config_path, 0o755, True)
         _source_path = pathlib.Path(__file__).parent.resolve()
-        # für wheel templates path anpassen !
-        # _templates_path = os.path.abspath(os.path.join(_source_path, '..', RESTIX_TEMPLATES_DIR))
-        _templates_path = os.path.abspath(os.path.join(_source_path, '..', '..', '..', ARESTIX_TEMPLATES_DIR))
+        _templates_path = os.path.abspath(os.path.join(_source_path, '..',ARESTIX_TEMPLATES_DIR))
         shutil.copy(os.path.join(_templates_path, ARESTIX_CONFIG_FN), _config_path)
         with open(os.path.join(_templates_path, ARESTIX_DEFAULT_INCLUDES_FN), 'r') as _includes_template:
             _contents = _includes_template.read()

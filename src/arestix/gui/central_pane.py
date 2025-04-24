@@ -67,49 +67,50 @@ class CentralPane(QWidget):
         :param gui_settings: GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)
-        self._local_config = local_config
-        self._gui_settings = gui_settings
+        self.__local_config = local_config
+        self.__gui_settings = gui_settings
         self.__model_factory = ConfigModelFactory(local_config)
-        self._layout = QVBoxLayout(self)
-        self._layout.setSpacing(DEFAULT_SPACING)
-        self._layout.setContentsMargins(SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN,
-                                        SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
+        self.__layout = QVBoxLayout(self)
+        self.__layout.setSpacing(DEFAULT_SPACING)
+        self.__layout.setContentsMargins(SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN,
+                                         SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
         _actions = ((BUTTON_ICON_BACKUP, L_BACKUP, self._backup_selected, False),
                     (BUTTON_ICON_RESTORE, L_RESTORE, self._restore_selected, False),
                     (BUTTON_ICON_MAINTENANCE, L_MAINTENANCE, self._maintenance_selected, False),
                     (BUTTON_ICON_CONFIGURATION, L_CONFIGURATION, self._config_selected, False),
                     (BUTTON_ICON_INFO, L_INFO, self._info_selected, True),
                     (BUTTON_ICON_EXIT, L_EXIT, QApplication.instance().quit, False))
-        self._layout.addWidget(ActionSelectionPane(self, _actions))
+        self.__action_selection_pane = ActionSelectionPane(self, _actions)
+        self.__layout.addWidget(self.__action_selection_pane)
         _welcome_pane = QWidget(self)
         _welcome_pane.setStyleSheet(_WELCOME_PANE_STYLE)
         _welcome_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
-        self._layout.addWidget(_welcome_pane)
-        self._work_pane = _welcome_pane
+        self.__layout.addWidget(_welcome_pane)
+        self.__work_pane = _welcome_pane
 
     def _backup_selected(self):
         """
         Zeigt die GUI-Bereiche für Backup an.
         """
-        self._activate_pane(BackupPane(self, self._local_config, self._gui_settings))
+        self._activate_pane(BackupPane(self, self.__local_config, self.__gui_settings), L_BACKUP)
 
     def _restore_selected(self):
         """
         Zeigt die GUI-Bereiche für Restore an.
         """
-        self._activate_pane(RestorePane(self, self._local_config, self._gui_settings))
+        self._activate_pane(RestorePane(self, self.__local_config, self.__gui_settings), L_RESTORE)
 
     def _maintenance_selected(self):
         """
         Zeigt die GUI-Bereiche für Wartung an.
         """
-        self._activate_pane(MaintenancePane(self, self._local_config, self._gui_settings))
+        self._activate_pane(MaintenancePane(self, self.__local_config, self.__gui_settings), L_MAINTENANCE)
 
     def _config_selected(self):
         """
         Zeigt die GUI-Bereiche für Konfiguration an.
         """
-        self._activate_pane(ConfigurationPane(self, self.__model_factory))
+        self._activate_pane(ConfigurationPane(self, self.__model_factory), L_CONFIGURATION)
 
     def _info_selected(self, mouse_x: int, mouse_y: int):
         """
@@ -126,16 +127,18 @@ class CentralPane(QWidget):
         _context_menu.addAction(localized_label(L_MENU_ABOUT)).triggered.connect(self._show_about)
         _context_menu.exec(QPoint(mouse_x, mouse_y))
 
-    def _activate_pane(self, pane: QWidget):
+    def _activate_pane(self, pane: QWidget, button_label_id: str):
         """
         Zeigt die übergebene Pane als Work-Pane an.
         :param pane: neue Work-Pane
+        :param button_label_id: Resource-ID des zur Pane gehörenden Image-Buttons
         """
-        self._work_pane.hide()
+        self.__work_pane.hide()
         pane.show()
-        self._layout.replaceWidget(self._work_pane, pane)
+        self.__layout.replaceWidget(self.__work_pane, pane)
         self.update()
-        self._work_pane = pane
+        self.__work_pane = pane
+        self.__action_selection_pane.action_selected(button_label_id)
 
     def _show_manual(self):
         """

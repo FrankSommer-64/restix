@@ -224,13 +224,21 @@ class ImageButtonPane(QWidget):
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__image_button = ImageButton(self, image_url, click_handler, triggers_menu)
         _layout.addWidget(self.__image_button)
-        _label = QLabel(localized_label(label_id), self)
-        _label.setStyleSheet(IMAGE_BUTTON_LABEL_STYLE)
-        _label.setFixedWidth(IMAGE_BUTTON_SIZE)
-        _label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        _label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        _layout.addWidget(_label)
+        self.__label = QLabel(localized_label(label_id), self)
+        self.__label.setStyleSheet(IMAGE_BUTTON_LABEL_STYLE_NORMAL)
+        self.__label.setFixedWidth(IMAGE_BUTTON_SIZE)
+        self.__label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.__label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        _layout.addWidget(self.__label)
         self.setStyleSheet(IMAGE_BUTTON_PANE_STYLE)
+
+    def mark_label(self, flag: bool):
+        """
+        Setzt die Hintergrundfarbe des Button-Labels.
+        :param flag: True, falls der Button aktiv ist; ansonsten False
+        """
+        _style = IMAGE_BUTTON_LABEL_STYLE_ACTIVE if flag else IMAGE_BUTTON_LABEL_STYLE_NORMAL
+        self.__label.setStyleSheet(_style)
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         """
@@ -286,19 +294,35 @@ class ActionSelectionPane(QWidget):
         :param actions: Beschreibung der Aktionen
         """
         super().__init__(parent)
+        self.__selected_button_label_id = None
         _layout = QGridLayout(self)
         _layout.setSpacing(10)
         _layout.setContentsMargins(0, 0, 0, 0)
         _url, _label, _slot, _triggers_menu = actions[0]
-        _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu), 0, 0, Qt.AlignmentFlag.AlignLeft)
+        _pane = ImageButtonPane(self, _url, _label, _slot, _triggers_menu)
+        self.__button_panes = {_label: _pane}
+        _layout.addWidget(_pane, 0, 0, Qt.AlignmentFlag.AlignLeft)
         for _i in range(1, len(actions) - 1):
             _url, _label, _slot, _triggers_menu = actions[_i]
-            _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu), 0, _i,
-                              Qt.AlignmentFlag.AlignHCenter)
+            _pane = ImageButtonPane(self, _url, _label, _slot, _triggers_menu)
+            self.__button_panes[_label] = _pane
+            _layout.addWidget(_pane, 0, _i, Qt.AlignmentFlag.AlignHCenter)
         _url, _label, _slot, _triggers_menu = actions[len(actions) - 1]
-        _layout.addWidget(ImageButtonPane(self, _url, _label, _slot, _triggers_menu), 0, len(actions) - 1,
-                          Qt.AlignmentFlag.AlignRight)
+        _pane = ImageButtonPane(self, _url, _label, _slot, _triggers_menu)
+        self.__button_panes[_label] = _pane
+        _layout.addWidget(_pane, 0, len(actions) - 1, Qt.AlignmentFlag.AlignRight)
 
+    def action_selected(self, button_label_id: str | None):
+        """
+        Wird aufgerufen, wenn der Benutzer eine Aktion ausgewählt hat.
+        Markiert den zur Aktion gehörenden Button.
+        :param button_label_id: Resource-ID des Button-Labels zur gewählten Aktion
+        """
+        if self.__selected_button_label_id is not None:
+            self.__button_panes.get(self.__selected_button_label_id).mark_label(False)
+        if button_label_id is not None:
+            self.__button_panes.get(button_label_id).mark_label(True)
+        self.__selected_button_label_id = button_label_id
 
 class MessagePane(QWidget):
     """
