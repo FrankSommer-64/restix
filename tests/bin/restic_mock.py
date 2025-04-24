@@ -114,7 +114,7 @@ class DetailAction:
         :param list[str] cmd_line: the command line
         :returns: detail action
         :rtype: DetailAction
-        :raises RestixException: if detail action cannot be created from command line
+        :raises ArestixException: if detail action cannot be created from command line
         """
         _option_values = {OPTION_BATCH: None, OPTION_HOST: None, OPTION_RESTORE_PATH: None,
                           OPTION_SNAPSHOT: None, OPTION_YEAR: None}
@@ -257,7 +257,7 @@ def resolve_restix_vars_in_str(str_value, restix_vars):
     :param dict restix_vars: dictionary containing arestix variable names and values
     :returns: string with all variable references replaced by actual values
     :rtype: str
-    :raises RestixException: if a referenced variable doesn't have an actual value (internal error)
+    :raises ArestixException: if a referenced variable doesn't have an actual value (internal error)
     """
     _plain_value = str_value
     for _var_name in RESTIX_CFG_VARS:
@@ -274,7 +274,7 @@ def resolve_restix_vars_in_value(value, restix_vars):
     :param value: the Python value where variable references shall be replaced
     :param dict restix_vars: dictionary containing arestix variable names and values
     :returns: python value with all variable references replaced by actual values
-    :raises RestixException: if a referenced variable doesn't have an actual value (internal error)
+    :raises ArestixException: if a referenced variable doesn't have an actual value (internal error)
     """
     if isinstance(value, str):
         return resolve_restix_vars_in_str(value, restix_vars)
@@ -292,7 +292,7 @@ def read_restix_config_file(restix_vars):
     :param dict restix_vars: arestix variable names and values
     :returns: local arestix settings
     :rtype: LocalConfig
-    :raises RestixException: if local arestix configuration file could not be read or parsed
+    :raises ArestixException: if local arestix configuration file could not be read or parsed
     """
     _config_path = config_root_path()
     _local_config = LocalConfig.from_file(os.path.join(_config_path, ARESTIX_CONFIG_FN))
@@ -366,7 +366,7 @@ def execute_restic_command(cmd):
     Executes a restic command.
     Standard output and error are written to console.
     :param list[str] cmd: the restic command to execute
-    :raises RestixException: if command execution returns an error
+    :raises ArestixException: if command execution returns an error
     """
     res = subprocess.run(cmd, capture_output=True, encoding='utf-8')
     if len(res.stderr) > 0: print(res.stderr)
@@ -396,7 +396,7 @@ def build_restic_cmd(restix_action, restic_info):
     :param dict restic_info: additional information
     :returns: restic command
     :rtype: list[str]
-    :raises RestixException: if desired action is not implemented
+    :raises ArestixException: if desired action is not implemented
     """
     _restic_cmd = ['restic', '-r', restic_info[RESTIX_TOML_KEY_REPO], '-p', restic_info[RESTIX_TOML_KEY_PW_FILE]]
     if restix_action.option(OPTION_DRY_RUN):
@@ -452,7 +452,7 @@ def do_action(restix_action, restic_info):
     Executes an action.
     :param DetailAction restix_action: arestix action including options
     :param dict restic_info: additional information
-    :raises RestixException: if command execution results in an error
+    :raises ArestixException: if command execution results in an error
     """
     # eventually check guard file first
     _base_action = restix_action.base_action()

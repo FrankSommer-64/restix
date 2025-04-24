@@ -47,7 +47,7 @@ class ArestixException(Exception):
     """
     def __init__(self, exception_id: str, *args: Any):
         """
-        Konstruktor
+        Konstruktor.
         :param exception_id: Exception-ID
         :param args: optionale Argumente
         """

@@ -70,7 +70,7 @@ class CentralPane(QWidget):
         self._local_config = local_config
         self._gui_settings = gui_settings
         self.__model_factory = ConfigModelFactory(local_config)
-        self._layout = QVBoxLayout()
+        self._layout = QVBoxLayout(self)
         self._layout.setSpacing(DEFAULT_SPACING)
         self._layout.setContentsMargins(SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN,
                                         SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
@@ -86,7 +86,6 @@ class CentralPane(QWidget):
         _welcome_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         self._layout.addWidget(_welcome_pane)
         self._work_pane = _welcome_pane
-        self.setLayout(self._layout)
 
     def _backup_selected(self):
         """

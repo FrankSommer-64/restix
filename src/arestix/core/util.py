@@ -36,13 +36,13 @@
 Hilfsfunktionen für arestix.
 """
 
-from typing import NoReturn
-
 import os
 import platform
 import pwd
 import re
 import subprocess
+
+from typing import NoReturn
 
 
 # Defaultwerte
@@ -71,7 +71,7 @@ def relative_config_path_of(file_path: str, config_dir_path: str) -> str | None:
     """
     :param file_path: Dateiname
     :param config_dir_path: arestix Konfigurationsverzeichnis
-    :return: Dateiname mit Pfad relativ zum Konfigurationsverzeichnis, falls möglich
+    :returns: Dateiname mit Pfad relativ zum Konfigurationsverzeichnis, falls möglich
     """
     if file_path is None:
         return None
@@ -88,7 +88,7 @@ def full_config_path_of(file_path: str, config_dir_path: str) -> str | None:
     """
     :param file_path: Dateiname
     :param config_dir_path: arestix Konfigurationsverzeichnis
-    :return: Dateiname mit absolutem Pfad
+    :returns: Dateiname mit absolutem Pfad
     """
     if file_path is None:
         return None

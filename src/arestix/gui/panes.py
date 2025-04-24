@@ -36,16 +36,15 @@
 Zusammengesetzte Bereiche der arestix GUI.
 """
 
-
 import time
+
 from collections.abc import Callable
 
 from PySide6.QtCore import QSize, Qt, Signal, QObject, QAbstractTableModel, QModelIndex
 from PySide6.QtGui import QMouseEvent, QBrush, QFont
-from PySide6.QtWidgets import (QWidget, QVBoxLayout,
-                               QPushButton, QLabel, QSizePolicy, QGridLayout, QListWidget,
-                               QListWidgetItem, QGroupBox, QTableView, QAbstractItemView, QCheckBox, QMessageBox,
-                               QComboBox, QLineEdit, QFileDialog, QDialog)
+from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog, QFileDialog, QGridLayout, QGroupBox,
+                               QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
+                               QSizePolicy, QTableView, QVBoxLayout, QWidget)
 
 from arestix.core import *
 from arestix.core.config import LocalConfig
@@ -166,7 +165,7 @@ class ImageButton(QPushButton):
     def __init__(self, parent: QWidget, image_url: str, click_handler, triggers_menu=False):
         """
         Konstruktor.
-        :param parent: die Pane für den Button
+        :param parent: Pane für den Button
         :param image_url: URL des Hintergrundbilds
         :param click_handler: Slot für Klicks auf den Button
         :param triggers_menu: zeigt an, ob beim Klick auf den Button ein Kontextmenü angezeigt werden soll
@@ -179,9 +178,8 @@ class ImageButton(QPushButton):
             self.__signals.menu_triggered.connect(click_handler)
         else:
             self.__signals.clicked.connect(click_handler)
-        self.setStyleSheet(f'background-image : url({ARESTIX_ASSETS_DIR}:{image_url}); border-width: 2px; border-color: black; border-style: solid')
-        self.setMinimumSize(QSize(128, 128))
-        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.setStyleSheet(_IMAGE_BUTTON_STYLE.format(ARESTIX_ASSETS_DIR, image_url))
+        self.setFixedSize(QSize(IMAGE_BUTTON_SIZE, IMAGE_BUTTON_SIZE))
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         """
@@ -206,7 +204,7 @@ class ImageButtonPane(QWidget):
     def __init__(self, parent: QWidget, image_url: str, label_id: str, click_handler, triggers_menu=False):
         """
         Konstruktor.
-        :param parent: das Widget, das diese Pane enthält.
+        :param parent: Widget, das diese Pane enthält.
         :param image_url: URL des Hintergrundbilds
         :param label_id: Resource-ID der Beschriftung
         :param click_handler: Slot für Klicks auf die Pane
@@ -220,7 +218,7 @@ class ImageButtonPane(QWidget):
             self.__signals.menu_triggered.connect(click_handler)
         else:
             self.__signals.clicked.connect(click_handler)
-        _layout = QVBoxLayout()
+        _layout = QVBoxLayout(self)
         _layout.setSpacing(0)
         _layout.setContentsMargins(0, 0, 0, 0)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -228,13 +226,11 @@ class ImageButtonPane(QWidget):
         _layout.addWidget(self.__image_button)
         _label = QLabel(localized_label(label_id), self)
         _label.setStyleSheet(IMAGE_BUTTON_LABEL_STYLE)
-        _label.setFixedWidth(128)
+        _label.setFixedWidth(IMAGE_BUTTON_SIZE)
         _label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         _label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         _layout.addWidget(_label)
-        self.setLayout(_layout)
         self.setStyleSheet(IMAGE_BUTTON_PANE_STYLE)
-
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         """
@@ -251,6 +247,7 @@ class ImageButtonPane(QWidget):
             if event.button() == Qt.MouseButton.LeftButton:
                 self.__signals.clicked.emit()
 
+
 class DirectorySelector(QPushButton):
     """
     Button zur Auswahl eines Verzeichnisses.
@@ -258,7 +255,7 @@ class DirectorySelector(QPushButton):
     def __init__(self, tooltip: str):
         """
         Konstruktor.
-        :param tooltip: der lokalisierte Tooltip-Text
+        :param tooltip: lokalisierter Tooltip-Text
         """
         super().__init__(localized_label(L_SELECT))
         self.setToolTip(tooltip)
@@ -285,7 +282,7 @@ class ActionSelectionPane(QWidget):
     def __init__(self, parent: QWidget, actions: (str, str, (), bool)):
         """
         Konstruktor.
-        :param parent: die zentrale arestix Pane
+        :param parent: zentrale arestix Pane
         :param actions: Beschreibung der Aktionen
         """
         super().__init__(parent)
@@ -310,21 +307,20 @@ class MessagePane(QWidget):
     def __init__(self, parent: QWidget):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
         """
         super().__init__(parent)
         _layout = QVBoxLayout(self)
         self.__messages = QListWidget(self)
         self.__messages.setStyleSheet(MESSAGE_PANE_STYLE)
-        self.__messages.setMinimumHeight(250)
+        self.__messages.setMinimumHeight(MIN_MESSAGE_PANE_HEIGHT)
         _layout.addWidget(self.__messages)
-        self.setLayout(_layout)
 
     def show_message(self, severity: str, text: str):
         """
         Gibt eine Nachricht aus.
-        :param severity: der Schweregrad der Nachricht (Information, Warnung, Fehler).
-        :param text: der Nachrichtentext
+        :param severity: Schweregrad der Nachricht (Information, Warnung, Fehler).
+        :param text: Nachrichtentext
         """
         _info = QListWidgetItem(text)
         if severity == SEVERITY_ERROR:
@@ -377,7 +373,6 @@ class ActionButtonPane(QWidget):
             self.__cancel_button.setEnabled(False)
             self.__cancel_button.clicked.connect(cancel_handler)
             _layout.addWidget(self.__cancel_button, 0, len(start_button_label_ids))
-        self.setLayout(_layout)
 
     def action_started(self):
         """
@@ -408,9 +403,9 @@ class TargetSelectionPane(QGroupBox):
                  target_selected_handler: Callable):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
         :param local_config: lokale arestix-Konfiguration
-        :param settings: die GUI-Einstellungen des Benutzers
+        :param settings: GUI-Einstellungen des Benutzers
         :param target_selected_handler: Handler für die Auswahl eines Backup-Ziels
         """
         super().__init__(localized_label(L_TARGET), parent)
@@ -419,7 +414,6 @@ class TargetSelectionPane(QGroupBox):
         _layout = QGridLayout(self)
         self._table_view = TargetTableView(self, local_config, target_selected_handler)
         _layout.addWidget(self._table_view)
-        self.setLayout(_layout)
         self.setStyleSheet(GROUP_BOX_STYLE)
 
     def selected_target(self) -> dict:
@@ -441,13 +435,13 @@ class ResticActionPane(QWidget):
                  local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: die zentrale arestix Pane
+        :param parent: zentrale arestix Pane
         :param start_button_label_ids: ID der Beschriftungen für die Start-Buttons
         :param start_button_tooltip_ids: ID der Tooltips für die Start-Buttons
         :param target_selected_handler: Handler, wenn der Benutzer ein Backup-Ziel auswählt
         :param start_handlers: Click-Handler für jeden der Start-Buttons
         :param local_config: lokale arestix-Konfiguration
-        :param gui_settings: die GUI-Einstellungen des Benutzers
+        :param gui_settings: GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)
         self.arestix_config = local_config
@@ -515,7 +509,8 @@ class ResticActionPane(QWidget):
 
     def handle_finish(self):
         """
-        Informs the user that the asynchronous task succeeded and updates the button statuses.
+        Informiert den Benutzer darüber, dass der Hintergrund-Prozess erfolgreich ausgeführt wurde.
+        Aktualisiert den Status der Start- und Cancel-Buttons.
         """
         _info = localized_message(I_GUI_TASK_FINISHED, time.strftime('%X', time.localtime()))
         self.message_pane.show_message(SEVERITY_INFO, _info)
@@ -523,16 +518,18 @@ class ResticActionPane(QWidget):
 
     def handle_result(self, result: TaskResult):
         """
-        Displays summary of asynchronous task.
-        :param result: the task result
+        Gibt eine Zusammenfassung des Ergebnisses der Hintergrund-Task aus.
+        Aktualisiert den Status der Start- und Cancel-Buttons.
+        :param result: Ergebnis des Hintergrund-Prozesses
         """
         self.message_pane.show_message(SEVERITY_INFO, result.summary())
         self.button_pane.action_stopped()
 
-    def handle_error(self, exception):
+    def handle_error(self, exception: Exception):
         """
-        Informs the user that the asynchronous task fails and updates the button statuses.
-        :param Exception exception: the exception causing task failure
+        Informiert den Benutzer darüber, dass Hintergrund-Prozess fehlgeschlagen ist.
+        Aktualisiert den Status der Start- und Cancel-Buttons.
+        :param exception: Exception, die zum Fehlschlag des Hintergrund-Prozesses geführt hat
         """
         self.message_pane.show_message(SEVERITY_ERROR, str(exception))
         self.button_pane.action_stopped()
@@ -541,10 +538,10 @@ class ResticActionPane(QWidget):
 def create_checkbox(layout: QGridLayout, caption_id: str, tooltip_id: str, initial_state:bool) -> QCheckBox:
     """
     Erzeugt Label und Checkbox für eine Option.
-    :param layout: das Layout, in dem die Option enthalten sein soll.
-    :param caption_id: die Label-ID für die Beschreibung.
-    :param tooltip_id: die Label-ID für den Tooltip-Text.
-    :param initial_state: der initiale Zustand der Checkbox.
+    :param layout: Layout, in dem die Option enthalten sein soll.
+    :param caption_id: Label-ID für die Beschreibung.
+    :param tooltip_id: Label-ID für den Tooltip-Text.
+    :param initial_state: initialer Zustand der Checkbox.
     :returns: checkbox widget
     """
     _row_nr = layout.rowCount()
@@ -569,7 +566,7 @@ def create_combo(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QComb
     _tooltip = localized_label(tooltip_id)
     layout.addWidget(option_label(caption_id, _tooltip), _row_nr, 0)
     _combo_box = QComboBox()
-    _combo_box.setMinimumWidth(240)
+    _combo_box.setMinimumWidth(MIN_COMBO_WIDTH)
     _combo_box.setToolTip(_tooltip)
     layout.addWidget(_combo_box, _row_nr, 1, 1, 2)
     return _combo_box
@@ -597,7 +594,7 @@ def create_text(layout: QGridLayout, caption_id: str, tooltip_id: str) -> QLineE
     :param layout: Layout, in dem die Option enthalten sein soll.
     :param caption_id: Label-ID für die Beschreibung.
     :param tooltip_id: Label-ID für den Tooltip-Text.
-    :returns: Combo-Box
+    :returns: Texteingabefeld
     """
     _row_nr = layout.rowCount()
     _tooltip = localized_label(tooltip_id)
@@ -622,3 +619,5 @@ def option_label(caption_id: str, tooltip_text: str) -> QLabel:
     _label.setToolTip(tooltip_text)
     _label.setStyleSheet(CAPTION_STYLE)
     return _label
+
+_IMAGE_BUTTON_STYLE = 'background-image : url({0}:{1}); border-width: 2px; border-color: black; border-style: solid'

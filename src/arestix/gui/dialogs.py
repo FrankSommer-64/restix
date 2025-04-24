@@ -35,6 +35,7 @@
 """
 Dialogfenster für die arestix GUI.
 """
+
 import datetime
 import os.path
 import tomli
@@ -46,9 +47,9 @@ from PySide6 import QtCore
 from PySide6.QtCore import qVersion, Qt
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import (QWidget, QLabel, QDialog, QPushButton,
-                               QMessageBox, QGridLayout, QVBoxLayout, QGroupBox, QHBoxLayout, QSizePolicy, QLineEdit,
-                               QTreeWidget, QTreeWidgetItem, QStyle, QFileDialog, QFrame, QTextEdit)
+from PySide6.QtWidgets import (QDialog, QFileDialog, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+                               QMessageBox, QPushButton, QSizePolicy, QStyle, QTextEdit,
+                               QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from arestix.core import *
 from arestix.core.action import ArestixAction
@@ -56,7 +57,7 @@ from arestix.core.config import LocalConfig
 from arestix.core.messages import *
 from arestix.core.restic_interface import find_snapshot_elements, list_snapshot_elements
 from arestix.core.snapshot import Snapshot
-from arestix.gui import GROUP_BOX_STYLE, ACTION_BUTTON_STYLE
+from arestix.gui import *
 
 
 class TextFileViewerDialog(QDialog):
@@ -94,7 +95,7 @@ class SnapshotViewerDialog(QDialog):
         Konstruktor.
         :param parent: übergeordnetes Widget
         :param snapshot_id: ID des restic Snapshots.
-        :param target_alias: Alias des Backup-Ziels.
+        :param target_alias: Alias-Name des Backup-Ziels.
         :param local_config: lokale arestix-Konfiguration.
         :param hostname: Hostname, für den der Snapshot angelegt wurde.
         :param year: Jahr des restic Snapshots.
@@ -112,14 +113,13 @@ class SnapshotViewerDialog(QDialog):
         self.setGeometry(_parent_rect.x() + _SNAPSHOT_VIEWER_OFFSET, _parent_rect.y() + _SNAPSHOT_VIEWER_OFFSET,
                          _SNAPSHOT_VIEWER_WIDTH, _SNAPSHOT_VIEWER_HEIGHT)
         self.setStyleSheet(_STYLE_WHITE_BG)
-        _layout = QVBoxLayout()
+        _layout = QVBoxLayout(self)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _viewer_pane = self._create_viewer_pane()
         _viewer_pane.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         _layout.addWidget(_viewer_pane)
         _action_pane = self._create_action_pane()
         _layout.addWidget(_action_pane)
-        self.setLayout(_layout)
 
     def selected_elements(self) -> list[str]:
         """
@@ -133,7 +133,7 @@ class SnapshotViewerDialog(QDialog):
         :returns: oberer Bereich des Dialogfensters
         """
         _group = QGroupBox(localized_label(L_SELECT_ELEMENTS))
-        _group_layout = QVBoxLayout()
+        _group_layout = QVBoxLayout(_group)
         _group_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _viewer_buttons_layout = QHBoxLayout()
         _show_all_button = QPushButton(localized_label(L_SHOW_ALL_ELEMENTS))
@@ -145,7 +145,6 @@ class SnapshotViewerDialog(QDialog):
         self.__search_field = QLineEdit()
         self.__search_field.setStyleSheet(_STYLE_INPUT_FIELD)
         self.__search_field.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        #_search_field.setToolTip(_tooltip)
         _viewer_buttons_layout.addWidget(self.__search_field)
         _group_layout.addLayout(_viewer_buttons_layout)
         self.__tree_viewer = QTreeWidget(self)
@@ -153,7 +152,6 @@ class SnapshotViewerDialog(QDialog):
         self.__tree_viewer.setHeaderLabels([localized_label(L_ELEMENT)])
         self.__tree_viewer.itemChanged.connect(SnapshotViewerDialog._item_changed)
         _group_layout.addWidget(self.__tree_viewer)
-        _group.setLayout(_group_layout)
         return _group
 
     @classmethod
@@ -290,7 +288,7 @@ class PdfViewerDialog(QDialog):
     def __init__(self, parent: QWidget, title_id: str, file_path: str):
         """
         Konstruktor.
-        :param parent: das übergeordnete Widget
+        :param parent: übergeordnetes Widget
         :param title_id: Resource-ID für die Fensterüberschrift
         :param file_path: Name und Pfad der anzuzeigenden PDF-Datei
         """
@@ -300,14 +298,13 @@ class PdfViewerDialog(QDialog):
         self.setGeometry(_parent_rect.x() + _PDF_VIEWER_OFFSET, _parent_rect.y() + _PDF_VIEWER_OFFSET,
                          _PDF_VIEWER_WIDTH, _PDF_VIEWER_HEIGHT)
         self.setStyleSheet(_STYLE_WHITE_BG)
-        _dlg_layout = QVBoxLayout()
+        _dlg_layout = QVBoxLayout(self)
         _web_view = QWebEngineView()
         _view_settings = _web_view.settings()
         _view_settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
         _view_settings.setAttribute(QWebEngineSettings.WebAttribute.PdfViewerEnabled, True)
         _web_view.load(f'file://{file_path}')
         _dlg_layout.addWidget(_web_view)
-        self.setLayout(_dlg_layout)
 
 
 class AboutDialog(QDialog):
@@ -326,7 +323,7 @@ class AboutDialog(QDialog):
                          _ABOUT_DIALOG_WIDTH, _ABOUT_DIALOG_HEIGHT)
         self.setStyleSheet(_STYLE_WHITE_BG)
         _dlg_layout = QGridLayout(self)
-        _dlg_layout.setSpacing(10)
+        _dlg_layout.setSpacing(DEFAULT_SPACING)
         _arestix_image = QWidget()
         _arestix_image.setFixedSize(_ARESTIX_IMAGE_SIZE, _ARESTIX_IMAGE_SIZE)
         _arestix_image.setStyleSheet(_STYLE_ARESTIX_IMAGE)
@@ -340,12 +337,13 @@ class AboutDialog(QDialog):
 
     def _arestix_group_box(self) -> QGroupBox:
         """
-        :return: GroupBox für die Informationen zur arestix-Applikation
+        :returns: GroupBox für die Informationen zur arestix-Applikation
         """
         _group_box = QGroupBox(localized_label(L_ARESTIX))
         _group_box.setStyleSheet(GROUP_BOX_STYLE)
         _grp_layout = QGridLayout(_group_box)
-        _grp_layout.setContentsMargins(10, 20, 10, 10)
+        _grp_layout.setContentsMargins(DEFAULT_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
+                                       DEFAULT_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _row = 0
         _row += AboutDialog._create_component_header(_grp_layout, _row, I_GUI_ARESTIX_INFO, I_GUI_ARESTIX_COPYRIGHT)
         AboutDialog._create_component_part(_grp_layout, _row, None, VERSION, self._show_mit_license,
@@ -354,12 +352,13 @@ class AboutDialog(QDialog):
 
     def _third_party_group_box(self) -> QGroupBox:
         """
-        :return: GroupBox für die Informationen zu verwendeten Bibliotheken
+        :returns: GroupBox für die Informationen zu verwendeten Bibliotheken
         """
         _group_box = QGroupBox(localized_label(L_LIBRARIES))
         _group_box.setStyleSheet(GROUP_BOX_STYLE)
         _grp_layout = QGridLayout(_group_box)
-        _grp_layout.setContentsMargins(10, 20, 10, 10)
+        _grp_layout.setContentsMargins(DEFAULT_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
+                                       DEFAULT_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _row = 0
         _row += AboutDialog._create_component_header(_grp_layout, _row, I_GUI_PYSIDE_INFO, None)
         _row += AboutDialog._create_component_part(_grp_layout, _row, _COMPONENT_PART_PYSIDE, qVersion(),
@@ -468,7 +467,7 @@ class SaveConfigDialog(QDialog):
                          _SAVE_DIALOG_WIDTH, _SAVE_DIALOG_HEIGHT)
         self.setStyleSheet(_STYLE_WHITE_BG)
         _layout = QVBoxLayout(self)
-        _layout.setSpacing(10)
+        _layout.setSpacing(DEFAULT_SPACING)
         _layout.addWidget(QLabel(localized_label(I_GUI_LOCAL_CONFIG_CHANGED)))
         _button_pane = QWidget()
         _button_pane_layout = QHBoxLayout(_button_pane)
@@ -520,7 +519,7 @@ class PasswordDialog(QDialog):
                          _PASSWORD_DIALOG_WIDTH, _PASSWORD_DIALOG_HEIGHT)
         self.setStyleSheet(_STYLE_WHITE_BG)
         _layout = QGridLayout(self)
-        _layout.setSpacing(10)
+        _layout.setSpacing(DEFAULT_SPACING)
         _layout.addWidget(QLabel(localized_label(L_ENTER_PASSWORD)), 0, 0)
         self.__password_text = QLineEdit('', echoMode=QLineEdit.EchoMode.Password)
         _layout.addWidget(self.__password_text, 0, 1)

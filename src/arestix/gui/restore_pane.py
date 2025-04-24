@@ -35,24 +35,25 @@
 """
 GUI-Bereich für den Restore.
 """
+
 import datetime
 import platform
 import tempfile
 
 from PySide6.QtCore import Qt, QThreadPool
-from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox, QRadioButton, QPushButton, QDialog
+from PySide6.QtWidgets import QDialog, QGridLayout, QGroupBox, QMessageBox, QPushButton, QRadioButton, QWidget
 
 from arestix.core import *
 from arestix.core.action import ArestixAction
+from arestix.core.arestix_exception import ArestixException
 from arestix.core.config import LocalConfig
 from arestix.core.messages import *
-from arestix.core.arestix_exception import ArestixException
 from arestix.core.restic_interface import determine_snapshots
 from arestix.core.task import TaskMonitor
-from arestix.gui import PAST_YEARS_COUNT
-from arestix.gui.dialogs import SnapshotViewerDialog, PasswordDialog
-from arestix.gui.panes import (ResticActionPane, create_combo, create_dir_selector, create_checkbox, create_text,
-                               GROUP_BOX_STYLE, option_label)
+from arestix.gui import PAST_YEARS_COUNT, WIDE_CONTENT_MARGIN
+from arestix.gui.dialogs import PasswordDialog, SnapshotViewerDialog
+from arestix.gui.panes import (create_checkbox, create_combo, create_dir_selector, create_text,
+                               GROUP_BOX_STYLE, option_label, ResticActionPane)
 from arestix.gui.settings import GuiSettings
 from arestix.gui.worker import Worker
 
@@ -64,7 +65,7 @@ class RestoreOptionsPane(QGroupBox):
     def __init__(self, parent: QWidget, local_config: LocalConfig):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
         :param local_config: lokale arestix-Konfiguration
         """
         super().__init__(localized_label(L_OPTIONS), parent)
@@ -73,9 +74,9 @@ class RestoreOptionsPane(QGroupBox):
         self.__selected_elements = None
         self.__pw = ''
         self.setStyleSheet(GROUP_BOX_STYLE)
-        _layout = QGridLayout()
+        _layout = QGridLayout(self)
         _layout.setColumnStretch(3, 1)
-        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__snapshot_combo = create_combo(_layout, L_MANDATORY_SNAPSHOT, T_OPT_RST_SNAPSHOT)
         self.__restore_path_selector = create_dir_selector(_layout, L_RESTORE_PATH, T_OPT_RST_RESTORE_PATH)
@@ -97,7 +98,6 @@ class RestoreOptionsPane(QGroupBox):
         self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year - PAST_YEARS_COUNT, -1)])
         self.__year_combo.setCurrentIndex(0)
         self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_RST_DRY_RUN, False)
-        self.setLayout(_layout)
 
     def clear_snapshot_combo(self):
         """
@@ -199,9 +199,9 @@ class RestorePane(ResticActionPane):
     def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: die zentrale arestix Pane
+        :param parent: zentrale arestix Pane
         :param local_config: lokale arestix-Konfiguration
-        :param gui_settings: die GUI-Einstellungen des Benutzers
+        :param gui_settings: GUI-Einstellungen des Benutzers
         """
         super().__init__(parent, [L_DO_RESTORE], [T_RST_DO_RESTORE], self._target_selected,
                          [self.start_button_clicked], local_config, gui_settings)

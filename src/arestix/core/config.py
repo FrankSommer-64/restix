@@ -44,14 +44,15 @@ import pathlib
 import re
 import shutil
 
-import tomli
-import tomli_w
 from typing import Self
 
+import tomli
+import tomli_w
+
 from arestix.core import *
-from arestix.core.messages import *
 from arestix.core.arestix_exception import ArestixException
-from arestix.core.util import full_path_of, current_user
+from arestix.core.messages import *
+from arestix.core.util import current_user, full_path_of
 
 
 class LocalConfig(dict):
@@ -96,14 +97,14 @@ class LocalConfig(dict):
 
     def repo_for_target(self, alias: str) -> str:
         """
-        :param alias: der Aliasname des Backup-Ziels
+        :param alias: Aliasname des Backup-Ziels
         :returns: Repository-Location für das angegebene Backup-Ziel
         """
         return self.targets().get(alias).get(CFG_PAR_LOCATION)
 
     def credentials_for_target(self, alias: str) -> dict:
         """
-        :param alias: der Aliasname des Backup-Ziels
+        :param alias: Aliasname des Backup-Ziels
         :returns: Zugangsdaten für das angegebene Backup-Ziel
         """
         _target = self.targets().get(alias)
@@ -111,7 +112,7 @@ class LocalConfig(dict):
 
     def scope_for_target(self, alias: str) -> dict:
         """
-        :param alias: der Aliasname des Backup-Ziels
+        :param alias: Aliasname des Backup-Ziels
         :returns: Backup-Umfang für das angegebene Backup-Ziel
         """
         _target = self.targets().get(alias)
@@ -128,7 +129,7 @@ class LocalConfig(dict):
         Prüft, ob ein Element gelöscht werden kann.
         :param group: Group des Elements
         :param alias: Aliasname des Elements.
-        :raises RestixException: falls das Element nicht gelöscht werden darf
+        :raises ArestixException: falls das Element nicht gelöscht werden darf
         """
         if group == CFG_GROUP_TARGET:
             # Backup-Ziele haben keine Abhängigkeiten
@@ -145,7 +146,7 @@ class LocalConfig(dict):
         :param group: Group des Elements
         :param old_alias: alter Aliasname des Elements
         :param new_alias: neuer Aliasname des Elements.
-        :raises RestixException: falls das Element nicht umbenannt werden darf
+        :raises ArestixException: falls das Element nicht umbenannt werden darf
         """
         if len(new_alias) == 0:
             # Leerstring als neuer Aliasname ist nie erlaubt
@@ -188,8 +189,8 @@ class LocalConfig(dict):
         """
         Speichert die Konfiguration in Datei.
         Überschreibt den Inhalt, falls die Datei bereits existiert.
-        :param file_path: der Dateiname; bei None wird der Dateiname vom öffnen benutzt.
-        :raises RestixException: falls das Speichern fehlschlägt
+        :param file_path: Dateiname; bei None wird der Dateiname vom öffnen benutzt.
+        :raises ArestixException: falls das Speichern fehlschlägt
         """
         _output_file_path = self.__file_path if file_path is None else file_path
         if _output_file_path is None:
@@ -202,7 +203,7 @@ class LocalConfig(dict):
 
     def _group(self, group_name: str) -> dict:
         """
-        :param group_name: die gewünschte Group
+        :param group_name: gewünschte Group
         :returns: alle definierten Elemente der übergebenen Group, sortiert nach Aliasname
         """
         _elements = {}
@@ -216,7 +217,7 @@ class LocalConfig(dict):
         Erzeugt die lokale arestix-Konfiguration aus einer TOML-Datei.
         :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
         :returns: lokale arestix-Konfiguration.
-        :raises RestixException: falls die Datei nicht gelesen oder verarbeitet werden kann
+        :raises ArestixException: falls die Datei nicht gelesen oder verarbeitet werden kann
         """
         _file_contents = ''
         _file_path = os.path.abspath(file_path)
@@ -231,10 +232,10 @@ class LocalConfig(dict):
     def from_str(cls: Self, data: str, file_path: str) -> Self:
         """
         Erzeugt die lokale arestix-Konfiguration aus einem TOML-String.
-        :param data: die TOML-Daten
+        :param data: TOML-Daten
         :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
         :returns: lokale arestix-Konfiguration.
-        :raises RestixException: falls der String nicht verarbeitet werden kann
+        :raises ArestixException: falls der String nicht verarbeitet werden kann
         """
         try:
             _toml_data = tomli.loads(data)
@@ -248,8 +249,8 @@ class LocalConfig(dict):
     def replace_variables(cls: Self, element: dict|list|str, variables: dict) -> dict|list|str:
         """
         Ersetzt Variablen in String-Werten des Elements
-        :param element: das Element
-        :param variables: die zu ersetzenden Variablen
+        :param element: Element
+        :param variables: zu ersetzende Variablen
         :returns: Element, in dem alle Vorkommen der Variablen durch ihre Werte ersetzt wurden
         """
         if type(element) is str:
@@ -271,7 +272,7 @@ def config_root_path() -> str:
     Falls die Umgebungsvariable RESTIX_CONFIG_PATH definiert und ein Verzeichnis ist, wird dieses Verzeichnis
     zurückgegeben. Ansonsten wird das Standardverzeichnis '.config/arestix' im Home-Verzeichnis des Users zurückgegeben.
     :returns: Wurzelverzeichnis der arestix-Konfiguration
-    :raises RestixException: Umgebungsvariable RESTIX_CONFIG_PATH ist definiert, aber kein Verzeichnis,
+    :raises ArestixException: Umgebungsvariable RESTIX_CONFIG_PATH ist definiert, aber kein Verzeichnis,
                              oder Umgebungsvariable RESTIX_CONFIG_PATH ist **nicht** definiert und das
                              Standardverzeichnis existiert nicht
     """
@@ -294,7 +295,7 @@ def create_config_root() -> str:
     Falls Umgebungsvariable RESTIX_CONFIG_PATH gesetzt ist, wird dieses als Verzeichnisname benutzt, ansonsten wird
     das Verzeichnis $HOME/.config/arestix erzeugt.
     :returns: arestix-Konfigurationsverzeichnis mit vollständigem Pfad.
-    :raises RestixException: falls das Erstellen fehlschlägt
+    :raises ArestixException: falls das Erstellen fehlschlägt
     """
     _config_path = os.environ.get(ENVA_ARESTIX_CONFIG_PATH)
     if _config_path is None:
@@ -304,7 +305,7 @@ def create_config_root() -> str:
         os.makedirs(_config_path, 0o755, True)
         _source_path = pathlib.Path(__file__).parent.resolve()
         # für wheel templates path anpassen !
-        #_templates_path = os.path.abspath(os.path.join(_source_path, '..', RESTIX_TEMPLATES_DIR))
+        # _templates_path = os.path.abspath(os.path.join(_source_path, '..', RESTIX_TEMPLATES_DIR))
         _templates_path = os.path.abspath(os.path.join(_source_path, '..', '..', '..', ARESTIX_TEMPLATES_DIR))
         shutil.copy(os.path.join(_templates_path, ARESTIX_CONFIG_FN), _config_path)
         with open(os.path.join(_templates_path, ARESTIX_DEFAULT_INCLUDES_FN), 'r') as _includes_template:
@@ -320,10 +321,10 @@ def create_config_root() -> str:
 def validate_config(data: dict, file_path: str) -> list[str]:
     """
     Prüft, ob eine arestix-Konfiguration gültig ist.
-    :param data: die TOML-Daten der Konfiguration
+    :param data: TOML-Daten der Konfiguration
     :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
     :returns: lokalisierte Warnungen.
-    :raises RestixException: falls in der Konfiguration ein Element mit falschem Typ definiert ist, ein notwendiges
+    :raises ArestixException: falls in der Konfiguration ein Element mit falschem Typ definiert ist, ein notwendiges
      Element fehlt oder in einem String-Wert eine nicht unterstützte Variable verwendet wird
     """
     _unsupported_items = []
@@ -379,7 +380,7 @@ def check_element(qualified_element_name: str, element_value: dict|list|str, ele
     :param element_desc: Beschreibung für alle Unter-Elemente
     :param file_name: Name der Konfigurationsdatei ohne Pfadangabe
     :returns: nicht unterstützte Elemente.
-    :raises RestixException: falls das Element nicht verarbeitet werden kann
+    :raises ArestixException: falls das Element nicht verarbeitet werden kann
     """
     _expected_element_type = element_desc[0]
     check_element_type(qualified_element_name, _expected_element_type, element_value, file_name)
@@ -424,7 +425,7 @@ def check_element_type(element_name: str, expected_type: str, par_value: dict|li
     :param expected_type: erwarteter TOML-Typ (a für Array, s für String, t für Table)
     :param par_value: Wert des Elements
     :param file_name: Name der Konfigurationsdatei ohne Pfad.
-    :raises RestixException: falls das Element nicht den erwarteten Typ oder Wert hat
+    :raises ArestixException: falls das Element nicht den erwarteten Typ oder Wert hat
     """
     if expected_type.startswith('s'):
         # string
@@ -455,10 +456,10 @@ def check_element_type(element_name: str, expected_type: str, par_value: dict|li
 def extract_groups(data: dict, file_path: str) -> dict:
     """
     Liest die Groups aus den übergebenen TOML-Daten.
-    :param data: die TOML-Daten der Konfiguration
+    :param data: TOML-Daten der Konfiguration
     :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
     :returns: Name und Daten aller Groups.
-    :raises RestixException: falls es Groups mit gleichem Namen gibt
+    :raises ArestixException: falls es Groups mit gleichem Namen gibt
     """
     _file_name = os.path.basename(file_path)
     _groups = {}

@@ -38,7 +38,10 @@ Lokalisierte Nachrichten.
 
 import os
 
+from typing import Self
+
 from arestix.core.util import platform_locale
+
 
 # Allgemeine Nachrichten
 E_ALIAS_NAME_ALREADY_USED = 'e-alias-name-already-used'
@@ -280,7 +283,7 @@ T_OPT_RST_YEAR = 't-opt-rst-year'
 # GUI Warnungen
 W_GUI_WRITE_GUI_SETTINGS_FAILED = 'w-gui-write-gui-settings-failed'
 
-# internal
+# intern
 _MSG_FILE_NAME_FMT = 'messages_{0}.txt'
 _DEFAULT_LOCALE = 'en'
 _EMSG_INST_CORRUPT = 'arestix installation is corrupt: {0}'
@@ -288,43 +291,42 @@ _EMSG_NO_MSG_FILE_FOUND = 'Could not find localized message definition files'
 _EMSG_READ_MSG_FILE_FAILED = 'Could not read localized message definition file {0}: {1}'
 
 
-def localized_message(msg_id, *args):
+def localized_message(msg_id: str, *args) -> str:
     """
-    Returns the localized message for given message ID and optional arguments.
-    The number of optional arguments must match the number of placeholders used in the message's format string.
-    Returns the message ID, if this table doesn't contain an appropriate message or there is a mismatch between
-    optional arguments and format string.
-    :param str msg_id: the message ID
-    :param args: the optional additional arguments
-    :returns: the localized message
-    :rtype: str
+    Gibt die lokalisierte Nachricht für angegebene Message-ID und Argumente zurück.
+    Die Anzahl der Argumente muss zur Anzahl der Platzhalter im Format-String der Nachricht passen.
+    Gibt die Message-ID zurück, falls die interne Tabelle keine passende Nachricht enthält oder die Argumente nicht
+    zum Format-String passen.
+    :param msg_id: Resource-ID der Nachricht
+    :param args: Argumente für die Nachricht
+    :returns: lokalisierte Nachricht für angegebene Message-ID und Argumente
     """
     global _MESSAGE_TABLE
     return _MESSAGE_TABLE.message_for(msg_id, *args)
 
 
-def localized_label(label_id):
+def localized_label(label_id: str) -> str:
     """
-    Returns the localized text for given label ID.
-    :param str label_id: the label ID
-    :rtype: str
+    :param label_id: Resource-ID des Labels
+    :returns: lokalisierter Label für ein GUI-Element
     """
     global _MESSAGE_TABLE
     return _MESSAGE_TABLE.label_for(label_id)
 
 
 class MessageTable(dict):
-    def __init__(self, locale, messages):
+    """
+    Tabelle mit allen lokalisierten Nachrichten für eine Sprache.
+    Jede Nachricht muss in einer eigenen Zeile definiert werden, beginnend mit der Message ID, gefolgt von einem
+    Leerzeichen und dem Format-String der Nachricht. Durch Backslash am Zeilenende kann sich der Format-String
+    über mehrere Zeilen erstrecken. Zeilen, die mit einem #-Zeichen beginnen werden ignoriert.
+    """
+    def __init__(self, messages: str):
         """
-        Initializes the message table for the specified localized messages.
-        Every message must be specified in a line starting with message ID followed by a space character and then
-        the format string associated with the message ID. A backslash at the end of a line may be used as
-        continuation. Lines starting with a hash mark or not complying with this format are ignored.
-        :param str locale: the locale
-        :param str messages: the localized messages
+        Konstruktor.
+        :param messages: lokalisierte Nachrichten
         """
         super().__init__()
-        self.__locale = locale
         msg_id = None
         msg_text = ''
         msg_list = messages.split(os.linesep)
@@ -354,16 +356,15 @@ class MessageTable(dict):
             msg_id = None
             msg_text = ''
 
-    def message_for(self, msg_id, *args):
+    def message_for(self, msg_id: str, *args) -> str:
         """
-        Returns the localized message for given message ID and optional arguments.
-        The number of optional arguments must match the number of placeholders used in the message's format string.
-        Returns the message ID, if this table doesn't contain an appropriate message or there is a mismatch between
-        optional arguments and format string.
-        :param str msg_id: the message ID
-        :param args: the optional additional arguments
-        :returns: the localized message
-        :rtype: str
+        Gibt die lokalisierte Nachricht für angegebene Message-ID und Argumente zurück.
+        Die Anzahl der Argumente muss zur Anzahl der Platzhalter im Format-String der Nachricht passen.
+        Gibt die Message-ID zurück, falls die interne Tabelle keine passende Nachricht enthält oder die Argumente nicht
+        zum Format-String passen.
+        :param msg_id: Resource-ID der Nachricht
+        :param args: Argumente für die Nachricht
+        :returns: lokalisierte Nachricht für angegebene Message-ID und Argumente
         """
         _fmt_str = self.get(msg_id)
         if _fmt_str is None:
@@ -374,36 +375,20 @@ class MessageTable(dict):
         except (KeyError, IndexError, ValueError):
             return msg_id
 
-    def label_for(self, label_id):
+    def label_for(self, label_id: str) -> str:
         """
-        Returns the localized label for given ID.
-        Used for GUI widgets.
-        :param str label_id: the label ID
-        :rtype: str
+        :param label_id: Resource-ID des Labels
+        :returns: lokalisierter Label für ein GUI-Element
         """
         _label = self.get(label_id)
-        if _label is None:
-            return label_id
-        return _label
+        return label_id if _label is None else _label
 
-    def locale(self):
+    @classmethod
+    def for_locale(cls, locale: str | None) -> Self:
         """
-        Returns the locale of this message table.
-        Used for testing purposes.
-        :returns: the locale
-        :rtype: str
-        """
-        return self.__locale
-
-    @staticmethod
-    def for_locale(locale):
-        """
-        Creates a message table for the specified locale.
-        Uses default locale, if locale is not supported.
-        :param str locale: the locale
-        :returns: message table for specified locale
-        :rtype: MessageTable
-        :raises RuntimeError: if no message definition files exist, i.e. installation is corrupt
+        :param locale: locale-Code der Sprache (z.B. 'en')
+        :returns: Tabelle mit den lokalisierten Nachrichten der angegebenen Sprache.
+        :raises RuntimeError: falls die Arestix-Konfiguration korrupt ist
         """
         _locale = _DEFAULT_LOCALE if locale is None else locale
         _msgs_file_name = _MSG_FILE_NAME_FMT.format(_locale)
@@ -417,11 +402,11 @@ class MessageTable(dict):
         try:
             with open(_msgs_file_path, 'r') as f:
                 _msgs = f.read()
-            return MessageTable(_locale, _msgs)
+            return MessageTable(_msgs)
         except IOError as e:
             _cause = _EMSG_READ_MSG_FILE_FAILED.format(_msgs_file_path, str(e))
             raise RuntimeError(_EMSG_INST_CORRUPT.format(_cause))
 
 
-# All localized messages, eventually containing placeholders
+# Tabelle mit allen lokalisierten Nachrichten für die lokale Plattform
 _MESSAGE_TABLE = MessageTable.for_locale(platform_locale())

@@ -43,7 +43,7 @@ from PySide6.QtWidgets import QDialog, QMainWindow, QMessageBox
 from arestix.core.arestix_exception import ArestixException
 from arestix.core.config import LocalConfig
 from arestix.core.messages import *
-from arestix.gui import SMALL_CONTENT_MARGIN, MAIN_WIN_MIN_HEIGHT, MAIN_WIN_MIN_WIDTH
+from arestix.gui import SMALL_CONTENT_MARGIN, MIN_MAIN_WIN_HEIGHT, MIN_MAIN_WIN_WIDTH
 from arestix.gui.central_pane import CentralPane
 from arestix.gui.dialogs import SaveConfigDialog
 from arestix.gui.settings import GuiSettings
@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
         self.__config = local_config
         self.__original_config = deepcopy(local_config)
         self.__settings = GuiSettings.from_file()
-        self.setMinimumSize(MAIN_WIN_MIN_WIDTH, MAIN_WIN_MIN_HEIGHT)
+        self.setMinimumSize(MIN_MAIN_WIN_WIDTH, MIN_MAIN_WIN_HEIGHT)
         self.setGeometry(self.__settings.win_geometry())
         self.setWindowTitle(localized_label(L_MAIN_WIN_TITLE))
         self.setCentralWidget(CentralPane(self, local_config, self.__settings))

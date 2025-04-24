@@ -123,7 +123,7 @@ class TestConfig(unittest.TestCase):
         """
         Test mit mehreren Testdaten-Dateien durchführen.
         :param file_name_pattern: Pattern für die Namen der Testdateien.
-        :raises RestixException: falls beim Validieren der Dateien **keine** Exception auftritt
+        :raises ArestixException: falls beim Validieren der Dateien **keine** Exception auftritt
         """
         _toml_dataset = TestConfig.unittest_toml_dataset(file_name_pattern)
         for _file_name, _toml_data in _toml_dataset.items():

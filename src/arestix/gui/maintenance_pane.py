@@ -35,19 +35,20 @@
 """
 GUI-Bereich für die Wartung.
 """
+
 import datetime
 import platform
 
 from PySide6.QtCore import Qt, QThreadPool
-from PySide6.QtWidgets import QWidget, QGridLayout, QGroupBox, QMessageBox
+from PySide6.QtWidgets import QGridLayout, QGroupBox, QMessageBox, QWidget
 
 from arestix.core import *
 from arestix.core.action import ArestixAction
+from arestix.core.arestix_exception import ArestixException
 from arestix.core.config import LocalConfig
 from arestix.core.messages import *
-from arestix.core.arestix_exception import ArestixException
-from arestix.gui import GROUP_BOX_STYLE, PAST_YEARS_COUNT
-from arestix.gui.panes import create_combo, create_checkbox, create_text, ResticActionPane
+from arestix.gui import GROUP_BOX_STYLE, PAST_YEARS_COUNT, WIDE_CONTENT_MARGIN
+from arestix.gui.panes import create_checkbox, create_combo, create_text, ResticActionPane
 from arestix.gui.settings import GuiSettings
 from arestix.gui.worker import Worker
 
@@ -59,15 +60,15 @@ class MaintenanceOptionsPane(QGroupBox):
     def __init__(self, parent: QWidget):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
         """
         super().__init__(localized_label(L_OPTIONS), parent)
         self.__target_alias = None
         self.__tag_name = None
         self.setStyleSheet(GROUP_BOX_STYLE)
-        _layout = QGridLayout()
+        _layout = QGridLayout(self)
         _layout.setColumnStretch(3, 1)
-        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__host_text = create_text(_layout, L_HOST, T_OPT_MNT_HOST)
         self.__host_text.setText(platform.node())
@@ -76,7 +77,6 @@ class MaintenanceOptionsPane(QGroupBox):
         self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year - PAST_YEARS_COUNT, -1)])
         self.__year_combo.setCurrentIndex(0)
         self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_MNT_DRY_RUN, False)
-        self.setLayout(_layout)
 
     def selected_options(self) -> dict:
         """
@@ -96,7 +96,7 @@ class MaintenancePane(ResticActionPane):
     def __init__(self, parent: QWidget, local_config: LocalConfig, gui_settings: GuiSettings):
         """
         Konstruktor.
-        :param parent: die zentrale arestix Pane
+        :param parent: zentrale arestix Pane
         :param local_config: lokale arestix-Konfiguration
         :param gui_settings: die GUI-Einstellungen des Benutzers
         """

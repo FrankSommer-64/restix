@@ -39,9 +39,9 @@ GUI-Bereich für die arestix-Konfiguration.
 from typing import Callable
 
 from PySide6.QtCore import Qt, QAbstractListModel, QPoint
-from PySide6.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QComboBox, QFormLayout,
-                               QLabel, QLineEdit, QSizePolicy, QPushButton, QTextEdit, QDialog, QTabWidget,
-                               QMenu, QMessageBox, QListView)
+from PySide6.QtWidgets import (QComboBox, QDialog, QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QListView,
+                               QMenu, QMessageBox, QPushButton, QSizePolicy, QTabWidget, QTextEdit,
+                               QVBoxLayout, QWidget)
 
 from arestix.core import *
 from arestix.core.arestix_exception import ArestixException
@@ -57,44 +57,44 @@ class CredentialsDetailPane(QListView):
     """
     Pane zum Anzeigen und Editieren von Zugriffsdaten.
     """
-    def __init__(self, parent: QWidget, include_name: bool = False):
+    def __init__(self, parent: QWidget, include_alias: bool = False):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
-        :param include_name: zeigt an, ob ein Eingabefeld für den Namen vorhanden sein soll
+        :param parent: übergeordnete Pane
+        :param include_alias: zeigt an, ob ein Eingabefeld für den Alias-Namen vorhanden sein soll
         """
         super().__init__(parent)
-        self.__layout = QFormLayout()
-        self.__layout.setContentsMargins(20, 20, 20, 20)
-        self.__layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        if include_name:
+        _layout = QFormLayout(self)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
+                                        WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        if include_alias:
             self.__alias_text = QLineEdit()
             self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
             self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
             self.__alias_text.setToolTip(localized_label(T_CFG_CREDENTIAL_ALIAS))
-            self.__layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
+            _layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
         else:
             self.__alias_text = None
         self.__comment_text = QLineEdit()
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.__comment_text.setToolTip(localized_label(T_CFG_CREDENTIAL_COMMENT))
-        self.__layout.addRow(QLabel(localized_label(L_COMMENT)), self.__comment_text)
+        _layout.addRow(QLabel(localized_label(L_COMMENT)), self.__comment_text)
         self.__type_combo = QComboBox()
-        self.__type_combo.setMinimumWidth(240)
+        self.__type_combo.setMinimumWidth(MIN_COMBO_WIDTH)
         self.__type_combo.setToolTip(localized_label(T_CFG_CREDENTIAL_TYPE))
         for _i, _type in enumerate(CFG_CREDENTIAL_TYPES):
             self.__type_combo.addItem(_type, _i)
         self.__type_combo.setCurrentIndex(-1)
         self.__type_combo.currentIndexChanged.connect(self._type_changed)
-        self.__layout.addRow(QLabel(localized_label(L_TYPE)), self.__type_combo)
+        _layout.addRow(QLabel(localized_label(L_TYPE)), self.__type_combo)
         self.__value_label = QLabel('')
         self.__value_text = QLineEdit()
         self.__value_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__value_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.__value_text.setVisible(False)
-        self.__layout.addRow(self.__value_label, self.__value_text)
-        self.setLayout(self.__layout)
+        _layout.addRow(self.__value_label, self.__value_text)
 
     def get_data(self) -> dict:
         """
@@ -235,7 +235,7 @@ class NewElementDialog(QDialog):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param model_factory: Factory für die Models
+        :param model_factory: Factory für die Qt-Models
         :param title_id: Resource-ID für die Fensterüberschrift
         """
         super().__init__(parent)
@@ -275,12 +275,19 @@ class NewElementDialog(QDialog):
 
     def add_button_clicked(self):
         """
-        Wird aufgerufen, wenn der Benutzer den Hinzufügen-Button geklickt hat
+        Wird aufgerufen, wenn der Benutzer den Hinzufügen-Button geklickt hat.
+        Funktionalität wird in den abgeleiteten Klassen implementiert.
         """
         pass
 
     @classmethod
     def for_group(cls, group: str, parent: QWidget, model_factory: ConfigModelFactory):
+        """
+        :param group: Group (Zugriffsdaten, Backup-Umfang oder Backup-Ziel)
+        :param parent: übergeordnetes Widget
+        :param model_factory: Factory für die Qt-Models
+        :returns: Dialogfenster zum Erzeugen eines neuen Elements der angegebenen Group
+        """
         if group == CFG_GROUP_CREDENTIALS:
             return NewCredentialDialog(parent, model_factory)
         if group == CFG_GROUP_SCOPE:
@@ -297,7 +304,7 @@ class NewCredentialDialog(NewElementDialog):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param model_factory: Factory für die Models
+        :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent, model_factory, localized_label(L_DLG_TITLE_NEW_CREDENTIALS))
         self.__credentials_pane = CredentialsDetailPane(self, True)
@@ -337,7 +344,7 @@ class NewScopeDialog(NewElementDialog):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param model_factory: Factory für die Models
+        :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent, model_factory, localized_label(L_DLG_TITLE_NEW_SCOPE))
         _config_path = model_factory.configuration_data().path()
@@ -373,7 +380,7 @@ class NewTargetDialog(NewElementDialog):
         """
         Konstruktor.
         :param parent: übergeordnetes Widget
-        :param model_factory: Factory für die Models
+        :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent, model_factory, localized_label(L_DLG_TITLE_NEW_TARGET))
         self.__target_pane = TargetDetailPane(self, model_factory, True)
@@ -408,10 +415,10 @@ class ElementSelectorPane(QWidget):
                  combo_model: QAbstractListModel, selected_handler: Callable):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
-        :param group: die Element-Gruppe
+        :param parent: übergeordnete Pane
+        :param group: Element-Gruppe
         :param tooltip_id: Resource ID für den Tooltip-Text der Combo-Box
-        :param model_factory: Factory für die Models
+        :param model_factory: Factory für die Qt-Models
         :param combo_model: Model für die Combo-Box zur Auswahl der Elemente
         :param selected_handler: Handler, wenn ein Element in der Combo-Box ausgewählt wird
         """
@@ -419,7 +426,8 @@ class ElementSelectorPane(QWidget):
         self.__group = group
         self.__model_factory = model_factory
         _layout = QVBoxLayout(self)
-        _layout.setContentsMargins(5, 5, 5, 5)
+        _layout.setContentsMargins(SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN,
+                                   SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__combo = QComboBox()
         self.__combo.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -493,13 +501,13 @@ class CredentialsPane(QWidget):
     def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
         :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent)
         self.__model_index = None
         _layout = QHBoxLayout(self)
-        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_CREDENTIALS, T_CFG_CREDENTIAL_ALIAS,
                                               model_factory, model_factory.credential_names_model(),
@@ -526,7 +534,6 @@ class CredentialsPane(QWidget):
     def _update_credential(self):
         """
         Wird aufgerufen, wenn der Aktualisieren-Button gedrückt wurde.
-        :return:
         """
         if self.__model_index is None:
             return
@@ -549,7 +556,7 @@ class ScopeDetailPane(QListView):
         self.__includes_file_name = None
         self.__excludes_file_name = None
         _layout = QFormLayout(self)
-        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         if include_name:
             self.__alias_text = QLineEdit()
@@ -570,8 +577,8 @@ class ScopeDetailPane(QListView):
         _layout.addRow(QLabel(localized_label(L_FILES_N_DIRS)), self.__edit_scope_button)
         self.__ignores_list = QTextEdit()
         self.__ignores_list.setStyleSheet(EDITOR_STYLE)
-        self.__ignores_list.setMinimumHeight(100)
-        self.__ignores_list.setMaximumHeight(200)
+        self.__ignores_list.setMinimumHeight(_MIN_IGNORES_LIST_HEIGHT)
+        self.__ignores_list.setMaximumHeight(_MAX_IGNORES_LIST_HEIGHT)
         self.__ignores_list.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.MinimumExpanding)
         self.__ignores_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         _layout.addRow(QLabel(localized_label(L_IGNORES)), self.__ignores_list)
@@ -628,13 +635,13 @@ class ScopePane(QWidget):
     def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
         :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent)
         self.__model_index = None
         _layout = QHBoxLayout(self)
-        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_SCOPE, T_CFG_SCOPE_ALIAS,
                                               model_factory, model_factory.scope_names_model(),
@@ -661,7 +668,7 @@ class ScopePane(QWidget):
     def _update_scope(self):
         """
         Wird aufgerufen, wenn der Aktualisieren-Button gedrückt wurde.
-        :return:
+        :returns:
         """
         if self.__model_index is None:
             return
@@ -675,13 +682,13 @@ class TargetDetailPane(QListView):
     def __init__(self, parent: QWidget, model_factory: ConfigModelFactory, include_name: bool = False):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
         :param model_factory: Factory für die Qt-Models
         :param include_name: zeigt an, ob ein Eingabefeld für den Aliasnamen vorhanden sein soll
         """
         super().__init__(parent)
         _layout = QFormLayout(self)
-        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         if include_name:
             self.__alias_text = QLineEdit()
@@ -702,12 +709,12 @@ class TargetDetailPane(QListView):
         self.__location_text.setToolTip(localized_label(T_CFG_TARGET_LOCATION))
         _layout.addRow(QLabel(localized_label(L_LOCATION)), self.__location_text)
         self.__credential_combo = QComboBox()
-        self.__credential_combo.setMinimumWidth(240)
+        self.__credential_combo.setMinimumWidth(MIN_COMBO_WIDTH)
         self.__credential_combo.setToolTip(localized_label(T_CFG_TARGET_CREDENTIALS))
         self.__credential_combo.setModel(model_factory.credential_names_model())
         _layout.addRow(QLabel(localized_label(L_CREDENTIALS)), self.__credential_combo)
         self.__scope_combo = QComboBox()
-        self.__scope_combo.setMinimumWidth(240)
+        self.__scope_combo.setMinimumWidth(MIN_COMBO_WIDTH)
         self.__scope_combo.setToolTip(localized_label(T_CFG_TARGET_SCOPE))
         self.__scope_combo.setModel(model_factory.scope_names_model())
         _layout.addRow(QLabel(localized_label(L_SCOPE)), self.__scope_combo)
@@ -744,13 +751,13 @@ class TargetPane(QGroupBox):
     def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
-        :param parent: die übergeordnete Pane
+        :param parent: übergeordnete Pane
         :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent)
         self.__model_index = None
         _layout = QHBoxLayout(self)
-        _layout.setContentsMargins(20, 20, 20, 20)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_TARGET, T_CFG_TARGET_ALIAS,
                                               model_factory, model_factory.target_names_model(),
@@ -777,7 +784,6 @@ class TargetPane(QGroupBox):
     def _update_target(self):
         """
         Wird aufgerufen, wenn der Aktualisieren-Button gedrückt wurde.
-        :return:
         """
         if self.__model_index is None:
             return
@@ -792,16 +798,20 @@ class ConfigurationPane(QTabWidget):
     def __init__(self, parent: QWidget, model_factory: ConfigModelFactory):
         """
         Konstruktor.
-        :param parent: die zentrale arestix Pane
-        :param model_factory: Factory für die Models
+        :param parent: zentrale arestix Pane
+        :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent, tabsClosable=False)
-        self.setContentsMargins(10, 10, 10, 10)
+        self.setContentsMargins(DEFAULT_CONTENT_MARGIN, DEFAULT_CONTENT_MARGIN,
+                                DEFAULT_CONTENT_MARGIN, DEFAULT_CONTENT_MARGIN)
         self.setStyleSheet(TAB_FOLDER_STYLE)
         self.addTab(CredentialsPane(self, model_factory), localized_label(L_CREDENTIALS))
         self.addTab(ScopePane(self, model_factory), localized_label(L_SCOPES))
         self.addTab(TargetPane(self, model_factory), localized_label(L_TARGETS))
 
+
+_MAX_IGNORES_LIST_HEIGHT = 200
+_MIN_IGNORES_LIST_HEIGHT = 100
 
 _NEW_ELEMENT_DLG_HEIGHT = 480
 _NEW_ELEMENT_DLG_OFFSET = 10

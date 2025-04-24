@@ -35,12 +35,13 @@
 """
 Models der arestix-Konfiguration zur Nutzung in der GUI.
 """
-import os.path
-from typing import Any
 
+import os.path
 import re
 
-from PySide6.QtCore import Qt, QAbstractListModel, QModelIndex, QPersistentModelIndex, QAbstractItemModel, QDir
+from typing import Any
+
+from PySide6.QtCore import Qt, QAbstractItemModel, QAbstractListModel, QDir, QModelIndex, QPersistentModelIndex
 from PySide6.QtGui import QColorConstants
 from PySide6.QtWidgets import QFileSystemModel
 
@@ -124,7 +125,7 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         die Vordergrundfarbe des Element-Namens behandelt, der Rest wird der Basisklasse überlassen.
         :param index: Index des Elements
         :param role: Selektor für die Eigenschaft
-        :return: Daten der Eigenschaft des Elements mit angegebenem Index
+        :returns: Daten der Eigenschaft des Elements mit angegebenem Index
         """
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
             # Checkbox-Status
@@ -300,7 +301,7 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         """
         Wandelt die Patterns für zu ignorierende Dateien aus der arestix-Konfiguration in reguläre Ausdrücke um.
         :param patterns: Patterns aus der arestix-Konfiguration
-        :return: Patterns als reguläre Ausdrücke
+        :returns: Patterns als reguläre Ausdrücke
         """
         _regex_patterns = []
         for _pattern in patterns:
@@ -546,7 +547,6 @@ class ConfigModelFactory:
     """
     Models für die gesamte arestix-Konfiguration.
     """
-
     def __init__(self, configuration_data: LocalConfig):
         """
         Konstruktor.

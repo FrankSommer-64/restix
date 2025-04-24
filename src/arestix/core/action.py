@@ -36,7 +36,6 @@
 Daten für alle arestix-Aktionen.
 """
 
-from typing import Self
 import datetime
 import os.path
 import platform
@@ -44,11 +43,13 @@ import re
 import shlex
 import tempfile
 
+from typing import Self
+
 from arestix.core import *
 from arestix.core import OPTION_AUTO_CREATE, OPTION_PATTERN
+from arestix.core.arestix_exception import ArestixException
 from arestix.core.config import LocalConfig, config_root_path
 from arestix.core.messages import *
-from arestix.core.arestix_exception import ArestixException
 from arestix.core.util import current_user
 
 
@@ -59,8 +60,8 @@ class ArestixAction:
     def __init__(self, action_id: str, target_alias: str):
         """
         Konstruktor.
-        :param action_id: die ID der Aktion (backup, forget, init, ...)
-        :param target_alias: der Aliasname des Backup-Ziels
+        :param action_id: ID der Aktion (backup, forget, init, ...)
+        :param target_alias: Aliasname des Backup-Ziels
         """
         self.__action_id = action_id
         self.__target_alias = target_alias
@@ -71,7 +72,7 @@ class ArestixAction:
 
     def action_id(self) -> str:
         """
-        :returns: die ID der Aktion (backup, forget, init, ...)
+        :returns: ID der Aktion (backup, forget, init, ...)
         """
         return self.__action_id
 
@@ -83,7 +84,7 @@ class ArestixAction:
 
     def option(self, option_name: str) -> str | bool | None:
         """
-        :param option_name: der Name der gewünschten Option
+        :param option_name: Name der gewünschten Option
         :returns: Wert der angegebenen Option; None, falls die Option nicht gesetzt wurde
         """
         _value = self.__options.get(option_name)
@@ -94,8 +95,8 @@ class ArestixAction:
         Setzt die angegebene Option.
         Dateinamen müssen mit vollständigem Pfad angegeben werden.
         Bei benutzerdefinierten Angaben für Host und Jahr müssen diese als erste Optionen gesetzt werden.
-        :param option_name: der Name der Option
-        :param option_value: der Wert der Option
+        :param option_name: Name der Option
+        :param option_value: Wert der Option
         :param value_is_temp_file: zeigt an, ob der übergebene Wert eine temporäre Datei ist
         """
         if option_value is None: return
@@ -151,7 +152,7 @@ class ArestixAction:
     def verify_mandatory_options(self):
         """
         Prüft, ob alle notwendigen Optionen für eine Aktion gesetzt wurden.
-        :raises RestixException: wenn mindestens eine notwendige Option nicht gesetzt wurde
+        :raises ArestixException: wenn mindestens eine notwendige Option nicht gesetzt wurde
         """
         if self.__action_id == ACTION_FIND or self.__action_id == ACTION_LS or self.__action_id == ACTION_RESTORE:
             if OPTION_SNAPSHOT not in self.__options:
@@ -227,7 +228,7 @@ class ArestixAction:
     def set_basic_options(self, local_config: LocalConfig, options: dict | None):
         """
         Setzt die Optionen, die restic immer benötigt sowie die angegebenen benutzerdefinierten Optionen.
-        :param local_config: die arestix-Konfiguration
+        :param local_config: arestix-Konfiguration
         :param options: ggf. zusätzliche Optionen
         """
         # restic-Repository setzen
@@ -257,7 +258,7 @@ class ArestixAction:
     def set_scope_options(self, scope: dict):
         """
         Setzt die Optionen für die zu sichernden und zu ignorierenden Daten.
-        :param scope: der Backup-Umfang aus der arestix-Konfiguration
+        :param scope: Backup-Umfang aus der arestix-Konfiguration
         """
         _includes_file_path = self._full_filename_of(scope.get(CFG_PAR_INCLUDES))
         self.set_option(OPTION_FILES_FROM, _includes_file_path)
@@ -312,7 +313,7 @@ class ArestixAction:
         :param local_config: arestix-Konfiguration
         :param options: ggf. zusätzliche Optionen
         :returns: vollständige Beschreibung der Aktion zur Ausführung mit restic.
-        :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
+        :raises ArestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
         _action = ArestixAction(action_id, target_alias)
         # Standard-Optionen setzen
@@ -327,9 +328,9 @@ class ArestixAction:
     @classmethod
     def from_command_line(cls, cmd_line: list[str]) -> Self:
         """
-        :param list[str] cmd_line: die Kommandozeile
+        :param list[str] cmd_line: Kommandozeile
         :returns: vollständige Beschreibung einer Aktion aus den Angaben der Kommandozeile.
-        :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
+        :raises ArestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
         _option_values = {}
         _action_id = ''

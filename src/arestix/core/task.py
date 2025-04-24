@@ -33,21 +33,22 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Informationen und Ergebnis einer asynchron ausgeführten Task.
+Informationen und Ergebnis eines asynchron ausgeführten Hintergrund-Prozesses.
 """
+
+import threading
 
 from abc import abstractmethod
 from typing import Any
-import threading
 
 from arestix.core import SEVERITY_INFO, TASK_SUCCEEDED
 from arestix.core.arestix_exception import ArestixException
-from arestix.core.messages import localized_message, E_BACKGROUND_TASK_ABORTED
+from arestix.core.messages import E_BACKGROUND_TASK_ABORTED, localized_message
 
 
 class TaskProgress:
     """
-    Informationen über den Fortschritt einer asynchronen Task.
+    Informationen über den Fortschritt eines Hintergrund-Prozesses.
     """
     def __init__(self, completion_status: int, message_severity: str, message_text: str):
         """
@@ -82,7 +83,7 @@ class TaskProgress:
 
 class TaskResult:
     """
-    Ergebnis einer asynchronen Task.
+    Ergebnis eines Hintergrund-Prozesses.
     """
     def __init__(self, code: int, summary: str):
         """
@@ -96,7 +97,7 @@ class TaskResult:
 
     def task_succeeded(self) -> bool:
         """
-        :returns: True, falls die Task erfolgreich ausgeführt wurde.
+        :returns: True, falls der Hintergrund-Prozess erfolgreich ausgeführt wurde.
         """
         return self.__code == TASK_SUCCEEDED
 
@@ -121,14 +122,14 @@ class TaskExecutor:
     def emit_progress(self, progress_data: TaskProgress):
         """
         Sendet ein Progress-Signal an den zugeordneten Slot.
-        :param progress_data: Informationen über den Fortschritt der Task.
+        :param progress_data: Informationen über den Fortschritt des Hintergrund-Prozesses.
         """
         pass
 
 
 class TaskMonitor:
     """
-    Überwacht die Ausführung einer asynchronen Task.
+    Überwacht die Ausführung eines Hintergrund-Prozesses.
     """
     def __init__(self, progress_handler: TaskExecutor = None, silent: bool = False):
         """
@@ -143,7 +144,7 @@ class TaskMonitor:
 
     def request_abort(self):
         """
-        Setzt das interne Flag zum Abbrechen der Task.
+        Setzt das interne Flag zum Abbrechen der des Hintergrund-Prozesses.
         """
         self.__lock.acquire()
         self.__abort_requested = True
@@ -151,7 +152,7 @@ class TaskMonitor:
 
     def abort_requested(self) -> bool:
         """
-        :returns: True, falls die Task abgebrochen werden soll.
+        :returns: True, falls der Hintergrund-Prozess abgebrochen werden soll.
         """
         self.__lock.acquire()
         _abort_requested = self.__abort_requested
@@ -160,7 +161,7 @@ class TaskMonitor:
 
     def check_abort(self):
         """
-        :raises RestixException: falls die Task abgebrochen werden soll.
+        :raises ArestixException: falls der Hintergrund-Prozess abgebrochen werden soll.
         """
         if self.abort_requested():
             raise ArestixException(E_BACKGROUND_TASK_ABORTED)
@@ -169,9 +170,9 @@ class TaskMonitor:
         """
         Sendet eine Fortschritt-Nachricht an den registrierten Handler. Falls kein Handler registriert
         wurde, wird die Nachricht auf der Konsole ausgegeben.
-        :param msg_id: die ID der Nachricht
+        :param msg_id: ID der Nachricht
         :param msg_args: die Argumente für die Nachricht.
-        :raises RestixException: falls die Task abgebrochen werden soll.
+        :raises ArestixException: falls der Hintergrund-Prozess abgebrochen werden soll.
         """
         _severity = msg_id[0]
         _msg = localized_message(msg_id, *msg_args)
@@ -183,7 +184,7 @@ class TaskMonitor:
         wurde, wird die Nachricht auf der Konsole ausgegeben.
         :param msg: lokalisierte Nachricht
         :param severity: Schweregrad der Nachricht.
-        :raises RestixException: falls die Task abgebrochen werden soll.
+        :raises ArestixException: falls der Hintergrund-Prozess abgebrochen werden soll.
         """
         if not self.__silent:
             if self.__progress_handler is None:

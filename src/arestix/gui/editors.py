@@ -38,11 +38,12 @@ Editoren für die arestix GUI.
 import os.path
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QDialog, QPushButton, QVBoxLayout, QHBoxLayout, QTreeView, QMessageBox, \
-    QFileDialog
+from PySide6.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QMessageBox, QPushButton, QTreeView,
+                               QVBoxLayout, QWidget)
 
 from arestix.core.messages import *
 from arestix.core.util import full_config_path_of
+from arestix.gui import EDITOR_STYLE
 from arestix.gui.model import CheckBoxFileSystemModel
 
 
@@ -101,7 +102,7 @@ class ScopeEditor(QDialog):
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _SCOPE_EDITOR_OFFSET, _parent_rect.y() + _SCOPE_EDITOR_OFFSET,
                          _SCOPE_EDITOR_WIDTH, _SCOPE_EDITOR_HEIGHT)
-        self.setStyleSheet(_STYLE_WHITE_BG)
+        self.setStyleSheet(EDITOR_STYLE)
         _layout = QVBoxLayout(self)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         # oberer Bereich Tree-Viewer mit dem Dateisystem
@@ -210,5 +211,3 @@ _SAVE_DIALOG_WIDTH = 360
 _SCOPE_EDITOR_HEIGHT = 720
 _SCOPE_EDITOR_OFFSET = 10
 _SCOPE_EDITOR_WIDTH = 1200
-
-_STYLE_WHITE_BG = 'background-color: white'

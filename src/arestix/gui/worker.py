@@ -72,8 +72,8 @@ class Worker(QRunnable, TaskExecutor):
     def __init__(self, worker_fn: Callable, *args: Any):
         """
         Konstruktor.
-        :param worker_fn: die im Hintergrund auszuführende Funktion
-        :param args: die Argumente für die Funktion
+        :param worker_fn: im Hintergrund auszuführende Funktion
+        :param args: Argumente für die Funktion
         """
         super().__init__()
         self.__fn = worker_fn
@@ -90,10 +90,10 @@ class Worker(QRunnable, TaskExecutor):
     def connect_signals(self, progress_slot: Callable, finished_slot: Callable, result_slot: Callable, error_slot: Callable):
         """
         Bindet die Signale an die übergebenen Slots.
-        :param progress_slot: der Handler für Signal 'Progress'
-        :param finished_slot: der Handler für Signal 'Finished'
-        :param result_slot: der Handler für Signal 'Result'
-        :param error_slot: der Handler für Signal 'Error'
+        :param progress_slot: Handler für Signal 'Progress'
+        :param finished_slot: Handler für Signal 'Finished'
+        :param result_slot: Handler für Signal 'Result'
+        :param error_slot: Handler für Signal 'Error'
         """
         if progress_slot is not None:
             self.__signals.progress.connect(progress_slot)
@@ -130,7 +130,7 @@ class Worker(QRunnable, TaskExecutor):
     @classmethod
     def for_action(cls: Self, action: ArestixAction) -> Self:
         """
-        Creates a worker for specified action.
+        Erzeugt einen Worker für die angegebene Aktion.
         :param action: die vom Worker auszuführende Aktion
         :returns: Worker für die gewünschte Aktion
         """

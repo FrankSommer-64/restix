@@ -52,9 +52,11 @@ SMALL_CONTENT_MARGIN = 5
 DEFAULT_CONTENT_MARGIN = 10
 WIDE_CONTENT_MARGIN = 20
 
-# Minimale Größe des GUI-Fensters
-MAIN_WIN_MIN_HEIGHT = 640
-MAIN_WIN_MIN_WIDTH = 6 * 128 + 64
+# Minimale Größen
+MIN_COMBO_WIDTH = 240
+MIN_MAIN_WIN_HEIGHT = 640
+MIN_MAIN_WIN_WIDTH = 6 * 128 + 64
+MIN_MESSAGE_PANE_HEIGHT = 256
 
 # Style für die Umrahmung aller GroupBoxes
 GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius: 6px; margin-top: 6px} ' \
@@ -68,9 +70,10 @@ BUTTON_ICON_INFO = 'dialog-information.png'
 BUTTON_ICON_MAINTENANCE = 'system-run.png'
 BUTTON_ICON_RESTORE = 'svn-update.png'
 
-# Style für die Buttons in der Hauptauswahl
+#  Buttons in der Hauptauswahl
 IMAGE_BUTTON_LABEL_STYLE = 'font-weight: bold'
 IMAGE_BUTTON_PANE_STYLE = 'background-color: white; border-width: 2px; border-color: black; border-style: solid'
+IMAGE_BUTTON_SIZE = 128
 
 # Style für die Pane zur Ausgabe von Nachrichten
 MESSAGE_PANE_STYLE = 'background-color: white; border-color: black; border-style: solid; border-width: 1px'

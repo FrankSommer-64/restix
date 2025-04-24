@@ -33,26 +33,29 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Functions to export entities from TCMS to files.
+Schnittstelle zu restic.
 """
-from datetime import datetime
+
 import json
 import subprocess
 
+from datetime import datetime
+
 from arestix.core import *
 from arestix.core.action import ArestixAction
-from arestix.core.messages import *
 from arestix.core.arestix_exception import ArestixException
+from arestix.core.messages import *
 from arestix.core.snapshot import Snapshot, SnapshotElement
 from arestix.core.task import TaskMonitor, TaskResult
 
 
-def run_backup(action: ArestixAction, task_monitor: TaskMonitor):
+def run_backup(action: ArestixAction, task_monitor: TaskMonitor) -> TaskResult:
     """
     Sichert lokale Daten in einem restic-Repository.
-    :param action: die Daten des auszuführenden Backups.
-    :param task_monitor: der Fortschritt-Handler.
-    :raises RestixException: falls das Backup fehlschlägt
+    :param action: Daten des auszuführenden Backups.
+    :param task_monitor: Fortschritt-Handler.
+    :returns: Ergebnis der Ausführung.
+    :raises ArestixException: falls das Backup fehlschlägt
     """
     _auto_create = action.option(OPTION_AUTO_CREATE) is True
     _dry_run = action.option(OPTION_DRY_RUN) is True
@@ -100,9 +103,9 @@ def run_backup(action: ArestixAction, task_monitor: TaskMonitor):
 def run_forget(action: ArestixAction, task_monitor: TaskMonitor) -> TaskResult:
     """
     Löscht Snapshots aus einem Repository.
-    :param action: die Daten des auszuführenden Forget-Befehls.
-    :param task_monitor: der Fortschritt-Handler.
-    :returns: Ergebnis der Ausführung
+    :param action: Daten des auszuführenden Forget-Befehls.
+    :param task_monitor: Fortschritt-Handler.
+    :returns: Ergebnis der Ausführung.
     """
     try:
         _restic_cmd = action.to_restic_command()
@@ -114,12 +117,13 @@ def run_forget(action: ArestixAction, task_monitor: TaskMonitor) -> TaskResult:
         return TaskResult(TASK_FAILED, str(_e))
 
 
-def run_init(action: ArestixAction, task_monitor: TaskMonitor):
+def run_init(action: ArestixAction, task_monitor: TaskMonitor) -> TaskResult:
     """
     Legt ein neues restic-Repository an.
-    :param action: die Daten für die Initialisierung.
-    :param task_monitor: der Fortschritt-Handler.
-    :raises RestixException: falls das Erzeugen des Repositories fehlschlägt
+    :param action: Daten für die Initialisierung.
+    :param task_monitor: Fortschritt-Handler.
+    :returns: Ergebnis der Ausführung.
+    :raises ArestixException: falls das Erzeugen des Repositories fehlschlägt
     """
     _repo = action.option(OPTION_REPO)
     task_monitor.log(I_GUI_CREATING_REPO, _repo)
@@ -130,12 +134,13 @@ def run_init(action: ArestixAction, task_monitor: TaskMonitor):
         return TaskResult(TASK_FAILED, str(_e))
 
 
-def run_restore(action: ArestixAction, task_monitor: TaskMonitor):
+def run_restore(action: ArestixAction, task_monitor: TaskMonitor) -> TaskResult:
     """
     Stellt lokale Daten aus einem restic-Repository wieder her.
-    :param action: die Daten des auszuführenden Restores.
-    :param task_monitor: der Fortschritt-Handler.
-    :raises RestixException: falls die Ausführung fehlschlägt
+    :param action: Daten des auszuführenden Restores.
+    :param task_monitor: Fortschritt-Handler.
+    :returns: Ergebnis der Ausführung.
+    :raises ArestixException: falls die Ausführung fehlschlägt
     """
     _repo = action.option(OPTION_REPO)
     _snapshot_id = action.option(OPTION_SNAPSHOT)
@@ -158,12 +163,13 @@ def run_restore(action: ArestixAction, task_monitor: TaskMonitor):
         return TaskResult(TASK_FAILED, str(_e))
 
 
-def run_snapshots(action: ArestixAction, task_monitor: TaskMonitor):
+def run_snapshots(action: ArestixAction, task_monitor: TaskMonitor) -> TaskResult:
     """
     Gibt alle Snapshots in einem Repository zurück.
-    :param action: die Daten des auszuführenden Snapshot-Befehls.
-    :param task_monitor: der Fortschritt-Handler.
-    :raises RestixException: falls die Ausführung fehlschlägt
+    :param action: Daten des auszuführenden Snapshot-Befehls.
+    :param task_monitor: Fortschritt-Handler.
+    :returns: Ergebnis der Ausführung.
+    :raises ArestixException: falls die Ausführung fehlschlägt
     """
     try:
         execute_restic_command(action.to_restic_command(), task_monitor)
@@ -179,9 +185,9 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     Bei potenziell lang laufenden Befehlen werden die Fortschritt-Nachrichten sofort an den TaskMonitor weitergeleitet,
     ansonsten erst nach der Befehlsausführung.
     :param cmd: auszuführender restic-Befehl
-    :param task_monitor: der Fortschritt-Handler.
+    :param task_monitor: Fortschritt-Handler.
     :param potential_long_runner: zeigt an, ob die Ausführung sehr lange dauern kann.
-    :raises RestixException: falls die Ausführung fehlschlägt
+    :raises ArestixException: falls die Ausführung fehlschlägt
     """
     _err_info = []
     if potential_long_runner:
@@ -232,9 +238,9 @@ def determine_snapshots(action: ArestixAction, task_monitor: TaskMonitor) -> lis
     """
     Ermittelt alle Snapshots in einem Repository für die GUI.
     :param action: Snapshot-Aktion
-    :param task_monitor: der Fortschritt-Handler.
+    :param task_monitor: Fortschritt-Handler.
     :returns: alle Snapshots im Repository.
-    :raises RestixException: falls das Lesen der Snapshots fehlschlägt
+    :raises ArestixException: falls das Lesen der Snapshots fehlschlägt
     """
     _silent_monitor = TaskMonitor(None, True)
     _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
@@ -263,7 +269,7 @@ def find_snapshot_elements(action: ArestixAction) -> list[SnapshotElement]:
     """
     :param action: find-Aktion
     :returns: gefundene Elemente im Snapshot.
-    :raises RestixException: falls das Lesen des Snapshots fehlschlägt
+    :raises ArestixException: falls das Lesen des Snapshots fehlschlägt
     """
     _silent_monitor = TaskMonitor(None, True)
     _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
@@ -284,7 +290,7 @@ def list_snapshot_elements(action: ArestixAction) -> Snapshot:
     """
     :param action: ls-Aktion
     :returns: Snapshot mit allen Elementen.
-    :raises RestixException: falls das Lesen des Snapshots fehlschlägt
+    :raises ArestixException: falls das Lesen des Snapshots fehlschlägt
     """
     _silent_monitor = TaskMonitor(None, True)
     _rc, _stdout, _stderr = _execute_restic_command(action.to_restic_command(), _silent_monitor)
@@ -335,7 +341,7 @@ def _execute_restic_command(cmd: list[str], task_monitor: TaskMonitor,
     Bei potenziell lang laufenden Befehlen werden die Fortschritt-Nachrichten sofort an den TaskMonitor weitergeleitet,
     ansonsten erst nach der Befehlsausführung.
     :param cmd: auszuführender restic-Befehl
-    :param task_monitor: der Fortschritt-Handler.
+    :param task_monitor: Fortschritt-Handler.
     :param potential_long_runner: zeigt an, ob die Ausführung sehr lange dauern kann.
     :returns: Tupel mit restic-Return code, Inhalt Standard-Ausgabe, Inhalt Standard-Error.
     """

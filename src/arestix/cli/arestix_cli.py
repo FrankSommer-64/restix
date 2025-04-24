@@ -43,9 +43,9 @@ import sys
 
 from arestix.core import *
 from arestix.core.action import ArestixAction
+from arestix.core.arestix_exception import ArestixException
 from arestix.core.config import config_root_path, LocalConfig
 from arestix.core.messages import *
-from arestix.core.arestix_exception import ArestixException
 from arestix.core.restic_interface import execute_restic_command
 from arestix.core.task import TaskMonitor
 from arestix.core.util import current_user
@@ -59,9 +59,9 @@ _COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_CLEANUP:
 def read_arestix_config_file(action: ArestixAction) -> LocalConfig:
     """
     Liest die arestix-Konfigurationsdatei und ersetzt darin enthaltene Variablen.
-    :param action: die auszuführende Aktion
+    :param action: auszuführende Aktion
     :returns: arestix-Konfiguration.
-    :raises RestixException: falls die Datei nicht verarbeitet werden kann
+    :raises ArestixException: falls die Datei nicht verarbeitet werden kann
     """
     _vars = {CFG_VAR_HOST: platform.node(), CFG_VAR_USER: current_user(),
              CFG_VAR_YEAR: str(datetime.datetime.now().year)}
@@ -79,7 +79,7 @@ def prompt_confirmation(action: ArestixAction) -> bool:
     """
     Verlangt vom Benutzer eine Bestätigung der Aktion. Falls einer der Optionen --batch oder --dry-run gesetzt sind
     oder die Aktion keine Datenänderung bewirkt, ist keine Bestätigung nötig.
-    :param action: die auszuführende Aktion.
+    :param action: auszuführende Aktion.
     :returns: True, falls die Aktion bestätigt wurde; ansonsten False
     """
     _base_action = action.action_id()
@@ -111,7 +111,7 @@ def prompt_confirmation(action: ArestixAction) -> bool:
 def show_help(cmd: str = None):
     """
     Zeigt Hilfe über arestix oder einen speziellen Befehl an.
-    :param cmd: optional der Befehl, über den Hilfe angezeigt werden soll
+    :param cmd: Befehl, über den Hilfe angezeigt werden soll
     """
     if cmd is None or cmd not in _COMMAND_HELP_IDS:
         print(localized_message(T_CLI_USAGE_INFO))
@@ -122,7 +122,7 @@ def show_help(cmd: str = None):
 def show_targets(targets: dict):
     """
     Zeigt die in der arestix-Konfiguration definierten Backup-Ziele an.
-    :param targets: die Backup-Ziele aus der arestix-Konfiguration
+    :param targets: Backup-Ziele aus der arestix-Konfiguration
     """
     print()
     print(localized_message(T_CLI_BACKUP_TARGETS_HEADER))

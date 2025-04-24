@@ -37,9 +37,9 @@ Persönliche Einstellungen der arestix GUI.
 """
 
 import os
-
 import tomli
 import tomli_w
+
 from typing import Self
 
 from PySide6 import QtGui
@@ -63,7 +63,7 @@ class GuiSettings(dict):
 
     def latest_target(self) -> str | None:
         """
-        :returns: zuletzt verwendetes Backup-Ziel
+        :returns: Alias-Name des zuletzt verwendeten Backup-Ziels
         """
         return self.get(_KEY_LATEST_TARGET)
 
@@ -77,8 +77,8 @@ class GuiSettings(dict):
 
     def set_latest_target(self, target_alias: str):
         """
-        Setzt den Alias des zuletzt verwendeten Backup-Ziels.
-        :param target_alias: Alias des Backup-Ziels
+        Setzt den Alias-Namen des zuletzt verwendeten Backup-Ziels.
+        :param target_alias: Alias-Name des Backup-Ziels
         """
         self[_KEY_LATEST_TARGET] = target_alias
         self.__is_modified = True
@@ -95,7 +95,7 @@ class GuiSettings(dict):
         """
         Speichert die Einstellungen in einer Datei.
         :param file_path: Dateiname inklusive Pfad.
-        :raises RestixException: falls die Einstellungen nicht gespeichert werden konnten
+        :raises ArestixException: falls die Einstellungen nicht gespeichert werden konnten
         """
         if not self.__is_modified:
             return
