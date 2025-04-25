@@ -250,9 +250,10 @@ t-cfg-credential-alias Alias name for credentials
 t-cfg-credential-password Password
 t-cfg-credential-type Type of credentials
 t-cfg-credential-file-name File name containing restic password
+t-cfg-scope-alias Alias name for backup scope
 t-cfg-scope-comment Comment for backup scope
 t-cfg-scope-files-n-dirs Select files and directories to backup
-t-cfg-scope-alias Alias name for backup scope
+t-cfg-scope-ignores Element-Patterns to ignore during backup
 t-cfg-target-alias Alias name for backup target
 t-cfg-target-comment Comment for backup target
 t-cfg-target-credentials Credentials for backup target

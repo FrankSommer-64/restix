@@ -93,3 +93,8 @@ TEXT_FIELD_STYLE = 'background-color: white'
 
 # Anzahl angezeigter Jahre in der Vergangenheit bei den Comboboxen zur Jahresauswahl
 PAST_YEARS_COUNT = 10
+
+# Styles
+CONFIG_GROUP_BOX_STYLE = 'QGroupBox {background: #fefedd; border: 1px solid black}'
+CONFIG_LIST_VIEW_STYLE = 'QListView {background: #fefedd; border: 0px}'
+CONFIG_TEXT_EDIT_STYLE = 'QTextEdit {background: white; border: 1px solid grey}'

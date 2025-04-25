@@ -64,23 +64,30 @@ class CredentialsDetailPane(QListView):
         :param include_alias: zeigt an, ob ein Eingabefeld für den Alias-Namen vorhanden sein soll
         """
         super().__init__(parent)
+        self.setStyleSheet(CONFIG_LIST_VIEW_STYLE)
         _layout = QFormLayout(self)
         _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
                                         WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         if include_alias:
+            _alias_label = QLabel(localized_label(L_ALIAS))
+            _alias_label.setToolTip(localized_label(T_CFG_CREDENTIAL_ALIAS))
             self.__alias_text = QLineEdit()
             self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
             self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
             self.__alias_text.setToolTip(localized_label(T_CFG_CREDENTIAL_ALIAS))
-            _layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
+            _layout.addRow(_alias_label, self.__alias_text)
         else:
             self.__alias_text = None
+        _comment_label = QLabel(localized_label(L_COMMENT))
+        _comment_label.setToolTip(localized_label(T_CFG_CREDENTIAL_COMMENT))
         self.__comment_text = QLineEdit()
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.__comment_text.setToolTip(localized_label(T_CFG_CREDENTIAL_COMMENT))
-        _layout.addRow(QLabel(localized_label(L_COMMENT)), self.__comment_text)
+        _layout.addRow(_comment_label, self.__comment_text)
+        _type_label = QLabel(localized_label(L_TYPE))
+        _type_label.setToolTip(localized_label(T_CFG_CREDENTIAL_TYPE))
         self.__type_combo = QComboBox()
         self.__type_combo.setMinimumWidth(MIN_COMBO_WIDTH)
         self.__type_combo.setToolTip(localized_label(T_CFG_CREDENTIAL_TYPE))
@@ -88,7 +95,7 @@ class CredentialsDetailPane(QListView):
             self.__type_combo.addItem(_type, _i)
         self.__type_combo.setCurrentIndex(-1)
         self.__type_combo.currentIndexChanged.connect(self._type_changed)
-        _layout.addRow(QLabel(localized_label(L_TYPE)), self.__type_combo)
+        _layout.addRow(_type_label, self.__type_combo)
         self.__value_label = QLabel('')
         self.__value_text = QLineEdit()
         self.__value_text.setStyleSheet(TEXT_FIELD_STYLE)
@@ -143,6 +150,7 @@ class CredentialsDetailPane(QListView):
             self.__value_label.setToolTip(_tooltip)
             self.__value_text.setEchoMode(QLineEdit.EchoMode.Normal)
             self.__value_text.setText(value)
+            self.__value_text.setToolTip(_tooltip)
             self.__value_text.setVisible(True)
             return
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_TEXT:
@@ -151,6 +159,7 @@ class CredentialsDetailPane(QListView):
             self.__value_label.setToolTip(_tooltip)
             self.__value_text.setEchoMode(QLineEdit.EchoMode.Password)
             self.__value_text.setText(value)
+            self.__value_text.setToolTip(_tooltip)
             self.__value_text.setVisible(True)
 
 
@@ -245,7 +254,7 @@ class NewElementDialog(QDialog):
         _parent_rect = parent.contentsRect()
         self.setGeometry(_parent_rect.x() + _NEW_ELEMENT_DLG_OFFSET, _parent_rect.y() + _NEW_ELEMENT_DLG_OFFSET,
                          _NEW_ELEMENT_DLG_WIDTH, _NEW_ELEMENT_DLG_HEIGHT)
-        self.setStyleSheet(EDITOR_STYLE)
+        self.setStyleSheet('QDialog {background: #fefedd; border: 0px}')
         _layout = QVBoxLayout(self)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -511,8 +520,9 @@ class CredentialsPane(QWidget):
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_CREDENTIALS, T_CFG_CREDENTIAL_ALIAS,
                                               model_factory, model_factory.credential_names_model(),
-                                              self._credential_selected))
+                                              self._credential_selected), 1)
         _detail_group_box = QGroupBox('')
+        _detail_group_box.setStyleSheet(CONFIG_GROUP_BOX_STYLE)
         _group_box_layout = QVBoxLayout(_detail_group_box)
         self.__detail_pane = CredentialsDetailPane(self)
         self.__detail_pane.setModel(model_factory.credentials_model())
@@ -522,7 +532,7 @@ class CredentialsPane(QWidget):
         _update_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         _update_button.clicked.connect(self._update_credential)
         _group_box_layout.addWidget(_update_button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        _layout.addWidget(_detail_group_box)
+        _layout.addWidget(_detail_group_box, 2)
 
     def _credential_selected(self, index: int):
         """
@@ -555,33 +565,47 @@ class ScopeDetailPane(QListView):
         self.__config_path = config_path
         self.__includes_file_name = None
         self.__excludes_file_name = None
+        self.setStyleSheet(CONFIG_LIST_VIEW_STYLE)
         _layout = QFormLayout(self)
         _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         if include_name:
+            _tooltip = localized_label(T_CFG_SCOPE_ALIAS)
+            _alias_label = QLabel(localized_label(L_ALIAS))
+            _alias_label.setToolTip(_tooltip)
             self.__alias_text = QLineEdit()
             self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
             self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-            self.__alias_text.setToolTip(localized_label(T_CFG_SCOPE_ALIAS))
-            _layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
+            self.__alias_text.setToolTip(_tooltip)
+            _layout.addRow(_alias_label, self.__alias_text)
         else:
             self.__alias_text = None
+        _tooltip = localized_label(T_CFG_SCOPE_COMMENT)
+        _comment_label = QLabel(localized_label(L_COMMENT))
+        _comment_label.setToolTip(_tooltip)
         self.__comment_text = QLineEdit()
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.__comment_text.setToolTip(localized_label(T_CFG_SCOPE_COMMENT))
-        _layout.addRow(QLabel(localized_label(L_COMMENT)), self.__comment_text)
+        self.__comment_text.setToolTip(_tooltip)
+        _layout.addRow(_comment_label, self.__comment_text)
+        _tooltip = localized_label(T_CFG_SCOPE_FILES_N_DIRS)
+        _edit_label = QLabel(localized_label(L_FILES_N_DIRS))
+        _edit_label.setToolTip(_tooltip)
         self.__edit_scope_button = QPushButton(localized_label(L_EDIT))
-        self.__edit_scope_button.setToolTip(localized_label(T_CFG_SCOPE_FILES_N_DIRS))
+        self.__edit_scope_button.setToolTip(_tooltip)
         self.__edit_scope_button.clicked.connect(self._edit_files_n_dirs)
-        _layout.addRow(QLabel(localized_label(L_FILES_N_DIRS)), self.__edit_scope_button)
+        _layout.addRow(_edit_label, self.__edit_scope_button)
+        _tooltip = localized_label(T_CFG_SCOPE_IGNORES)
+        _ignores_label = QLabel(localized_label(L_IGNORES))
+        _ignores_label.setToolTip(_tooltip)
         self.__ignores_list = QTextEdit()
-        self.__ignores_list.setStyleSheet(EDITOR_STYLE)
+        self.__ignores_list.setStyleSheet(CONFIG_TEXT_EDIT_STYLE)
         self.__ignores_list.setMinimumHeight(_MIN_IGNORES_LIST_HEIGHT)
         self.__ignores_list.setMaximumHeight(_MAX_IGNORES_LIST_HEIGHT)
         self.__ignores_list.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.MinimumExpanding)
         self.__ignores_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        _layout.addRow(QLabel(localized_label(L_IGNORES)), self.__ignores_list)
+        self.__ignores_list.setToolTip(_tooltip)
+        _layout.addRow(_ignores_label, self.__ignores_list)
 
     def get_data(self) -> dict:
         """
@@ -645,8 +669,9 @@ class ScopePane(QWidget):
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_SCOPE, T_CFG_SCOPE_ALIAS,
                                               model_factory, model_factory.scope_names_model(),
-                                              self._scope_selected))
+                                              self._scope_selected), 1)
         _detail_group_box = QGroupBox('')
+        _detail_group_box.setStyleSheet(CONFIG_GROUP_BOX_STYLE)
         _group_box_layout = QVBoxLayout(_detail_group_box)
         self.__detail_pane = ScopeDetailPane(self, model_factory.configuration_data().path())
         self.__detail_pane.setModel(model_factory.scope_model())
@@ -656,7 +681,7 @@ class ScopePane(QWidget):
         _update_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         _update_button.clicked.connect(self._update_scope)
         _group_box_layout.addWidget(_update_button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        _layout.addWidget(_detail_group_box)
+        _layout.addWidget(_detail_group_box, 2)
 
     def _scope_selected(self, index: int):
         """
@@ -687,37 +712,53 @@ class TargetDetailPane(QListView):
         :param include_name: zeigt an, ob ein Eingabefeld für den Aliasnamen vorhanden sein soll
         """
         super().__init__(parent)
+        self.setStyleSheet(CONFIG_LIST_VIEW_STYLE)
         _layout = QFormLayout(self)
         _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         if include_name:
+            _tooltip = localized_label(T_CFG_TARGET_ALIAS)
+            _alias_label = QLabel(localized_label(L_ALIAS))
+            _alias_label.setToolTip(_tooltip)
             self.__alias_text = QLineEdit()
             self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
             self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-            self.__alias_text.setToolTip(localized_label(T_CFG_TARGET_ALIAS))
-            _layout.addRow(QLabel(localized_label(L_ALIAS)), self.__alias_text)
+            self.__alias_text.setToolTip(_tooltip)
+            _layout.addRow(_alias_label, self.__alias_text)
         else:
             self.__alias_text = None
+        _tooltip = localized_label(T_CFG_TARGET_COMMENT)
+        _comment_label = QLabel(localized_label(L_COMMENT))
+        _comment_label.setToolTip(_tooltip)
         self.__comment_text = QLineEdit()
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.__comment_text.setToolTip(localized_label(T_CFG_TARGET_COMMENT))
-        _layout.addRow(QLabel(localized_label(L_COMMENT)), self.__comment_text)
+        self.__comment_text.setToolTip(_tooltip)
+        _layout.addRow(_comment_label, self.__comment_text)
+        _tooltip = localized_label(T_CFG_TARGET_LOCATION)
+        _location_label = QLabel(localized_label(L_LOCATION))
+        _location_label.setToolTip(_tooltip)
         self.__location_text = QLineEdit()
         self.__location_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__location_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.__location_text.setToolTip(localized_label(T_CFG_TARGET_LOCATION))
-        _layout.addRow(QLabel(localized_label(L_LOCATION)), self.__location_text)
+        self.__location_text.setToolTip(_tooltip)
+        _layout.addRow(_location_label, self.__location_text)
+        _tooltip = localized_label(T_CFG_TARGET_CREDENTIALS)
+        _credentials_label = QLabel(localized_label(L_CREDENTIALS))
+        _credentials_label.setToolTip(_tooltip)
         self.__credential_combo = QComboBox()
         self.__credential_combo.setMinimumWidth(MIN_COMBO_WIDTH)
-        self.__credential_combo.setToolTip(localized_label(T_CFG_TARGET_CREDENTIALS))
+        self.__credential_combo.setToolTip(_tooltip)
         self.__credential_combo.setModel(model_factory.credential_names_model())
-        _layout.addRow(QLabel(localized_label(L_CREDENTIALS)), self.__credential_combo)
+        _layout.addRow(_credentials_label, self.__credential_combo)
+        _tooltip = localized_label(T_CFG_TARGET_SCOPE)
+        _scope_label = QLabel(localized_label(L_SCOPE))
+        _scope_label.setToolTip(_tooltip)
         self.__scope_combo = QComboBox()
         self.__scope_combo.setMinimumWidth(MIN_COMBO_WIDTH)
-        self.__scope_combo.setToolTip(localized_label(T_CFG_TARGET_SCOPE))
+        self.__scope_combo.setToolTip(_tooltip)
         self.__scope_combo.setModel(model_factory.scope_names_model())
-        _layout.addRow(QLabel(localized_label(L_SCOPE)), self.__scope_combo)
+        _layout.addRow(_scope_label, self.__scope_combo)
 
     def get_data(self) -> dict:
         """
@@ -761,8 +802,9 @@ class TargetPane(QGroupBox):
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         _layout.addWidget(ElementSelectorPane(self, CFG_GROUP_TARGET, T_CFG_TARGET_ALIAS,
                                               model_factory, model_factory.target_names_model(),
-                                              self._target_selected))
+                                              self._target_selected), 1)
         _detail_group_box = QGroupBox('')
+        _detail_group_box.setStyleSheet(CONFIG_GROUP_BOX_STYLE)
         _group_box_layout = QVBoxLayout(_detail_group_box)
         self.__detail_pane = TargetDetailPane(self, model_factory)
         self.__detail_pane.setModel(model_factory.target_model())
@@ -772,7 +814,7 @@ class TargetPane(QGroupBox):
         _update_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         _update_button.clicked.connect(self._update_target)
         _group_box_layout.addWidget(_update_button, alignment=Qt.AlignmentFlag.AlignHCenter)
-        _layout.addWidget(_detail_group_box)
+        _layout.addWidget(_detail_group_box, 2)
 
     def _target_selected(self, index: int):
         """

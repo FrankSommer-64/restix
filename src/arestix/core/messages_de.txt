@@ -214,8 +214,8 @@ l-select Auswählen
 l-select-elements Elemente auswählen
 l-show-all-elements Alle Elemente anzeigen
 l-some einzelne Datei(en)
-l-target Backup-Ziel
-l-targets Backup-Ziele
+l-target Sicherungs-Ziel
+l-targets Sicherungs-Ziele
 l-type Typ
 l-update Aktualisieren
 l-year Jahr
@@ -245,25 +245,26 @@ l-menu-user-manual Benutzerhandbuch
 
 # GUI Tooltips
 t-cancel-action Laufende Aktion abbrechen
-t-cfg-credential-comment Kommentar zu den Zugriffsdaten
-t-cfg-credential-alias Aliasname der Zugriffsdaten
+t-cfg-credential-comment Kommentar zu den Zugangsdaten
+t-cfg-credential-alias Aliasname der Zugangsdaten
 t-cfg-credential-password Passwort
 t-cfg-credential-type Art der Zugriffsdaten
 t-cfg-credential-file-name Name der Datei mit dem Passwort
-t-cfg-scope-comment Kommentar zum Backup-Umfang
+t-cfg-scope-alias Aliasname des Sicherungs-Umfangs
+t-cfg-scope-comment Kommentar zum Sicherungs-Umfang
 t-cfg-scope-files-n-dirs Dateien und Verzeichnisse auswählen, die gesichert werden sollen
-t-cfg-scope-alias Aliasname des Backup-Umfangs
-t-cfg-target-alias Aliasname des Backup-Ziels
-t-cfg-target-comment Kommentar zum Backup-Ziel
-t-cfg-target-credentials Zugangsdaten für das Backup-Ziel
-t-cfg-target-location URL zum Backup-Ziel
-t-cfg-target-scope zu sichernder Umfang im Backup-Ziel
-t-do-bak-backup Backup starten
+t-cfg-scope-ignores Patterns der zu ignorierenden Elemente
+t-cfg-target-alias Aliasname des Sicherungs-Ziels
+t-cfg-target-comment Kommentar zum Sicherungs-Ziel
+t-cfg-target-credentials Zugangsdaten für das Sicherungs-Ziel
+t-cfg-target-location URL zum Sicherungs-Ziel
+t-cfg-target-scope zu sichernder Umfang im Sicherungs-Ziel
+t-do-bak-backup Sicherung starten
 t-do-mnt-init-repo Restic Repository anlegen
 t-do-mnt-year-end Alle Snapshots bis auf max. einen Snapshot pro Monat löschen
 t-do-rst-restore Wiederherstellung der ausgewählten Elemente starten
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert
-t-opt-bak-dry-run Backup nur simulieren
+t-opt-bak-dry-run Sicherung nur simulieren
 t-opt-mnt-dry-run Wartungs-Aktion nur simulieren
 t-opt-mnt-host Bitte ggf. den Hostnamen für das Repository auswählen
 t-opt-mnt-year Bitte ggf. das Jahr für das Repository auswählen
