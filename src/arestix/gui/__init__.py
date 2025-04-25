@@ -42,10 +42,6 @@ CANCEL_BUTTON_STYLE = 'background-color: red; color: white'
 # Style für die Beschreibung einer Option
 CAPTION_STYLE = 'color: black; font-weight: bold'
 
-# Style für Kontext-Menüs
-CONTEXT_MENU_STYLE = 'QMenu {background-color: #ABABAB; border: 1px solid black; margin: 2px;}' \
-                     'QMenu::item:selected {color: white; background: darkblue;}'
-
 # Content margins
 DEFAULT_SPACING = 10
 SMALL_CONTENT_MARGIN = 5
@@ -56,7 +52,7 @@ WIDE_CONTENT_MARGIN = 20
 MIN_COMBO_WIDTH = 240
 MIN_MAIN_WIN_HEIGHT = 640
 MIN_MAIN_WIN_WIDTH = 6 * 128 + 64
-MIN_MESSAGE_PANE_HEIGHT = 256
+MIN_MESSAGE_PANE_HEIGHT = 144
 
 # Style für die Umrahmung aller GroupBoxes
 GROUP_BOX_STYLE = 'QGroupBox {font: bold; border: 1px solid blue; border-radius: 6px; margin-top: 6px} ' \
@@ -94,7 +90,17 @@ TEXT_FIELD_STYLE = 'background-color: white'
 # Anzahl angezeigter Jahre in der Vergangenheit bei den Comboboxen zur Jahresauswahl
 PAST_YEARS_COUNT = 10
 
-# Styles
+INFO_CONTEXT_MENU_STYLE = '''QMenu {background-color: #fcfcdd; border: 1px solid black}
+QMenu::item {font-size: 18px; font-weight: bold; margin: 8px}
+QMenu::item::selected {font-size: 18px; font-weight: bold; background-color: #4681be; color: white}
+'''
+
+# Styles für die Konfigurations-Widgets
+CONFIG_COMBO_BOX_STYLE = 'QComboBox QAbstractItemView {background: lightgray; border: 1px solid black}'
+CONFIG_CONTEXT_MENU_STYLE = '''QMenu {background-color: #eeeeee; border: 2px solid black}
+QMenu::item {font-size: 14px; font-weight: bold; margin: 5px}
+QMenu::item::selected {font-size: 14px; font-weight: bold; background-color: #4681be; color: white}
+'''
 CONFIG_GROUP_BOX_STYLE = 'QGroupBox {background: #fefedd; border: 1px solid black}'
 CONFIG_LIST_VIEW_STYLE = 'QListView {background: #fefedd; border: 0px}'
 CONFIG_TEXT_EDIT_STYLE = 'QTextEdit {background: white; border: 1px solid grey}'

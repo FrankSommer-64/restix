@@ -336,8 +336,10 @@ class MessagePane(QWidget):
         super().__init__(parent)
         _layout = QVBoxLayout(self)
         self.__messages = QListWidget(self)
+        _layout.setContentsMargins(0, DEFAULT_CONTENT_MARGIN, 0, 0)
         self.__messages.setStyleSheet(MESSAGE_PANE_STYLE)
         self.__messages.setMinimumHeight(MIN_MESSAGE_PANE_HEIGHT)
+        self.__messages.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         _layout.addWidget(self.__messages)
 
     def show_message(self, severity: str, text: str):
@@ -484,7 +486,6 @@ class ResticActionPane(QWidget):
         # unten Ausgabetexte
         self.message_pane = MessagePane(self)
         self.pane_layout.addWidget(self.message_pane, 2, 0, 1, -1)
-        self.setLayout(self.pane_layout)
 
     def start_button_clicked(self) -> tuple[bool, str]:
         """

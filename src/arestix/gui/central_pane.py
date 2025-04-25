@@ -119,7 +119,7 @@ class CentralPane(QWidget):
         :param mouse_y: Y-Position des Mausklicks
         """
         _context_menu = QMenu(self)
-        _context_menu.setStyleSheet(_INFO_MENU_STYLE)
+        _context_menu.setStyleSheet(INFO_CONTEXT_MENU_STYLE)
         _context_menu.setContentsMargins(DEFAULT_CONTENT_MARGIN, DEFAULT_CONTENT_MARGIN,
                                          DEFAULT_CONTENT_MARGIN, DEFAULT_CONTENT_MARGIN)
         _context_menu.addAction(localized_label(L_MENU_USER_MANUAL)).triggered.connect(self._show_manual)
@@ -161,8 +161,4 @@ class CentralPane(QWidget):
         _about_dlg.exec()
 
 
-_INFO_MENU_STYLE = '''QMenu {background-color: #fcfcdd; border: 1px solid black}
-QMenu::item {font-size: 18px; font-weight: bold; margin: 8px}
-QMenu::item::selected {font-size: 18px; font-weight: bold; background-color: #4681be; color: white}
-'''
 _WELCOME_PANE_STYLE = f'border-image: url({ARESTIX_ASSETS_DIR}:arestix.jpg)'

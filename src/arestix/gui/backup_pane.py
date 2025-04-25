@@ -91,7 +91,6 @@ class BackupPane(ResticActionPane):
         self.__worker = None
         self.__options_pane = BackupOptionsPane(self)
         self.pane_layout.addWidget(self.__options_pane, 0, 1)
-        self.setLayout(self.pane_layout)
         self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
 
     def start_button_clicked(self):

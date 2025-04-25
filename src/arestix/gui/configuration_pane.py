@@ -41,13 +41,13 @@ from typing import Callable
 from PySide6.QtCore import Qt, QAbstractListModel, QPoint
 from PySide6.QtWidgets import (QComboBox, QDialog, QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QListView,
                                QMenu, QMessageBox, QPushButton, QSizePolicy, QTabWidget, QTextEdit,
-                               QVBoxLayout, QWidget)
+                               QVBoxLayout, QWidget, QFileDialog)
 
 from arestix.core import *
 from arestix.core.arestix_exception import ArestixException
 from arestix.core.config import LocalConfig
 from arestix.core.messages import *
-from arestix.core.util import relative_config_path_of
+from arestix.core.util import relative_config_path_of, full_config_path_of
 from arestix.gui import *
 from arestix.gui.editors import ScopeEditor
 from arestix.gui.model import ConfigModelFactory
@@ -57,13 +57,15 @@ class CredentialsDetailPane(QListView):
     """
     Pane zum Anzeigen und Editieren von Zugriffsdaten.
     """
-    def __init__(self, parent: QWidget, include_alias: bool = False):
+    def __init__(self, parent: QWidget, config_dir_path: str, include_alias: bool = False):
         """
         Konstruktor.
         :param parent: übergeordnete Pane
+        :param config_dir_path: arestix-Konfigurationsverzeichnis
         :param include_alias: zeigt an, ob ein Eingabefeld für den Alias-Namen vorhanden sein soll
         """
         super().__init__(parent)
+        self.__config_path = config_dir_path
         self.setStyleSheet(CONFIG_LIST_VIEW_STYLE)
         _layout = QFormLayout(self)
         _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
@@ -77,8 +79,10 @@ class CredentialsDetailPane(QListView):
             self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
             self.__alias_text.setToolTip(localized_label(T_CFG_CREDENTIAL_ALIAS))
             _layout.addRow(_alias_label, self.__alias_text)
+            self.__value_row = 3
         else:
             self.__alias_text = None
+            self.__value_row = 2
         _comment_label = QLabel(localized_label(L_COMMENT))
         _comment_label.setToolTip(localized_label(T_CFG_CREDENTIAL_COMMENT))
         self.__comment_text = QLineEdit()
@@ -90,18 +94,15 @@ class CredentialsDetailPane(QListView):
         _type_label.setToolTip(localized_label(T_CFG_CREDENTIAL_TYPE))
         self.__type_combo = QComboBox()
         self.__type_combo.setMinimumWidth(MIN_COMBO_WIDTH)
+        self.__type_combo.setStyleSheet(CONFIG_COMBO_BOX_STYLE)
         self.__type_combo.setToolTip(localized_label(T_CFG_CREDENTIAL_TYPE))
         for _i, _type in enumerate(CFG_CREDENTIAL_TYPES):
             self.__type_combo.addItem(_type, _i)
         self.__type_combo.setCurrentIndex(-1)
         self.__type_combo.currentIndexChanged.connect(self._type_changed)
         _layout.addRow(_type_label, self.__type_combo)
-        self.__value_label = QLabel('')
-        self.__value_text = QLineEdit()
-        self.__value_text.setStyleSheet(TEXT_FIELD_STYLE)
-        self.__value_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.__value_text.setVisible(False)
-        _layout.addRow(self.__value_label, self.__value_text)
+        self.__value_text = None
+        self.__value_button = None
 
     def get_data(self) -> dict:
         """
@@ -110,8 +111,10 @@ class CredentialsDetailPane(QListView):
         _data = {CFG_PAR_COMMENT: self.__comment_text.text(), CFG_PAR_TYPE: self.__type_combo.currentText()}
         if self.__alias_text is not None:
             _data[CFG_PAR_ALIAS] = self.__alias_text.text()
-        if self.__value_text.isVisible():
+        if self.__value_text is not None:
             _data[CFG_PAR_VALUE] = self.__value_text.text()
+        elif self.__value_button  is not None:
+            _data[CFG_PAR_VALUE] = self.__value_button.text()
         return _data
 
     def set_data(self, credential_data: dict):
@@ -139,28 +142,41 @@ class CredentialsDetailPane(QListView):
         :param credential_type: Credential-Typ
         :param value: Dateiname oder Passwort
         """
+        if self.layout().rowCount() > self.__value_row:
+            self.layout().removeRow(self.__value_row)
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_PROMPT or credential_type == CFG_VALUE_CREDENTIALS_TYPE_TOKEN:
-            self.__value_label.setText('')
-            self.__value_label.setToolTip('')
-            self.__value_text.setVisible(False)
+            self.__value_button = None
+            self.__value_text = None
             return
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_FILE:
             _tooltip = localized_label(T_CFG_CREDENTIAL_FILE_NAME)
-            self.__value_label.setText(localized_label(L_FILE_NAME))
-            self.__value_label.setToolTip(_tooltip)
-            self.__value_text.setEchoMode(QLineEdit.EchoMode.Normal)
-            self.__value_text.setText(value)
-            self.__value_text.setToolTip(_tooltip)
-            self.__value_text.setVisible(True)
+            _value_label = QLabel(localized_label(L_FILE_NAME))
+            _value_label.setToolTip(_tooltip)
+            self.__value_button = QPushButton(value)
+            self.__value_button.clicked.connect(self._select_password_file)
+            self.__value_button.setToolTip(_tooltip)
+            self.layout().addRow(_value_label, self.__value_button)
             return
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_TEXT:
             _tooltip = localized_label(T_CFG_CREDENTIAL_PASSWORD)
-            self.__value_label.setText(localized_label(L_PASSWORD))
-            self.__value_label.setToolTip(_tooltip)
+            _value_label = QLabel(localized_label(L_PASSWORD))
+            _value_label.setToolTip(_tooltip)
+            self.__value_text = QLineEdit()
+            self.__value_text.setStyleSheet(TEXT_FIELD_STYLE)
+            self.__value_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
             self.__value_text.setEchoMode(QLineEdit.EchoMode.Password)
             self.__value_text.setText(value)
             self.__value_text.setToolTip(_tooltip)
-            self.__value_text.setVisible(True)
+            self.layout().addRow(_value_label, self.__value_text)
+
+    def _select_password_file(self):
+        """
+        Wird aufgerufen, wenn der Benutzer auf den Button mit dem Dateinamen der Passwort-Datei klickt.
+        """
+        _current_file_path = full_config_path_of(self.__value_button.text(), self.__config_path)
+        _file_path, _ = QFileDialog.getOpenFileName(self, localized_label(L_DLG_TITLE_SELECT_FILE), _current_file_path)
+        if len(_file_path) > 0:
+            self.__value_button.setText(relative_config_path_of(_file_path, self.__config_path))
 
 
 class RenameElementDialog(QDialog):
@@ -316,7 +332,7 @@ class NewCredentialDialog(NewElementDialog):
         :param model_factory: Factory für die Qt-Models
         """
         super().__init__(parent, model_factory, localized_label(L_DLG_TITLE_NEW_CREDENTIALS))
-        self.__credentials_pane = CredentialsDetailPane(self, True)
+        self.__credentials_pane = CredentialsDetailPane(self, model_factory.configuration_data().path(), True)
         self.layout().addWidget(self.__credentials_pane)
         self.create_button_pane()
 
@@ -460,7 +476,7 @@ class ElementSelectorPane(QWidget):
         _context_menu = QMenu(self.__combo)
         _context_menu.addAction(localized_label(L_MENU_RENAME)).triggered.connect(self._rename_element)
         _context_menu.addAction(localized_label(L_MENU_REMOVE)).triggered.connect(self._remove_element)
-        _context_menu.setStyleSheet(CONTEXT_MENU_STYLE)
+        _context_menu.setStyleSheet(CONFIG_CONTEXT_MENU_STYLE)
         _context_menu.exec(self.mapToGlobal(position))
 
     def _add_element(self):
@@ -524,7 +540,7 @@ class CredentialsPane(QWidget):
         _detail_group_box = QGroupBox('')
         _detail_group_box.setStyleSheet(CONFIG_GROUP_BOX_STYLE)
         _group_box_layout = QVBoxLayout(_detail_group_box)
-        self.__detail_pane = CredentialsDetailPane(self)
+        self.__detail_pane = CredentialsDetailPane(self, model_factory.configuration_data().path())
         self.__detail_pane.setModel(model_factory.credentials_model())
         _group_box_layout.addWidget(self.__detail_pane)
         _update_button = QPushButton(localized_label(L_UPDATE))
