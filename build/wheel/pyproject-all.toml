@@ -26,10 +26,10 @@ classifiers = [
 ]
 
 [project.gui-scripts]
-restix_gui = "arestix.gui.arestix_gui:gui_main"
+garestix = "arestix.gui.arestix_gui:gui_main"
 
 [project.scripts]
-restix = "arestix.cli.arestix_cli:cli_main"
+arestix = "arestix.cli.arestix_cli:cli_main"
 
 [project.urls]
 Homepage = "https://github.com/frsommer64/arestix"
@@ -49,9 +49,6 @@ exclude = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/arestix"]
-
-[tool.hatch.build.targets.wheel.force-include]
-"templates" = "arestix/templates"
 
 [tool.hatch.version]
 path = "src/arestix/core/__init__.py"

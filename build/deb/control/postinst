@@ -1,0 +1,22 @@
+#!/usr/bin/bash
+
+case "$1" in
+  "install")
+    cd /opt/arestix
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip3 install ${WHEEL_FILE_NAME}
+    deactivate
+    rm ${WHEEL_FILE_NAME}
+    rm -f /usr/local/bin/arestix
+    ln -s /opt/arestix/arestix /usr/local/bin/arestix
+    rm -f /usr/local/bin/garestix
+    ln -s /opt/arestix/garestix /usr/local/bin/garestix
+    ;;
+  "upgrade")
+    echo "upgrade $2 $3"
+    ;;
+  "abort-upgrade")
+    echo "abort-upgrade $2"
+    ;;
+esac
