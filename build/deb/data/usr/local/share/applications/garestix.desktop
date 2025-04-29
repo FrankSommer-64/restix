@@ -1,0 +1,19 @@
+[Desktop Entry]
+Categories=Utility;
+Comment[de_DE]=GUI für die Datensicherung mit restic.
+Comment=GUI für die Datensicherung mit restic.
+Exec=/opt/arestix/garestix
+GenericName[de_DE]=
+GenericName=
+Icon=system-software-update
+MimeType=
+Name[de_DE]=Arestix GUI
+Name=Arestix GUI
+Path=
+StartupNotify=true
+StartupWMClass=arestix
+Terminal=false
+TerminalOptions=
+Type=Application
+X-KDE-SubstituteUID=false
+X-KDE-Username=
