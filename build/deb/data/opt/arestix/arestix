@@ -1,8 +1,8 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # Run arestix command line interface.
 
-VENV_ACTIVATION_FILE = /opt/arestix/.venv/bin/activate
+VENV_ACTIVATION_FILE=/opt/arestix/.venv/bin/activate
 
 source $VENV_ACTIVATION_FILE
 arestix $@

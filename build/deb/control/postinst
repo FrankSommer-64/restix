@@ -1,7 +1,7 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 case "$1" in
-  "install")
+  configure)
     cd /opt/arestix
     python3 -m venv .venv
     source .venv/bin/activate
@@ -13,10 +13,10 @@ case "$1" in
     rm -f /usr/local/bin/garestix
     ln -s /opt/arestix/garestix /usr/local/bin/garestix
     ;;
-  "upgrade")
+  upgrade)
     echo "upgrade $2 $3"
     ;;
-  "abort-upgrade")
+  abort-upgrade)
     echo "abort-upgrade $2"
     ;;
 esac
