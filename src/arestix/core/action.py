@@ -149,6 +149,14 @@ class ArestixAction:
                 raise ArestixException(E_INVALID_YEAR, option_value)
         self.__options[option_name] = option_value
 
+    def remove_option(self, option_name: str):
+        """
+        Entfernt die angegebene Option.
+        :param option_name: Name der Option
+        """
+        if option_name in self.__options:
+            del self.__options[option_name]
+
     def verify_mandatory_options(self):
         """
         Prüft, ob alle notwendigen Optionen für eine Aktion gesetzt wurden.

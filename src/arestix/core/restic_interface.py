@@ -58,6 +58,12 @@ def run_backup(action: ArestixAction, task_monitor: TaskMonitor) -> TaskResult:
     :raises ArestixException: falls das Backup fehlschlägt
     """
     _auto_create = action.option(OPTION_AUTO_CREATE) is True
+    if _auto_create:
+        _restic_version = determine_version()
+        if _restic_version < ENHANCED_RESTIC_VERSION:
+            task_monitor.log(W_OUTDATED_RESTIC_VERSION, _restic_version)
+            action.remove_option(OPTION_AUTO_CREATE)
+            _auto_create = False
     _dry_run = action.option(OPTION_DRY_RUN) is True
     _repo = action.option(OPTION_REPO)
     _status = _repo_status(action)
@@ -232,6 +238,27 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     else:
         raise ArestixException(E_RESTIC_CMD_FAILED, _restic_cmd, os.linesep.join(_err_info))
     raise ArestixException(_exception_id, _restic_cmd)
+
+
+def determine_version() -> str:
+    """
+    Ermittelt die installierte restic-Version.
+    :returns: restic-Version.
+    :raises ArestixException: falls das Lesen der Version fehlschlägt
+    """
+    _action_id = 'version'
+    _cmd = ['restic', _action_id, '--json']
+    _silent_monitor = TaskMonitor(None, True)
+    try:
+        _rc, _stdout, _stderr = _execute_restic_command(_cmd, _silent_monitor)
+        if _rc == RESTIC_RC_OK:
+            _version_info = json.loads(_stdout)
+            return _version_info.get(JSON_ATTR_VERSION)
+        raise ArestixException(E_RESTIC_NOT_INSTALLED, f'{_stderr}{os.linesep}{_stdout}')
+    except ArestixException:
+        raise
+    except OSError as _e:
+        raise ArestixException(E_RESTIC_NOT_INSTALLED, str(_e))
 
 
 def determine_snapshots(action: ArestixAction, task_monitor: TaskMonitor) -> list[Snapshot]:

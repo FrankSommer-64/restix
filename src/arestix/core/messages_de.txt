@@ -2,6 +2,8 @@
 e-alias-name-already-used Aliasname '{0}' wird bereits verwendet.
 e-alias-name-empty Kein Aliasname angegeben.
 e-alias-referenced Aliasname '{0}' wird noch in Sicherungs-Zielen verwendet.
+e-arestix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
+e-arestix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 e-background-task-aborted Hintergrund-Task abgebrochen.
 e-background-task-failed Hintergrund-Task fehlgeschlagen: {0}
 e-backup-failed Backup zu Repository {0} fehlgeschlagen, restic return code {1}.
@@ -19,12 +21,12 @@ e-internal-error Interner Fehler: {0}.
 e-mandatory-option-missing Notwendige Option {0} nicht angegeben.
 e-no-snapshot-desc-from-restic Keine Snapshot-Beschreibung von restic bekommen.
 e-repo-does-not-exist restic-Repository {0} existiert nicht.
-e-arestix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
-e-arestix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
+e-restic-not-installed restic ist nicht installiert. Der Befehl 'restic version' lieferte die Fehlermeldung: {0}
 e-write-file-failed Fehler beim Schreiben der Datei {0}: {1}.
 i-dry-run-create-repo Werde Repository {0} anlegen.
 i-running-restic-cmd restic-Befehl: {0}
 w-cant-dry-run-backup-without-repo Trockenlauf der Sicherung nicht möglich, da Repository {0} nicht existiert.
+w-outdated-restic-version Die installierte restic-Version {0} liefert keine detaillierten Fehlercodes, Option '--auto-create' ignoriert.
 
 # Konfiguration
 e-cfg-create-config-root-failed Konnte Konfigurationsverzeichnis {0} nicht anlegen: {1}.

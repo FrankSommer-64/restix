@@ -136,6 +136,7 @@ JSON_ATTR_STRUCT_TYPE = 'struct_type'
 JSON_ATTR_TAGS = 'tags'
 JSON_ATTR_TIME = 'time'
 JSON_ATTR_TYPE = 'type'
+JSON_ATTR_VERSION = 'version'
 JSON_STRUCT_TYPE_NODE = 'node'
 JSON_STRUCT_TYPE_SNAPSHOT = 'snapshot'
 
@@ -166,6 +167,7 @@ OPTION_USER = '--user'
 OPTION_YEAR = '--year'
 
 # restic Sondervariablen
+ENHANCED_RESTIC_VERSION = '0.17'
 RESTIC_SNAPSHOT_LATEST = 'latest'
 RESTIC_RC_OK = 0
 RESTIC_RC_CMD_FAILED = 1
