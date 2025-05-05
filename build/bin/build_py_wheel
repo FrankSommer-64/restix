@@ -1,0 +1,58 @@
+#!/usr/bin/bash
+
+# Erstellt Python wheel für ein Projekt
+# Projekt Root-Verzeichnis muss unter $HOME/GITROOT/sw/projects liegen.
+# Falls das Projekt wegen unterschiedlicher Features mehrere Installationspakete
+# benötigt, muss das Script für jeden Feature-Umfang aufgerufen werden.
+
+PROJECTS_ROOT="$HOME/GITROOT/sw/projects"
+VENV_ACT="$HOME/.python_venv/build/bin/activate"
+
+# Argumente einlesen
+if [ "$1" = "" ]; then
+  echo "Kein Projekt angegeben"
+  echo "Aufruf: py_build <Projekt> [<Feature-Umfang>]"
+  exit 1
+fi
+PROJECT=$1
+FEATURES=""
+if [ "$2" != "" ]; then
+  FEATURES=$2
+fi
+
+# pruefen, ob noetige Dateien existieren
+REMOVE_CONFIG_FILE=false
+PROJECT_ROOT="$PROJECTS_ROOT/$1"
+CONFIG_FILE="$PROJECT_ROOT/pyproject.toml"
+if [ ! -d $PROJECT_ROOT ]; then
+  echo "Projekt-Verzeichnis $PROJECT_ROOT nicht gefunden"
+  exit 1
+fi
+if [ "$FEATURES" != "" ]; then
+  CONFIG_DIR="$PROJECT_ROOT/build/wheel"
+  if [ ! -d "$CONFIG_DIR" ]; then
+    echo "Konfigurations-Verzeichnis $CONFIG_DIR nicht gefunden"
+    exit 1
+  fi
+  FEATURES_FILE="$CONFIG_DIR/pyproject-$FEATURES.toml"
+  if [ ! -f "$FEATURES_FILE" ]; then
+    echo "Konfigurationsdatei $FEATURES_FILE nicht gefunden"
+    exit 1
+  fi
+  cp $FEATURES_FILE $CONFIG_FILE
+  REMOVE_CONFIG_FILE=true
+fi
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Konfigurationsdatei $CONFIG_FILE nicht gefunden"
+  exit 1
+fi
+
+# Build starten
+source $VENV_ACT
+cd $PROJECT_ROOT
+echo "Build $PROJECT $FEATURES"
+hatchling build
+deactivate
+if [[ $REMOVE_CONFIG_FILE == true ]]; then
+  rm $CONFIG_FILE
+fi

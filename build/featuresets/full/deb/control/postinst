@@ -5,6 +5,7 @@ case "$1" in
     cd /opt/arestix
     python3 -m venv .venv
     source .venv/bin/activate
+    echo Installing required Python dependencies. This will take a while...
     pip3 install ${WHEEL_FILE_NAME}
     deactivate
     rm ${WHEEL_FILE_NAME}

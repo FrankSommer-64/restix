@@ -297,7 +297,7 @@ def create_config_root() -> str:
     """
     _config_path = os.environ.get(ENVA_ARESTIX_CONFIG_PATH)
     if _config_path is None:
-        _config_path = os.path.join(os.path.expanduser('~'), ARESTIX_CONFIG_SUBDIR)
+        _config_path = os.path.join(os.path.expanduser('~'), *ARESTIX_CONFIG_SUBDIR)
     _config_path = full_path_of(_config_path)
     try:
         os.makedirs(_config_path, 0o755, True)

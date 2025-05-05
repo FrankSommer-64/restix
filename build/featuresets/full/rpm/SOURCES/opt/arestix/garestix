@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Run arestix GUI.
+
+VENV_ACTIVATION_FILE=/opt/arestix/.venv/bin/activate
+
+source $VENV_ACTIVATION_FILE
+garestix
+deactivate

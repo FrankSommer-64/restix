@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+# Erzeugt ein Debian-Installationspaket für eine Python-Applikation.
+
+source $HOME/.python_venv/build/bin/activate
+python3 $HOME/bin/build_py_deb.py $@
+deactivate

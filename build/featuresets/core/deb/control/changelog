@@ -1,4 +1,4 @@
-arestix (${VERSION}) unstable; urgency=low
+${PACKAGE_NAME} (${VERSION}) unstable; urgency=low
 
   * Initial public release
 

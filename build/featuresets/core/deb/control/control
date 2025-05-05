@@ -1,0 +1,10 @@
+Package: ${PACKAGE_NAME}
+Version: ${VERSION}
+Section: misc
+Depends: python3 (>= 3.8), restic
+Priority: optional
+Architecture: all
+Maintainer: Frank Sommer <Frank.Sommer@sherpa-software.de>
+Description: Backup and restore based on restic.
+    .
+    Uses distinct repositories for hosts, users and years.
