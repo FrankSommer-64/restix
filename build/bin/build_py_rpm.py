@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 # Erzeugt ein rpm-Installationspaket für eine Python-Applikation.
 
 import os
@@ -11,6 +9,7 @@ import tempfile
 import tomli
 
 
+PY_CONFIG_FILE_NAME = 'pyproject.toml'
 PROJECTS_ROOT = os.path.join(os.path.expanduser('~'), 'GITROOT', 'sw', 'projects')
 RPM_WORK_PATH = os.path.join(os.path.expanduser('~'), 'rpmbuild')
 BUILD_WHEEL_SCRIPT = os.path.join(os.path.expanduser('~'), 'bin', 'build_py_wheel')
@@ -150,8 +149,9 @@ def build_project_feature(project_name: str, feature_name: str | None):
     :param feature_name: Name des Feature-Sets
     """
     _feature = feature_info(project_name, feature_name)
+    _py_package_name = _feature[ATTR_PYTHON_PACKAGE_NAME]
     create_work_dir()
-    _project_dir = f'{_feature[ATTR_PYTHON_PACKAGE_NAME]}-{_feature[ATTR_VERSION]}'
+    _project_dir = f'{_py_package_name}-{_feature[ATTR_VERSION]}'
     # Archiv mit den Projekt-Dateien erzeugen
     with tempfile.TemporaryDirectory() as _temp_path:
         _archive_project_root = os.path.join(_temp_path, _project_dir)
@@ -186,7 +186,16 @@ def build_project_feature(project_name: str, feature_name: str | None):
     _spec_target_path = os.path.join(RPM_WORK_PATH, 'SPECS')
     for _f in os.listdir(_spec_data_path):
         copy_spec_file(_spec_data_path, _f, _spec_target_path, project_name, _feature)
-    print(f'rpm Installationspaket erstellt.')
+    # rpm-Paket erstellen
+    _cmd = ['rpmbuild', '-bb', os.path.join(_spec_target_path, f'{_py_package_name}.spec')]
+    _rc = run_command(_cmd)
+    if _rc != 0:
+        raise RuntimeError(f'Build rpm-Paket {project_name} {feature_name} fehlgeschlagen')
+    _rpms_path = os.path.join(RPM_WORK_PATH, 'RPMS', 'noarch')
+    _dist_path = os.path.join(PROJECTS_ROOT, project_name, 'dist')
+    for _f in os.listdir(_rpms_path):
+        shutil.copy(os.path.join(_rpms_path, _f), _dist_path)
+    print('rpm Installationspaket erstellt.')
 
 
 # Hauptprogramm
