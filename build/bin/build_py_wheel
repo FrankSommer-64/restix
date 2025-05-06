@@ -7,6 +7,7 @@
 
 PROJECTS_ROOT="$HOME/GITROOT/sw/projects"
 VENV_ACT="$HOME/.python_venv/build/bin/activate"
+CONFIG_FILE_NAME="pyproject.toml"
 
 # Argumente einlesen
 if [ "$1" = "" ]; then
@@ -15,31 +16,32 @@ if [ "$1" = "" ]; then
   exit 1
 fi
 PROJECT=$1
-FEATURES=""
+FEATURE_SET=""
 if [ "$2" != "" ]; then
-  FEATURES=$2
+  FEATURE_SET=$2
 fi
 
 # pruefen, ob noetige Dateien existieren
 REMOVE_CONFIG_FILE=false
 PROJECT_ROOT="$PROJECTS_ROOT/$1"
-CONFIG_FILE="$PROJECT_ROOT/pyproject.toml"
+BUILD_ROOT="$PROJECT_ROOT/build"
+CONFIG_FILE="$PROJECT_ROOT/$CONFIG_FILE_NAME"
 if [ ! -d $PROJECT_ROOT ]; then
   echo "Projekt-Verzeichnis $PROJECT_ROOT nicht gefunden"
   exit 1
 fi
-if [ "$FEATURES" != "" ]; then
-  CONFIG_DIR="$PROJECT_ROOT/build/wheel"
+if [ "$FEATURE_SET" != "" ]; then
+  CONFIG_DIR="$BUILD_ROOT/featuresets/$FEATURE_SET/wheel"
   if [ ! -d "$CONFIG_DIR" ]; then
     echo "Konfigurations-Verzeichnis $CONFIG_DIR nicht gefunden"
     exit 1
   fi
-  FEATURES_FILE="$CONFIG_DIR/pyproject-$FEATURES.toml"
-  if [ ! -f "$FEATURES_FILE" ]; then
-    echo "Konfigurationsdatei $FEATURES_FILE nicht gefunden"
+  FEATURE_SET_CONFIG_FILE="$CONFIG_DIR/$CONFIG_FILE_NAME"
+  if [ ! -f "$FEATURE_SET_CONFIG_FILE" ]; then
+    echo "Konfigurationsdatei $FEATURE_SET_CONFIG_FILE nicht gefunden"
     exit 1
   fi
-  cp $FEATURES_FILE $CONFIG_FILE
+  cp $FEATURE_SET_CONFIG_FILE $PROJECT_ROOT
   REMOVE_CONFIG_FILE=true
 fi
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -50,7 +52,7 @@ fi
 # Build starten
 source $VENV_ACT
 cd $PROJECT_ROOT
-echo "Build $PROJECT $FEATURES"
+echo "Build $PROJECT $FEATURE_SET"
 hatchling build
 deactivate
 if [[ $REMOVE_CONFIG_FILE == true ]]; then
