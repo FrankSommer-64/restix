@@ -1,0 +1,189 @@
+#!/usr/bin/python3
+# Server-Script zum Löschen von restic-Repositories oder deren Archivierungsständen.
+#
+# Das Script löscht alle Repositories bzw. Archivierungsdaten unterhalb eines Root-Verzeichnisses eines Jahres
+# bzw. bis zu einem bestimmten Jahr.
+# Daten des aktuellen Jahres können nicht gelöscht werden.
+#
+# Aufruf: purge_restix <repo-or-archive-root> <jahr> [--and-older]
+#           repo-or-archive-root: Root-Verzeichnis der restic-Repositories bzw. archivierten Repository-Stände
+#           jahr: Jahr, für das die Daten gelöscht werden sollen, vier Ziffern
+#           --and-older: auch die Daten aller früheren Jahre löschen
+
+import datetime
+import os
+import subprocess
+import sys
+
+
+REPO_MARKER = 'config'
+ARCHIVE_FILE_SUFFIX = '.tgz'
+
+INFO_ATTR_ELEMENTS = 'elements'
+INFO_ATTR_ERROR = 'error'
+INFO_ATTR_TYPE = 'type'
+
+TYPE_ARCHIVE = 'archive'
+TYPE_REPO = 'repo'
+TYPE_UNKNOWN = 'unknown'
+
+
+def usage_info():
+    """
+    Gibt Informationen zum Aufruf des Scripts auf der Konsole aus.
+    """
+    print('Aufruf: purge_restix <repo-or-archive-root> <jahr> [--and-older]')
+    print('          repo-or-archive-root: Root-Verzeichnis der restic-Repositories bzw. archivierten Repository-Stände')
+    print('          jahr: Jahr, für das die Daten gelöscht werden sollen, vier Ziffern')
+    print('          --and-older: auch die Daten aller früheren Jahre löschen')
+
+
+def parse_cmdline(cmd_line: list[str]) -> tuple[str, int, bool]:
+    """
+    Liest die Argumente von der Kommandozeile ein.
+    :param cmd_line: Argumente der Kommandozeile
+    :returns: Tupel mit den Argumenten (root-Verzeichnis, Jahr, ältere Jahre)
+    """
+    if len(cmd_line) == 2:
+        _root_path = cmd_line[0]
+        _year = cmd_line[1]
+        _remove_older = False
+    elif len(cmd_line) == 3:
+        _root_path = cmd_line[0]
+        _year = cmd_line[1]
+        if cmd_line[2] != '--and-older':
+            raise RuntimeError(f'Ungültiges Argument {cmd_line[2]}')
+        _remove_older = True
+    else:
+        raise RuntimeError('Ungültige Anzahl von Argumenten')
+    if not os.path.isdir(_root_path):
+        raise RuntimeError(f'Root-Verzeichnis {_root_path} nicht gefunden')
+    try:
+        _int_year = int(_year)
+    except Exception:
+        raise RuntimeError('Jahr muss eine Integer-Zahl sein')
+    _current_year = datetime.datetime.now().year
+    if _int_year >= _current_year:
+        raise RuntimeError('Jahr muss in der Vergangenheit liegen')
+    return _root_path, _int_year, _remove_older
+
+
+def execute_command(command: list[str]):
+    """
+    Führt den übergebenen Befehl aus.
+    Standard-Output und -Error wird auf der Konsole ausgegeben.
+    :param command: der auszuführende Befehl.
+    :raise RuntimeError: falls die Operation fehlgeschlagen ist
+    """
+    res = subprocess.run(command, capture_output=True, encoding='utf-8')
+    if len(res.stderr) > 0: print(res.stderr)
+    if len(res.stdout) > 0: print(res.stdout)
+    if res.returncode != 0:
+        raise RuntimeError(f'Operation fehlgeschlagen: {command}')
+
+
+def find_victims(elements_root_path: str, purge_year: int, purge_older_years: bool) -> dict:
+    """
+    Gibt Informationen über die zu löschenden Elemente zurück.
+    :param elements_root_path: Root-Verzeichnis der Elemente
+    :param purge_year: Jahr der zu löschenden Elemente
+    :param purge_older_years: zeigt an, ob auch ältere Elemente gelöscht werden sollen
+    :returns: Dictionary mit den zu löschenden Elementen
+    """
+    _victims = {}
+    for _user_dir in os.listdir(elements_root_path):
+        _user_dir_path = os.path.join(elements_root_path, _user_dir)
+        if not os.path.isdir(_user_dir_path):
+            continue
+        _victims[_user_dir] = {}
+        for _host_dir in os.listdir(_user_dir_path):
+            _host_dir_path = os.path.join(_user_dir_path, _host_dir)
+            if not os.path.isdir(_host_dir_path):
+                continue
+            _victims[_user_dir][_host_dir] = {}
+            for _year_dir in os.listdir(_host_dir_path):
+                if not _year_dir.isdigit():
+                    continue
+                if int(_year_dir) > purge_year or (int(_year_dir) < purge_year and not purge_older_years):
+                    continue
+                _year_dir_path = os.path.join(_host_dir_path, _year_dir)
+                if not os.path.isdir(_year_dir_path):
+                    continue
+                _victims[_user_dir][_host_dir][_year_dir] = elements_info(_year_dir_path)
+    return _victims
+
+
+def elements_info(elements_path: str) -> dict:
+    """
+    :param elements_path: Root-Verzeichnis der Elemente
+    :returns: Informationen zu den zu löschenden Elementen im Verzeichnis
+    """
+    _error = None
+    _elements = []
+    _type = TYPE_UNKNOWN
+    for _element in os.listdir(elements_path):
+        if _element == REPO_MARKER:
+            if _type != TYPE_UNKNOWN:
+                _error = 'Verzeichnis enthält sowohl Repository-Kennung als auch Archivdateien'
+                break
+            _type = TYPE_REPO
+            continue
+        if _element.endswith(ARCHIVE_FILE_SUFFIX):
+            if _type == TYPE_REPO:
+                _error = 'Verzeichnis enthält sowohl Repository-Kennung als auch Archivdateien'
+                break
+            _type = TYPE_ARCHIVE
+            _elements.append(_element)
+    return {INFO_ATTR_ELEMENTS: _elements, INFO_ATTR_TYPE: _type, INFO_ATTR_ERROR: _error}
+
+
+def purge_victims(elements_root_path: str, elements: dict):
+    """
+    Löscht die übergebenen Elemente.
+    :param elements_root_path: Root-Verzeichnis der Elemente
+    :param elements: die zu löschenden Elemente
+    """
+    _purge_list = []
+    _display_list = []
+    for _user_name, _host_info in elements.items():
+        for _host_name, _year_info in _host_info.items():
+            for _year, _elements_info in _year_info.items():
+                if _elements_info[INFO_ATTR_ERROR] is not None:
+                    _display_list.append(f'+++ Ignoriere {_user_name}/{_host_name}/{_year} - {_elements_info[INFO_ATTR_ERROR]}')
+                    continue
+                if _elements_info[INFO_ATTR_TYPE] == TYPE_REPO:
+                    _display_list.append(f'Repository für Benutzer {_user_name}, Host {_host_name} aus {_year}')
+                    _purge_list.append(os.path.join(elements_root_path, _user_name, _host_name, _year))
+                elif _elements_info[INFO_ATTR_TYPE] == TYPE_ARCHIVE:
+                    _display_list.append(f'Archivdateien für Benutzer {_user_name}, Host {_host_name} aus {_year}')
+                    _purge_list.append(os.path.join(elements_root_path, _user_name, _host_name, _year))
+                    for _file in _elements_info[INFO_ATTR_ELEMENTS]:
+                        _display_list.append(f'  {_file}')
+                else:
+                    _display_list.append(f'+++ Ignoriere {_user_name}/{_host_name}/{_year} - nicht als Repository oder Archiv erkannt')
+    if len(_purge_list) == 0:
+        print('Keine zu löschenden Elemente gefunden')
+        return
+    print('Es werden folgende Elemente gelöscht:')
+    [print(_line) for _line in _display_list]
+    print()
+    ch = input('OK (j/n) > ')
+    if ch.lower() != 'j':
+        raise RuntimeError('Script abgebrochen.')
+    for _dir in _purge_list:
+        execute_command(['rm', '-rf', _dir])
+
+
+# Hauptprogramm
+try:
+    (root_path, year, purge_older) = parse_cmdline(sys.argv[1:])
+except Exception as e:
+    print(e)
+    usage_info()
+    sys.exit(1)
+try:
+    victims = find_victims(root_path, year, purge_older)
+    purge_victims(root_path, victims)
+except Exception as e:
+    print('+++ Aufräumen fehlgeschlagen +++')
+    print(f'> {e}')

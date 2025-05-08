@@ -33,7 +33,7 @@
 # -----------------------------------------------------------------------------------------------
 
 # arestix Version
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 
 # Anfang des Dateinamens für die lokalisierten Benutzerhandbücher
 USER_MANUAL_STEM = 'user_manual_'

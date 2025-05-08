@@ -1,0 +1,235 @@
+#!/usr/bin/python3
+# Server-Script zum Archivieren von restic-Repositories.
+#
+# Das Script archiviert alle Repositories unterhalb eines Root-Verzeichnisses
+# im komprimierten tar-Format in ein Archivverzeichnis.
+# Die Anzahl der archivierten Stände ist konfigurierbar.
+# Die Log-Ausgabe erfolgt in Datei /var/log/archive_restix.log.
+#
+# Aufruf: archive_restix <repo-root> <archive-root> <keep>
+#           repo-root: Root-Verzeichnis der restic-Repositories
+#           archive-root: Root-Verzeichnis für die archivierten Repository-Stände
+#           keep: maximale Anzahl der archivierten Stände eines Repositories,
+#                 ältere werden gelöscht
+
+import datetime
+import os
+import subprocess
+import sys
+
+
+ARCHIVE_FILE_SUFFIX = '.tgz'
+SNAPSHOTS_SUBDIR = 'snapshots'
+LOG_FN = '/var/log/archive_restix.log'
+
+STATUS_ATTR_AR_FILES = 'archived-files'
+STATUS_ATTR_ERROR = 'error'
+STATUS_ATTR_MOD_TIME = 'mod-time'
+STATUS_ATTR_PATH = 'path'
+STATUS_ATTR_SUB_DIR = 'subdir'
+
+log_data = []
+
+
+def usage_info():
+    """
+    Gibt Informationen zum Aufruf des Scripts auf der Konsole aus.
+    """
+    log('Aufruf: archive_restix <repo-root> <archive-root> <keep>')
+    log('          repo-root: Root-Verzeichnis der restic-Repositories')
+    log('          archive-root: Root-Verzeichnis für die archivierten Repository-Stände')
+    log('          keep: maximale Anzahl der archivierten Stände eines Repositories')
+
+
+def log(text: str):
+    """
+    Fügt den übergebenen Log-Text ins globale Log-Array ein.
+    :param text: der Log-Text
+    """
+    global log_data
+    log_data.append(f'{text}{os.linesep}')
+
+
+def write_log_data():
+    """
+    Schreibt das globale Log-Array in die Log-Datei.
+    """
+    global log_data
+    try:
+        _now = datetime.datetime.now().strftime('%d.%m.%Y-%H:%M:%S')
+        hdr = f'----------  {_now}  ----------{os.linesep}'
+        with open(LOG_FN, 'a') as _f:
+            _f.write(hdr)
+            _f.writelines(log_data)
+            _f.close()
+    except Exception as _e:
+        print(f'Fehler beim Schreiben des Logs in Datei {LOG_FN}')
+        print(_e)
+        for m in log_data:
+            print(m)
+
+
+def parse_cmdline(cmd_line: list[str]) -> tuple[str, str, int]:
+    """
+    Liest die Argumente von der Kommandozeile ein.
+    :param cmd_line: Argumente der Kommandozeile
+    :returns: Tupel mit den Argumenten (repository root, archive root, keep)
+    """
+    if len(cmd_line) != 3:
+        raise RuntimeError('Ungültige Anzahl von Argumenten')
+    _repo_root, _archive_root, _keep = tuple(cmd_line)
+    if not os.path.isdir(_repo_root):
+        raise RuntimeError(f'Repository-Root-Verzeichnis {_repo_root} nicht gefunden')
+    if not os.path.isdir(_archive_root):
+        raise RuntimeError(f'Archiv-Root-Verzeichnis {_archive_root} nicht gefunden')
+    try:
+        _int_keep = int(_keep)
+    except Exception:
+        raise RuntimeError('Keep-Argument muss eine Integer-Zahl sein')
+    if _int_keep < 1 or _int_keep > 100:
+        raise RuntimeError('Keep-Argument muss zwischen 1 und 100 liegen')
+    return _repo_root, _archive_root, _int_keep
+
+
+def repository_state(sub_dir: str, repo_path: str) -> dict:
+    """
+    Gibt den Status eines einzelnen Repositories zurück.
+    :param sub_dir: Unterverzeichnis des Repositories unter dem Repository-Root-Verzeichnis
+    :param repo_path: Verzeichnis des Repositories
+    :returns: Dictionary mit dem Repository-Status (Keys: path, subdir, mod-time, error)
+    """
+    _status = {STATUS_ATTR_PATH: repo_path, STATUS_ATTR_SUB_DIR: sub_dir,
+               STATUS_ATTR_MOD_TIME: None, STATUS_ATTR_ERROR: None}
+    _snapshots_path = os.path.join(repo_path, SNAPSHOTS_SUBDIR)
+    if not os.path.isdir(_snapshots_path):
+        _status[STATUS_ATTR_ERROR] = f'Verzeichnis {SNAPSHOTS_SUBDIR} in Repo {repo_path} nicht gefunden'
+        return _status
+    _latest_mod_time = None
+    for _file in os.listdir(repo_path):
+        _mod_time = os.stat(os.path.join(repo_path, _file)).st_mtime
+        if _latest_mod_time is None or _mod_time > _latest_mod_time:
+            _latest_mod_time = _mod_time
+    _status[STATUS_ATTR_MOD_TIME] = datetime.datetime.fromtimestamp(_latest_mod_time)
+    return _status
+
+
+def repository_states(repo_root_path: str) -> list[dict]:
+    """
+    Gibt den Status aller Repositories zurück. Im Root-Verzeichnis werden die Repositories im Verzeichnisbaum
+    <User>/<Host>/<Jahr> abgelegt.
+    :param repo_root_path: Root-Verzeichnis der Repositories
+    :returns: Liste von Dictionaries mit den Repository-Status (Keys: path, mod-time, error)
+    """
+    _status_list = []
+    for _user_dir in os.listdir(repo_root_path):
+        _user_dir_path = os.path.join(repo_root_path, _user_dir)
+        if os.path.isdir(_user_dir_path):
+            for _host_dir in os.listdir(_user_dir_path):
+                _host_dir_path = os.path.join(_user_dir_path, _host_dir)
+                if os.path.isdir(_host_dir_path):
+                    for _year_dir in os.listdir(_host_dir_path):
+                        _year_dir_path = os.path.join(_host_dir_path, _year_dir)
+                        _sub_dir = os.path.join(_user_dir, _host_dir, _year_dir)
+                        _status_list.append(repository_state(_sub_dir, _year_dir_path))
+    return _status_list
+
+
+def fill_archive_states(archive_root_path: str, repo_status_list: list[dict]):
+    """
+    Trägt den Archiv-Status für alle Repositories ein.
+    :param archive_root_path: Root-Verzeichnis der Archiv-Dateien
+    :param repo_status_list: Liste mit den Status aller Repositories
+    """
+    for _repo_state in repo_status_list:
+        ar_path = os.path.join(archive_root_path, _repo_state[STATUS_ATTR_SUB_DIR])
+        if not os.path.isdir(ar_path):
+            _repo_state[STATUS_ATTR_AR_FILES] = None
+            continue
+        _repo_state[STATUS_ATTR_AR_FILES] = sorted(os.listdir(ar_path), reverse=True)
+
+
+def archive_repositories(archive_root_path: str, repo_status_list: list[dict], keep: int):
+    """
+    Archiviert alle Repositories.
+    :param archive_root_path: Root-Verzeichnis der Archiv-Dateien
+    :param repo_status_list: Liste mit den Status aller Repositories
+    :param keep: maximale Anzahl der archivierten Stände
+    """
+    for _repo_status in repo_status_list:
+        _repo_name = _repo_status[STATUS_ATTR_SUB_DIR]
+        _error_info = _repo_status[STATUS_ATTR_ERROR]
+        if _error_info is not None:
+            log(f'Ignoriere Repository {_repo_name}: {_error_info}')
+            continue
+        if _repo_status[STATUS_ATTR_MOD_TIME] is None:
+            log(f'Ignoriere Repository {_repo_name}: Repository ist leer')
+            continue
+        _archive_file_path = os.path.join(archive_root_path, _repo_name)
+        archive_repository(_archive_file_path, _repo_status, keep)
+
+
+def archive_repository(archive_path: str, repository_status: dict, keep: int):
+    """
+    Archiviert ein Repository.
+    :param archive_path: Archiv-Verzeichnis
+    :param repository_status: Status des Repositories
+    :param keep: maximale Anzahl der archivierten Stände
+    """
+    _fmt = f'%Y%m%d%H%M%S{ARCHIVE_FILE_SUFFIX}'
+    _archive_file = os.path.join(archive_path, datetime.datetime.now().strftime(_fmt))
+    _repository_path = repository_status[STATUS_ATTR_PATH]
+    _repository_sub_dir = repository_status[STATUS_ATTR_SUB_DIR]
+    _archive_command = ['sh', '-c', f'cd {_repository_path} && tar -czf {_archive_file} *']
+    if repository_status[STATUS_ATTR_AR_FILES] is None:
+        os.makedirs(archive_path, 0o700, exist_ok=True)
+    if repository_status[STATUS_ATTR_AR_FILES] is None or len(repository_status[STATUS_ATTR_AR_FILES]) == 0:
+        execute_command(_archive_command)
+        log(f'Repository {_repository_sub_dir} archiviert ({_archive_file})')
+        return
+    _last_archived = datetime.datetime.strptime(repository_status[STATUS_ATTR_AR_FILES][0][:-4], '%Y%m%d%H%M%S')
+    if _last_archived > repository_status[STATUS_ATTR_MOD_TIME]:
+        _last_archive_time = _last_archived.strftime('%d.%m.%Y-%H:%M:%S')
+        _repo_mod_time = repository_status[STATUS_ATTR_MOD_TIME].strftime('%d.%m.%Y-%H:%M:%S')
+        log(f'Repository {_repository_sub_dir} nicht archiviert.')
+        log(f'Letzte Archivierung ({_last_archive_time}) war nach der letzten Repo-Änderung ({_repo_mod_time}).')
+        return
+    execute_command(_archive_command)
+    log(f'Repository {_repository_sub_dir} archiviert ({_archive_file})')
+    for _i in range(keep - 1, len(repository_status[STATUS_ATTR_AR_FILES])):
+        _file_to_delete = os.path.join(archive_path, repository_status[STATUS_ATTR_AR_FILES][_i])
+        _delete_command = ['rm', '-f', _file_to_delete]
+        execute_command(_delete_command)
+        log(f'Archivstand {_file_to_delete} gelöscht')
+
+
+def execute_command(command: list[str]):
+    """
+    Führt den übergebenen Befehl aus.
+    Standard-Output und -Error wird auf der Konsole ausgegeben.
+    :param command: der auszuführende Befehl.
+    :raise RuntimeError: falls die Operation fehlgeschlagen ist
+    """
+    res = subprocess.run(command, capture_output=True, encoding='utf-8')
+    if len(res.stderr) > 0: log(res.stderr)
+    if len(res.stdout) > 0: log(res.stdout)
+    if res.returncode != 0:
+        raise RuntimeError(f'Operation fehlgeschlagen: {command}')
+
+
+# Hauptprogramm
+try:
+    (repo_root, archive_root, keep_count) = parse_cmdline(sys.argv[1:])
+except Exception as e:
+    log(str(e))
+    usage_info()
+    write_log_data()
+    sys.exit(1)
+try:
+    repo_states = repository_states(repo_root)
+    fill_archive_states(archive_root, repo_states)
+    log(str(repo_states))
+    archive_repositories(archive_root, repo_states, keep_count)
+except Exception as e:
+    log('+++ Archivierung fehlgeschlagen +++')
+    log(f'> {str(e)}')
+write_log_data()
