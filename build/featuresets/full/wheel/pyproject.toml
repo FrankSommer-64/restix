@@ -1,6 +1,6 @@
-# arestix with all features
+# restix with all features
 [project]
-name = "arestix"
+name = "restix"
 dynamic = ["version"]
 authors = [
     {name="Frank Sommer", email="Frank.Sommer@sherpa-software.de"}
@@ -26,14 +26,14 @@ classifiers = [
 ]
 
 [project.gui-scripts]
-garestix = "arestix.gui.arestix_gui:gui_main"
+grestix = "restix.gui.restix_gui:gui_main"
 
 [project.scripts]
-arestix = "arestix.cli.arestix_cli:cli_main"
+restix = "restix.cli.restix_cli:cli_main"
 
 [project.urls]
-Homepage = "https://github.com/frsommer64/arestix"
-Issues = "https://github.com/frsommer64/arestixissues"
+Homepage = "https://github.com/frsommer64/restix"
+Issues = "https://github.com/frsommer64/restixissues"
 
 [build-system]
 requires = ["hatchling"]
@@ -48,7 +48,7 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/arestix"]
+packages = ["src/restix"]
 
 [tool.hatch.version]
-path = "src/arestix/core/__init__.py"
+path = "src/restix/core/__init__.py"

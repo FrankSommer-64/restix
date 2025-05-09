@@ -1,0 +1,286 @@
+# general
+e-alias-name-already-used Alias name '{0}' already in use.
+e-alias-name-empty No alias name specified.
+e-alias-referenced Alias name '{0}' is used in backup targets.
+e-restix-target-not-defined Alias for restic repository {0} is not configured.
+e-restix-var-not-defined Undefined variable {0} in configuration file.
+e-background-task-aborted Background task aborted.
+e-background-task-failed Background task failed: {0}
+e-backup-failed Backup to repository {0} failed, restic return code {1}.
+e-bool-opt-required Option {0} requires True or False for its value.
+e-could-not-create-repo Could not create repository {0}, restic return code {1}.
+e-could-not-determine-repo-status Could not determine status of repository {0}, restic return code {1}.
+e-file-name-missing No file name specified.
+e-file-opt-required File {0} for option {1} does not exist.
+e-invalid-hostname Specified host name {0} invalid.
+e-invalid-action Invalid action {0}.
+e-invalid-option Option {0} is not supported.
+e-invalid-snapshot-id Specified snapshot ID {0} invalid, hex number required.
+e-invalid-year Specified year {0} invalid, four digits required.
+e-internal-error Internal error: {0}.
+e-mandatory-option-missing Mandatory option {0} not specified.
+e-no-snapshot-desc-from-restic Did not get snapshot description from restic.
+e-repo-does-not-exist restic repository {0} doesn't exist.
+e-restic-not-installed restic not installed. Command 'restic version' failed with: {0}
+e-write-file-failed Error writing file {0}: {1}.
+i-dry-run-create-repo Will create repository {0}.
+i-running-restic-cmd restic command: {0}
+w-cant-dry-run-backup-without-repo Dry run for backup action not possible, repository {0} doesn't exist.
+w-outdated-restic-version Installed restic-Version {0} does not provide detailed error codes, option '--auto-create' ignored.
+
+# configuration
+e-cfg-create-config-root-failed Could not create configuration directory {0}: {1}.
+e-cfg-custom-config-root-not-found Configuration directory {0} specified by environment variable {1} not found.
+e-cfg-default-config-root-not-found Default configuration directory {0} not found.
+e-cfg-duplicate-group Group {0} {1} specified multiple times in configuration file {2}.
+e-cfg-invalid-credentials-ref Backup target {0} in configuration file {2} references invalid credentials alias {1}.
+e-cfg-invalid-elem-type Invalid type for element {0} in configuration file {2}, {1} expected.
+e-cfg-invalid-elem-value Invalid value for element {0} in configuration file {2}, {1} expected.
+e-cfg-invalid-scope-ref Backup target {0} in configuration file {2} references invalid scope alias {1}.
+e-cfg-invalid-variable Variable name {0} not supported.
+e-cfg-mandatory-elem-missing Element {0} requires mandatory attribute {1}.
+e-cfg-mandatory-grp-missing Mandatory group {0} not specified in configuration file {1}.
+e-cfg-meta-desc-missing Description for type {0} not found.
+e-cfg-read-file-failed Error reading configuration file {0}: {1}.
+w-cfg-elem-ignored Element {0} ignored.
+
+# CLI texts
+t-cli-backup-targets-header Backup targets:
+t-cli-backup-target-info {0} - {1}
+t-cli-confirm-backup Backup to repository {0}.
+t-cli-confirm-cleanup Remove all snapshots except one per month from repository {0}.
+t-cli-confirm-init Initialise repository {0}.
+t-cli-confirm-restore Restore snapshot {0} from repository {1} to {2}.
+t-cli-enter-password Please enter password >
+t-cli-help-backup Backup local data to restic repository\n \
+    Command: restix backup [options] backup-target\n \
+    Options: --batch * execute restic command without confirmation\n           \
+    --dry-run * simulate execution only, no data transferred to repository\n           \
+    --auto-create * create repository automatically, if it doesn't exist\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-cleanup Remove snapshots except one per month from restic repository\n \
+    Command: restix cleanup  [options] backup-target\n \
+    Options: --batch * execute restic command without confirmation\n \
+    --dry-run * simulate execution only, no data removed from repository\n           \
+    --host hostname * Use repository for specified host\n           \
+    --year year * Use repository for specified year\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-find Search elements in restic repository\n \
+    Command: restix find [options] backup-target\n \
+    Options: --pattern pattern - Search pattern for the elements\n           \
+    --snapshot snapshot * Snapshot (ID or latest)\n           \
+    --host hostname * Use repository for specified host\n           \
+    --year year * Use repository for specified year\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-init Create new restic repository\n \
+    Command: restix init [options] backup-target\n \
+    Options: --batch * execute restic command without confirmation\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-ls Show elements in restic repository\n \
+    Command: restix ls [options] backup-target\n \
+    Options: --snapshot snapshot * Snapshot where to take elements from (ID or latest)\n           \
+    --host hostname * Use repository for specified host\n           \
+    --year year * Use repository for specified year\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-restore Restore data from restic repository to local filesystem\n \
+    Command: restix restore [options] backup-target\n \
+    Options: --batch * execute restic command without confirmation\n           \
+    --dry-run * simulate execution only, no data copied from repository\n           \
+    --host hostname * Use repository for specified host\n           \
+    --restore-path path * Root directory, where to copy data from repository\n           \
+    --snapshot snapshot * Snapshot (ID or latest)\n           \
+    --year year * Use repository for specified year\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-snapshots Show snapshots of a restic repository\n \
+    Command: restix snapshots [options] backup-target\n \
+    Options: --host hostname * Use repository for specified host\n           \
+    --year year * Use repository for specified year\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-prompt-for-confirmation OK (y/n)?
+t-cli-usage-info Usage: restix command [options] [backup-target]\n \
+    Commands: backup | cleanup | find | init | ls | restore | snapshots | targets\n \
+    For help on each command use restix --help <command>
+t-cli-yes-char y
+
+# CLI messages
+e-cli-command-missing No command specified.
+e-cli-dup-option Option {0} specified multiple times.
+e-cli-invalid-command Invalid command {0}.
+e-cli-invalid-option Invalid option {0}.
+e-cli-invalid-path-spec Invalid path for option {0}: {1}.
+e-cli-non-existing-path Path {0} for option {1} does not exist.
+e-cli-path-is-not-dir Path {0} for option {1} is not a directory.
+e-cli-restix-command-failed +++ Command failed +++
+e-cli-target-missing Action {0} requires an alias name for the backup target.
+e-cli-too-many-args Too many arguments given, cannot process '{0}'.
+
+# restic errors
+e-restic-cmd-failed restic command {0} failed: {1}.
+e-restic-cmd-interrupted restic command {0} failed: restic command aborted.
+e-restic-go-runtime-error restic command {0} failed: Go runtime error.
+e-restic-read-backup-data-failed restic command {0} failed: error reading backup data.
+e-restic-repo-does-not-exist restic command {0} failed: repository does not exist.
+e-restic-repo-lock-failed restic command {0} failed: could not lock repository.
+e-restic-repo-wrong-password restic command {0} failed: wrong password.
+
+# GUI messages
+i-gui-restix-info restix - Backup and restore based on restic
+i-gui-restix-link <a href='https://github.com/frsommer64/restix'>Web site</a>
+i-gui-restix-copyright Copyright (c) 2025 Frank Sommer
+i-gui-config-problem Problems in restix configuration detected:
+i-gui-config-warning Warnings in restix configuration detected:
+i-gui-confirm-remove Are you sure to remove {0} ?
+i-gui-create-config-root x
+i-gui-creating-repo Create restic repository {0}.
+i-gui-credential-exists Credentials with alias name '{0}' already exist.
+i-gui-data-restored Data restored from repository {0}.
+i-gui-icons-copyright  Copyright (C) 2007 Nuno Pinheiro <nuno@oxygen-icons.org>\n\
+Copyright (C) 2007 David Vignoni <david@icon-king.com>\n\
+Copyright (C) 2007 David Miller <miller@oxygen-icons.org>\n\
+Copyright (C) 2007 Johann Ollivier Lapeyre <johann@oxygen-icons.org>\n\
+Copyright (C) 2007 Kenneth Wimer <kwwii@bootsplash.org>\n\
+Copyright (C) 2007 Riccardo Iaconelli <riccardo@oxygen-icons.org>
+i-gui-icons-info KDE Oxygen Icon Theme
+i-gui-icons-link <a href='https://github.com/KDE/oxygen-icons'>Web site</a>
+i-gui-local-config-changed restix configuration has been changed.
+i-gui-no-credential-type-specified No credentials type selected.
+i-gui-no-includes-specified No files to include in backup selected.
+i-gui-no-name-specified No alias name specified.
+i-gui-no-snapshot-selected No snapshot selected
+i-gui-no-target-selected No backup target selected
+i-gui-pyside-info Qt GUI library
+i-gui-pyside-link <a href='https://wiki.qt.io/PySide6'>Web site</a>
+i-gui-repo-created Successfully created restic repository {0}.
+i-gui-restore-path-is-not-dir Restore target path {0} is not a directory.
+i-gui-restoring-all-data Restoring all data from repository {0}.
+i-gui-restoring-all-data-to-path Restoring all data from repository {0} to directory {1}.
+i-gui-restoring-some-data Restoring selected data from repository {0} .
+i-gui-restoring-some-data-to-path Restoring selected data from repository {0} to directory {1}.
+i-gui-scope-exists Scope with alias name '{0}' already exists.
+i-gui-target-exists Backup target with alias name '{0}' already exists.
+i-gui-task-finished Background task finished {0}.
+i-gui-toml-lib-copyright Copyright (c) 2021 Taneli Hukkinen
+i-gui-toml-lib-info Python TOML libraries
+i-gui-tomli-link <a href='https://github.com/hukkin/tomli'>Web site</a>
+i-gui-tomliw-link <a href='https://github.com/hukkin/tomli-w'>Web site</a>
+i-gui-version Version {0}
+
+# GUI labels
+l-add Add
+l-adopt-selection Adopt selected elements
+l-alias Alias name
+l-auto-create Automatically create repository
+l-cancel Cancel
+l-comment Comment
+l-backup Backup
+l-configuration Configuration
+l-credentials Credentials
+l-current-alias Current alias name
+l-dismiss Dismiss changes
+l-do-backup Start backup
+l-do-init-repo Create repository
+l-do-restore Start restore
+l-do-year-end Year end
+l-dry-run Dry run
+l-edit Edit
+l-element Element
+l-enter-password Please enter password:
+l-exit Exit
+l-file-name File name
+l-files-n-dirs Files and directories
+l-full full
+l-host Host name
+l-ignores Ignored elements
+l-info Info
+l-libraries Used libraries
+l-license License
+l-location Location
+l-maintenance Maintenance
+l-mandatory-snapshot * Snapshot
+l-new New...
+l-new-alias New alias name
+l-ok OK
+l-options Options
+l-password Password
+l-rename Rename
+l-restix Restix
+l-restore Restore
+l-restore-path Restore target directory
+l-restore-scope Restore scope
+l-save Save
+l-save-as Save as
+l-scope Backup scope
+l-scopes Backup scopes
+l-search Search
+l-select Select
+l-select-elements Select elements
+l-show-all-elements Show all elements
+l-some single file(s)
+l-target Backup target
+l-targets Backup targets
+l-type Type
+l-update Update
+l-year Year
+
+# GUI widget labels
+l-dlg-title-about About restix
+l-dlg-title-new-credentials New credentials
+l-dlg-title-new-scope New backup scope
+l-dlg-title-new-target New backup target
+l-dlg-title-password Password
+l-dlg-title-rename-element Rename {0}
+l-dlg-title-save-local-config Save local restix configuration
+l-dlg-title-scope-editor Specify backup scope
+l-dlg-title-select-excludes-file Select excludes file
+l-dlg-title-select-file Select file name
+l-dlg-title-select-includes-file Select includes file
+l-dlg-title-snapshot-viewer Snapshot {0} for host {1} ({2})
+l-dlg-title-user-manual User manual
+l-main-win-title restix
+l-mbox-title-error Error
+l-mbox-title-info Information
+l-mbox-title-warning Warning
+l-menu-about About restix
+l-menu-remove Remove
+l-menu-rename Rename...
+l-menu-user-manual User manual...
+
+# GUI tooltips
+t-cancel-action Cancel current action
+t-cfg-credential-comment Comment for credentials
+t-cfg-credential-alias Alias name for credentials
+t-cfg-credential-password Password
+t-cfg-credential-type Type of credentials
+t-cfg-credential-file-name File name containing restic password
+t-cfg-scope-alias Alias name for backup scope
+t-cfg-scope-comment Comment for backup scope
+t-cfg-scope-files-n-dirs Select files and directories to backup
+t-cfg-scope-ignores Element-Patterns to ignore during backup
+t-cfg-target-alias Alias name for backup target
+t-cfg-target-comment Comment for backup target
+t-cfg-target-credentials Credentials for backup target
+t-cfg-target-location URL to backup target
+t-cfg-target-scope files and directories to transfer to backup target
+t-do-bak-backup Start backup
+t-do-mnt-init-repo Create restic repository
+t-do-mnt-year-end Remove all snapshots but latest for every month
+t-do-rst-restore Start restore of selected elements
+t-opt-bak-auto-create Automatically create repository, if it doesn't exist
+t-opt-bak-dry-run Simulate backup action only
+t-opt-mnt-dry-run Simulate maintenance action only
+t-opt-mnt-host Select host name for repository, if you do not want to use local host
+t-opt-mnt-year Select year for repository, if you do not want to use current year
+t-opt-rst-dry-run Simulate restore action only
+t-opt-rst-host Select host name, if you want to restore data of a different host
+t-opt-rst-restore-path Specify target directory, where to restore data to
+t-opt-rst-restore-scope Select scope of restore
+t-opt-rst-restore-scope-full Restore all data from snapshot
+t-opt-rst-restore-scope-some Restore selected data from snapshot
+t-opt-rst-snapshot Select snapshot to use for restore
+t-opt-rst-year Select year, if you want to restore data from a former year
+
+# GUI errors
+e-gui-no-snapshot-selected No snapshot selected
+
+# GUI warnings
+w-gui-write-gui-settings-failed Error writing GUI settings to file {0}: {1}.

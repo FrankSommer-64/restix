@@ -1,0 +1,19 @@
+[Desktop Entry]
+Categories=Utility;
+Comment[de_DE]=GUI für die Datensicherung mit restic
+Comment=GUI for restic based backup and restore
+Exec=/opt/restix/grestix
+GenericName[de_DE]=
+GenericName=
+Icon=system-software-update
+MimeType=
+Name[de_DE]=Restix GUI
+Name=Restix GUI
+Path=
+StartupNotify=true
+StartupWMClass=restix
+Terminal=false
+TerminalOptions=
+Type=Application
+X-KDE-SubstituteUID=false
+X-KDE-Username=

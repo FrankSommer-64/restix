@@ -33,50 +33,36 @@
 # -----------------------------------------------------------------------------------------------
 
 """
-Unit tests für gui.settings.
+restix-spezifische Exceptions.
 """
-import tempfile
-import os.path
-import unittest
 
-from PySide6.QtCore import QRect
+from typing import Any
 
-from restix.core import RESTIX_GUI_SETTINGS_FILE_PATH
-from restix.gui.settings import GuiSettings
-
-# Standard restix-Konfiguration für Unit-Tests
-STANDARD_TARGET = 'mytarget'
-
-# Name der Einstellungsdatei für Unit-Tests
-TEST_FILE_PATH = os.path.join(tempfile.gettempdir(), RESTIX_GUI_SETTINGS_FILE_PATH)
+from restix.core.messages import localized_message
 
 
-class TestSettings(unittest.TestCase):
-    def test_default(self):
+class RestixException(Exception):
+    """
+    restix-Exception.
+    """
+    def __init__(self, exception_id: str, *args: Any):
         """
-        Testet die Standard-Einstellungen
+        Konstruktor.
+        :param exception_id: Exception-ID
+        :param args: optionale Argumente
         """
-        _settings = GuiSettings()
-        _settings.set_win_geometry(QRect(100, 100, 800, 600))
-        _settings.set_latest_target(STANDARD_TARGET)
-        self.assertEqual(QRect(100, 100, 800, 600), _settings.win_geometry())
-        self.assertEqual(STANDARD_TARGET, _settings.latest_target())
+        super().__init__(exception_id, args)
 
-    def test_roundtrip(self):
+    def id(self) -> str:
         """
-        Testet den Zyklus Erzeugen-Speichern-Laden
+        :returns: Exception-ID
         """
-        _settings = GuiSettings()
-        _settings.set_win_geometry(QRect(100, 100, 800, 600))
-        _settings.set_latest_target(STANDARD_TARGET)
-        if os.path.exists(TEST_FILE_PATH):
-            os.remove(TEST_FILE_PATH)
-        _settings.save(TEST_FILE_PATH)
-        _settings2 = GuiSettings.from_file(TEST_FILE_PATH)
-        self.assertEqual(_settings2.win_geometry(), _settings.win_geometry())
-        self.assertEqual(_settings.latest_target(), _settings.latest_target())
-        self.assertFalse(_settings2._GuiSettings__is_modified)
+        return self.args[0]
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def __str__(self) -> str:
+        """
+        :returns: Daten dieser Exception in lokalisierter Form.
+        """
+        if len(self.args) > 1:
+            return localized_message(self.args[0], *self.args[1])
+        return localized_message(self.args[0])

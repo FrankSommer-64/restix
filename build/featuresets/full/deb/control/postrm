@@ -1,4 +1,4 @@
 #!/bin/bash
 
-rm -f /usr/local/bin/arestix
-rm -f /usr/local/bin/garestix
+rm -f /usr/local/bin/restix
+rm -f /usr/local/bin/grestix

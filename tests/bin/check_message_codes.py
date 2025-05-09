@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# arestix - Datensicherung auf restic-Basis.
+# restix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -35,7 +35,7 @@
 """
 Prüft die Konsistenz der lokalisierten Messages für eine bestimmte Sprache.
 Die zu prüfende Sprache muss in Umgebungsvariable LANG angegeben werden.
-Das Root-Verzeichnis der arestix Source-Dateien muss in Umgebungsvariable RESTIX_SOURCE_PATH angegeben werden.
+Das Root-Verzeichnis der restix Source-Dateien muss in Umgebungsvariable RESTIX_SOURCE_PATH angegeben werden.
 Im Einzelnen werden folgende Prüfungen durchgeführt:
 - alle Message-Codes in Datei core.messages.py müssen einen entsprechenden Eintrag in core.messages_<LANG>.txt haben
 - alle Einträge in core.messages_<LANG>.txt müssen in core.messages.py definiert sein
@@ -137,7 +137,7 @@ class MessageCodeVisitor(ast.NodeVisitor):
                         _exc_type = ev.id
                     if ek == 'args':
                         _exc_args = ev
-        if _exc_type == 'ArestixException':
+        if _exc_type == 'RestixException':
             _msg_code = '-'
             if isinstance(_exc_args[0], ast.Name):
                 if MSG_CODE_PATTERN.match(_exc_args[0].id):
@@ -335,10 +335,10 @@ if __name__ == '__main__':
         if _lang is None:
             raise RuntimeError('Umgebungsvariable LANG ist nicht definiert')
         _locale = _lang[:2].lower()
-        _source_path = os.environ.get('ARESTIX_SOURCE_PATH')
+        _source_path = os.environ.get('RESTIX_SOURCE_PATH')
         if _source_path is None:
-            raise RuntimeError('Umgebungsvariable ARESTIX_SOURCE_PATH ist nicht definiert')
-        _core_package_path = os.path.join(_source_path, 'arestix', 'core')
+            raise RuntimeError('Umgebungsvariable RESTIX_SOURCE_PATH ist nicht definiert')
+        _core_package_path = os.path.join(_source_path, 'restix', 'core')
         _message_file_path = os.path.join(_core_package_path, 'messages.py')
         _localized_message_file_path = os.path.join(_core_package_path, f'messages_{_locale}.txt')
         # alle Message-Codes von Source-Datei core.messages.py einlesen

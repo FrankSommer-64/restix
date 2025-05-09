@@ -1,5 +1,5 @@
 # ===============================================================
-# Unit-Test Konfigurationsdatei für arestix
+# Unit-Test Konfigurationsdatei für restix
 # ===============================================================
 [[credentials]]
 alias = "standard"
@@ -35,18 +35,18 @@ credentials = "standard"
 
 [[target]]
 alias = "target-dir"
-location = "/var/arestix"
+location = "/var/restix"
 scope = "full"
 credentials = "standard"
 
 [[target]]
 alias = "target-usbstick"
-location = "/media/${USER}/USBSAVE/arestix"
+location = "/media/${USER}/USBSAVE/restix"
 scope = "excludes-only"
 credentials = "standard"
 
 [[target]]
 alias = "target-exthdd"
-location = "/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/arestix"
+location = "/media/${USER}/58af5a30-36b5-4f0b-bb8f-a70683ae3e7e/restix"
 scope = "ignores-only"
 credentials = "standard"

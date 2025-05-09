@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -----------------------------------------------------------------------------------------------
-# arestix - Datensicherung auf restic-Basis.
+# restix - Datensicherung auf restic-Basis.
 #
 # Copyright (c) 2025, Frank Sommer.
 # All rights reserved.
@@ -41,12 +41,12 @@ from pathlib import Path
 import os.path
 import unittest
 
-from arestix.core.config import *
+from restix.core.config import *
 
 # Namen der nicht unterstützten Elemente in Testdatei unsupported_elements.toml
 UNSUPPORTED_ELEMENTS = ['credentials.[0].user', 'credentials.[0].password', 'scope.[0].type',
                         'target.[0].url', 'user']
-# Namen der Elemente in der Standard-arestix-Konfiguration, deren Wert eine Variable enthält
+# Namen der Elemente in der Standard-restix-Konfiguration, deren Wert eine Variable enthält
 VAR_CREDENTIALS = {'shared': ['value']}
 VAR_TARGETS = {'usbstick': ['location'],
                'nvme': ['location']}
@@ -55,25 +55,25 @@ VAR_TARGETS = {'usbstick': ['location'],
 class TestConfig(unittest.TestCase):
     def test_config_root_path(self):
         """
-        Testet die Ermittlung des arestix-Konfigurationsverzeichnisses.
+        Testet die Ermittlung des restix-Konfigurationsverzeichnisses.
         """
         # existierendes Default-Verzeichnis
-        self.assertEqual(os.path.join(Path.home(), *ARESTIX_CONFIG_SUBDIR), config_root_path())
+        self.assertEqual(os.path.join(Path.home(), *RESTIX_CONFIG_SUBDIR), config_root_path())
         # existierendes benutzerdefiniertes Verzeichnis
         _custom_root = TestConfig.unit_test_home()
-        os.environ[ENVA_ARESTIX_CONFIG_PATH] = _custom_root
+        os.environ[ENVA_RESTIX_CONFIG_PATH] = _custom_root
         self.assertEqual(_custom_root, config_root_path())
         # nicht existierendes benutzerdefiniertes Verzeichnis
-        os.environ[ENVA_ARESTIX_CONFIG_PATH] = os.path.join(Path.home(), 'nonexistent')
-        self.assertRaises(ArestixException, config_root_path)
+        os.environ[ENVA_RESTIX_CONFIG_PATH] = os.path.join(Path.home(), 'nonexistent')
+        self.assertRaises(RestixException, config_root_path)
         # nicht existierendes Default-Verzeichnis
         _orig_home_dir = os.environ['HOME']
         try:
             os.environ['HOME'] = os.path.join(Path.home(), 'nonexistent')
-            self.assertRaises(ArestixException, config_root_path)
+            self.assertRaises(RestixException, config_root_path)
         finally:
             os.environ['HOME'] = _orig_home_dir
-            del os.environ[ENVA_ARESTIX_CONFIG_PATH]
+            del os.environ[ENVA_RESTIX_CONFIG_PATH]
 
     def test_unsupported_elements(self):
         """
@@ -123,11 +123,11 @@ class TestConfig(unittest.TestCase):
         """
         Test mit mehreren Testdaten-Dateien durchführen.
         :param file_name_pattern: Pattern für die Namen der Testdateien.
-        :raises ArestixException: falls beim Validieren der Dateien **keine** Exception auftritt
+        :raises RestixException: falls beim Validieren der Dateien **keine** Exception auftritt
         """
         _toml_dataset = TestConfig.unittest_toml_dataset(file_name_pattern)
         for _file_name, _toml_data in _toml_dataset.items():
-            with self.assertRaises(ArestixException, msg=_file_name) as _e:
+            with self.assertRaises(RestixException, msg=_file_name) as _e:
                 validate_config(_toml_data, _file_name)
             print(_e.exception)
 
@@ -177,11 +177,11 @@ class TestConfig(unittest.TestCase):
     @staticmethod
     def unittest_configuration() -> LocalConfig:
         """
-        :returns: Standard arestix-Konfiguration für Unit-Tests
+        :returns: Standard restix-Konfiguration für Unit-Tests
         """
-        _config_file_path = os.path.join(TestConfig.unit_test_home(), ARESTIX_CONFIG_FN)
-        _arestix_config = LocalConfig.from_file(_config_file_path)
-        return _arestix_config
+        _config_file_path = os.path.join(TestConfig.unit_test_home(), RESTIX_CONFIG_FN)
+        _restix_config = LocalConfig.from_file(_config_file_path)
+        return _restix_config
 
     @staticmethod
     def unit_test_home() -> str:

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Run restix GUI.
+
+VENV_ACTIVATION_FILE=/opt/restix/.venv/bin/activate
+
+source $VENV_ACTIVATION_FILE
+grestix
+deactivate

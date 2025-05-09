@@ -2,17 +2,17 @@
 
 case "$1" in
   configure)
-    cd /opt/arestix
+    cd /opt/restix
     python3 -m venv .venv
     source .venv/bin/activate
     echo Installing required Python dependencies. This will take a while...
     pip3 install ${WHEEL_FILE_NAME}
     deactivate
     rm ${WHEEL_FILE_NAME}
-    rm -f /usr/local/bin/arestix
-    ln -s /opt/arestix/arestix /usr/local/bin/arestix
-    rm -f /usr/local/bin/garestix
-    ln -s /opt/arestix/garestix /usr/local/bin/garestix
+    rm -f /usr/local/bin/restix
+    ln -s /opt/restix/restix /usr/local/bin/restix
+    rm -f /usr/local/bin/grestix
+    ln -s /opt/restix/grestix /usr/local/bin/grestix
     ;;
   upgrade)
     echo "upgrade $2 $3"
