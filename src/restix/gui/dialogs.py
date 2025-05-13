@@ -49,7 +49,7 @@ from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QDialog, QFileDialog, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
                                QMessageBox, QPushButton, QSizePolicy, QStyle, QTextEdit,
-                               QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+                               QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget, QCheckBox)
 
 from restix.core import *
 from restix.core.action import RestixAction
@@ -544,6 +544,79 @@ class PasswordDialog(QDialog):
         self.accept()
 
 
+class PgpFileDialog(QDialog):
+    """
+    Dialog zum Erzeugen einer PGP-verschlüsselten Passwort-Datei.
+    """
+    def __init__(self, parent: QWidget):
+        """
+        Konstruktor.
+        :param parent: das übergeordnete Widget
+        """
+        super().__init__(parent)
+        self.__file_name = ''
+        self.__password = ''
+        self.__email = ''
+        self.__ascii_armor_format = True
+        self.setWindowTitle(localized_label(L_DLG_TITLE_PGP_FILE))
+        _parent_rect = parent.contentsRect()
+        self.setGeometry(_parent_rect.x() + _PGP_FILE_DIALOG_OFFSET, _parent_rect.y() + _PGP_FILE_DIALOG_OFFSET,
+                         _PGP_FILE_DIALOG_WIDTH, _PGP_FILE_DIALOG_HEIGHT)
+        self.setStyleSheet(_STYLE_WHITE_BG)
+        _layout = QGridLayout(self)
+        _layout.setSpacing(DEFAULT_SPACING)
+        _file_name_tooltip = localized_label(T_CFG_PGP_FILE_NAME)
+        _file_name_label = QLabel(localized_label(L_FILE_NAME))
+        _file_name_label.setToolTip(_file_name_tooltip)
+        _layout.addWidget(_file_name_label, 0, 0)
+        self.__file_name_text = QLineEdit('')
+        self.__file_name_text.setToolTip(_file_name_tooltip)
+        _layout.addWidget(self.__file_name_text, 0, 1)
+        _password_tooltip = localized_label(T_CFG_PGP_PASSWORD)
+        _password_label = QLabel(localized_label(L_PASSWORD))
+        _password_label.setToolTip(_password_tooltip)
+        _layout.addWidget(_password_label, 1, 0)
+        self.__password_text = QLineEdit('', echoMode=QLineEdit.EchoMode.Password)
+        self.__password_text.setToolTip(_password_tooltip)
+        _layout.addWidget(self.__password_text, 1, 1)
+        _email_tooltip = localized_label(T_CFG_PGP_EMAIL)
+        _email_label = QLabel(localized_label(L_EMAIL))
+        _email_label.setToolTip(_email_tooltip)
+        _layout.addWidget(_email_label, 2, 0)
+        self.__email_text = QLineEdit('')
+        self.__email_text.setToolTip(_email_tooltip)
+        _layout.addWidget(self.__email_text, 2, 1)
+        _ascii_armor_format_tooltip = localized_label(T_CFG_PGP_ASCII_ARMOR)
+        _ascii_armor_format_label = QLabel(localized_label(L_ASCII_ARMOR))
+        _ascii_armor_format_label.setToolTip(_ascii_armor_format_tooltip)
+        _layout.addWidget(_ascii_armor_format_label, 3, 0)
+        self.__ascii_armor_format_checkbox = QCheckBox()
+        self.__ascii_armor_format_checkbox.setChecked(True)
+        _layout.addWidget(self.__ascii_armor_format_checkbox, 3, 1)
+        _ok_button = QPushButton(localized_label(L_OK))
+        _ok_button.clicked.connect(self._ok_button_clicked)
+        _layout.addWidget(_ok_button, 4, 0)
+        _cancel_button = QPushButton(localized_label(L_CANCEL))
+        _cancel_button.clicked.connect(self.reject)
+        _layout.addWidget(_cancel_button, 4, 1)
+
+    def data_for_file_creation(self) -> tuple[str, str, str, bool]:
+        """
+        :returns: Eingegebene Daten (Dateiname, Passwort, E-Mail, ASCII-Format)
+        """
+        return self.__file_name, self.__password, self.__email, self.__ascii_armor_format
+
+    def _ok_button_clicked(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den "OK"-Button geklickt hat.
+        """
+        self.__file_name = self.__file_name_text.text()
+        self.__email = self.__email_text.text()
+        self.__password = self.__password_text.text()
+        self.__ascii_armor_format = self.__ascii_armor_format_checkbox.isChecked()
+        self.accept()
+
+
 def exception_box(icon, reason, question, buttons, default_button):
     """
     Creates and returns a message box in reaction to an exception.
@@ -582,6 +655,9 @@ _PASSWORD_DIALOG_WIDTH = 360
 _PDF_VIEWER_HEIGHT = 720
 _PDF_VIEWER_OFFSET = 10
 _PDF_VIEWER_WIDTH = 640
+_PGP_FILE_DIALOG_HEIGHT = 240
+_PGP_FILE_DIALOG_OFFSET = 80
+_PGP_FILE_DIALOG_WIDTH = 360
 _SAVE_DIALOG_HEIGHT = 240
 _SAVE_DIALOG_OFFSET = 80
 _SAVE_DIALOG_WIDTH = 360

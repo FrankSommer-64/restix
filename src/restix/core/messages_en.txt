@@ -2,8 +2,6 @@
 e-alias-name-already-used Alias name '{0}' already in use.
 e-alias-name-empty No alias name specified.
 e-alias-referenced Alias name '{0}' is used in backup targets.
-e-restix-target-not-defined Alias for restic repository {0} is not configured.
-e-restix-var-not-defined Undefined variable {0} in configuration file.
 e-background-task-aborted Background task aborted.
 e-background-task-failed Background task failed: {0}
 e-backup-failed Backup to repository {0} failed, restic return code {1}.
@@ -22,14 +20,18 @@ e-mandatory-option-missing Mandatory option {0} not specified.
 e-no-snapshot-desc-from-restic Did not get snapshot description from restic.
 e-repo-does-not-exist restic repository {0} doesn't exist.
 e-restic-not-installed restic not installed. Command 'restic version' failed with: {0}
+e-restix-target-not-defined Alias for restic repository {0} is not configured.
+e-restix-var-not-defined Undefined variable {0} in configuration file.
 e-write-file-failed Error writing file {0}: {1}.
 i-dry-run-create-repo Will create repository {0}.
+i-overwrite-file Overwrite file {0} ?
 i-running-restic-cmd restic command: {0}
 w-cant-dry-run-backup-without-repo Dry run for backup action not possible, repository {0} doesn't exist.
 w-outdated-restic-version Installed restic-Version {0} does not provide detailed error codes, option '--auto-create' ignored.
 
 # configuration
 e-cfg-create-config-root-failed Could not create configuration directory {0}: {1}.
+e-cfg-create-pgp-file-failed Could not create encrypted password file {0}: {1}.
 e-cfg-custom-config-root-not-found Configuration directory {0} specified by environment variable {1} not found.
 e-cfg-default-config-root-not-found Default configuration directory {0} not found.
 e-cfg-duplicate-group Group {0} {1} specified multiple times in configuration file {2}.
@@ -169,11 +171,13 @@ i-gui-version Version {0}
 l-add Add
 l-adopt-selection Adopt selected elements
 l-alias Alias name
+l-ascii-armor Use ASCII armor format
 l-auto-create Automatically create repository
 l-cancel Cancel
 l-comment Comment
 l-backup Backup
 l-configuration Configuration
+l-create-encrypted-file Create encrypted password file
 l-credentials Credentials
 l-current-alias Current alias name
 l-dismiss Dismiss changes
@@ -184,6 +188,7 @@ l-do-year-end Year end
 l-dry-run Dry run
 l-edit Edit
 l-element Element
+l-email E-Mail address
 l-enter-password Please enter password:
 l-exit Exit
 l-file-name File name
@@ -228,6 +233,7 @@ l-dlg-title-new-credentials New credentials
 l-dlg-title-new-scope New backup scope
 l-dlg-title-new-target New backup target
 l-dlg-title-password Password
+l-dlg-title-pgp-file Create PGP encrypted file
 l-dlg-title-rename-element Rename {0}
 l-dlg-title-save-local-config Save local restix configuration
 l-dlg-title-scope-editor Specify backup scope
@@ -247,11 +253,17 @@ l-menu-user-manual User manual...
 
 # GUI tooltips
 t-cancel-action Cancel current action
+t-cfg-create-encrypted-file Creates PGP encrypted password file in configuration directory
 t-cfg-credential-comment Comment for credentials
 t-cfg-credential-alias Alias name for credentials
 t-cfg-credential-password Password
 t-cfg-credential-type Type of credentials
 t-cfg-credential-file-name File name containing restic password
+t-cfg-pgp-ascii-armor Check, if file shall be created in ASCII armor format, otherwise binary format is used. \
+An ASCII armor formatted file gets extension '.asc', a binary formatted file extension '.pgp'
+t-cfg-pgp-email Enter email address for PGP key
+t-cfg-pgp-file-name Enter filename without extension, file will be created in restix configuration directory
+t-cfg-pgp-password Enter password to use for restic repository
 t-cfg-scope-alias Alias name for backup scope
 t-cfg-scope-comment Comment for backup scope
 t-cfg-scope-files-n-dirs Select files and directories to backup

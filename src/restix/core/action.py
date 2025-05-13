@@ -177,8 +177,12 @@ class RestixAction:
         """
         :returns: restic-Kommando für die Daten dieser Aktion.
         """
-        _cmd = [RESTIC_EXECUTABLE, self.__action_id, OPTION_REPO, self.option(OPTION_REPO),
-                OPTION_PASSWORD_FILE, self.option(OPTION_PASSWORD_FILE)]
+        _cmd = [RESTIC_EXECUTABLE, self.__action_id, OPTION_REPO, self.option(OPTION_REPO)]
+        _pw_cmd = self.option(OPTION_PASSWORD_COMMAND)
+        if _pw_cmd is not None:
+            _cmd.extend([OPTION_PASSWORD_COMMAND, _pw_cmd])
+        else:
+            _cmd.extend([OPTION_PASSWORD_FILE, self.option(OPTION_PASSWORD_FILE)])
         if self.option(OPTION_DRY_RUN):
             _cmd.append(OPTION_DRY_RUN)
         if self.option(OPTION_JSON):
@@ -218,7 +222,11 @@ class RestixAction:
         """
         _init_action = RestixAction(ACTION_INIT, self.target_alias())
         _init_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
-        _init_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
+        _pw_cmd = self.option(OPTION_PASSWORD_COMMAND)
+        if _pw_cmd is not None:
+            _init_action.__options[OPTION_PASSWORD_COMMAND] = _pw_cmd
+        else:
+            _init_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
         return _init_action
 
     def snapshots_action(self) -> Self:
@@ -227,7 +235,11 @@ class RestixAction:
         """
         _snapshots_action = RestixAction(ACTION_SNAPSHOTS, self.target_alias())
         _snapshots_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
-        _snapshots_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
+        _pw_cmd = self.option(OPTION_PASSWORD_COMMAND)
+        if _pw_cmd is not None:
+            _snapshots_action.__options[OPTION_PASSWORD_COMMAND] = _pw_cmd
+        else:
+            _snapshots_action.__options[OPTION_PASSWORD_FILE] = self.option(OPTION_PASSWORD_FILE)
         _snapshots_action.__options[OPTION_JSON] = True
         return _snapshots_action
 
@@ -246,6 +258,10 @@ class RestixAction:
         _credentials = local_config.credentials_for_target(self.target_alias())
         if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_FILE:
             self.set_option(OPTION_PASSWORD_FILE, self._full_filename_of(_credentials.get(CFG_PAR_VALUE)))
+        elif _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PGP:
+            _file_path = self._full_filename_of(_credentials.get(CFG_PAR_VALUE))
+            _cmd = f'""gpg --decrypt {_file_path}""'
+            self.set_option(OPTION_PASSWORD_COMMAND, _cmd)
         elif _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_TEXT:
             _f = tempfile.NamedTemporaryFile('wt', delete=False)
             _f.write(_credentials.get(CFG_PAR_VALUE))
@@ -400,7 +416,7 @@ class RestixAction:
         return _action
 
 
-_STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD, OPTION_PASSWORD_FILE}
+_STD_OPTIONS = {OPTION_REPO, OPTION_PASSWORD, OPTION_PASSWORD_COMMAND, OPTION_PASSWORD_FILE}
 _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_BATCH, OPTION_DRY_RUN,
                                    OPTION_EXCLUDE_FILE, OPTION_FILES_FROM},
                    ACTION_FIND: {OPTION_HOST, OPTION_PATTERN, OPTION_JSON, OPTION_SNAPSHOT, OPTION_YEAR},

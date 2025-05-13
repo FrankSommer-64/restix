@@ -494,9 +494,9 @@ class ResticActionPane(QWidget):
         """
         if self.selected_target is None:
             # ohne Backup-Ziel geht nichts
-            _rc = QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
-                                          localized_message(I_GUI_NO_TARGET_SELECTED),
-                                          QMessageBox.StandardButton.Ok)
+            QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                    localized_message(I_GUI_NO_TARGET_SELECTED),
+                                    QMessageBox.StandardButton.Ok)
             return False, ''
         _pw = None
         _credentials = self.restix_config.credentials_for_target(self.selected_target[CFG_PAR_ALIAS])

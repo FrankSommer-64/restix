@@ -35,7 +35,7 @@
 """
 GUI-Bereich für die restix-Konfiguration.
 """
-
+import tempfile
 from typing import Callable
 
 from PySide6.QtCore import Qt, QAbstractListModel, QPoint
@@ -47,8 +47,9 @@ from restix.core import *
 from restix.core.restix_exception import RestixException
 from restix.core.config import LocalConfig
 from restix.core.messages import *
-from restix.core.util import relative_config_path_of, full_config_path_of
+from restix.core.util import relative_config_path_of, full_config_path_of, shell_cmd
 from restix.gui import *
+from restix.gui.dialogs import PgpFileDialog
 from restix.gui.editors import ScopeEditor
 from restix.gui.model import ConfigModelFactory
 
@@ -69,7 +70,7 @@ class CredentialsDetailPane(QListView):
         self.setStyleSheet(CONFIG_LIST_VIEW_STYLE)
         _layout = QFormLayout(self)
         _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
-                                        WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
+                                   WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         if include_alias:
             _alias_label = QLabel(localized_label(L_ALIAS))
@@ -127,37 +128,32 @@ class CredentialsDetailPane(QListView):
         self.__comment_text.setText(credential_data[CFG_PAR_COMMENT])
         _type = credential_data[CFG_PAR_TYPE]
         self.__type_combo.setCurrentText(_type)
-        self._show_type(_type, credential_data.get(CFG_PAR_VALUE))
+        self._show_type_specific_widgets(_type, credential_data.get(CFG_PAR_VALUE))
 
     def _type_changed(self, _index: int):
         """
         Wird aufgerufen, wenn der Benutzer einen anderen Typ aus der Combobox ausgewählt hat.
         :param _index: Index des ausgewählten Credential-Typs
         """
-        self._show_type(self.__type_combo.currentText(), '')
+        self._show_type_specific_widgets(self.__type_combo.currentText(), '')
 
-    def _show_type(self, credential_type: str, value: str | None):
+    def _show_type_specific_widgets(self, credential_type: str, value: str | None):
         """
-        Zeigt den Wert zu einem Credential-Typ an.
+        Zeigt die Widgets an, die für den übergebenen Credential-Typ spezifisch sind.
         :param credential_type: Credential-Typ
         :param value: Dateiname oder Passwort
         """
-        if self.layout().rowCount() > self.__value_row:
-            self.layout().removeRow(self.__value_row)
-        if credential_type == CFG_VALUE_CREDENTIALS_TYPE_PROMPT or credential_type == CFG_VALUE_CREDENTIALS_TYPE_TOKEN:
+        # Zeilen, die nicht für jeden Credential-Typ vorhanden sind, löschen
+        _row_count = self.layout().rowCount()
+        for _i in range(0, _row_count - self.__value_row):
+            self.layout().removeRow(_row_count - _i - 1)
+        if credential_type == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
+            # Prompt braucht gar keine zusätzlichen Widgets
             self.__value_button = None
             self.__value_text = None
             return
-        if credential_type == CFG_VALUE_CREDENTIALS_TYPE_FILE:
-            _tooltip = localized_label(T_CFG_CREDENTIAL_FILE_NAME)
-            _value_label = QLabel(localized_label(L_FILE_NAME))
-            _value_label.setToolTip(_tooltip)
-            self.__value_button = QPushButton(value)
-            self.__value_button.clicked.connect(self._select_password_file)
-            self.__value_button.setToolTip(_tooltip)
-            self.layout().addRow(_value_label, self.__value_button)
-            return
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_TEXT:
+            # Text brauch ein Eingabefeld für das Passwort
             _tooltip = localized_label(T_CFG_CREDENTIAL_PASSWORD)
             _value_label = QLabel(localized_label(L_PASSWORD))
             _value_label.setToolTip(_tooltip)
@@ -168,6 +164,23 @@ class CredentialsDetailPane(QListView):
             self.__value_text.setText(value)
             self.__value_text.setToolTip(_tooltip)
             self.layout().addRow(_value_label, self.__value_text)
+            return
+        if credential_type == CFG_VALUE_CREDENTIALS_TYPE_FILE or credential_type == CFG_VALUE_CREDENTIALS_TYPE_PGP:
+            # Passwort-Datei und PGP benötigen die Datei mit dem Passwort
+            _tooltip = localized_label(T_CFG_CREDENTIAL_FILE_NAME)
+            _value_label = QLabel(localized_label(L_FILE_NAME))
+            _value_label.setToolTip(_tooltip)
+            self.__value_button = QPushButton(value)
+            self.__value_button.clicked.connect(self._select_password_file)
+            self.__value_button.setToolTip(_tooltip)
+            self.layout().addRow(_value_label, self.__value_button)
+        if credential_type == CFG_VALUE_CREDENTIALS_TYPE_PGP:
+            # PGP hat zusätzlich noch einen Button zum Erzeugen einer verschlüsselten Datei mit dem Passwort
+            _create_encrypted_file_label = QLabel('')
+            _create_encrypted_file_button = QPushButton(localized_label(L_CREATE_ENCRYPTED_FILE))
+            _create_encrypted_file_button.clicked.connect(self._create_encrypted_file)
+            _create_encrypted_file_button.setToolTip(localized_label(localized_label(T_CFG_CREATE_ENCRYPTED_FILE)))
+            self.layout().addRow(_create_encrypted_file_label, _create_encrypted_file_button)
 
     def _select_password_file(self):
         """
@@ -177,6 +190,39 @@ class CredentialsDetailPane(QListView):
         _file_path, _ = QFileDialog.getOpenFileName(self, localized_label(L_DLG_TITLE_SELECT_FILE), _current_file_path)
         if len(_file_path) > 0:
             self.__value_button.setText(relative_config_path_of(_file_path, self.__config_path))
+
+    def _create_encrypted_file(self):
+        """
+        Wird aufgerufen, wenn der Benutzer auf den Button zum Erzeugen einer verschlüsselten Passwort-Datei klickt.
+        """
+        _pgp_file_dlg = PgpFileDialog(self)
+        if _pgp_file_dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+        _file_name, _pwd, _email, _ascii_flag = _pgp_file_dlg.data_for_file_creation()
+        _file_name = f'{_file_name}.asc' if _ascii_flag else f'{_file_name}.gpg'
+        _file_path = os.path.join(self.__config_path, _file_name)
+        try:
+            if os.path.isfile(_file_path):
+                _rc = QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                              localized_message(I_OVERWRITE_FILE, _file_path),
+                                              QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                if _rc != QMessageBox.StandardButton.Yes:
+                    return
+                os.remove(_file_path)
+            with tempfile.NamedTemporaryFile('w') as _f:
+                _f.write(_pwd)
+                _f.flush()
+                _cmd = ['gpg', '--recipient', _email, '-o', _file_path]
+                if _ascii_flag:
+                    _cmd.append('-a')
+                _cmd.extend(['--encrypt', _f.name])
+                _rc, _stdout, _stderr = shell_cmd(_cmd)
+                if _rc != 0:
+                    _reason = os.linesep.join([_stderr, _stdout])
+                    raise RestixException(E_CFG_CREATE_PGP_FILE_FAILED, _file_path, _reason)
+                self.__value_button.setText(_file_name)
+        except OSError | RestixException as _e:
+            QMessageBox.critical(self, L_MBOX_TITLE_ERROR, str(_e), QMessageBox.StandardButton.Ok)
 
 
 class RenameElementDialog(QDialog):

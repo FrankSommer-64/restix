@@ -2,8 +2,6 @@
 e-alias-name-already-used Aliasname '{0}' wird bereits verwendet.
 e-alias-name-empty Kein Aliasname angegeben.
 e-alias-referenced Aliasname '{0}' wird noch in Sicherungs-Zielen verwendet.
-e-restix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
-e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 e-background-task-aborted Hintergrund-Task abgebrochen.
 e-background-task-failed Hintergrund-Task fehlgeschlagen: {0}
 e-backup-failed Backup zu Repository {0} fehlgeschlagen, restic return code {1}.
@@ -22,14 +20,18 @@ e-mandatory-option-missing Notwendige Option {0} nicht angegeben.
 e-no-snapshot-desc-from-restic Keine Snapshot-Beschreibung von restic bekommen.
 e-repo-does-not-exist restic-Repository {0} existiert nicht.
 e-restic-not-installed restic ist nicht installiert. Der Befehl 'restic version' lieferte die Fehlermeldung: {0}
+e-restix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
+e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 e-write-file-failed Fehler beim Schreiben der Datei {0}: {1}.
 i-dry-run-create-repo Werde Repository {0} anlegen.
+i-overwrite-file Soll die Datei {0} überschrieben werden ?
 i-running-restic-cmd restic-Befehl: {0}
 w-cant-dry-run-backup-without-repo Trockenlauf der Sicherung nicht möglich, da Repository {0} nicht existiert.
 w-outdated-restic-version Die installierte restic-Version {0} liefert keine detaillierten Fehlercodes, Option '--auto-create' ignoriert.
 
 # Konfiguration
 e-cfg-create-config-root-failed Konnte Konfigurationsverzeichnis {0} nicht anlegen: {1}.
+e-cfg-create-pgp-file-failed Konnte verschlüsselte Passwortdatei {0} nicht anlegen: {1}.
 e-cfg-custom-config-root-not-found Konfigurationsverzeichnis {0} aus Umgebungsvariable {1} nicht gefunden.
 e-cfg-default-config-root-not-found Standard-Konfigurationsverzeichnis {0} nicht gefunden.
 e-cfg-duplicate-group Group {0} {1} wurde in der Konfigurationsdatei {2} mehrfach definiert
@@ -169,11 +171,13 @@ i-gui-version Version {0}
 l-add Hinzufügen
 l-adopt-selection Ausgewählte Elemente übernehmen
 l-alias Aliasname
+l-ascii-armor ASCII-Armor-Format verwenden
 l-auto-create Repository automatisch anlegen
 l-cancel Abbrechen
 l-comment Beschreibung
 l-backup Sicherung
 l-configuration Konfiguration
+l-create-encrypted-file Verschlüsselte Passwort-Datei erzeugen
 l-credentials Zugangsdaten
 l-current-alias Aktueller Aliasname
 l-dismiss Änderungen verwerfen
@@ -184,6 +188,7 @@ l-do-year-end Jahresabschluss
 l-dry-run Dry run
 l-edit Editieren
 l-element Element
+l-email E-Mail-Adresse
 l-enter-password Bitte Passwort eingeben:
 l-exit Beenden
 l-file-name Dateiname
@@ -228,6 +233,7 @@ l-dlg-title-new-credentials Neue Zugriffsdaten
 l-dlg-title-new-scope Neuer Sicherungsumfang
 l-dlg-title-new-target Neues Sicherungsziel
 l-dlg-title-password Passwort
+l-dlg-title-pgp-file PGP-verschlüsselte Datei erzeugen
 l-dlg-title-rename-element {0} umbenennen
 l-dlg-title-save-local-config Lokale restix-Konfiguration speichern
 l-dlg-title-scope-editor Backup-Umfang festlegen
@@ -247,11 +253,17 @@ l-menu-user-manual Benutzerhandbuch
 
 # GUI Tooltips
 t-cancel-action Laufende Aktion abbrechen
+t-cfg-create-encrypted-file Erzeugt eine PGP-verschlüsselte Datei im Konfigurationsverzeichnis
 t-cfg-credential-comment Kommentar zu den Zugangsdaten
 t-cfg-credential-alias Aliasname der Zugangsdaten
 t-cfg-credential-password Passwort
 t-cfg-credential-type Art der Zugriffsdaten
 t-cfg-credential-file-name Name der Datei mit dem Passwort
+t-cfg-pgp-ascii-armor Anhaken, falls die Datei im ASCII-Armor-Format erzeugt werden soll, ansonsten wird das Binärformat verwendet. \
+Bei ASCII-Armor-Format bekommt die Datei die Endung '.asc', beim Binärformat '.pgp'
+t-cfg-pgp-email E-Mail-Adresse für den PGP-Schlüssel eingeben
+t-cfg-pgp-file-name Dateiname ohne Endung eingeben, die Datei wird im restix-Konfigurationsverzeichnis erzeugt
+t-cfg-pgp-password Passwort für das restic-Repository eingeben
 t-cfg-scope-alias Aliasname des Sicherungs-Umfangs
 t-cfg-scope-comment Kommentar zum Sicherungs-Umfang
 t-cfg-scope-files-n-dirs Dateien und Verzeichnisse auswählen, die gesichert werden sollen
