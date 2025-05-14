@@ -12,9 +12,9 @@ case "$1" in
     ln -s /opt/restix/restix /usr/local/bin/restix
     ;;
   upgrade)
-    echo "upgrade $2 $3"
-    ;;
-  abort-upgrade)
-    echo "abort-upgrade $2"
+    cd /opt/restix
+    source .venv/bin/activate
+    pip3 install ${WHEEL_FILE_NAME} --upgrade
+    deactivate
     ;;
 esac

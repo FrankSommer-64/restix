@@ -1,3 +1,11 @@
 #!/bin/bash
 
-rm -f /usr/local/bin/restix
+case "$1" in
+  remove)
+    rm -f /usr/local/bin/restix
+    ;;
+  purge)
+    rm -f /usr/local/bin/restix
+    rm -rf $HOME/.config/restix
+    ;;
+esac

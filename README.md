@@ -31,38 +31,48 @@ Restix mainly provides a GUI for the open source backup application restic.<br/>
 
 ### Prerequisites
 
-Restix needs Python 3 and restic Version 0.17 or above.
-The GUI is based on PySide 6, 
-Restix has been tested on Linux Mint 22, Fedora xx, FreeBSD 14 and Windows 11.
+Restix needs Python 3 and restic, restic Version 0.17 or above is required if you like
+restix to create repositories automatically if needed.
+The GUI is based on PySide 6.
+Restix has been tested on Linux Mint 22, Fedora 42, FreeBSD 14 and Windows 11.
 
 
 ### Installation
-Fully featured installation:
-1. pip install restix
-2. Enter URL and credentials in file .tcms.conf in your home directory to access Kiwi TCMS using XML-RPC
-3. Configure restix according to your needs in directory .config/restix under your home directory.
-Core features without GUI:
-Binary install
+
+Binary installation:
+1. Download appropriate installation package for your system
+2. Install the package with administrator privileges
+
+Manual installation:
+1. Download restix Python wheel and start scripts
+2. Create root directory for restix application (may require administrator privileges)
+3. Copy restix wheel and start scripts to restix root directory
+4. Change to restix root directory
+5. Create virtual Python environment (python3 -m venv .venv)
+6. Activate virtual Python environment (source .venv/bin/activate)
+7. Install restix wheel (pip3 install <restix wheel filename>)
+8. Deactivate virtual Python environment (deactivate)
+9. Create links to start scripts in a directory in your path (/usr/local/bin or $HOME/bin)
 
 
 ## Usage
 
-Restix offers a GUI for local configuration and development on test automation. Start the GUI with <pre>grestix</pre>.
+Restix offers a GUI for backup, restore and configuration.
+Start the GUI with <pre>grestix</pre>.
 
 Command line interface for automated tasks is also available:
 <ul>
-  <li>Run a test plan: <pre>restix --plan mytestplan --product-version "v0.8" --product-build "240120"</pre></li>
-  <li>Export a product: <pre>restix --product myproduct /tmp/issai-export</pre></li>
-  <li>Import a test result: <pre>restix /tmp/myproduct/plan_24_result.toml</pre></li>
+  <li>Create a backup: <pre>restix backup --batch --auto-create usbstick-a</pre></li>
+  <li>Restore: <pre>restix restore --batch --snapshot latest --restore-path /tmp usbstick-a</pre></li>
+  <li>List snapshots: <pre>restix --batch snapshots usbstick-a</pre></li>
 </ul>
-
 
 
 ## Roadmap
 
-- [ ] v0.7 full functionality to run tests
-- [ ] v0.8 full functionality for import and export, CI integration
-- [ ] v0.9 Windows support, localization, complete system test
+- [ ] v0.9.5 system tests
+- [ ] v0.9.6 Windows support
+- [ ] v0.9.7 full documentation and manuals
 
 See the [open issues](https://github.com/FrankSommer-64/restix/issues) for a full list of proposed features (and known issues).
 

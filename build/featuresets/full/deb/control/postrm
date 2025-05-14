@@ -1,4 +1,13 @@
 #!/bin/bash
 
-rm -f /usr/local/bin/restix
-rm -f /usr/local/bin/grestix
+case "$1" in
+  remove)
+    rm -f /usr/local/bin/restix
+    rm -f /usr/local/bin/grestix
+    ;;
+  purge)
+    rm -f /usr/local/bin/restix
+    rm -f /usr/local/bin/grestix
+    rm -rf $HOME/.config/restix
+    ;;
+esac
