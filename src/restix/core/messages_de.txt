@@ -99,9 +99,11 @@ t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
     --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
     Backup-Ziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-prompt-for-confirmation OK (j/n)?
+t-cli-restix-version restix-Version {0}
 t-cli-usage-info Aufruf: restix Befehl [Optionen] [Backup-Ziel]\n \
     Befehle: backup | cleanup | find | init | ls | restore | snapshots | targets\n \
-    Hilfe zu jedem Befehl mit restix --help <Befehl>
+    Hilfe zu jedem Befehl mit restix --help <Befehl>\n \
+    Anzeige der Programmversion mit restix --version
 t-cli-yes-char j
 
 # CLI messages

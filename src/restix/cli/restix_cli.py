@@ -141,6 +141,9 @@ def cli_main():
         if _action.action_id() == ACTION_HELP:
             show_help(_action.option(OPTION_HELP))
             sys.exit(0)
+        if _action.action_id() == ACTION_VERSION:
+            print(localized_message(T_CLI_RESTIX_VERSION, VERSION))
+            sys.exit(0)
     except RestixException as _e:
         print(str(_e))
         show_help()

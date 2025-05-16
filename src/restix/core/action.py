@@ -377,6 +377,8 @@ class RestixAction:
                 if _arg == OPTION_HELP:
                     _option_values[OPTION_HELP] = True
                     continue
+                if _arg == OPTION_VERSION:
+                    return RestixAction(ACTION_VERSION, '')
                 if (_arg == OPTION_HOST or _arg == OPTION_PATTERN or _arg == OPTION_RESTORE_PATH or
                         _arg == OPTION_SNAPSHOT or _arg == OPTION_YEAR):
                     if _arg in _specified_options:

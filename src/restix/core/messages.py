@@ -107,6 +107,7 @@ T_CLI_HELP_INIT = 't-cli-help-init'
 T_CLI_HELP_LS = 't-cli-help-ls'
 T_CLI_HELP_RESTORE = 't-cli-help-restore'
 T_CLI_HELP_SHAPSHOTS = 't-cli-help-snapshots'
+T_CLI_RESTIX_VERSION = 't-cli-restix-version'
 T_CLI_USAGE_INFO = 't-cli-usage-info'
 T_CLI_YES_CHAR = 't-cli-yes-char'
 

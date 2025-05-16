@@ -122,6 +122,7 @@ ACTION_INIT = 'init'
 ACTION_LS = 'ls'
 ACTION_RESTORE = 'restore'
 ACTION_SNAPSHOTS = 'snapshots'
+ACTION_VERSION = 'version'
 
 # interne Attribute
 ATTR_CHILDREN = 'children'
@@ -165,6 +166,7 @@ OPTION_SNAPSHOT = '--snapshot'
 OPTION_TARGET = '--target'
 OPTION_UNTAGGED = '--untagged'
 OPTION_USER = '--user'
+OPTION_VERSION = '--version'
 OPTION_YEAR = '--year'
 
 # restic Sondervariablen
