@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # Setzt Owner fuer ein Debian-Paket mit allen Elementen auf root:root.
 # Muss mit root-Rechten ausgefuehrt werden.

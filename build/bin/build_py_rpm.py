@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
+
 # Erzeugt ein rpm-Installationspaket für eine Python-Applikation.
+# Aufruf: python3 build_py_rpm.py <Build-Script-Path> <Projekt-Root> [<Feature-Set>]
 
 import os
 import re
@@ -10,9 +13,8 @@ import tomli
 
 
 PY_CONFIG_FILE_NAME = 'pyproject.toml'
-PROJECTS_ROOT = os.path.join(os.path.expanduser('~'), 'GITROOT', 'sw', 'projects')
 RPM_WORK_PATH = os.path.join(os.path.expanduser('~'), 'rpmbuild')
-BUILD_WHEEL_SCRIPT = os.path.join(os.path.expanduser('~'), 'bin', 'build_py_wheel')
+BUILD_WHEEL_SCRIPT = 'build_py_wheel'
 RPM_WORK_SUBDIRS = ['BUILD', 'RPMS', 'SOURCES', 'SPECS', 'SRPMS', 'tmp']
 
 ATTR_PYTHON_PACKAGE_NAME = 'python-package-name'
@@ -100,55 +102,56 @@ def py_config_info(project_root: str, file_path: str) -> dict:
     return {ATTR_PYTHON_PACKAGE_NAME: _py_package_name, ATTR_VERSION: _version, ATTR_WHEEL_FILE_NAME: _wheel_file_name}
 
 
-def feature_sets(project_name: str) -> list[str]:
+def feature_sets(project_root: str) -> list[str]:
     """
-    :param project_name: Name des Projekts
+    :param project_root: Root-Verzeichnis des Projekts
     :returns: Namen der Feature-Sets des uebergebenen Projekts
     """
-    _project_root = os.path.join(PROJECTS_ROOT, project_name)
-    if not os.path.isdir(_project_root):
-        raise RuntimeError(f'Projektverzeichnis {_project_root} nicht gefunden')
-    _features_path = os.path.join(_project_root, 'build', 'featuresets')
+    if not os.path.isdir(project_root):
+        raise RuntimeError(f'Projektverzeichnis {project_root} nicht gefunden')
+    _features_path = os.path.join(project_root, 'build', 'featuresets')
     return os.listdir(_features_path) if os.path.isdir(_features_path) else []
 
 
-def feature_info(project_name: str, feature_name: str | None) -> dict:
+def feature_info(project_root: str, feature_name: str | None) -> dict:
     """
     Liest die pyproject-toml-Datei und gibt die fuer das Bauen des deb-Pakets
     relevanten Daten zurueck.
-    :param project_name: Name des Projekts
+    :param project_root: Root-Verzeichnis des Projekts
     :param feature_name: Name des Feature-Sets
     :returns: Daten des Feature-Sets
     """
-    _project_root = os.path.join(PROJECTS_ROOT, project_name)
     if feature_name is None:
-        _cfg_file_path = os.path.join(_project_root, PY_CONFIG_FILE_NAME)
+        _cfg_file_path = os.path.join(project_root, PY_CONFIG_FILE_NAME)
     else:
-        _cfg_file_path = os.path.join(_project_root, 'build', 'featuresets', feature_name,
-                                      'wheel', PY_CONFIG_FILE_NAME)
-    return py_config_info(_project_root, _cfg_file_path)
+        _cfg_file_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'wheel', PY_CONFIG_FILE_NAME)
+    return py_config_info(project_root, _cfg_file_path)
 
 
-def build_wheel(project_name: str, feature_name: str):
+def build_wheel(build_scripts_path: str, project_name: str, feature_name: str):
     """
     Erzeugt ein Python wheel für Projekt und Feature in <Projekt-Root>/dist.
+    :param build_scripts_path: Verzeichnis mit den Build-Scripts
     :param project_name: Name des Projekts
     :param feature_name: Name des Feature-Sets
     """
-    _cmd = [BUILD_WHEEL_SCRIPT, project_name]
+    _build_wheel_script_path = os.path.join(build_scripts_path, BUILD_WHEEL_SCRIPT)
+    _cmd = [_build_wheel_script_path, project_name]
     if len(feature_name) > 0: _cmd.append(feature_name)
     _rc = run_command(_cmd)
     if _rc != 0:
         raise RuntimeError(f'Build Python wheel für {project_name} {feature_name} fehlgeschlagen')
 
 
-def build_project_feature(project_name: str, feature_name: str | None):
+def build_project_feature(build_scripts_path: str, project_root: str, feature_name: str | None):
     """
     Erzeugt ein rpm-Paket für Projekt und Feature in <Projekt-Root>/dist.
-    :param project_name: Name des Projekts
+    :param build_scripts_path: Verzeichnis mit den Build-Scripts
+    :param project_root: Root-Verzeichnis des Projekts
     :param feature_name: Name des Feature-Sets
     """
-    _feature = feature_info(project_name, feature_name)
+    _project_name = os.path.basename(project_root)
+    _feature = feature_info(project_root, feature_name)
     _py_package_name = _feature[ATTR_PYTHON_PACKAGE_NAME]
     create_work_dir()
     _project_dir = f'{_py_package_name}-{_feature[ATTR_VERSION]}'
@@ -158,71 +161,72 @@ def build_project_feature(project_name: str, feature_name: str | None):
         _archive_file_name = f'{_project_dir}.tar.gz'
         os.mkdir(_archive_project_root, mode=0o755)
         # Python wheel erzeugen und in /opt/<project> ablegen
-        build_wheel(project_name, feature_name)
-        _wheel_source_path = os.path.join(PROJECTS_ROOT, project_name, 'dist')
-        _wheel_target_path = os.path.join(_archive_project_root, 'opt', project_name)
+        build_wheel(build_scripts_path, _project_name, feature_name)
+        _wheel_source_path = os.path.join(project_root, 'dist')
+        _wheel_target_path = os.path.join(_archive_project_root, 'opt', _project_name)
         os.makedirs(_wheel_target_path, mode=0o755, exist_ok=True)
         shutil.move(os.path.join(_wheel_source_path, _feature[ATTR_WHEEL_FILE_NAME]), _wheel_target_path)
         # projektspezifische Daten kopieren
         if feature_name is None:
-            _source_data_path = os.path.join(PROJECTS_ROOT, project_name, 'build', 'rpm', 'SOURCES')
+            _source_data_path = os.path.join(project_root, 'build', 'rpm', 'SOURCES')
         else:
-            _source_data_path = os.path.join(PROJECTS_ROOT, project_name, 'build', 'featuresets',
-                                                feature_name, 'rpm', 'SOURCES')
+            _source_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'rpm', 'SOURCES')
         shutil.copytree(_source_data_path, _archive_project_root, dirs_exist_ok=True)
         os.chdir(_temp_path)
         _cmd = ['tar', '-czf', _archive_file_name, _project_dir]
         _rc = run_command(_cmd)
         if _rc != 0:
-            raise RuntimeError(f'Konnte Archiv für {project_name} {feature_name} nicht erzeugen')
+            raise RuntimeError(f'Konnte Archiv für {_project_name} {feature_name} nicht erzeugen')
         _archive_target_path = os.path.join(RPM_WORK_PATH, 'SOURCES')
         shutil.copy(os.path.join(_temp_path, _archive_file_name), _archive_target_path)
     # Steuerdateien kopieren
     if feature_name is None:
-        _spec_data_path = os.path.join(PROJECTS_ROOT, project_name, 'build', 'rpm', 'SPECS')
+        _spec_data_path = os.path.join(project_root, 'build', 'rpm', 'SPECS')
     else:
-        _spec_data_path = os.path.join(PROJECTS_ROOT, project_name, 'build', 'featuresets',
-                                            feature_name, 'rpm', 'SPECS')
+        _spec_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'rpm', 'SPECS')
     _spec_target_path = os.path.join(RPM_WORK_PATH, 'SPECS')
     for _f in os.listdir(_spec_data_path):
-        copy_spec_file(_spec_data_path, _f, _spec_target_path, project_name, _feature)
+        copy_spec_file(_spec_data_path, _f, _spec_target_path, _project_name, _feature)
     # rpm-Paket erstellen
     _cmd = ['rpmbuild', '-bb', os.path.join(_spec_target_path, f'{_py_package_name}.spec')]
     _rc = run_command(_cmd)
     if _rc != 0:
-        raise RuntimeError(f'Build rpm-Paket {project_name} {feature_name} fehlgeschlagen')
+        raise RuntimeError(f'Build rpm-Paket {_project_name} {feature_name} fehlgeschlagen')
     _rpms_path = os.path.join(RPM_WORK_PATH, 'RPMS', 'noarch')
-    _dist_path = os.path.join(PROJECTS_ROOT, project_name, 'dist')
+    _dist_path = os.path.join(project_root, 'dist')
     for _f in os.listdir(_rpms_path):
         shutil.copy(os.path.join(_rpms_path, _f), _dist_path)
     print('rpm Installationspaket erstellt.')
 
 
 # Hauptprogramm
-_project = None
+_project_root_path = None
+_build_scripts_path = None
 _feature_set = None
-if len(sys.argv) == 2:
-    _project = sys.argv[1]
-elif len(sys.argv) == 3:
-    _project = sys.argv[1]
-    _feature_set = sys.argv[2]
+if len(sys.argv) == 3:
+    _build_scripts_path = sys.argv[1]
+    _project_root_path = sys.argv[2]
+elif len(sys.argv) == 4:
+    _build_scripts_path = sys.argv[1]
+    _project_root_path = sys.argv[2]
+    _feature_set = sys.argv[3]
 else:
-    print('Aufruf: build_py_rpm <Projekt> [<Feature-Umfang>]')
+    print('Aufruf: python3 build_py_rpm.py <Build-Script-Path> <Projekt-Root> [<Feature-Umfang>]')
     sys.exit(1)
 try:
-    _feature_sets = feature_sets(_project)
+    _feature_sets = feature_sets(_project_root_path)
     if _feature_set == 'all':
         for _fs in _feature_sets:
-            build_project_feature(_project, _fs)
+            build_project_feature(_build_scripts_path, _project_root_path, _fs)
     elif _feature_set is not None:
         if _feature_set not in _feature_sets:
             raise RuntimeError(f'Feature-Set {_feature_set} nicht gefunden')
-        build_project_feature(_project, _feature_set)
+        build_project_feature(_build_scripts_path, _project_root_path, _feature_set)
     else:
         if len(_feature_sets) == 0:
-            build_project_feature(_project, None)
+            build_project_feature(_build_scripts_path, _project_root_path, None)
         elif len(_feature_sets) == 1:
-            build_project_feature(_project, _feature_sets[0])
+            build_project_feature(_build_scripts_path, _project_root_path, _feature_sets[0])
         else:
             raise RuntimeError(f'Feature-Set muss angegeben werden {_feature_sets}')
 except RuntimeError as _e:

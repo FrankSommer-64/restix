@@ -1,7 +1,23 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # Erzeugt ein Debian-Installationspaket für eine Python-Applikation.
+# Aufruf: build_py_deb <Projekt> [<Feature-Umfang>]
 
-source $HOME/.python_venv/build/bin/activate
-python3 $HOME/bin/build_py_deb.py $@
+if [ "$1" == "" ]; then
+  echo "Aufruf: build_py_deb <Projekt> [<Feature-Umfang>]"
+  exit 1
+fi
+
+if [ "$BUILD_SCRIPTS_PATH" == "" ]; then
+  BUILD_SCRIPTS_PATH=$HOME/bin
+fi
+if [ "$BUILD_PY_VENV_PATH" == "" ]; then
+  BUILD_PY_VENV_PATH=$HOME/.python_venv/build
+fi
+if [ "$SW_PROJECTS_ROOT" == "" ]; then
+  SW_PROJECTS_ROOT=$HOME/GITROOT/sw/projects
+fi
+
+source $BUILD_PY_VENV_PATH/bin/activate
+python3 $BUILD_SCRIPTS_PATH/build_py_deb.py $BUILD_SCRIPTS_PATH $SW_PROJECTS_ROOT/$1 $2
 deactivate

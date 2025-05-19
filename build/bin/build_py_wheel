@@ -1,12 +1,13 @@
-#!/usr/bin/bash
+#!/bin/bash
 
-# Erstellt Python wheel für ein Projekt
-# Projekt Root-Verzeichnis muss unter $HOME/GITROOT/sw/projects liegen.
-# Falls das Projekt wegen unterschiedlicher Features mehrere Installationspakete
-# benötigt, muss das Script für jeden Feature-Umfang aufgerufen werden.
+# Erstellt Python wheel für ein Projekt.
+# Root-Verzeichnis für Projekte muss $HOME/GITROOT/sw/projects sein oder über Umgebungsvariable SW_PROJECTS_ROOT
+# definiert werden.
+# Verzeichnis mit dem virtuellen Python-Environment für Builds muss $HOME/.python_venv/build sein oder über
+# Umgebungsvariable BUILD_PY_VENV_PATH definiert werden.
+# Falls das Projekt wegen unterschiedlicher Features mehrere Installationspakete benötigt,
+# muss das Script für jeden Feature-Umfang aufgerufen werden.
 
-PROJECTS_ROOT="$HOME/GITROOT/sw/projects"
-VENV_ACT="$HOME/.python_venv/build/bin/activate"
 CONFIG_FILE_NAME="pyproject.toml"
 
 # Argumente einlesen
@@ -21,9 +22,17 @@ if [ "$2" != "" ]; then
   FEATURE_SET=$2
 fi
 
+if [ "$BUILD_PY_VENV_PATH" == "" ]; then
+  BUILD_PY_VENV_PATH=$HOME/.python_venv/build
+fi
+VENV_ACT=$BUILD_PY_VENV_PATH/bin/activate
+if [ "$SW_PROJECTS_ROOT" == "" ]; then
+  SW_PROJECTS_ROOT=$HOME/GITROOT/sw/projects
+fi
+PROJECT_ROOT=$SW_PROJECTS_ROOT/$PROJECT
+
 # pruefen, ob noetige Dateien existieren
 REMOVE_CONFIG_FILE=false
-PROJECT_ROOT="$PROJECTS_ROOT/$1"
 BUILD_ROOT="$PROJECT_ROOT/build"
 CONFIG_FILE="$PROJECT_ROOT/$CONFIG_FILE_NAME"
 if [ ! -d $PROJECT_ROOT ]; then

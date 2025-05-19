@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
+
 # Erzeugt ein Debian-Installationspaket für eine Python-Applikation.
+# Aufruf: python3 build_py_deb.py <Build-Script-Path> <Projekt-Root> [<Feature-Set>]
 
 import os
 import re
@@ -10,8 +13,7 @@ import tomli
 
 
 PY_CONFIG_FILE_NAME = 'pyproject.toml'
-PROJECTS_ROOT = os.path.join(os.path.expanduser(f'~'), 'GITROOT', 'sw', 'projects')
-BUILD_WHEEL_SCRIPT = os.path.join(os.path.expanduser(f'~'), 'bin', 'build_py_wheel')
+BUILD_WHEEL_SCRIPT = 'build_py_wheel'
 
 ATTR_DEB_FILE_NAME = 'deb-file-name'
 ATTR_PYTHON_PACKAGE_NAME = 'python-package-name'
@@ -83,69 +85,69 @@ def py_config_info(project_root: str, file_path: str) -> dict:
             ATTR_DEB_FILE_NAME: _deb_file_name, ATTR_WHEEL_FILE_NAME: _wheel_file_name}
 
 
-def feature_sets(project_name: str) -> list[str]:
+def feature_sets(project_root: str) -> list[str]:
     """
-    :param project_name: Name des Projekts
-    :returns: Namen der Feature-Sets des uebergebenen Projekts
+    :param project_root: Root-Verzeichnis des Projekts
+    :returns: Namen der Feature-Sets des Projekts
     """
-    _project_root = os.path.join(PROJECTS_ROOT, project_name)
-    if not os.path.isdir(_project_root):
-        raise RuntimeError(f'Projektverzeichnis {_project_root} nicht gefunden')
-    _features_path = os.path.join(_project_root, 'build', 'featuresets')
+    if not os.path.isdir(project_root):
+        raise RuntimeError(f'Projektverzeichnis {project_root} nicht gefunden')
+    _features_path = os.path.join(project_root, 'build', 'featuresets')
     return os.listdir(_features_path) if os.path.isdir(_features_path) else []
 
 
-def feature_info(project_name: str, feature_name: str | None) -> dict:
+def feature_info(project_root: str, feature_name: str | None) -> dict:
     """
     Liest die pyproject-toml-Datei und gibt die fuer das Bauen des deb-Pakets
     relevanten Daten zurueck.
-    :param project_name: Name des Projekts
+    :param project_root: Root-Verzeichnis des Projekts
     :param feature_name: Name des Feature-Sets
     :returns: Daten des Feature-Sets
     """
-    _project_root = os.path.join(PROJECTS_ROOT, project_name)
     if feature_name is None:
-        _cfg_file_path = os.path.join(_project_root, PY_CONFIG_FILE_NAME)
+        _cfg_file_path = os.path.join(project_root, PY_CONFIG_FILE_NAME)
     else:
-        _cfg_file_path = os.path.join(_project_root, 'build', 'featuresets', feature_name,
-                                      'wheel', PY_CONFIG_FILE_NAME)
-    return py_config_info(_project_root, _cfg_file_path)
+        _cfg_file_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'wheel', PY_CONFIG_FILE_NAME)
+    return py_config_info(project_root, _cfg_file_path)
 
 
-def build_wheel(project_name: str, feature_name: str | None):
+def build_wheel(build_scripts_path: str, project_name: str, feature_name: str | None):
     """
     Erzeugt ein Python wheel für Projekt und Feature in <Projekt-Root>/dist.
+    :param build_scripts_path: Verzeichnis mit den Build-Scripts
     :param project_name: Name des Projekts
     :param feature_name: Name des Feature-Sets
     """
-    _cmd = [BUILD_WHEEL_SCRIPT, project_name]
+    _build_wheel_script_path = os.path.join(build_scripts_path, BUILD_WHEEL_SCRIPT)
+    _cmd = [_build_wheel_script_path, project_name]
     if feature_name is not None and len(feature_name) > 0: _cmd.append(feature_name)
     _rc = run_command(_cmd)
     if _rc != 0:
         raise RuntimeError(f'Build Python wheel für {project_name} {feature_name} fehlgeschlagen')
 
 
-def build_project_feature(project_name: str, feature_name: str | None):
+def build_project_feature(build_scripts_path: str, project_root: str, feature_name: str | None):
     """
     Erzeugt ein Debian deb-Paket für Projekt und Feature in <Projekt-Root>/dist.
-    :param project_name: Name des Projekts
+    :param build_scripts_path: Verzeichnis mit den Build-Scripts
+    :param project_root: Root-Verzeichnis des Projekts
     :param feature_name: Name des Feature-Sets
     """
-    _feature = feature_info(project_name, feature_name)
+    _project_name = os.path.basename(project_root)
+    _feature = feature_info(project_root, feature_name)
     # data-Archiv erzeugen
     with tempfile.TemporaryDirectory() as _target_path:
         # Python wheel erzeugen und in /opt/<project> ablegen
-        build_wheel(project_name, feature_name)
-        _build_target_path = os.path.join(PROJECTS_ROOT, project_name, 'dist')
-        _target_wheel_path = os.path.join(_target_path, 'opt', project_name)
+        build_wheel(build_scripts_path, _project_name, feature_name)
+        _build_target_path = os.path.join(project_root, 'dist')
+        _target_wheel_path = os.path.join(_target_path, 'opt', _project_name)
         os.makedirs(_target_wheel_path, mode=0o755, exist_ok=True)
         shutil.move(os.path.join(_build_target_path, _feature[ATTR_WHEEL_FILE_NAME]), _target_wheel_path)
         # projektspezifische Daten kopieren
         if feature_name is None:
-            _source_data_path = os.path.join(PROJECTS_ROOT, project_name, 'build', 'deb', 'data')
+            _source_data_path = os.path.join(project_root, 'build', 'deb', 'data')
         else:
-            _source_data_path = os.path.join(PROJECTS_ROOT, project_name, 'build', 'featuresets',
-                                             feature_name, 'deb', 'data')
+            _source_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'deb', 'data')
         shutil.copytree(_source_data_path, _target_path, dirs_exist_ok=True)
         _data_elements = os.listdir(_target_path)
         os.chdir(_target_path)
@@ -153,16 +155,15 @@ def build_project_feature(project_name: str, feature_name: str | None):
         _cmd.extend(_data_elements)
         _rc = run_command(_cmd)
         if _rc != 0:
-            raise RuntimeError(f'Konnte data-Archiv für {project_name} {feature_name} nicht erzeugen')
+            raise RuntimeError(f'Konnte data-Archiv für {_project_name} {feature_name} nicht erzeugen')
         shutil.copy(os.path.join(_target_path, DATA_ARCHIVE_FILE_NAME), _build_target_path)
     # control-Archiv erzeugen
     with tempfile.TemporaryDirectory() as _target_path:
         # Steuerdateien kopieren
         if feature_name is None:
-            _source_data_path = os.path.join(PROJECTS_ROOT, project_name, 'build', 'deb', 'control')
+            _source_data_path = os.path.join(project_root, 'build', 'deb', 'control')
         else:
-            _source_data_path = os.path.join(PROJECTS_ROOT, project_name, 'build', 'featuresets',
-                                             feature_name, 'deb', 'control')
+            _source_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'deb', 'control')
         for _f in os.listdir(_source_data_path):
             copy_control_file(_source_data_path, _f, _target_path, _feature)
         # control-Archiv erzeugen
@@ -172,31 +173,30 @@ def build_project_feature(project_name: str, feature_name: str | None):
         _cmd.extend(_control_elements)
         _rc = run_command(_cmd)
         if _rc != 0:
-            raise RuntimeError(f'Konnte control-Archiv für {project_name} {feature_name} nicht erzeugen')
+            raise RuntimeError(f'Konnte control-Archiv für {_project_name} {feature_name} nicht erzeugen')
         shutil.copy(os.path.join(_target_path, CONTROL_ARCHIVE_FILE_NAME), _build_target_path)
     # Debian-Package-Version kopieren
     if feature_name is None:
-        _ver_file = os.path.join(PROJECTS_ROOT, project_name, 'build', 'deb', PACKAGE_VERSION_FILE_NAME)
+        _ver_file = os.path.join(project_root, 'build', 'deb', PACKAGE_VERSION_FILE_NAME)
     else:
-        _ver_file = os.path.join(PROJECTS_ROOT, project_name, 'build', 'featuresets', feature_name,
-                                 'deb', PACKAGE_VERSION_FILE_NAME)
+        _ver_file = os.path.join(project_root, 'build', 'featuresets', feature_name, 'deb', PACKAGE_VERSION_FILE_NAME)
     shutil.copy(_ver_file, _build_target_path)
     # deb-Datei erzeugen
-    _deb_project_name = project_name if len(feature_name) == 0 else f'{project_name}-{feature_name}'
+    _deb_project_name = _project_name if len(feature_name) == 0 else f'{_project_name}-{feature_name}'
     _deb_package_name = _feature[ATTR_DEB_FILE_NAME]
     os.chdir(_build_target_path)
     _cmd = ['ar', 'cvr', _deb_package_name, PACKAGE_VERSION_FILE_NAME]
     _rc = run_command(_cmd)
     if _rc != 0:
-        raise RuntimeError(f'Konnte Debian-Installationspaket für {project_name} {feature_name} nicht erzeugen')
+        raise RuntimeError(f'Konnte Debian-Installationspaket für {_project_name} {feature_name} nicht erzeugen')
     _cmd = ['ar', 'vr', _deb_package_name, CONTROL_ARCHIVE_FILE_NAME]
     _rc = run_command(_cmd)
     if _rc != 0:
-        raise RuntimeError(f'Konnte Debian-Installationspaket für {project_name} {feature_name} nicht erzeugen')
+        raise RuntimeError(f'Konnte Debian-Installationspaket für {_project_name} {feature_name} nicht erzeugen')
     _cmd = ['ar', 'vr', _deb_package_name, DATA_ARCHIVE_FILE_NAME]
     _rc = run_command(_cmd)
     if _rc != 0:
-        raise RuntimeError(f'Konnte Debian-Installationspaket für {project_name} {feature_name} nicht erzeugen')
+        raise RuntimeError(f'Konnte Debian-Installationspaket für {_project_name} {feature_name} nicht erzeugen')
     os.remove(os.path.join(_build_target_path, CONTROL_ARCHIVE_FILE_NAME))
     os.remove(os.path.join(_build_target_path, DATA_ARCHIVE_FILE_NAME))
     os.remove(os.path.join(_build_target_path, PACKAGE_VERSION_FILE_NAME))
@@ -204,30 +204,33 @@ def build_project_feature(project_name: str, feature_name: str | None):
 
 
 # Hauptprogramm
-_project = None
+_project_root_path = None
+_build_scripts_path = None
 _feature_set = None
-if len(sys.argv) == 2:
-    _project = sys.argv[1]
-elif len(sys.argv) == 3:
-    _project = sys.argv[1]
-    _feature_set = sys.argv[2]
+if len(sys.argv) == 3:
+    _build_scripts_path = sys.argv[1]
+    _project_root_path = sys.argv[2]
+elif len(sys.argv) == 4:
+    _build_scripts_path = sys.argv[1]
+    _project_root_path = sys.argv[2]
+    _feature_set = sys.argv[3]
 else:
-    print('Aufruf: build_py_deb <Projekt> [<Feature-Umfang>]')
+    print('Aufruf: python3 build_py_deb.py <Build-Script-Path> <Projekt-Root> [<Feature-Umfang>]')
     sys.exit(1)
 try:
-    _feature_sets = feature_sets(_project)
+    _feature_sets = feature_sets(_project_root_path)
     if _feature_set == 'all':
         for _fs in _feature_sets:
-            build_project_feature(_project, _fs)
+            build_project_feature(_build_scripts_path, _project_root_path, _fs)
     elif _feature_set is not None:
         if _feature_set not in _feature_sets:
             raise RuntimeError(f'Feature-Set {_feature_set} nicht gefunden')
-        build_project_feature(_project, _feature_set)
+        build_project_feature(_build_scripts_path, _project_root_path, _feature_set)
     else:
         if len(_feature_sets) == 0:
-            build_project_feature(_project, None)
+            build_project_feature(_build_scripts_path, _project_root_path, None)
         elif len(_feature_sets) == 1:
-            build_project_feature(_project, _feature_sets[0])
+            build_project_feature(_build_scripts_path, _project_root_path, _feature_sets[0])
         else:
             raise RuntimeError(f'Feature-Set muss angegeben werden {_feature_sets}')
 except RuntimeError as _e:
