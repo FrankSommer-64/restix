@@ -31,7 +31,7 @@ Restix mainly provides a GUI for the open source backup application restic.<br/>
 
 ### Prerequisites
 
-Restix needs Python 3 and restic, restic Version 0.17 or above is required if you like
+Restix needs Python, version 3.10 and above and restic. Restic version 0.17 or above is required if you like
 restix to create repositories automatically if needed.
 The GUI is based on PySide 6.
 Restix has been tested on Linux Mint 22, Fedora 42, FreeBSD 14 and Windows 11.

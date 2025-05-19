@@ -193,7 +193,7 @@ class Snapshot:
         """
         :returns: Inhalt des Snapshots in lesbarer Form.
         """
-        _snapshot_data = f'ID:{self.__snapshot_id}/TIME:{self.__time_stamp}/TAGS:{','.join(self.__tags)}'
+        _snapshot_data = f'ID:{self.__snapshot_id}/TIME:{self.__time_stamp}/TAGS:{",".join(self.__tags)}'
         if self.__elements is None:
             return _snapshot_data
         _element_data = os.linesep.join([str(_e) for _e in self.__elements])

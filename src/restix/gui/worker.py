@@ -37,7 +37,7 @@ Worker für die asynchrone Ausführung von restic-Befehlen als Hintergrund-Task.
 """
 
 from collections.abc import Callable
-from typing import Any, Self
+from typing import Any
 from PySide6.QtCore import QObject, QRunnable, Signal
 
 from restix.core.restic_interface import *
