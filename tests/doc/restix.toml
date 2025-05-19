@@ -1,0 +1,525 @@
+entity-type = "product"
+entity-name = "restix"
+entity-id = 1
+
+[master-data]
+plan-types = [
+    {id = 4, name = "System", description = ""},
+]
+product-builds = [
+    {id = 1, is_active = true, name = "unspecified", version = 1},
+]
+product-classifications = [
+    {id = 1, name = "Applikation"},
+]
+case-statuses = [
+    {id = 2, name = "CONFIRMED", description = "", is_confirmed = true},
+]
+product-versions = [
+    {id = 1, product = 1, value = "0.9.5"},
+]
+case-priorities = [
+    {id = 1, value = "high", is_active = true},
+]
+tcms-users = [
+    {email = "", first_name = "Frank", id = 3, is_active = true, is_staff = true, is_superuser = true, last_name = "Developer", username = "frsommer"},
+]
+case-categories = [
+    {id = 1, name = "Installation", product = 1, description = "Tests rund um die restix-Installation"},
+]
+
+[product]
+id = 1
+name = "restix"
+description = "Backup und Restore auf Basis von restic"
+classification = 1
+
+[[environments]]
+id = 3
+name = "platform-desktop-fedora-kde"
+description = "Desktop-PC mit Linux Fedora und Window-Manager KDE Plasma"
+properties = []
+
+[[environments]]
+id = 4
+name = "platform-desktop-manjaro-xfce"
+description = "Desktop-PC mit Linux Manjaro und Window-Manager Xfce"
+properties = []
+
+[[environments]]
+id = 1
+name = "platform-desktop-mint-cinnamon"
+description = "Desktop-PC mit Linux Mint und Window-Manager Cinnamon"
+properties = []
+
+[[environments]]
+id = 2
+name = "platform-desktop-ubuntu-gnome"
+description = "Desktop-PC mit Linux Ubuntu und Window-Manager Gnome"
+properties = []
+
+[[environments]]
+id = 8
+name = "platform-desktop-windows"
+description = "Desktop-PC mit Windows"
+properties = []
+
+[[environments]]
+id = 6
+name = "platform-server-alma"
+description = "Server mit Linux Alma ohne Grafik"
+properties = []
+
+[[environments]]
+id = 5
+name = "platform-server-debian"
+description = "Server mit Linux Debian ohne Grafik"
+properties = []
+
+[[environments]]
+id = 7
+name = "platform-server-netbsd"
+description = "Server mit NetBSD ohne Grafik"
+properties = []
+
+[[test-plans]]
+id = 53
+name = "Installationstests"
+text = "Übergeordneter Testplan für alle Installationstests."
+is_active = true
+product_version = 1
+product = 1
+author = 3
+type = 4
+attachments = []
+tags = []
+cases = []
+runs = []
+
+[[test-plans]]
+id = 54
+name = "Installation mit Binärpaket"
+text = "Übergeordneter Testplan für alle Installationstests mit Binärpaketen."
+is_active = true
+product_version = 1
+product = 1
+author = 3
+type = 4
+parent = 53
+attachments = []
+tags = []
+cases = []
+runs = []
+
+[[test-plans]]
+id = 55
+name = "Manuelle Installation"
+text = "Übergeordneter Testplan für alle manuellen Installationstests."
+is_active = true
+product_version = 1
+product = 1
+author = 3
+type = 4
+parent = 53
+attachments = []
+tags = []
+cases = [89, 90, 91, 92, 93, 94, 95, 96]
+runs = []
+
+[[test-plans]]
+id = 56
+name = "Installation mit vollständigem Binärpaket"
+text = "Installationstests mit vollständigem Binärpaket (GUI und CLI)."
+is_active = true
+product_version = 1
+product = 1
+author = 3
+type = 4
+parent = 54
+attachments = []
+tags = []
+cases = [81, 82, 83, 84]
+runs = []
+
+[[test-plans]]
+id = 57
+name = "Installation mit Core-Binärpaket"
+text = "Installationstests mit Core Binärpaket (nur CLI)."
+is_active = true
+product_version = 1
+product = 1
+author = 3
+type = 4
+parent = 54
+attachments = []
+tags = []
+cases = [85, 86, 87, 88]
+runs = []
+
+[[test-cases]]
+id = 81
+is_automated = false
+script = ""
+arguments = ""
+summary = "Installation eines vollständigen Binärpakets mit fehlenden Paketabhängigkeiten"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic darf nicht installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Links, Desktop-Icon, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. Vollständiges restix-Binärpaket mit Administrator-Rechten installieren\n2. Verifizieren, dass das vollständige restix-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss selbständig restic installieren und fehlerfrei durchlaufen\n2. Applikation und Startscripte wurden im Installationsverzeichnis erstellt (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Links auf die Startscripte wurden Systemverzeichnis erstellt (/usr/local/bin auf Unix)\n    Desktop-Datei wurde im System-Desktop-Verzeichnis erstellt (/usr/local/share/applications auf Unix)\n    Restix-GUI ist im Startmenü verfügbar\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten\n    restix-GUI lässt sich aus dem Startmenü starten"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 82
+is_automated = false
+script = ""
+arguments = ""
+summary = "Installation eines vollständigen Binärpakets mit installierten Paketabhängigkeiten"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Links, Desktop-Icon, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. Vollständiges restix-Binärpaket mit Administrator-Rechten installieren\n2. Verifizieren, dass das vollständige restix-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss fehlerfrei durchlaufen\n2. Applikation und Startscripte wurden im Installationsverzeichnis erstellt (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Links auf die Startscripte wurden Systemverzeichnis erstellt (/usr/local/bin auf Unix)\n    Desktop-Datei wurde im System-Desktop-Verzeichnis erstellt (/usr/local/share/applications auf Unix)\n    Restix-GUI ist im Startmenü verfügbar\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten\n    restix-GUI lässt sich aus dem Startmenü starten"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 83
+is_automated = false
+script = ""
+arguments = ""
+summary = "Update eines vollständigen Binärpakets"
+notes = ""
+text = "**Voraussetzungen**:\n1. restix muss in vollständigem Umfang installiert sein (Applikation, Links, Desktop-Icon, Konfigurationsverzeichnis).\n2. restix-Konfigurationsverzeichnis $HOME/.config/restix ist vorhanden\n\n**Testschritte**:\n1. aktuelle Version der restix-GUI per Info/Über restix ermitteln\n2. aktuelle Version des restix-CLI ermitteln per restix --version ermitteln\n3. Vollständiges neues restix-Binärpaket mit Administrator-Rechten installieren\n4. Verifizieren, dass das vollständige restix-Paket korrekt aktualisiert wurde\n5. aktuelle Version der restix-GUI per Info/Über restix ermitteln\n6. aktuelle Version des restix-CLI ermitteln per restix --version ermitteln\n\n**Erwartete Ergebnisse**:\n1. alte Version\n2. alte Version\n3. das Installationsprogramm muss fehlerfrei durchlaufen\n4. Applikation und Startscripte sind im Installationsverzeichnis vorhanden (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Links auf die Startscripte sind im Systemverzeichnis vorhanden (/usr/local/bin auf Unix)\n    Desktop-Datei ist im System-Desktop-Verzeichnis vorhanden (/usr/local/share/applications auf Unix)\n    Restix-GUI ist im Startmenü verfügbar\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht verändert\n5. neue Version\n6. neue Version"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 84
+is_automated = false
+script = ""
+arguments = ""
+summary = "Deinstallation eines vollständigen Binärpakets"
+notes = ""
+text = "**Voraussetzungen**:\n1. restix muss in vollständigem Umfang installiert sein (Applikation, Links, Desktop-Icon, Konfigurationsverzeichnis).\n2. restix-Konfigurationsverzeichnis $HOME/.config/restix ist vorhanden\n\n**Testschritte**:\n1. Paket restix mit dem Installer des Betriebssystems entfernen\n2. Verifizieren, dass das vollständige restix-Paket korrekt entfernt wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss fehlerfrei durchlaufen\n2. restix-Installationsverzeichnis ist nicht vorhanden (/opt/restix auf Unix)\n    Links auf die Startscripte sind im Systemverzeichnis nicht vorhanden (/usr/local/bin auf Unix)\n    Desktop-Datei ist im System-Desktop-Verzeichnis nicht vorhanden (/usr/local/share/applications auf Unix)\n    Restix-GUI ist im Startmenü nicht verfügbar\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht verändert"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 85
+is_automated = false
+script = ""
+arguments = ""
+summary = "Installation eines Core-Binärpakets mit fehlenden Paketabhängigkeiten"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic darf nicht installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Links, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix Core-Binärpaket mit Administrator-Rechten installieren\n2. Verifizieren, dass das restix Core-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss selbständig restic installieren und fehlerfrei durchlaufen\n2. Applikation und Startscript wurden im Installationsverzeichnis erstellt (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Link auf das Startscript wurde Systemverzeichnis erstellt (/usr/local/bin auf Unix)\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 86
+is_automated = false
+script = ""
+arguments = ""
+summary = "Update eines Core Binärpakets"
+notes = ""
+text = "**Voraussetzungen**:\n1. restix muss im Core-Umfang installiert sein (Applikation, Links, Konfigurationsverzeichnis).\n2. restix-Konfigurationsverzeichnis $HOME/.config/restix ist vorhanden\n\n**Testschritte**:\n1 aktuelle Version des restix-CLI per restix --version ermitteln\n2. neues restix Core-Binärpaket mit Administrator-Rechten installieren\n3. Verifizieren, dass das restix Core-Paket korrekt aktualisiert wurde\n4. aktuelle Version des restix-CLI per restix --version ermitteln\n\n**Erwartete Ergebnisse**:\n1. alte Version\n2. das Installationsprogramm muss fehlerfrei durchlaufen\n3. Applikation und Startscript sind im Installationsverzeichnis vorhanden (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Link auf das Startscript ist im Systemverzeichnis vorhanden (/usr/local/bin auf Unix)\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht verändert\n4. neue Version"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 87
+is_automated = false
+script = ""
+arguments = ""
+summary = "Installation eines Core Binärpakets mit installierten Paketabhängigkeiten"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Link, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix Core-Binärpaket mit Administrator-Rechten installieren\n2. Verifizieren, dass das restix Core-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss fehlerfrei durchlaufen\n2. Applikation und Startscript wurden im Installationsverzeichnis erstellt (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Link auf das Startscript wurde im Systemverzeichnis erstellt (/usr/local/bin auf Unix)\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 88
+is_automated = false
+script = ""
+arguments = ""
+summary = "Deinstallation eines Core Binärpakets"
+notes = ""
+text = "**Voraussetzungen**:\n1. restix muss im Core-Umfang installiert sein (Applikation, Links, Konfigurationsverzeichnis).\n2. restix-Konfigurationsverzeichnis $HOME/.config/restix ist vorhanden\n\n**Testschritte**:\n1. Paket restix mit dem Installer des Betriebssystems entfernen\n2. Verifizieren, dass das restix Core-Paket korrekt entfernt wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss fehlerfrei durchlaufen\n2. restix-Installationsverzeichnis ist nicht vorhanden (/opt/restix auf Unix)\n    Link auf das Startscript ist im Systemverzeichnis nicht vorhanden (/usr/local/bin auf Unix)\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht verändert"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 89
+is_automated = false
+script = ""
+arguments = ""
+summary = "Manuelle Installation eines Core-Pakets lokal für einen Benutzer"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Link, Konfigurationsverzeichnis).\n3. Verzeichnis $HOME/apps existiert nicht.\n4. Verzeichnis $HOME/bin ist im PATH des Benutzers.\n\n**Testschritte**:\n1. restix Core-Paket in einem temporären Verzeichnis entpacken\n2. im Installations-Script die Variablen für eine lokale Installation setzen\n3. Installations-Script mit normalen Benutzerrechten ausführen\n4. Verifizieren, dass das restix Core-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. Installations-Script, Python-Wheel und Start-Script müssen entpackt worden sein\n2. Applikations-Verzeichnis $HOME/apps/restix, Start-Verzeichnis $HOME/bin\n3. Das Installations-Script muss fehlerfrei durchlaufen.\n4. Verzeichnis $HOME/apps/restix existiert\n    Python virtual environment wurde in $HOME/apps/restix/.venv erzeugt\n    Start-Script ist in $HOME/apps/restix vorhanden\n    Link auf das Startscript wurde in $HOME/bin erstellt\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 90
+is_automated = false
+script = ""
+arguments = ""
+summary = "Manuelle Installation eines Core-Pakets systemweit"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Link, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix Core-Paket in einem temporären Verzeichnis entpacken\n2. im Installations-Script die Variablen für eine systemweite Installation setzen\n3. Installations-Script mit Administrator-Rechten ausführen\n4. Verifizieren, dass das restix Core-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. Installations-Script, Python-Wheel und Start-Script müssen entpackt worden sein\n2. Applikations-Verzeichnis /opt/restix, Start-Verzeichnis /usr/local/bin bzw. Program Files/restix\n3. Das Installations-Script muss fehlerfrei durchlaufen\n4. Python virtual environment wurde in /opt/restix/.venv erzeugt\n    Start-Script ist in /opt/restix vorhanden\n    Link auf das Startscript wurde in/usr/local/bin erstellt\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 91
+is_automated = false
+script = ""
+arguments = ""
+summary = "Manuelle Installation eines vollständigen restix-Pakets systemweit"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Links, Desktop-Datei, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. vollständiges restix-Paket in einem temporären Verzeichnis entpacken\n2. im Installations-Script die Variablen für eine systemweite Installation setzen\n3. Installations-Script mit Administrator-Rechten ausführen\n4. Verifizieren, dass das vollständige restix Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. Installations-Script, Python-Wheel, Desktop-Datei und Start-Scripts müssen entpackt worden sein\n2. Applikations-Verzeichnis /opt/restix, Start-Verzeichnis /usr/local/bin bzw. Program Files/restix, Desktop-Verzeichnis /usr/local/share/applications\n3. Das Installations-Script muss fehlerfrei durchlaufen\n4. Python virtual environment wurde in /opt/restix/.venv erzeugt\n    Start-Scripte sind in /opt/restix vorhanden\n    Links auf die Startscripte wurden in/usr/local/bin erstellt\n    Desktop-Datei wurde in /usr/local/share/applications erstellt\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten\n    restix-GUI lässt sich aus dem Startmenü aufrufen"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 92
+is_automated = false
+script = ""
+arguments = ""
+summary = "Manuelle Installation eines vollständigen restix-Pakets lokal für einen Benutzer"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Links, Desktop-Datei, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. vollständiges restix-Paket in einem temporären Verzeichnis entpacken\n2. im Installations-Script die Variablen für eine lokale Installation setzen\n3. Installations-Script mit normalen Benutzer-Rechten ausführen\n4. Verifizieren, dass das vollständige restix Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. Installations-Script, Python-Wheel, Desktop-Datei und Start-Scripts müssen entpackt worden sein\n2. Applikations-Verzeichnis $HOME/apps/restix, Start-Verzeichnis $HOME/bin bzw. Program Files/restix, Desktop-Verzeichnis $HOME/Schreibtisch\n3. Das Installations-Script muss fehlerfrei durchlaufen\n4. Python virtual environment wurde in $HOME/apps/restix/.venv erzeugt\n    Start-Scripte sind in $HOME/apps/restix vorhanden\n    Links auf die Startscripte wurden in $HOME/bin erstellt\n    Desktop-Shortcut ist auf dem Schreibtisch vorhanden\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten\n    restix-GUI lässt sich vom Schreibtisch aus starten"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 93
+is_automated = false
+script = ""
+arguments = ""
+summary = "Manuelles Upgrade eines Core-Pakets lokal für einen Benutzer"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. restix muss als Core-Paket für den lokalen Benutzer installiert sein (Applikation, Link, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix-Version über CLI ermitteln\n2. restix Core-Paket in einem temporären Verzeichnis entpacken\n3. im Installations-Script die Variablen für eine lokale Installation setzen\n4. Installations-Script mit normalen Benutzerrechten ausführen\n5. restix-Version über CLI ermitteln\n\n**Erwartete Ergebnisse**:\n1. alte Version\n2. Installations-Script, Python-Wheel und Start-Script müssen entpackt worden sein\n3. Applikations-Verzeichnis $HOME/apps/restix, Start-Verzeichnis $HOME/bin\n4. Das Installations-Script muss fehlerfrei durchlaufen.\n5. neue Version"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 94
+is_automated = false
+script = ""
+arguments = ""
+summary = "Manuelles Upgrade eines vollständigen restix-Pakets lokal für einen Benutzer"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. restix muss als vollständiges Paket für den lokalen Benutzer installiert sein (Applikation, Links, Desktop-Shortcut, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix-Version über CLI ermitteln\n2. restix-Version über GUI ermitteln\n3. vollständiges restix Paket in einem temporären Verzeichnis entpacken\n4. im Installations-Script die Variablen für eine lokale Installation setzen\n5. Installations-Script mit normalen Benutzerrechten ausführen\n6. restix-Version über CLI ermitteln\n7. restix-Version über GUI ermitteln\n\n**Erwartete Ergebnisse**:\n1. alte Version\n2. alte Version\n3. Installations-Script, Python-Wheel, Desktop-Datei und Start-Scripte müssen entpackt worden sein\n4. Applikations-Verzeichnis $HOME/apps/restix, Start-Verzeichnis $HOME/bin, Desktop-Verzeichnis $HOME/Schreibtisch\n5. Das Installations-Script muss fehlerfrei durchlaufen.\n6. neue Version\n7. neue Version"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 95
+is_automated = false
+script = ""
+arguments = ""
+summary = "Manuelles Upgrade eines Core-Pakets systemweit"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. restix Core-Paket muss systemweit installiert sein (Applikation, Link, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix-Version über CLI ermitteln\n2. restix Core-Paket in einem temporären Verzeichnis entpacken\n3. im Installations-Script die Variablen für eine systemweite Installation setzen\n4. Installations-Script mit Administrator-Rechten ausführen\n5. restix-Version über CLI ermitteln\n\n**Erwartete Ergebnisse**:\n1. alte Version\n2. Installations-Script, Python-Wheel und Start-Script müssen entpackt worden sein\n3. Applikations-Verzeichnis /opt/restix, Start-Verzeichnis /usr/local/bin bzw. Program Files/restix\n4. Das Installations-Script muss fehlerfrei durchlaufen\n5. neue Version"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 96
+is_automated = false
+script = ""
+arguments = ""
+summary = "Manuelles Upgrade eines vollständigen restix-Pakets systemweit"
+notes = ""
+text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. vollständiges restix-Paket muss systemweit installiert sein (Applikation, Links, Desktop-Datei, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix-Version über CLI ermitteln\n2. restix-Version über GUI ermitteln\n3. vollständiges restix Paket in einem temporären Verzeichnis entpacken\n4. im Installations-Script die Variablen für eine systemweite Installation setzen\n5. Installations-Script mit Administrator-Rechten ausführen\n6. restix-Version über CLI ermitteln\n7. restix-Version über GUI ermitteln\n\n**Erwartete Ergebnisse**:\n1. alte Version\n2. alte Version\n3. Installations-Scripte, Python-Wheel, Desktop-Datei und Start-Scripte müssen entpackt worden sein\n4. Applikations-Verzeichnis /opt/restix, Start-Verzeichnis /usr/local/bin bzw. Program Files/restix, Desktop-Verzeichnis /usr/local/share/applications\n5. Das Installations-Script muss fehlerfrei durchlaufen\n6. neue Version\n7. neue Version"
+case_status = 2
+category = 1
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
