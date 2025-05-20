@@ -2,7 +2,7 @@
 Categories=Utility;
 Comment[de_DE]=GUI für die Datensicherung mit restic
 Comment=GUI for restic based backup and restore
-Exec=/opt/restix/grestix
+Exec=${INSTALL_PATH}/grestix
 GenericName[de_DE]=
 GenericName=
 Icon=system-software-update

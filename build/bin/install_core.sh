@@ -10,13 +10,16 @@ LINK_PATH=$HOME/bin
 
 
 if [ ! -d $INSTALL_PATH ]; then
-  mkdir $INSTALL_PATH
+  mkdir -p $INSTALL_PATH
 fi
 
 WHEEL_FILE=`ls restix*whl`
 VENV_PATH=$INSTALL_PATH/.venv
 if [ ! -d $VENV_PATH ]; then
   python3 -m venv $VENV_PATH
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
   source $VENV_PATH/bin/activate
   pip3 install ./$WHEEL_FILE
   deactivate
@@ -26,5 +29,7 @@ else
   deactivate
 fi
 
+cat restix | sed -e s:$\{INSTALL_PATH\}:$INSTALL_PATH: > $INSTALL_PATH/restix
+chmod 755 $INSTALL_PATH/restix
 rm -f $LINK_PATH/restix
 ln -s $INSTALL_PATH/restix $LINK_PATH/restix

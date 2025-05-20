@@ -63,7 +63,7 @@ class RestixAction:
         """
         self.__action_id = action_id
         self.__target_alias = target_alias
-        self.__config_path = config_root_path()
+        self.__config_path = config_root_path() if action_id != ACTION_VERSION and action_id != ACTION_HELP else None
         self.__options = {OPTION_HOST: platform.node(), OPTION_YEAR: str(datetime.date.today().year),
                           OPTION_USER: current_user(), OPTION_DRY_RUN: False, OPTION_BATCH: False}
         self.__temp_files = []

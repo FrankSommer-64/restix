@@ -37,14 +37,16 @@ def run_command(cmd: list[str]) -> int:
     return res.returncode
 
 
-def copy_control_file(source_path: str, file_name: str, target_path: str, feature: dict):
+def copy_customizable_file(project_name: str, source_path: str, file_name: str, target_path: str, feature: dict):
     """
-    Kopiert eine Steuerdatei ins Build-Verzeichnis und ersetzt ggf. Variablen.
-    :param source_path: Verzeichnis, in dem die Steuerdatei liegt
-    :param file_name: Name der Steuerdatei
+    Kopiert eine Datei ins Build-Verzeichnis und ersetzt ggf. Variablen.
+    :param project_name: Name des Projekts
+    :param source_path: Verzeichnis, in dem die Datei liegt
+    :param file_name: Name der Datei
     :param target_path: Zielverzeichnis
     :param feature: relevante Daten des Feature-Sets
     """
+    _install_path = os.path.join('/opt', project_name)
     _source_fn = os.path.join(source_path, file_name)
     _stat = os.stat(_source_fn)
     with open(_source_fn, 'r') as _f:
@@ -52,10 +54,27 @@ def copy_control_file(source_path: str, file_name: str, target_path: str, featur
     _contents = _contents.replace('${VERSION}', feature[ATTR_VERSION])
     _contents = _contents.replace('${PACKAGE_NAME}', feature[ATTR_PYTHON_PACKAGE_NAME])
     _contents = _contents.replace('${WHEEL_FILE_NAME}', feature[ATTR_WHEEL_FILE_NAME])
+    _contents = _contents.replace('${INSTALL_PATH}', _install_path)
     _target_fn = os.path.join(target_path, file_name)
     with open(_target_fn, 'w') as _f:
         _f.write(_contents)
     os.chmod(_target_fn, _stat.st_mode)
+
+
+def copy_customizable_file_tree(project_name: str, source_path: str, target_path: str, feature: dict):
+    """
+    Kopiert einen Verzeichnisbaum ins Build-Verzeichnis und ersetzt ggf. Variablen in den kopierten Dateien.
+    :param project_name: Name des Projekts
+    :param source_path: Verzeichnis, in dem die Datei liegt
+    :param target_path: Zielverzeichnis
+    :param feature: relevante Daten des Feature-Sets
+    """
+    for _dir, _sub_dirs, _files in os.walk(source_path):
+        _source_dir = _dir[len(source_path):].lstrip(os.sep)
+        _target_dir = os.path.join(target_path, _source_dir)
+        os.makedirs(_target_dir, mode=0o755, exist_ok=True)
+        for _f in _files:
+            copy_customizable_file(project_name, _dir, _f, _target_dir, feature)
 
 
 def py_config_info(project_root: str, file_path: str) -> dict:
@@ -148,7 +167,8 @@ def build_project_feature(build_scripts_path: str, project_root: str, feature_na
             _source_data_path = os.path.join(project_root, 'build', 'deb', 'data')
         else:
             _source_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'deb', 'data')
-        shutil.copytree(_source_data_path, _target_path, dirs_exist_ok=True)
+        copy_customizable_file_tree(_project_name, _source_data_path, _target_path, _feature)
+        #shutil.copytree(_source_data_path, _target_path, dirs_exist_ok=True)
         _data_elements = os.listdir(_target_path)
         os.chdir(_target_path)
         _cmd = ['tar', '-cJf', DATA_ARCHIVE_FILE_NAME]
@@ -165,7 +185,7 @@ def build_project_feature(build_scripts_path: str, project_root: str, feature_na
         else:
             _source_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'deb', 'control')
         for _f in os.listdir(_source_data_path):
-            copy_control_file(_source_data_path, _f, _target_path, _feature)
+            copy_customizable_file(_project_name, _source_data_path, _f, _target_path, _feature)
         # control-Archiv erzeugen
         _control_elements = os.listdir(_target_path)
         os.chdir(_target_path)

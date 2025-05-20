@@ -25,6 +25,8 @@ if [ "$2" == "full" ]; then
   cp $DIST_DIR/restix-$VERSION-py3-none-any.whl $TEMP_DIR
   cp $BUILD_DIR/bin/install_full.sh $TEMP_DIR/install.sh
   cp $BUILD_DIR/featuresets/full/deb/data/opt/restix/* $TEMP_DIR
+  cp $BUILD_DIR/featuresets/full/deb/data/opt/restix/* $TEMP_DIR
+  cp $BUILD_DIR/featuresets/full/deb/data/usr/local/share/applications/grestix.desktop $TEMP_DIR
   ARCHIVE_FILE=restix-$VERSION.zip
 elif [ "$2" == "core" ]; then
   cp $DIST_DIR/restix_core-$VERSION-py3-none-any.whl $TEMP_DIR

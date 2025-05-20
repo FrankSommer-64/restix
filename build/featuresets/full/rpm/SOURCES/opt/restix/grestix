@@ -2,7 +2,7 @@
 
 # Run restix GUI.
 
-VENV_ACTIVATION_FILE=/opt/restix/.venv/bin/activate
+VENV_ACTIVATION_FILE=${INSTALL_PATH}/.venv/bin/activate
 
 source $VENV_ACTIVATION_FILE
 grestix
