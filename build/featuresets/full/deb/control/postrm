@@ -2,12 +2,16 @@
 
 case "$1" in
   remove)
+    rm -f /usr/local/share/application/grestix.desktop
     rm -f /usr/local/bin/restix
     rm -f /usr/local/bin/grestix
+    rm -rf /opt/restix
     ;;
   purge)
+    rm -f /usr/local/share/application/grestix.desktop
     rm -f /usr/local/bin/restix
     rm -f /usr/local/bin/grestix
+    rm -rf /opt/restix
     rm -rf $HOME/.config/restix
     ;;
 esac

@@ -60,6 +60,7 @@ ln -s /opt/restix/restix /usr/local/bin/restix
 %postun
 if [ $1 == 0 ];then
   rm -f /usr/local/bin/restix
+  rm -rf /opt/restix
 fi
 
 

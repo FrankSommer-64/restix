@@ -65,6 +65,8 @@ ln -s /opt/restix/grestix /usr/local/bin/grestix
 if [ $1 == 0 ];then
   rm -f /usr/local/bin/restix
   rm -f /usr/local/bin/grestix
+  rm -rf /opt/restix
+  rm -f /usr/local/share/applications/grestix.desktop
 fi
 
 
