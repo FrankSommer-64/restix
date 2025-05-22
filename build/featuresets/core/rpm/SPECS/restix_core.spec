@@ -8,7 +8,9 @@ URL:            https://github.com/FrankSommer-64/restix
 Source0:        ${PACKAGE_NAME}-${VERSION}.tar.gz
 BuildArch:      noarch
 
-Requires:       python >= 3.8
+Requires:       python >= 3.10
+Requires:       python3-pip
+Requires:       python3-venv
 Requires:       restic
 
 BuildRoot:      ${RPM_BUILD_ROOT}
