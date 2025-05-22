@@ -168,7 +168,6 @@ def build_project_feature(build_scripts_path: str, project_root: str, feature_na
         else:
             _source_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'deb', 'data')
         copy_customizable_file_tree(_project_name, _source_data_path, _target_path, _feature)
-        #shutil.copytree(_source_data_path, _target_path, dirs_exist_ok=True)
         _data_elements = os.listdir(_target_path)
         os.chdir(_target_path)
         _cmd = ['tar', '-cJf', DATA_ARCHIVE_FILE_NAME]

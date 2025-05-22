@@ -51,7 +51,7 @@ def create_work_dir():
             raise RuntimeError(f'Konnte Verzeichnis {_sub_dir_path} nicht anlegen')
 
 
-def copy_spec_file(source_path: str, file_name: str, target_path: str, project_name: str, feature: dict):
+def copy_customizable_file(source_path: str, file_name: str, target_path: str, project_name: str, feature: dict):
     """
     Kopiert eine Steuerdatei ins Build-Verzeichnis und ersetzt ggf. Variablen.
     :param source_path: Verzeichnis, in dem die Steuerdatei liegt
@@ -60,6 +60,7 @@ def copy_spec_file(source_path: str, file_name: str, target_path: str, project_n
     :param project_name: Name des Projekts
     :param feature: relevante Daten des Feature-Sets
     """
+    _install_path = os.path.join('/opt', project_name)
     _version = feature[ATTR_VERSION]
     _rpm_proj_dir = f'{project_name}-{_version}-root'
     _rpm_build_root = os.path.join(RPM_WORK_PATH, 'tmp', _rpm_proj_dir)
@@ -71,10 +72,27 @@ def copy_spec_file(source_path: str, file_name: str, target_path: str, project_n
     _contents = _contents.replace('${PACKAGE_NAME}', feature[ATTR_PYTHON_PACKAGE_NAME])
     _contents = _contents.replace('${WHEEL_FILE_NAME}', feature[ATTR_WHEEL_FILE_NAME])
     _contents = _contents.replace('${RPM_BUILD_ROOT}', _rpm_build_root)
+    _contents = _contents.replace('${INSTALL_PATH}', _install_path)
     _target_fn = os.path.join(target_path, file_name)
     with open(_target_fn, 'w') as _f:
         _f.write(_contents)
     os.chmod(_target_fn, _stat.st_mode)
+
+
+def copy_customizable_file_tree(source_path: str, target_path: str, project_name: str, feature: dict):
+    """
+    Kopiert einen Verzeichnisbaum ins Build-Verzeichnis und ersetzt ggf. Variablen in den kopierten Dateien.
+    :param source_path: Verzeichnis, in dem die Datei liegt
+    :param target_path: Zielverzeichnis
+    :param project_name: Name des Projekts
+    :param feature: relevante Daten des Feature-Sets
+    """
+    for _dir, _sub_dirs, _files in os.walk(source_path):
+        _source_dir = _dir[len(source_path):].lstrip(os.sep)
+        _target_dir = os.path.join(target_path, _source_dir)
+        os.makedirs(_target_dir, mode=0o755, exist_ok=True)
+        for _f in _files:
+            copy_customizable_file(_dir, _f, _target_dir, project_name, feature)
 
 
 def py_config_info(project_root: str, file_path: str) -> dict:
@@ -171,7 +189,8 @@ def build_project_feature(build_scripts_path: str, project_root: str, feature_na
             _source_data_path = os.path.join(project_root, 'build', 'rpm', 'SOURCES')
         else:
             _source_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'rpm', 'SOURCES')
-        shutil.copytree(_source_data_path, _archive_project_root, dirs_exist_ok=True)
+        copy_customizable_file_tree(_source_data_path, _archive_project_root, _project_name, _feature)
+        #shutil.copytree(_source_data_path, _archive_project_root, dirs_exist_ok=True)
         os.chdir(_temp_path)
         _cmd = ['tar', '-czf', _archive_file_name, _project_dir]
         _rc = run_command(_cmd)
@@ -186,7 +205,7 @@ def build_project_feature(build_scripts_path: str, project_root: str, feature_na
         _spec_data_path = os.path.join(project_root, 'build', 'featuresets', feature_name, 'rpm', 'SPECS')
     _spec_target_path = os.path.join(RPM_WORK_PATH, 'SPECS')
     for _f in os.listdir(_spec_data_path):
-        copy_spec_file(_spec_data_path, _f, _spec_target_path, _project_name, _feature)
+        copy_customizable_file(_spec_data_path, _f, _spec_target_path, _project_name, _feature)
     # rpm-Paket erstellen
     _cmd = ['rpmbuild', '-bb', os.path.join(_spec_target_path, f'{_py_package_name}.spec')]
     _rc = run_command(_cmd)
