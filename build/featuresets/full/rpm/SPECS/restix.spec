@@ -9,14 +9,9 @@ Source0:        ${PACKAGE_NAME}-${VERSION}.tar.gz
 BuildArch:      noarch
 
 Requires:       python >= 3.10
-Requires:       python3-pip
-Requires:       python3-venv
 Requires:       restic
-Requires:       libxcb-cursor0
-Requires:       libxcb-icccm4
-Requires:       libxcb-keysyms1
-Requires:       libxcb-image0
-Requires:       libxcb-render-util0
+
+
 BuildRoot:      ${RPM_BUILD_ROOT}
 
 
