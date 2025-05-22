@@ -1,7 +1,7 @@
 Package: ${PACKAGE_NAME}
 Version: ${VERSION}
 Section: misc
-Depends: python3 (>= 3.10), python3-pip, python3-venv, restic
+Depends: python3 (>= 3.10), python3-pip, python3-venv
 Priority: optional
 Architecture: all
 Maintainer: Frank Sommer <Frank.Sommer@sherpa-software.de>

@@ -9,7 +9,7 @@ Source0:        ${PACKAGE_NAME}-${VERSION}.tar.gz
 BuildArch:      noarch
 
 Requires:       python >= 3.10
-Requires:       restic
+
 
 BuildRoot:      ${RPM_BUILD_ROOT}
 

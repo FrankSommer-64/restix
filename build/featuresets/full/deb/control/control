@@ -1,7 +1,7 @@
 Package: ${PACKAGE_NAME}
 Version: ${VERSION}
 Section: misc
-Depends: python3 (>= 3.10), python3-pip, python3-venv, restic, libxcb-cursor0, libxcb-icccm4, libxcb-keysyms1, libxcb-image0, libxcb-render-util0
+Depends: python3 (>= 3.10), python3-pip, python3-venv, libxcb-cursor0, libxcb-icccm4, libxcb-keysyms1, libxcb-image0, libxcb-render-util0
 Priority: optional
 Architecture: all
 Maintainer: Frank Sommer <Frank.Sommer@sherpa-software.de>
