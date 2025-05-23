@@ -161,4 +161,4 @@ class CentralPane(QWidget):
         _about_dlg.exec()
 
 
-_WELCOME_PANE_STYLE = f'border-image: url({RESTIX_ASSETS_DIR}:restix.jpg)'
+_WELCOME_PANE_STYLE = f'border-image: url({RESTIX_ASSETS_DIR}:restix_background.jpg)'

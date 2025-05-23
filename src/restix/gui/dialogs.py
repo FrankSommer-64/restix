@@ -684,7 +684,7 @@ _URL_PYSIDE = 'https://wiki.qt.io/PySide6'
 _URL_TOMLI = 'https://github.com/hukkin/tomli'
 _URL_TOMLI_W = 'https://github.com/hukkin/tomli-w'
 
-_STYLE_RESTIX_IMAGE = f'border-image: url({RESTIX_ASSETS_DIR}:restix.jpg)'
+_STYLE_RESTIX_IMAGE = f'border-image: url({RESTIX_ASSETS_DIR}:restix_icon.jpg)'
 _STYLE_INPUT_FIELD = 'background-color: #ffffcc'
 _STYLE_WHITE_BG = 'background-color: white'
 _STYLE_BOLD_TEXT = 'font-weight: bold'
