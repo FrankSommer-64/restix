@@ -152,11 +152,17 @@ def cli_main():
         # restix-Konfiguration einlesen
         _restix_config = read_restix_config_file(_action)
         if _action.action_id() == CLI_COMMAND_TARGETS:
-            # Sonderfall Backup-Ziele anzeigen (resultiert nicht in einem restic-Befehl)
+            # Sonderfall Sicherungsziele anzeigen (resultiert nicht in einem restic-Befehl)
             show_targets(_restix_config.targets())
             sys.exit(0)
-        # Repository und Zugangsdaten in die Aktion eintragen
+        # Prüfen, ob das Sicherungsziel existiert
         _target_alias = _action.target_alias()
+        if _target_alias not in _restix_config.targets():
+            raise RestixException(E_CLI_INVALID_TARGET, _target_alias)
+        # Bei Befehlen, die Daten verändern, Bestätigung vom Benutzer einholen
+        if not prompt_confirmation(_action):
+            sys.exit(0)
+        # Zugangsdaten in die Aktion eintragen
         _options = None
         _credentials = _restix_config.credentials_for_target(_target_alias)
         if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
@@ -166,10 +172,10 @@ def cli_main():
         _action.set_basic_options(_restix_config, _options)
         if _action.action_id() == ACTION_BACKUP:
             _action.set_scope_options(_restix_config.scope_for_target(_target_alias))
-        # Aktion ausführen
+        # Prüfen, ob notwendige Optionen angegeben wurden
         _action.verify_mandatory_options()
-        if prompt_confirmation(_action):
-            execute_restic_command(_action.to_restic_command(), TaskMonitor())
+        # Aktion ausführen
+        execute_restic_command(_action.to_restic_command(), TaskMonitor())
     except Exception as _e:
         print(localized_message(E_CLI_RESTIX_COMMAND_FAILED))
         print(f'> {_e}')

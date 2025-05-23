@@ -112,6 +112,7 @@ e-cli-dup-option Option {0} specified multiple times.
 e-cli-invalid-command Invalid command {0}.
 e-cli-invalid-option Invalid option {0}.
 e-cli-invalid-path-spec Invalid path for option {0}: {1}.
+e-cli-invalid-target Backup target with alias {0} has not been configured.
 e-cli-non-existing-path Path {0} for option {1} does not exist.
 e-cli-path-is-not-dir Path {0} for option {1} is not a directory.
 e-cli-restix-command-failed +++ Command failed +++
@@ -119,7 +120,8 @@ e-cli-target-missing Action {0} requires an alias name for the backup target.
 e-cli-too-many-args Too many arguments given, cannot process '{0}'.
 
 # restic errors
-e-restic-cmd-failed restic command {0} failed: {1}.
+e-restic-call-failed restic call '{0}' failed.\n{1}.
+e-restic-cmd-failed restic command '{0}' failed.
 e-restic-cmd-interrupted restic command {0} failed: restic command aborted.
 e-restic-go-runtime-error restic command {0} failed: Go runtime error.
 e-restic-read-backup-data-failed restic command {0} failed: error reading backup data.

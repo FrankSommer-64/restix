@@ -195,7 +195,6 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     :param potential_long_runner: zeigt an, ob die Ausführung sehr lange dauern kann.
     :raises RestixException: falls die Ausführung fehlschlägt
     """
-    _err_info = []
     if potential_long_runner:
         # potenziell lang laufender restic-Befehl, Ausgaben gleich an den TaskMonitor weiterreichen
         _p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
@@ -206,7 +205,6 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
         for _line in iter(_p.stderr.readline, ""):
             _pure_line = _line.strip()
             if len(_pure_line) > 0:
-                _err_info.append(_line.strip())
                 task_monitor.log_text(_pure_line, SEVERITY_ERROR)
         _rc = _p.wait()
     else:
@@ -214,7 +212,6 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
         res = subprocess.run(cmd, capture_output=True, encoding='utf-8')
         if len(res.stderr) > 0:
             _pure_output = os.linesep.join([_s for _s in res.stderr.split(os.linesep) if _s])
-            _err_info.append(_pure_output)
             task_monitor.log_text(_pure_output, SEVERITY_ERROR)
         if len(res.stdout) > 0:
             _pure_output = os.linesep.join([_s for _s in res.stdout.split(os.linesep) if _s])
@@ -236,7 +233,7 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     elif _rc == 130:
         _exception_id = E_RESTIC_CMD_INTERRUPTED
     else:
-        raise RestixException(E_RESTIC_CMD_FAILED, _restic_cmd, os.linesep.join(_err_info))
+        raise RestixException(E_RESTIC_CMD_FAILED, _restic_cmd)
     raise RestixException(_exception_id, _restic_cmd)
 
 
@@ -276,7 +273,7 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
         task_monitor.log_text(_stdout, SEVERITY_INFO)
         task_monitor.log_text(_stderr, SEVERITY_ERROR)
         _result = f'{_stderr}{os.linesep}{_stdout}'
-        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
+        raise RestixException(E_RESTIC_CALL_FAILED, action.action_id(), _result)
     _snapshots = []
     _result = json.loads(_stdout)
     for _element in _result:
@@ -303,7 +300,7 @@ def find_snapshot_elements(action: RestixAction) -> list[SnapshotElement]:
     action.action_executed()
     if _rc != RESTIC_RC_OK:
         _result = f'{_stderr}{os.linesep}{_stdout}'
-        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
+        raise RestixException(E_RESTIC_CALL_FAILED, action.action_id(), _result)
     _elements = []
     _result = json.loads(_stdout)
     for _match in _result:
@@ -324,7 +321,7 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
     action.action_executed()
     if _rc != RESTIC_RC_OK:
         _result = f'{_stderr}{os.linesep}{_stdout}'
-        raise RestixException(E_RESTIC_CMD_FAILED, action.action_id(), _result)
+        raise RestixException(E_RESTIC_CALL_FAILED, action.action_id(), _result)
     _elements = []
     _snapshot = None
     for _line in _stdout.split(os.linesep):
@@ -341,7 +338,7 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
         elif _element.get(JSON_ATTR_STRUCT_TYPE) == JSON_STRUCT_TYPE_NODE:
             if _snapshot is None:
                 _reason = localized_message(E_NO_SNAPSHOT_DESC_FROM_RESTIC)
-                raise RestixException(E_RESTIC_CMD_FAILED, ACTION_SNAPSHOTS, _reason)
+                raise RestixException(E_RESTIC_CALL_FAILED, ACTION_SNAPSHOTS, _reason)
             _snapshot.add_element(SnapshotElement(_element[JSON_ATTR_PATH], _element[JSON_ATTR_TYPE]))
         else:
             continue

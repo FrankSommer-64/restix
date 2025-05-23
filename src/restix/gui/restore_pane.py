@@ -167,7 +167,7 @@ class RestoreOptionsPane(QGroupBox):
             self.fill_snapshot_combo(_combo_data)
         except RestixException as _e:
             QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR),
-                                 localized_message(E_RESTIC_CMD_FAILED, ACTION_SNAPSHOTS, str(_e)),
+                                 localized_message(E_RESTIC_CALL_FAILED, ACTION_SNAPSHOTS, str(_e)),
                                  QMessageBox.StandardButton.Ok)
 
     def _scope_button_clicked(self):
