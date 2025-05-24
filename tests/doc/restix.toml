@@ -6,26 +6,31 @@ entity-id = 1
 plan-types = [
     {id = 4, name = "System", description = ""},
 ]
-product-builds = [
-    {id = 1, is_active = true, name = "unspecified", version = 1},
-]
-product-classifications = [
-    {id = 1, name = "Applikation"},
-]
 case-statuses = [
     {id = 2, name = "CONFIRMED", description = "", is_confirmed = true},
 ]
-product-versions = [
-    {id = 1, product = 1, value = "0.9.5"},
-]
-case-priorities = [
-    {id = 1, value = "high", is_active = true},
+product-builds = [
+    {id = 1, is_active = true, name = "25001", version = 1},
 ]
 tcms-users = [
     {email = "", first_name = "Frank", id = 3, is_active = true, is_staff = true, is_superuser = true, last_name = "Developer", username = "frsommer"},
 ]
+product-classifications = [
+    {id = 1, name = "Applikation"},
+]
 case-categories = [
     {id = 1, name = "Installation", product = 1, description = "Tests rund um die restix-Installation"},
+    {id = 3, name = "CLI", product = 1, description = "Tests der restix-Kommandozeile"},
+    {id = 4, name = "GUI", product = 1, description = "Tests der grafischen Oberfläche von restix"},
+]
+product-versions = [
+    {id = 1, product = 1, value = "0.9.5"},
+]
+execution-statuses = [
+    {id = 4, name = "PASSED", weight = 20, icon = "fa fa-check-circle-o", color = "#92d400"},
+]
+case-priorities = [
+    {id = 1, value = "high", is_active = true},
 ]
 
 [product]
@@ -124,7 +129,8 @@ parent = 53
 attachments = []
 tags = []
 cases = [89, 90, 91, 92, 93, 94, 95, 96]
-runs = []
+runs = [32]
+run = 32
 
 [[test-plans]]
 id = 56
@@ -138,7 +144,7 @@ type = 4
 parent = 54
 attachments = []
 tags = []
-cases = [81, 82, 83, 84]
+cases = [82, 83, 84]
 runs = []
 
 [[test-plans]]
@@ -153,38 +159,107 @@ type = 4
 parent = 54
 attachments = []
 tags = []
-cases = [85, 86, 87, 88]
+cases = [86, 87, 88]
+runs = [33, 34]
+run = 34
+
+[[test-plans]]
+id = 58
+name = "GUI Tests"
+text = "Übergeordneter Testplan für alle Tests der grafischen Oberfläche von restix."
+is_active = true
+product_version = 1
+product = 1
+author = 3
+type = 4
+attachments = []
+tags = []
+cases = []
 runs = []
 
-[[test-cases]]
-id = 81
-is_automated = false
-script = ""
-arguments = ""
-summary = "Installation eines vollständigen Binärpakets mit fehlenden Paketabhängigkeiten"
-notes = ""
-text = "**Voraussetzungen**:\n1. Paket restic darf nicht installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Links, Desktop-Icon, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. Vollständiges restix-Binärpaket mit Administrator-Rechten installieren\n2. Verifizieren, dass das vollständige restix-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss selbständig restic installieren und fehlerfrei durchlaufen\n2. Applikation und Startscripte wurden im Installationsverzeichnis erstellt (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Links auf die Startscripte wurden Systemverzeichnis erstellt (/usr/local/bin auf Unix)\n    Desktop-Datei wurde im System-Desktop-Verzeichnis erstellt (/usr/local/share/applications auf Unix)\n    Restix-GUI ist im Startmenü verfügbar\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten\n    restix-GUI lässt sich aus dem Startmenü starten"
-case_status = 2
-category = 1
-priority = 1
+[[test-plans]]
+id = 59
+name = "CLI Tests"
+text = "Testplan für alle Tests der Kommandozeile von restix."
+is_active = true
+product_version = 1
+product = 1
 author = 3
-setup_duration = 0.0
-testing_duration = 0.0
-expected_duration = 0.0
+type = 4
 attachments = []
-cc_notifications = []
-comments = []
-components = []
+tags = []
+cases = [97, 98]
+runs = []
+
+[[test-plans]]
+id = 60
+name = "Initialisierung eines Repositories über CLI"
+text = "Test der Initialisierung eines restic-Repositories über die Kommandozeile."
+is_active = true
+product_version = 1
+product = 1
+author = 3
+type = 4
+parent = 59
+attachments = []
+tags = []
+cases = [99, 100, 101, 102, 103, 104, 105]
+runs = []
+
+[[test-runs]]
+id = 32
+start_date = 2025-05-20T17:58:41
+stop_date = 2025-05-21T20:29:57
+planned_start = 2025-05-20T00:00:00
+planned_stop = 2025-05-25T00:00:00
+summary = "Run Manuelle Installation"
+notes = ""
+plan = 55
+build = 1
+manager = 3
+default_tester = 3
 properties = []
 tags = []
-executions = []
+executions = [44, 45, 46, 47, 48, 49, 50, 51]
+
+[[test-runs]]
+id = 33
+start_date = 2025-05-22T07:42:42
+stop_date = 2025-05-22T07:44:03
+planned_start = 2025-05-22T00:00:00
+planned_stop = 2025-05-23T00:00:00
+summary = "Run Installation mit Core-Binärpaket"
+notes = ""
+plan = 57
+build = 1
+manager = 3
+default_tester = 3
+properties = []
+tags = []
+executions = [53, 54, 55]
+
+[[test-runs]]
+id = 34
+start_date = 2025-05-22T12:42:49
+stop_date = 2025-05-22T12:43:26
+planned_start = 2025-05-22T00:00:00
+planned_stop = 2025-05-23T00:00:00
+summary = "Run Installation mit Core-Binärpaket"
+notes = ""
+plan = 57
+build = 1
+manager = 3
+default_tester = 3
+properties = []
+tags = []
+executions = [57, 58, 59]
 
 [[test-cases]]
 id = 82
 is_automated = false
 script = ""
 arguments = ""
-summary = "Installation eines vollständigen Binärpakets mit installierten Paketabhängigkeiten"
+summary = "Installation eines vollständigen Binärpakets"
 notes = ""
 text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Links, Desktop-Icon, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. Vollständiges restix-Binärpaket mit Administrator-Rechten installieren\n2. Verifizieren, dass das vollständige restix-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss fehlerfrei durchlaufen\n2. Applikation und Startscripte wurden im Installationsverzeichnis erstellt (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Links auf die Startscripte wurden Systemverzeichnis erstellt (/usr/local/bin auf Unix)\n    Desktop-Datei wurde im System-Desktop-Verzeichnis erstellt (/usr/local/share/applications auf Unix)\n    Restix-GUI ist im Startmenü verfügbar\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten\n    restix-GUI lässt sich aus dem Startmenü starten"
 case_status = 2
@@ -249,29 +324,6 @@ tags = []
 executions = []
 
 [[test-cases]]
-id = 85
-is_automated = false
-script = ""
-arguments = ""
-summary = "Installation eines Core-Binärpakets mit fehlenden Paketabhängigkeiten"
-notes = ""
-text = "**Voraussetzungen**:\n1. Paket restic darf nicht installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Links, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix Core-Binärpaket mit Administrator-Rechten installieren\n2. Verifizieren, dass das restix Core-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss selbständig restic installieren und fehlerfrei durchlaufen\n2. Applikation und Startscript wurden im Installationsverzeichnis erstellt (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Link auf das Startscript wurde Systemverzeichnis erstellt (/usr/local/bin auf Unix)\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten"
-case_status = 2
-category = 1
-priority = 1
-author = 3
-setup_duration = 0.0
-testing_duration = 0.0
-expected_duration = 0.0
-attachments = []
-cc_notifications = []
-comments = []
-components = []
-properties = []
-tags = []
-executions = []
-
-[[test-cases]]
 id = 86
 is_automated = false
 script = ""
@@ -292,14 +344,14 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [53, 57]
 
 [[test-cases]]
 id = 87
 is_automated = false
 script = ""
 arguments = ""
-summary = "Installation eines Core Binärpakets mit installierten Paketabhängigkeiten"
+summary = "Installation eines Core Binärpakets"
 notes = ""
 text = "**Voraussetzungen**:\n1. Paket restic muss installiert sein.\n2. Es dürfen keine restix-Artefakte installiert sein (Applikation, Link, Konfigurationsverzeichnis).\n\n**Testschritte**:\n1. restix Core-Binärpaket mit Administrator-Rechten installieren\n2. Verifizieren, dass das restix Core-Paket korrekt installiert wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss fehlerfrei durchlaufen\n2. Applikation und Startscript wurden im Installationsverzeichnis erstellt (/opt/restix auf Unix)\n    Python wheel ist im Installationsverzeichnis nicht vorhanden\n    Link auf das Startscript wurde im Systemverzeichnis erstellt (/usr/local/bin auf Unix)\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht erstellt\n    restix-CLI lässt sich von der Konsole starten"
 case_status = 2
@@ -315,7 +367,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [54, 58]
 
 [[test-cases]]
 id = 88
@@ -324,7 +376,7 @@ script = ""
 arguments = ""
 summary = "Deinstallation eines Core Binärpakets"
 notes = ""
-text = "**Voraussetzungen**:\n1. restix muss im Core-Umfang installiert sein (Applikation, Links, Konfigurationsverzeichnis).\n2. restix-Konfigurationsverzeichnis $HOME/.config/restix ist vorhanden\n\n**Testschritte**:\n1. Paket restix mit dem Installer des Betriebssystems entfernen\n2. Verifizieren, dass das restix Core-Paket korrekt entfernt wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss fehlerfrei durchlaufen\n2. restix-Installationsverzeichnis ist nicht vorhanden (/opt/restix auf Unix)\n    Link auf das Startscript ist im Systemverzeichnis nicht vorhanden (/usr/local/bin auf Unix)\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht verändert"
+text = "**Voraussetzungen**:\n1. restix muss im Core-Umfang installiert sein (Applikation, Links, Konfigurationsverzeichnis).\n2. restix-Konfigurationsverzeichnis $HOME/.config/restix ist vorhanden\n\n**Testschritte**:\n1. Paket restix_core mit dem Installer des Betriebssystems entfernen\n2. Verifizieren, dass das restix Core-Paket korrekt entfernt wurde\n\n**Erwartete Ergebnisse**:\n1. das Installationsprogramm muss fehlerfrei durchlaufen\n2. restix-Installationsverzeichnis ist nicht vorhanden (/opt/restix auf Unix)\n    Link auf das Startscript ist im Systemverzeichnis nicht vorhanden (/usr/local/bin auf Unix)\n    restix-Konfigurationsverzeichnis $HOME/.config/restix wurde nicht verändert"
 case_status = 2
 category = 1
 priority = 1
@@ -338,7 +390,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [55, 59]
 
 [[test-cases]]
 id = 89
@@ -361,7 +413,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [44]
 
 [[test-cases]]
 id = 90
@@ -384,7 +436,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [45]
 
 [[test-cases]]
 id = 91
@@ -407,7 +459,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [47]
 
 [[test-cases]]
 id = 92
@@ -430,7 +482,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [46]
 
 [[test-cases]]
 id = 93
@@ -453,7 +505,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [48]
 
 [[test-cases]]
 id = 94
@@ -476,7 +528,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [50]
 
 [[test-cases]]
 id = 95
@@ -499,7 +551,7 @@ comments = []
 components = []
 properties = []
 tags = []
-executions = []
+executions = [51]
 
 [[test-cases]]
 id = 96
@@ -522,4 +574,407 @@ comments = []
 components = []
 properties = []
 tags = []
+executions = [49]
+
+[[test-cases]]
+id = 97
+is_automated = false
+script = ""
+arguments = ""
+summary = "Ermittlung der Restix-Version mit CLI"
+notes = "Die Version muss auch ausgegeben werden, wenn restix frisch installiert wurde und noch kein Konfigurationsverzeichnis vorhanden ist."
+text = "**Voraussetzungen**\n1. restix ist installiert\n\n**Testschritte**\n1. in der Konsole \"restix --version\" eingeben\n\n**Erwartete Ergebnisse**\n1. Ausgabe restix Version x.x.x"
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
 executions = []
+
+[[test-cases]]
+id = 98
+is_automated = false
+script = ""
+arguments = ""
+summary = "Hilfefunktion der CLI"
+notes = ""
+text = "**Voraussetzungen**\n1. restix ist installiert\n\n**Testschritte**\n1. in der Konsole \"restix --help backup\" eingeben\n2. in der Konsole \"restix --help cleanup\" eingeben\n3. in der Konsole \"restix --help find\" eingeben\n4. in der Konsole \"restix --help init\" eingeben\n5. in der Konsole \"restix --help ls\" eingeben\n6. in der Konsole \"restix --help restore\" eingeben\n7. in der Konsole \"restix --help snapshots\" eingeben\n8. in der Konsole \"restix --help bla\" eingeben\n\n**Erwartete Ergebnisse**\n1. Ausgabe der Informationen über die Backup-Funktion\n2. Ausgabe der Informationen über die Cleanup-Funktion\n3. Ausgabe der Informationen über die Find-Funktion\n4. Ausgabe der Informationen über die Init-Funktion\n5. Ausgabe der Informationen über die List-Funktion\n6. Ausgabe der Informationen über die Restore-Funktion\n7. Ausgabe der Informationen über die Snapshots-Funktion\n8. Ausgabe der allgemeinen Hilfe"
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 99
+is_automated = false
+script = ""
+arguments = ""
+summary = "Initialisierung eines Repositories über CLI mit Passwort-Abfrage"
+notes = ""
+text = "**Voraussetzungen**\n1. Script zur Vorbereitung eines CLI-Systemtests für die Initialisierung wurde ausgeführt\n2. Umgebungsvariable RESTIX_CONFIG_PATH zeigt auf das Verzeichnis mit der Systemtest-Konfiguration\n\n**Testschritte**\n1. restix backup localdir_pw\n2. Befehl bestätigen und Passwort eingeben\n3. Verifizieren, dass das Repository unter Benutzer/Host/Jahr angelegt wurde\n\n**Erwartete Ergebnisse**\n1. restix zeigt an, wo das Repository erzeugt wird und erwartet Bestätigung und Passwort\n2. Der Befehl wird fehlerfrei durchgeführt\n3. Im Zielverzeichnis existiert die Datei Benutzer/Host/Jahr/config"
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 100
+is_automated = false
+script = ""
+arguments = ""
+summary = "Initialisierung eines Repositories über CLI mit Passwortdatei"
+notes = ""
+text = "**Voraussetzungen**\n1. Script zur Vorbereitung eines CLI-Systemtests für die Initialisierung wurde ausgeführt\n2. Umgebungsvariable RESTIX_CONFIG_PATH zeigt auf das Verzeichnis mit der Systemtest-Konfiguration\n\n**Testschritte**\n1. restix backup localdir_pwfile\n2. Befehl bestätigen\n3. Verifizieren, dass das Repository unter Benutzer/Host/Jahr angelegt wurde\n\n**Erwartete Ergebnisse**\n1. restix zeigt an, wo das Repository erzeugt wird und erwartet eine Bestätigung\n2. Der Befehl wird fehlerfrei durchgeführt\n3. Im Zielverzeichnis existiert die Datei Benutzer/Host/Jahr/config"
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 101
+is_automated = false
+script = ""
+arguments = ""
+summary = "Initialisierung eines Repositories über CLI mit Passphrase-geschützter PGP-Datei"
+notes = ""
+text = "**Voraussetzungen**\n1. Script zur Vorbereitung eines CLI-Systemtests für die Initialisierung wurde ausgeführt\n2. Umgebungsvariable RESTIX_CONFIG_PATH zeigt auf das Verzeichnis mit der Systemtest-Konfiguration\n\n**Testschritte**\n1. restix backup localdir_pgp_pass\n2. Befehl bestätigen\n3. Verifizieren, dass das Repository unter Benutzer/Host/Jahr angelegt wurde\n\n**Erwartete Ergebnisse**\n1. restix zeigt an, wo das Repository erzeugt wird und erwartet Bestätigung und PGP-Passphrase\n2. Der Befehl wird fehlerfrei durchgeführt\n3. Im Zielverzeichnis existiert die Datei Benutzer/Host/Jahr/config"
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 102
+is_automated = false
+script = ""
+arguments = ""
+summary = "Initialisierung eines Repositories über CLI mit Token-geschützter PGP-Datei"
+notes = ""
+text = "**Voraussetzungen**\n1. Script zur Vorbereitung eines CLI-Systemtests für die Initialisierung wurde ausgeführt\n2. Umgebungsvariable RESTIX_CONFIG_PATH zeigt auf das Verzeichnis mit der Systemtest-Konfiguration\n\n**Testschritte**\n1. restix backup localdir_pgp_token\n2. Befehl bestätigen\n3. Verifizieren, dass das Repository unter Benutzer/Host/Jahr angelegt wurde\n\n**Erwartete Ergebnisse**\n1. restix zeigt an, wo das Repository erzeugt wird und erwartet Bestätigung und PIN des Tokens\n2. Der Befehl wird fehlerfrei durchgeführt\n3. Im Zielverzeichnis existiert die Datei Benutzer/Host/Jahr/config"
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 103
+is_automated = false
+script = ""
+arguments = ""
+summary = "Initialisierung eines Repositories über CLI, Zielverzeichnis schreibgeschützt"
+notes = ""
+text = "**Voraussetzungen**\n1. Script zur Vorbereitung eines CLI-Systemtests für die Initialisierung wurde ausgeführt\n2. Umgebungsvariable RESTIX_CONFIG_PATH zeigt auf das Verzeichnis mit der Systemtest-Konfiguration\n\n**Testschritte**\n1. restix backup --batch localdir_readonly\n\n**Erwartete Ergebnisse**\n1. restix erwartet keine Bestätigung, der Befehl liefert Fehler \"permission denied\""
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 104
+is_automated = false
+script = ""
+arguments = ""
+summary = "Initialisierung eines Repositories über CLI, Repository existiert bereits"
+notes = ""
+text = "**Voraussetzungen**\n1. Script zur Vorbereitung eines CLI-Systemtests für die Initialisierung wurde ausgeführt\n2. Umgebungsvariable RESTIX_CONFIG_PATH zeigt auf das Verzeichnis mit der Systemtest-Konfiguration\n3. Zu initialisierendes Repository existiert bereits\n\n**Testschritte**\n1. restix backup --batch localdir_pwfile\n\n**Erwartete Ergebnisse**\n1. restix erwartet keine Bestätigung, der Befehl liefert Fehler \"config file exists\""
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-cases]]
+id = 105
+is_automated = false
+script = ""
+arguments = ""
+summary = "Initialisierung eines Repositories über CLI, Sicherungsziel nicht definiert"
+notes = ""
+text = "**Voraussetzungen**\n1. Script zur Vorbereitung eines CLI-Systemtests für die Initialisierung wurde ausgeführt\n2. Umgebungsvariable RESTIX_CONFIG_PATH zeigt auf das Verzeichnis mit der Systemtest-Konfiguration\n3. Aliasname des zu initialisierendes Repository ist nicht in der restix-Konfigurationsdatei vorhanden\n\n**Testschritte**\n1. restix backup --batch nonexisting\n\n**Erwartete Ergebnisse**\n1. restix erwartet keine Bestätigung, der Befehl liefert Fehler \"Sicherungsziel nicht konfiguriert\""
+case_status = 2
+category = 3
+priority = 1
+author = 3
+setup_duration = 0.0
+testing_duration = 0.0
+expected_duration = 0.0
+attachments = []
+cc_notifications = []
+comments = []
+components = []
+properties = []
+tags = []
+executions = []
+
+[[test-executions]]
+id = 44
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-20T17:58:40
+run = 32
+case = 89
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 2, user_id = 3, comment = "Getestet auf Debian 12 Server VM", submit_date = 2025-05-20T18:00:44, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 45
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-20T18:06:04
+run = 32
+case = 90
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 3, user_id = 3, comment = "Getestet auf Debian 12 Server VM", submit_date = 2025-05-20T18:06:04, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 46
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-21T10:18:12
+run = 32
+case = 92
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 5, user_id = 3, comment = "Getestet auf Devuan 5.\nQt-Bibliotheken für libxcb mussten nachinstalliert werden.", submit_date = 2025-05-21T10:18:12, is_public = true, is_removed = false}, {id = 6, user_id = 3, comment = "Benötigte Bibliotheken im Detail:\nlibxcb-cursor0\nlibxcb-icccm4\nlibxcb-keysyms1\nlibxcb-image0\nlibxcb-render-util0", submit_date = 2025-05-21T11:31:17, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 47
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-21T20:27:35
+run = 32
+case = 91
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 8, user_id = 3, comment = "Getestet auf Devuan 12 Xfce", submit_date = 2025-05-21T20:27:35, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 48
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-20T17:59:05
+run = 32
+case = 93
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 1, user_id = 3, comment = "Getestet auf Debian 12 Server VM", submit_date = 2025-05-20T18:00:28, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 49
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-21T20:29:56
+run = 32
+case = 96
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 9, user_id = 3, comment = "Getestet auf Devuan 5 Xfce.", submit_date = 2025-05-21T20:29:56, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 50
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-21T11:32:10
+run = 32
+case = 94
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 7, user_id = 3, comment = "Getestet auf Devuan 12 VM mit Xfce.", submit_date = 2025-05-21T11:32:10, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 51
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-20T18:09:55
+run = 32
+case = 95
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 4, user_id = 3, comment = "Getestet auf Debian 12 Server VM", submit_date = 2025-05-20T18:09:55, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 53
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-22T07:42:55
+run = 33
+case = 86
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 11, user_id = 3, comment = "Getestet auf Debian 12 Server als root.\nBeim Installieren Warnung wegen root.", submit_date = 2025-05-22T07:42:55, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 54
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-22T07:43:06
+run = 33
+case = 87
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 12, user_id = 3, comment = "Getestet auf Debian 12 Server als root.\nBeim Installieren Warnung wegen root.", submit_date = 2025-05-22T07:43:06, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 55
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-22T07:44:02
+run = 33
+case = 88
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 13, user_id = 3, comment = "Getestet auf Debian 12 Server als root.\nBei apt remove muss restic_core als Paket angegeben werden.", submit_date = 2025-05-22T07:44:02, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 57
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-22T12:43:11
+run = 34
+case = 86
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 15, user_id = 3, comment = "Getestet auf Alma Linux 10 Beta.", submit_date = 2025-05-22T12:43:11, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 58
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-22T12:43:18
+run = 34
+case = 87
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 16, user_id = 3, comment = "Getestet auf Alma Linux 10 Beta.", submit_date = 2025-05-22T12:43:19, is_public = true, is_removed = false}]
+properties = []
+links = []
+
+[[test-executions]]
+id = 59
+assignee = 3
+tested_by = 3
+stop_date = 2025-05-22T12:43:25
+run = 34
+case = 88
+build = 1
+status = 4
+expected_duration = 0.0
+comments = [{id = 17, user_id = 3, comment = "Getestet auf Alma Linux 10 Beta.", submit_date = 2025-05-22T12:43:25, is_public = true, is_removed = false}]
+properties = []
+links = []

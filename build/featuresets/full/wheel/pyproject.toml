@@ -12,7 +12,7 @@ description = "Backup and restore system based on restic"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "PySide6",
+    "PySide6 == 6.9.0",
     "tomli",
     "tomli_w"
 ]

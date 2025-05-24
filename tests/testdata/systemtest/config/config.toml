@@ -1,0 +1,70 @@
+[[credentials]]
+alias = "password"
+comment = ""
+type = "prompt"
+
+[[credentials]]
+comment = ""
+type = "file"
+alias = "pwfile"
+value = "pw.txt"
+
+[[credentials]]
+comment = ""
+type = "pgp"
+alias = "pgp_token"
+value = "pgp_token.gpg"
+
+[[credentials]]
+comment = ""
+type = "pgp"
+alias = "pgp_pass"
+value = "pgp_phrase.asc"
+
+[[scope]]
+alias = "standard"
+comment = ""
+includes = "standard.list"
+excludes = "standard_excludes.list"
+ignores = [
+    ".git",
+    ".idea",
+    ".pytest_cache",
+    ".venv",
+    "__pycache__",
+]
+
+[[target]]
+alias = "local_pw"
+comment = ""
+location = "${RESTIX_TESTING_ROOT}/systemtest/repos/pw"
+scope = "standard"
+credentials = "password"
+
+[[target]]
+alias = "local_pwfile"
+comment = ""
+location = "${RESTIX_TESTING_ROOT}/systemtest/repos/pwfile"
+scope = "standard"
+credentials = "pwfile"
+
+[[target]]
+alias = "local_pgp_pass"
+comment = ""
+location = "${RESTIX_TESTING_ROOT}/systemtest/repos/pgp_pass"
+scope = "standard"
+credentials = "pgp_pass"
+
+[[target]]
+alias = "local_pgp_token"
+comment = ""
+location = "${RESTIX_TESTING_ROOT}/systemtest/repos/pgp_token"
+scope = "standard"
+credentials = "pgp_token"
+
+[[target]]
+alias = "local_readonly"
+comment = ""
+location = "${RESTIX_TESTING_ROOT}/systemtest/repos/readonly"
+scope = "standard"
+credentials = "pwfile"
