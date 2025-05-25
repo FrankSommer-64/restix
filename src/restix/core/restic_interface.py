@@ -249,8 +249,11 @@ def determine_version() -> str:
     try:
         _rc, _stdout, _stderr = _execute_restic_command(_cmd, _silent_monitor)
         if _rc == RESTIC_RC_OK:
-            _version_info = json.loads(_stdout)
-            return _version_info.get(JSON_ATTR_VERSION)
+            try:
+                _version_info = json.loads(_stdout)
+                return _version_info.get(JSON_ATTR_VERSION)
+            except ValueError:
+                return OLD_RESTIC_VERSION
         raise RestixException(E_RESTIC_NOT_INSTALLED, f'{_stderr}{os.linesep}{_stdout}')
     except RestixException:
         raise
