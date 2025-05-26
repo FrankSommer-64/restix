@@ -40,6 +40,7 @@ from copy import deepcopy
 
 from PySide6.QtWidgets import QDialog, QMainWindow, QMessageBox
 
+from restix.core.restic_interface import determine_version
 from restix.core.restix_exception import RestixException
 from restix.core.config import LocalConfig
 from restix.core.messages import *
@@ -69,6 +70,11 @@ class MainWindow(QMainWindow):
         self.layout().setContentsMargins(SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN,
                                          SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
         self.layout().update()
+        _restic_version = determine_version()
+        if not _restic_version.suitable_for_restix():
+            QMessageBox.warning(self, localized_label(L_MBOX_TITLE_WARNING),
+                                localized_message(W_OUTDATED_RESTIC_VERSION, _restic_version.version()),
+                                QMessageBox.StandardButton.Ok)
 
     def save_settings(self):
         """

@@ -42,7 +42,7 @@ import subprocess
 from datetime import datetime
 
 from restix.core import *
-from restix.core.action import RestixAction
+from restix.core.action import RestixAction, ResticVersion
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.snapshot import Snapshot, SnapshotElement
@@ -60,11 +60,16 @@ def run_backup(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult:
     _auto_create = action.option(OPTION_AUTO_CREATE) is True
     if _auto_create:
         _restic_version = determine_version()
-        if _restic_version < ENHANCED_RESTIC_VERSION:
-            task_monitor.log(W_OUTDATED_RESTIC_VERSION, _restic_version)
+        if not _restic_version.auto_create_supported():
+            task_monitor.log(W_AUTO_CREATE_NOT_SUPPORTED, _restic_version.version())
             action.remove_option(OPTION_AUTO_CREATE)
             _auto_create = False
     _dry_run = action.option(OPTION_DRY_RUN) is True
+    if _dry_run:
+        _restic_version = determine_version()
+        if not _restic_version.backup_dry_run_supported():
+            task_monitor.log(E_BACKUP_DRY_RUN_NOT_SUPPORTED, _restic_version.version())
+            return TaskResult(TASK_FAILED, '')
     _repo = action.option(OPTION_REPO)
     _status = _repo_status(action)
     if _status == 1:
@@ -148,6 +153,12 @@ def run_restore(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult:
     :returns: Ergebnis der Ausführung.
     :raises RestixException: falls die Ausführung fehlschlägt
     """
+    _dry_run = action.option(OPTION_DRY_RUN) is True
+    if _dry_run:
+        _restic_version = determine_version()
+        if not _restic_version.restore_dry_run_supported():
+            task_monitor.log(E_RESTORE_DRY_RUN_NOT_SUPPORTED, _restic_version.version())
+            return TaskResult(TASK_FAILED, '')
     _repo = action.option(OPTION_REPO)
     _snapshot_id = action.option(OPTION_SNAPSHOT)
     _restore_path = action.option(OPTION_RESTORE_PATH)
@@ -237,23 +248,18 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     raise RestixException(_exception_id, _restic_cmd)
 
 
-def determine_version() -> str:
+def determine_version() -> ResticVersion:
     """
     Ermittelt die installierte restic-Version.
     :returns: restic-Version.
     :raises RestixException: falls das Lesen der Version fehlschlägt
     """
-    _action_id = 'version'
-    _cmd = ['restic', _action_id, '--json']
+    _cmd = ['restic', 'version']
     _silent_monitor = TaskMonitor(None, True)
     try:
         _rc, _stdout, _stderr = _execute_restic_command(_cmd, _silent_monitor)
         if _rc == RESTIC_RC_OK:
-            try:
-                _version_info = json.loads(_stdout)
-                return _version_info.get(JSON_ATTR_VERSION)
-            except ValueError:
-                return OLD_RESTIC_VERSION
+            return ResticVersion.from_version_command(_stdout)
         raise RestixException(E_RESTIC_NOT_INSTALLED, f'{_stderr}{os.linesep}{_stdout}')
     except RestixException:
         raise

@@ -51,6 +51,60 @@ from restix.core.restix_exception import RestixException
 from restix.core.util import current_user
 
 
+class ResticVersion:
+    """
+    Restic-Version mit Informationen über die unterstützte Funktionalität.
+    """
+    def __init__(self, version: str):
+        """
+        Konstruktor
+        :param version: die ermittelte restic-Version
+        """
+        self.__version = version
+
+    def version(self) -> str:
+        """
+        :returns: restic-Version
+        """
+        return self.__version
+
+    def auto_create_supported(self) -> bool:
+        """
+        :returns: True, falls die restic-Version einen eigenen Fehlercode für nicht existierendes Repository liefert
+        """
+        return self.__version >= '0.17'
+
+    def backup_dry_run_supported(self) -> bool:
+        """
+        :returns: True, falls die restic-Version die Option --dry-run für backup-Befehle unterstützt
+        """
+        return self.__version >= '0.13'
+
+    def restore_dry_run_supported(self) -> bool:
+        """
+        :returns: True, falls die restic-Version die Option --dry-run für restore-Befehle unterstützt
+        """
+        return self.__version >= '0.17'
+
+    def suitable_for_restix(self) -> bool:
+        """
+        :returns: True, falls die restic-Version für restix benutzt werden kann
+        """
+        return self.__version >= '0.10'
+
+    @classmethod
+    def from_version_command(cls, output: str) -> Self:
+        """
+        :param output: Ausgabe des restic-Befehls 'restic version'
+        :returns: restic-Version mit Informationen über die unterstützte Funktionalität.
+        :raises RestixException: falls die Version nicht erkannt wird
+        """
+        _match = re.match(r'^restic\s+([\d.]+)\s.*$', output)
+        if _match is None:
+            raise RestixException(E_UNSUPPORTED_RESTIC_VERSION, output.strip())
+        return ResticVersion(_match.group(1))
+
+
 class RestixAction:
     """
     Datenklasse mit allen Informationen, die zum Ausführen einer restix-Aktion benötigt werden.
@@ -350,7 +404,7 @@ class RestixAction:
     @classmethod
     def from_command_line(cls, cmd_line: list[str]) -> Self:
         """
-        :param list[str] cmd_line: Kommandozeile
+        :param cmd_line: Kommandozeile
         :returns: vollständige Beschreibung einer Aktion aus den Angaben der Kommandozeile.
         :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """

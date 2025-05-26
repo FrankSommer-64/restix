@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Setzt Owner fuer ein Debian-Paket mit allen Elementen auf root:root.
-# Muss mit root-Rechten ausgefuehrt werden.
+# Setzt Owner für ein Debian-Paket mit allen Elementen auf root:root.
+# Muss mit root-Rechten ausgeführt werden.
 
 STAGING_ROOT="/tmp/chroot_deb"
 STAGING_DEB="$STAGING_ROOT/deb"
@@ -13,7 +13,7 @@ DEB_VERSION_FILE=debian-binary
 CONTROL_ARCHIVE=control.tar.xz
 DATA_ARCHIVE=data.tar.xz
 
-# Pruefen, ob wir root sind
+# Prüfen, ob wir root sind
 if [ "$USER" != "root" ]; then
   echo "chroot_deb muss mit Root-Rechten aufgerufen werden"
   exit 1
@@ -39,7 +39,7 @@ rm -f $DEB_PACKAGE_FILE
 mv $CONTROL_ARCHIVE $STAGING_CONTROL
 mv $DATA_ARCHIVE $STAGING_DATA
 
-# Steuerdateien aendern
+# Steuerdateien ändern
 cd $STAGING_CONTROL
 tar xpvf $CONTROL_ARCHIVE
 rm -f $CONTROL_ARCHIVE
@@ -52,7 +52,7 @@ cd $STAGING_DATA
 tar xpvf $DATA_ARCHIVE
 rm -f $DATA_ARCHIVE
 
-# Wheel-Dateien aendern
+# Wheel-Dateien ändern
 cd $STAGING_DATA/opt/$PROJECT_NAME
 WHEEL_FILE=`ls $PROJECT*.whl`
 echo $WHEEL_FILE
@@ -65,7 +65,7 @@ chown root:root *
 zip -r $WHEEL_FILE *
 mv $WHEEL_FILE $STAGING_DATA/opt/$PROJECT_NAME
 
-# Daten-Dateien aendern
+# Daten-Dateien ändern
 cd $STAGING_DATA
 chown -R root:root *
 tar cJf $DATA_ARCHIVE *
@@ -75,5 +75,5 @@ mv $DATA_ARCHIVE $STAGING_DEB
 cd $STAGING_DEB
 ar cr $DEB_PACKAGE_FILE $DEB_VERSION_FILE $CONTROL_ARCHIVE $DATA_ARCHIVE
 cp $DEB_PACKAGE_FILE $DEB_PACKAGE_PATH
-chown root:root $DEB_PACKAGE_PATH
+#chown root:root $DEB_PACKAGE_PATH
 
