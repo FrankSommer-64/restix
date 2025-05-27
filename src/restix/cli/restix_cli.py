@@ -53,7 +53,7 @@ from restix.core.util import current_user
 _COMMAND_HELP_IDS = {CLI_COMMAND_BACKUP: T_CLI_HELP_BACKUP, CLI_COMMAND_CLEANUP: T_CLI_HELP_CLEANUP,
                      CLI_COMMAND_FIND: T_CLI_HELP_FIND, CLI_COMMAND_INIT: T_CLI_HELP_INIT,
                      CLI_COMMAND_LS: T_CLI_HELP_LS, CLI_COMMAND_RESTORE: T_CLI_HELP_RESTORE,
-                     CLI_COMMAND_SNAPSHOTS: T_CLI_HELP_SHAPSHOTS}
+                     CLI_COMMAND_SNAPSHOTS: T_CLI_HELP_SHAPSHOTS, CLI_COMMAND_UNLOCK: T_CLI_HELP_UNLOCK}
 
 
 def read_restix_config_file(action: RestixAction) -> LocalConfig:
@@ -93,6 +93,8 @@ def prompt_confirmation(action: RestixAction) -> bool:
         print(localized_message(T_CLI_CONFIRM_INIT, _target_alias))
     elif _base_action == ACTION_FORGET:
         print(localized_message(T_CLI_CONFIRM_CLEANUP, _target_alias))
+    elif _base_action == ACTION_UNLOCK:
+        print(localized_message(T_CLI_CONFIRM_UNLOCK, _target_alias))
     elif _base_action == ACTION_RESTORE:
         _snapshot_id = action.option(OPTION_SNAPSHOT)
         if _snapshot_id is None:
@@ -179,7 +181,7 @@ def cli_main():
         # Prüfen, ob notwendige Optionen angegeben wurden
         _action.verify_mandatory_options()
         # Aktion ausführen
-        execute_restic_command(_action.to_restic_command(), TaskMonitor())
+        execute_restic_command(_action.to_restic_command(), TaskMonitor(), _action.is_potential_long_runner())
     except Exception as _e:
         print(localized_message(E_CLI_RESTIX_COMMAND_FAILED))
         print(f'> {_e}')

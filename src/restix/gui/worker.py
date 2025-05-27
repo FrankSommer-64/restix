@@ -145,5 +145,7 @@ class Worker(QRunnable, TaskExecutor):
             return Worker(run_restore, action)
         elif _action_id == ACTION_SNAPSHOTS:
             return Worker(run_snapshots, action)
+        elif _action_id == ACTION_UNLOCK:
+            return Worker(run_unlock, action)
         _emsg = localized_message(E_INVALID_ACTION, _action_id)
         raise RestixException(E_INTERNAL_ERROR, _emsg)

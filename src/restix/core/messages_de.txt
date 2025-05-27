@@ -57,6 +57,7 @@ t-cli-confirm-backup Backup nach Repository {0}.
 t-cli-confirm-cleanup Lösche alle Snapshots bis auf einen pro Monat von Repository {0}.
 t-cli-confirm-init Initialisiere Repository {0}.
 t-cli-confirm-restore Restore Snapshot {0} von Repository {1} nach {2}.
+t-cli-confirm-unlock Entsperre Repository {0}.
 t-cli-enter-password Bitte Passwort eingeben >
 t-cli-help-backup Lokale Daten in restic-Repository sichern\n \
     Befehl: restix backup [Optionen] Sicherungsziel\n \
@@ -102,10 +103,14 @@ t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
     Optionen: --host Hostname * Daten aus dem Repository des angegebenen Hosts nehmen\n           \
     --year Jahr * Daten aus dem Repository des angegeben Jahrs nehmen\n \
     Sicherungsziel: Aliasname aus der restix-Konfigurationsdatei
+t-cli-help-unlock restic-Repository entsperren\n \
+    Befehl: restix unlock [Optionen] Sicherungsziel\n \
+    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n \
+    Sicherungsziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-prompt-for-confirmation OK (j/n)?
 t-cli-restix-version restix-Version {0}
 t-cli-usage-info Aufruf: restix Befehl [Optionen] [Sicherungsziel]\n \
-    Befehle: backup | cleanup | find | init | ls | restore | snapshots | targets\n \
+    Befehle: backup | cleanup | find | init | ls | restore | snapshots | targets | unlock\n \
     Hilfe zu jedem Befehl mit restix --help <Befehl>\n \
     Anzeige der Programmversion mit restix --version
 t-cli-yes-char j
@@ -161,6 +166,7 @@ i-gui-no-target-selected Kein Sicherungsziel ausgewählt
 i-gui-pyside-info Qt GUI-Bibliothek
 i-gui-pyside-link <a href='https://wiki.qt.io/PySide6'>Webseite</a>
 i-gui-repo-created restic-Repository {0} erfolgreich angelegt.
+i-gui-repo-unlocked restic-Repository {0} erfolgreich entsperrt.
 i-gui-restore-path-is-not-dir Zielpfad für die Wiederherstellung {0} ist kein Verzeichnis.
 i-gui-restoring-all-data Stelle alle Daten aus Repository {0} wieder her.
 i-gui-restoring-all-data-to-path Kopiere alle Daten aus Repository {0} in Verzeichnis {1}.
@@ -173,6 +179,7 @@ i-gui-toml-lib-copyright Copyright (c) 2021 Taneli Hukkinen
 i-gui-toml-lib-info Python TOML-Bibliotheken
 i-gui-tomli-link <a href='https://github.com/hukkin/tomli'>Webseite</a>
 i-gui-tomliw-link <a href='https://github.com/hukkin/tomli-w'>Webseite</a>
+i-gui-unlocking-repo Entsperre restic-Repository {0}.
 i-gui-version Version {0}
 
 # GUI Labels
@@ -192,6 +199,7 @@ l-dismiss Änderungen verwerfen
 l-do-backup Sicherung starten
 l-do-init-repo Repository anlegen
 l-do-restore Wiederherstellung starten
+l-do-unlock-repo Repository entsperren
 l-do-year-end Jahresabschluss
 l-dry-run Dry run
 l-edit Editieren
@@ -283,6 +291,7 @@ t-cfg-target-location URL zum Sicherungs-Ziel
 t-cfg-target-scope zu sichernder Umfang im Sicherungs-Ziel
 t-do-bak-backup Sicherung starten
 t-do-mnt-init-repo Restic Repository anlegen
+t-do-mnt-unlock-repo Restic Repository entsperren
 t-do-mnt-year-end Alle Snapshots bis auf max. einen Snapshot pro Monat löschen
 t-do-rst-restore Wiederherstellung der ausgewählten Elemente starten
 t-opt-bak-auto-create Repository automatisch anlegen, falls es noch nicht existiert

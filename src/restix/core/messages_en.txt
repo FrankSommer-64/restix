@@ -57,6 +57,7 @@ t-cli-confirm-backup Backup to repository {0}.
 t-cli-confirm-cleanup Remove all snapshots except one per month from repository {0}.
 t-cli-confirm-init Initialise repository {0}.
 t-cli-confirm-restore Restore snapshot {0} from repository {1} to {2}.
+t-cli-confirm-unlock Unlock repository {0}.
 t-cli-enter-password Please enter password >
 t-cli-help-backup Backup local data to restic repository\n \
     Command: restix backup [options] backup-target\n \
@@ -101,6 +102,10 @@ t-cli-help-snapshots Show snapshots of a restic repository\n \
     Command: restix snapshots [options] backup-target\n \
     Options: --host hostname * Use repository for specified host\n           \
     --year year * Use repository for specified year\n \
+    Backup-target: Alias name from restix configuration file
+t-cli-help-unlock Remove stale lock from restic repository\n \
+    Command: restix unlock [options] backup-target\n \
+    Options: --batch * execute restic command without confirmation\n \
     Backup-target: Alias name from restix configuration file
 t-cli-prompt-for-confirmation OK (y/n)?
 t-cli-restix-version restix version {0}
@@ -161,6 +166,7 @@ i-gui-no-target-selected No backup target selected
 i-gui-pyside-info Qt GUI library
 i-gui-pyside-link <a href='https://wiki.qt.io/PySide6'>Web site</a>
 i-gui-repo-created Successfully created restic repository {0}.
+i-gui-repo-unlocked Successfully unlocked restic repository {0}.
 i-gui-restore-path-is-not-dir Restore target path {0} is not a directory.
 i-gui-restoring-all-data Restoring all data from repository {0}.
 i-gui-restoring-all-data-to-path Restoring all data from repository {0} to directory {1}.
@@ -173,6 +179,7 @@ i-gui-toml-lib-copyright Copyright (c) 2021 Taneli Hukkinen
 i-gui-toml-lib-info Python TOML libraries
 i-gui-tomli-link <a href='https://github.com/hukkin/tomli'>Web site</a>
 i-gui-tomliw-link <a href='https://github.com/hukkin/tomli-w'>Web site</a>
+i-gui-unlocking-repo Unlocking restic repository {0}.
 i-gui-version Version {0}
 
 # GUI labels
@@ -192,6 +199,7 @@ l-dismiss Dismiss changes
 l-do-backup Start backup
 l-do-init-repo Create repository
 l-do-restore Start restore
+l-do-unlock-repo Unlock repository
 l-do-year-end Year end
 l-dry-run Dry run
 l-edit Edit
@@ -283,6 +291,7 @@ t-cfg-target-location URL to backup target
 t-cfg-target-scope files and directories to transfer to backup target
 t-do-bak-backup Start backup
 t-do-mnt-init-repo Create restic repository
+t-do-mnt-unlock-repo Unlock restic repository
 t-do-mnt-year-end Remove all snapshots but latest for every month
 t-do-rst-restore Start restore of selected elements
 t-opt-bak-auto-create Automatically create repository, if it doesn't exist

@@ -227,6 +227,12 @@ class RestixAction:
             if self.option(_option) is None:
                 raise RestixException(E_MANDATORY_OPTION_MISSING, _option)
 
+    def is_potential_long_runner(self):
+        """
+        :returns: True, falls die Ausführung der Action sehr lange dauern kann
+        """
+        return self.__action_id == ACTION_BACKUP or self.__action_id == ACTION_RESTORE
+
     def to_restic_command(self) -> list[str]:
         """
         :returns: restic-Kommando für die Daten dieser Aktion.
@@ -265,8 +271,6 @@ class RestixAction:
             return _cmd
         if self.__action_id == ACTION_LS:
             _cmd.append(self.option(OPTION_SNAPSHOT))
-            return _cmd
-        if self.__action_id == ACTION_INIT:
             return _cmd
         return _cmd
 
@@ -483,6 +487,7 @@ _ACTION_OPTIONS = {ACTION_BACKUP: {OPTION_AUTO_CREATE, OPTION_BATCH, OPTION_DRY_
                    ACTION_RESTORE: {OPTION_BATCH, OPTION_DRY_RUN, OPTION_HOST, OPTION_INCLUDE_FILE,
                                     OPTION_SNAPSHOT, OPTION_RESTORE_PATH, OPTION_YEAR},
                    ACTION_SNAPSHOTS: {OPTION_BATCH, OPTION_HOST, OPTION_JSON, OPTION_YEAR},
+                   ACTION_UNLOCK: {OPTION_BATCH},
                    ACTION_HELP: {OPTION_HELP}}
 
 _MANDATORY_OPTIONS = {ACTION_BACKUP: (OPTION_FILES_FROM,),

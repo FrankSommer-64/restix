@@ -196,6 +196,23 @@ def run_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult
         return TaskResult(TASK_FAILED, str(_e))
 
 
+def run_unlock(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult:
+    """
+    Entsperrt ein restic-Repository an.
+    :param action: Daten für das Entsperren.
+    :param task_monitor: Fortschritt-Handler.
+    :returns: Ergebnis der Ausführung.
+    :raises RestixException: falls das Entsperren des Repositories fehlschlägt
+    """
+    _repo = action.option(OPTION_REPO)
+    task_monitor.log(I_GUI_UNLOCKING_REPO, _repo)
+    try:
+        execute_restic_command(action.to_restic_command(), task_monitor)
+        return TaskResult(TASK_SUCCEEDED, localized_message(I_GUI_REPO_UNLOCKED, _repo))
+    except Exception as _e:
+        return TaskResult(TASK_FAILED, str(_e))
+
+
 def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_long_runner: bool = False):
     """
     Führt einen restic-Befehl aus.
