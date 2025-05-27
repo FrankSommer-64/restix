@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 # Server-Script zum Archivieren von restic-Repositories.
 #
-# Das Script archiviert alle Repositories unterhalb eines Root-Verzeichnisses
+# Das Script archiviert alle Repositories unterhalb eines Root-Verzeichnisses.
 # im komprimierten tar-Format in ein Archivverzeichnis.
+# Im Archivverzeichnis werden die Daten in Verzeichnisstruktur Jahr/Host/Benutzer abgelegt.
 # Die Anzahl der archivierten Stände ist konfigurierbar.
 # Die Log-Ausgabe erfolgt in Datei /var/log/archive_restix.log.
 #
@@ -18,11 +19,12 @@ import subprocess
 import sys
 
 
-ARCHIVE_FILE_SUFFIX = '.tgz'
+ARCHIVE_FILE_SUFFIX = '.tar'
 SNAPSHOTS_SUBDIR = 'snapshots'
 LOG_FN = '/var/log/archive_restix.log'
 
 STATUS_ATTR_AR_FILES = 'archived-files'
+STATUS_ATTR_AR_PATH = 'archive-path'
 STATUS_ATTR_ERROR = 'error'
 STATUS_ATTR_MOD_TIME = 'mod-time'
 STATUS_ATTR_PATH = 'path'
@@ -105,8 +107,8 @@ def repository_state(sub_dir: str, repo_path: str) -> dict:
         _status[STATUS_ATTR_ERROR] = f'Verzeichnis {SNAPSHOTS_SUBDIR} in Repo {repo_path} nicht gefunden'
         return _status
     _latest_mod_time = None
-    for _file in os.listdir(repo_path):
-        _mod_time = os.stat(os.path.join(repo_path, _file)).st_mtime
+    for _snapshot_dir in os.listdir(_snapshots_path):
+        _mod_time = os.stat(os.path.join(_snapshots_path, _snapshot_dir)).st_mtime
         if _latest_mod_time is None or _mod_time > _latest_mod_time:
             _latest_mod_time = _mod_time
     _status[STATUS_ATTR_MOD_TIME] = datetime.datetime.fromtimestamp(_latest_mod_time)
@@ -121,16 +123,32 @@ def repository_states(repo_root_path: str) -> list[dict]:
     :returns: Liste von Dictionaries mit den Repository-Status (Keys: path, mod-time, error)
     """
     _status_list = []
+    _repo_counts = {}
+    _current_year = str(datetime.datetime.now().year)
     for _user_dir in os.listdir(repo_root_path):
+        _user_counts = {'total-count': 0, 'hosts': {}}
         _user_dir_path = os.path.join(repo_root_path, _user_dir)
         if os.path.isdir(_user_dir_path):
             for _host_dir in os.listdir(_user_dir_path):
+                _user_counts['hosts'][_host_dir] = 0
                 _host_dir_path = os.path.join(_user_dir_path, _host_dir)
                 if os.path.isdir(_host_dir_path):
                     for _year_dir in os.listdir(_host_dir_path):
+                        if _year_dir != _current_year:
+                            continue
+                        _user_counts['hosts'][_host_dir] += 1
+                        _user_counts['total-count'] += 1
                         _year_dir_path = os.path.join(_host_dir_path, _year_dir)
                         _sub_dir = os.path.join(_user_dir, _host_dir, _year_dir)
                         _status_list.append(repository_state(_sub_dir, _year_dir_path))
+        _repo_counts[_user_dir] = _user_counts
+    for _user, _user_info in _repo_counts.items():
+        if _user_info['total-count'] == 0:
+            log(f'Keine aktuellen Daten für Benutzer {_user} zu archivieren.')
+        else:
+            _skipped_hosts = [_host for _host in _user_info['hosts'].keys() if _user_info['hosts'][_host] == 0]
+            _host_info = ','.join(_skipped_hosts)
+            log(f'Keine aktuellen Daten für Hosts {_host_info} des Benutzers {_user} zu archivieren.')
     return _status_list
 
 
@@ -141,17 +159,19 @@ def fill_archive_states(archive_root_path: str, repo_status_list: list[dict]):
     :param repo_status_list: Liste mit den Status aller Repositories
     """
     for _repo_state in repo_status_list:
-        ar_path = os.path.join(archive_root_path, _repo_state[STATUS_ATTR_SUB_DIR])
-        if not os.path.isdir(ar_path):
+        _ar_dir_parts = _repo_state[STATUS_ATTR_SUB_DIR].split(os.sep)
+        _ar_dir = os.sep.join([_ar_dir_parts[2], _ar_dir_parts[1], _ar_dir_parts[0]])
+        _ar_path = os.path.join(archive_root_path, _ar_dir)
+        _repo_state[STATUS_ATTR_AR_PATH] = _ar_path
+        if not os.path.isdir(_ar_path):
             _repo_state[STATUS_ATTR_AR_FILES] = None
             continue
-        _repo_state[STATUS_ATTR_AR_FILES] = sorted(os.listdir(ar_path), reverse=True)
+        _repo_state[STATUS_ATTR_AR_FILES] = sorted(os.listdir(_ar_path), reverse=True)
 
 
-def archive_repositories(archive_root_path: str, repo_status_list: list[dict], keep: int):
+def archive_repositories(repo_status_list: list[dict], keep: int):
     """
     Archiviert alle Repositories.
-    :param archive_root_path: Root-Verzeichnis der Archiv-Dateien
     :param repo_status_list: Liste mit den Status aller Repositories
     :param keep: maximale Anzahl der archivierten Stände
     """
@@ -164,24 +184,23 @@ def archive_repositories(archive_root_path: str, repo_status_list: list[dict], k
         if _repo_status[STATUS_ATTR_MOD_TIME] is None:
             log(f'Ignoriere Repository {_repo_name}: Repository ist leer')
             continue
-        _archive_file_path = os.path.join(archive_root_path, _repo_name)
-        archive_repository(_archive_file_path, _repo_status, keep)
+        archive_repository(_repo_status, keep)
 
 
-def archive_repository(archive_path: str, repository_status: dict, keep: int):
+def archive_repository(repository_status: dict, keep: int):
     """
     Archiviert ein Repository.
-    :param archive_path: Archiv-Verzeichnis
     :param repository_status: Status des Repositories
     :param keep: maximale Anzahl der archivierten Stände
     """
+    _archive_path: str = repository_status[STATUS_ATTR_AR_PATH]
     _fmt = f'%Y%m%d%H%M%S{ARCHIVE_FILE_SUFFIX}'
-    _archive_file = os.path.join(archive_path, datetime.datetime.now().strftime(_fmt))
+    _archive_file = os.path.join(_archive_path, datetime.datetime.now().strftime(_fmt))
     _repository_path = repository_status[STATUS_ATTR_PATH]
     _repository_sub_dir = repository_status[STATUS_ATTR_SUB_DIR]
-    _archive_command = ['sh', '-c', f'cd {_repository_path} && tar -czf {_archive_file} *']
+    _archive_command = ['sh', '-c', f'cd {_repository_path} && tar -cf {_archive_file} *']
     if repository_status[STATUS_ATTR_AR_FILES] is None:
-        os.makedirs(archive_path, 0o700, exist_ok=True)
+        os.makedirs(_archive_path, 0o700, exist_ok=True)
     if repository_status[STATUS_ATTR_AR_FILES] is None or len(repository_status[STATUS_ATTR_AR_FILES]) == 0:
         execute_command(_archive_command)
         log(f'Repository {_repository_sub_dir} archiviert ({_archive_file})')
@@ -196,7 +215,7 @@ def archive_repository(archive_path: str, repository_status: dict, keep: int):
     execute_command(_archive_command)
     log(f'Repository {_repository_sub_dir} archiviert ({_archive_file})')
     for _i in range(keep - 1, len(repository_status[STATUS_ATTR_AR_FILES])):
-        _file_to_delete = os.path.join(archive_path, repository_status[STATUS_ATTR_AR_FILES][_i])
+        _file_to_delete = os.path.join(_archive_path, repository_status[STATUS_ATTR_AR_FILES][_i])
         _delete_command = ['rm', '-f', _file_to_delete]
         execute_command(_delete_command)
         log(f'Archivstand {_file_to_delete} gelöscht')
@@ -227,8 +246,7 @@ except Exception as e:
 try:
     repo_states = repository_states(repo_root)
     fill_archive_states(archive_root, repo_states)
-    log(str(repo_states))
-    archive_repositories(archive_root, repo_states, keep_count)
+    archive_repositories(repo_states, keep_count)
 except Exception as e:
     log('+++ Archivierung fehlgeschlagen +++')
     log(f'> {str(e)}')
