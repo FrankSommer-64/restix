@@ -112,7 +112,7 @@ RESTIC_COMMAND_LS = 'ls'
 RESTIC_COMMAND_RESTORE = 'restore'
 RESTIC_COMMAND_SNAPSHOTS = 'snapshots'
 RESTIC_COMMAND_UNLOCK = 'unlock'
-RESTIC_EXECUTABLE = 'restic'
+RESTIC_EXECUTABLE = 'restics'
 
 # interne Aktionen
 ACTION_BACKUP = 'backup'
