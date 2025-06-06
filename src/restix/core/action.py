@@ -80,6 +80,12 @@ class ResticVersion:
         """
         return self.__version >= '0.13'
 
+    def forget_dry_run_supported(self) -> bool:
+        """
+        :returns: True, falls die restic-Version die Option --dry-run für forget-Befehle unterstützt
+        """
+        return self.__version >= '0.12.1'
+
     def restore_dry_run_supported(self) -> bool:
         """
         :returns: True, falls die restic-Version die Option --dry-run für restore-Befehle unterstützt

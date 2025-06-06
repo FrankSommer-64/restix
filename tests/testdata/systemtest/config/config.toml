@@ -68,3 +68,10 @@ comment = ""
 location = "${RESTIX_TESTING_ROOT}/systemtest/repos/readonly"
 scope = "standard"
 credentials = "pwfile"
+
+[[target]]
+alias = "local_nirvana"
+comment = ""
+location = "${RESTIX_TESTING_ROOT}/systemtest/repos/nirvana"
+scope = "standard"
+credentials = "pwfile"

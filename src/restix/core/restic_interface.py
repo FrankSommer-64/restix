@@ -58,18 +58,7 @@ def run_backup(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult:
     :raises RestixException: falls das Backup fehlschlägt
     """
     _auto_create = action.option(OPTION_AUTO_CREATE) is True
-    if _auto_create:
-        _restic_version = determine_version()
-        if not _restic_version.auto_create_supported():
-            task_monitor.log(W_AUTO_CREATE_NOT_SUPPORTED, _restic_version.version())
-            action.remove_option(OPTION_AUTO_CREATE)
-            _auto_create = False
     _dry_run = action.option(OPTION_DRY_RUN) is True
-    if _dry_run:
-        _restic_version = determine_version()
-        if not _restic_version.backup_dry_run_supported():
-            task_monitor.log(E_BACKUP_DRY_RUN_NOT_SUPPORTED, _restic_version.version())
-            return TaskResult(TASK_FAILED, '')
     _repo = action.option(OPTION_REPO)
     _status = _repo_status(action)
     if _status == 1:
@@ -153,12 +142,6 @@ def run_restore(action: RestixAction, task_monitor: TaskMonitor) -> TaskResult:
     :returns: Ergebnis der Ausführung.
     :raises RestixException: falls die Ausführung fehlschlägt
     """
-    _dry_run = action.option(OPTION_DRY_RUN) is True
-    if _dry_run:
-        _restic_version = determine_version()
-        if not _restic_version.restore_dry_run_supported():
-            task_monitor.log(E_RESTORE_DRY_RUN_NOT_SUPPORTED, _restic_version.version())
-            return TaskResult(TASK_FAILED, '')
     _repo = action.option(OPTION_REPO)
     _snapshot_id = action.option(OPTION_SNAPSHOT)
     _restore_path = action.option(OPTION_RESTORE_PATH)
@@ -265,10 +248,11 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     raise RestixException(_exception_id, _restic_cmd)
 
 
-def determine_version() -> ResticVersion:
+def determine_version() -> str:
     """
+    TODO benutzerdefiniertes restic executable
     Ermittelt die installierte restic-Version.
-    :returns: restic-Version.
+    :returns: Ausgabe des 'restic version'-Befehls.
     :raises RestixException: falls das Lesen der Version fehlschlägt
     """
     _cmd = ['restic', 'version']
@@ -276,7 +260,7 @@ def determine_version() -> ResticVersion:
     try:
         _rc, _stdout, _stderr = _execute_restic_command(_cmd, _silent_monitor)
         if _rc == RESTIC_RC_OK:
-            return ResticVersion.from_version_command(_stdout)
+            return _stdout
         raise RestixException(E_RESTIC_NOT_INSTALLED, f'{_stderr}{os.linesep}{_stdout}')
     except RestixException:
         raise
@@ -369,6 +353,35 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
         else:
             continue
     return _snapshot
+
+
+def check_restic_for_action(action: RestixAction) -> str | None:
+    """
+    Prüft, ob die installierte restic-Version Probleme mit dem übergebenen Befehl hat.
+    Entfernt ggf. nicht unterstützte Optionen aus dem restix-Befehl.
+    :param action: restix-Befehl
+    :returns: lokalisierte Warnung, bei None gibt es keine Beanstandungen.
+    :raises RestixException: falls restic nicht installiert ist oder die Version nicht unterstützt wird
+    """
+    _restic_version = ResticVersion.from_version_command(determine_version())
+    if not _restic_version.suitable_for_restix():
+        raise RestixException(E_UNSUPPORTED_RESTIC_VERSION, _restic_version.version())
+    if action.action_id() == ACTION_INIT:
+        if action.option(OPTION_DRY_RUN):
+            raise RestixException(E_INIT_DRY_RUN_NOT_SUPPORTED)
+    elif action.action_id() == ACTION_BACKUP:
+        if action.option(OPTION_DRY_RUN) and not _restic_version.backup_dry_run_supported():
+            raise RestixException(E_BACKUP_DRY_RUN_NOT_SUPPORTED, _restic_version.version())
+        if action.option(OPTION_AUTO_CREATE) and not _restic_version.auto_create_supported():
+            action.remove_option(OPTION_AUTO_CREATE)
+            return localized_message(W_AUTO_CREATE_NOT_SUPPORTED, _restic_version.version())
+    elif action.action_id() == ACTION_RESTORE:
+        if action.option(OPTION_DRY_RUN) and not _restic_version.restore_dry_run_supported():
+            raise RestixException(E_RESTORE_DRY_RUN_NOT_SUPPORTED, _restic_version.version())
+    elif action.action_id() == ACTION_FORGET:
+        if action.option(OPTION_DRY_RUN) and not _restic_version.forget_dry_run_supported():
+            raise RestixException(E_FORGET_DRY_RUN_NOT_SUPPORTED, _restic_version.version())
+    return None
 
 
 def _repo_status(action: RestixAction) -> int:

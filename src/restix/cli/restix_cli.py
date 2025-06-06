@@ -46,7 +46,7 @@ from restix.core.action import RestixAction
 from restix.core.restix_exception import RestixException
 from restix.core.config import config_root_path, LocalConfig
 from restix.core.messages import *
-from restix.core.restic_interface import execute_restic_command, determine_version
+from restix.core.restic_interface import check_restic_for_action, execute_restic_command
 from restix.core.task import TaskMonitor
 from restix.core.util import current_user
 
@@ -165,9 +165,9 @@ def cli_main():
         if not prompt_confirmation(_action):
             sys.exit(0)
         # restic-Version prüfen
-        _restic_version = determine_version()
-        if not _restic_version.suitable_for_restix():
-            print(localized_message(W_OUTDATED_RESTIC_VERSION, _restic_version.version()))
+        _warning = check_restic_for_action(_action)
+        if len(_warning) > 0:
+            print(_warning)
         # Zugangsdaten in die Aktion eintragen
         _options = None
         _credentials = _restix_config.credentials_for_target(_target_alias)

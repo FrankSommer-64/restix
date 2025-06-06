@@ -11,6 +11,8 @@ e-could-not-create-repo Could not create repository {0}, restic return code {1}.
 e-could-not-determine-repo-status Could not determine status of repository {0}, restic return code {1}.
 e-file-name-missing No file name specified.
 e-file-opt-required File {0} for option {1} does not exist.
+e-forget-dry-run-not-supported Installed restic version {0} does not support option '--dry-run' for cleanup commands.
+e-init-dry-run-not-supported Option '--dry-run' not allowed for init commands.
 e-invalid-hostname Specified host name {0} invalid.
 e-invalid-action Invalid action {0}.
 e-invalid-option Option {0} is not supported.
@@ -31,7 +33,6 @@ i-overwrite-file Overwrite file {0} ?
 i-running-restic-cmd restic command: {0}
 w-auto-create-not-supported Installed restic version {0} does not provide detailed error codes, option '--auto-create' ignored.
 w-cant-dry-run-backup-without-repo Dry run for backup action not possible, repository {0} doesn't exist.
-w-outdated-restic-version Installed restic version {0} is outdated, restix functionality may be limited.
 
 # configuration
 e-cfg-create-config-root-failed Could not create configuration directory {0}: {1}.
