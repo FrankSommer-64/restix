@@ -75,6 +75,12 @@ class LocalConfig(dict):
         """
         return os.path.dirname(self.__file_path)
 
+    def restic_executable(self) -> str:
+        """
+        :returns: Pfad des restic-Programms
+        """
+        return self.get(CFG_PAR_RESTIC) or RESTIC_EXECUTABLE
+
     def warnings(self) -> list[str]:
         """
         :returns: lokalisierte Warnungen vom Auswerten der Konfigurationsdatei
@@ -331,12 +337,15 @@ def validate_config(data: dict, file_path: str) -> list[str]:
         if _grp_desc is None:
             _unsupported_items.append(_grp_name)
             continue
-        check_element_type(_grp_name, 'at', _grp_value, _file_name)
-        for _i, _elem_value in enumerate(_grp_value):
-            _elem_name = f'{_grp_name}.[{_i}]'
-            _unsupported_items.extend(check_element(_elem_name, _elem_value, _grp_desc, _file_name))
+        if _grp_desc[0] != 't':
+            check_element_type(_grp_name, _grp_desc[0], _grp_value, _file_name)
+        else:
+            check_element_type(_grp_name, 'at', _grp_value, _file_name)
+            for _i, _elem_value in enumerate(_grp_value):
+                _elem_name = f'{_grp_name}.[{_i}]'
+                _unsupported_items.extend(check_element(_elem_name, _elem_value, _grp_desc, _file_name))
     # Prüfen, ob alle notwendigen Elemente definiert wurden
-    for _mandatory_grp in _META_ROOT.keys():
+    for _mandatory_grp in [_g for _g in _META_ROOT.keys() if _META_ROOT.get(_g)[3]]:
         if _mandatory_grp not in data.keys():
             raise RestixException(E_CFG_MANDATORY_GRP_MISSING, _mandatory_grp, _file_name)
     _warnings = [localized_message(W_CFG_ELEM_IGNORED, _elem) for _elem in _unsupported_items]
@@ -461,7 +470,7 @@ def extract_groups(data: dict, file_path: str) -> dict:
     _groups = {}
     for _grp_name, _grp_value in data.items():
         _grp_desc = _META_ROOT.get(_grp_name)
-        if _grp_desc is None:
+        if _grp_desc is None or not isinstance(_grp_value, list):
             continue
         _element_names = set()
         _groups[_grp_name] = {}
@@ -506,4 +515,5 @@ _META_TARGET = {CFG_PAR_ALIAS: ('s', None, True, True, None),
                 CFG_PAR_SCOPE: ('s', None, False, True, None)}
 _META_ROOT = {CFG_GROUP_CREDENTIALS: ('t', _META_CREDENTIALS, False, True, None),
               CFG_GROUP_SCOPE: ('t', _META_SCOPE, False, True, None),
-              CFG_GROUP_TARGET: ('t', _META_TARGET, False, True, None)}
+              CFG_GROUP_TARGET: ('t', _META_TARGET, False, True, None),
+              CFG_PAR_RESTIC: ('s', None, True, False, None)}

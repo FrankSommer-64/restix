@@ -248,14 +248,15 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
     raise RestixException(_exception_id, _restic_cmd)
 
 
-def determine_version() -> str:
+def determine_version(restic_executable: str) -> str:
     """
     TODO benutzerdefiniertes restic executable
     Ermittelt die installierte restic-Version.
+    :param restic_executable: Pfad zum restic-Programm
     :returns: Ausgabe des 'restic version'-Befehls.
     :raises RestixException: falls das Lesen der Version fehlschlägt
     """
-    _cmd = ['restic', 'version']
+    _cmd = [restic_executable, 'version']
     _silent_monitor = TaskMonitor(None, True)
     try:
         _rc, _stdout, _stderr = _execute_restic_command(_cmd, _silent_monitor)
@@ -363,7 +364,7 @@ def check_restic_for_action(action: RestixAction) -> str | None:
     :returns: lokalisierte Warnung, bei None gibt es keine Beanstandungen.
     :raises RestixException: falls restic nicht installiert ist oder die Version nicht unterstützt wird
     """
-    _restic_version = ResticVersion.from_version_command(determine_version())
+    _restic_version = ResticVersion.from_version_command(determine_version(action.restic_executable()))
     if not _restic_version.suitable_for_restix():
         raise RestixException(E_UNSUPPORTED_RESTIC_VERSION, _restic_version.version())
     if action.action_id() == ACTION_INIT:

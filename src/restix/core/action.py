@@ -45,7 +45,7 @@ import tempfile
 
 from restix.core import *
 from restix.core import OPTION_AUTO_CREATE, OPTION_PATTERN
-from restix.core.config import LocalConfig, config_root_path
+from restix.core.config import LocalConfig
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.util import current_user
@@ -123,7 +123,7 @@ class RestixAction:
         """
         self.__action_id = action_id
         self.__target_alias = target_alias
-        self.__config_path = config_root_path() if action_id != ACTION_VERSION and action_id != ACTION_HELP else None
+        self.__local_config = None
         self.__options = {OPTION_HOST: platform.node(), OPTION_YEAR: str(datetime.date.today().year),
                           OPTION_USER: current_user(), OPTION_DRY_RUN: False, OPTION_BATCH: False}
         self.__temp_files = []
@@ -133,6 +133,18 @@ class RestixAction:
         :returns: ID der Aktion (backup, forget, init, ...)
         """
         return self.__action_id
+
+    def restic_executable(self) -> str:
+        """
+        :returns: Pfad zum restic-Programm
+        """
+        return self.__local_config.restic_executable()
+
+    def set_config(self, config: LocalConfig):
+        """
+        :param config: lokale restix-Konfiguration
+        """
+        self.__local_config = config
 
     def target_alias(self) -> str | None:
         """
@@ -243,7 +255,8 @@ class RestixAction:
         """
         :returns: restic-Kommando für die Daten dieser Aktion.
         """
-        _cmd = [RESTIC_EXECUTABLE, self.__action_id, OPTION_REPO, self.option(OPTION_REPO)]
+        _cmd: list[str] = [self.__local_config.restic_executable(), self.__action_id,
+                           OPTION_REPO, self.option(OPTION_REPO)]
         _pw_cmd = self.option(OPTION_PASSWORD_COMMAND)
         if _pw_cmd is not None:
             _cmd.extend([OPTION_PASSWORD_COMMAND, _pw_cmd])
@@ -286,6 +299,7 @@ class RestixAction:
         """
         _init_action = RestixAction(ACTION_INIT, self.target_alias())
         _init_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
+        _init_action.__local_config = self.__local_config
         _pw_cmd = self.option(OPTION_PASSWORD_COMMAND)
         if _pw_cmd is not None:
             _init_action.__options[OPTION_PASSWORD_COMMAND] = _pw_cmd
@@ -299,6 +313,7 @@ class RestixAction:
         """
         _snapshots_action = RestixAction(ACTION_SNAPSHOTS, self.target_alias())
         _snapshots_action.__options[OPTION_REPO] = self.option(OPTION_REPO)
+        _snapshots_action.__local_config = self.__local_config
         _pw_cmd = self.option(OPTION_PASSWORD_COMMAND)
         if _pw_cmd is not None:
             _snapshots_action.__options[OPTION_PASSWORD_COMMAND] = _pw_cmd
@@ -382,7 +397,7 @@ class RestixAction:
         :param file_name: Dateiname aus der Konfigurationsdatei
         :returns: Dateiname mit vollständigem Pfad
         """
-        return file_name if os.path.isabs(file_name) else os.path.join(self.__config_path, file_name)
+        return file_name if os.path.isabs(file_name) else os.path.join(self.__local_config.path(), file_name)
 
     def __str__(self) -> str:
         """
@@ -402,6 +417,7 @@ class RestixAction:
         :raises RestixException: falls die Aktion nicht aus den angegebenen Daten erzeugt werden kann
         """
         _action = RestixAction(action_id, target_alias)
+        _action.set_config(local_config)
         # Standard-Optionen setzen
         _action.set_basic_options(local_config, options)
         if action_id == ACTION_BACKUP:

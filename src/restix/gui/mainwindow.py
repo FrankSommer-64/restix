@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
                                          SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
         self.layout().update()
         try:
-            _restic_version = ResticVersion.from_version_command(determine_version())
+            _restic_version = ResticVersion.from_version_command(determine_version(local_config.restic_executable()))
             if not _restic_version.suitable_for_restix():
                 QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR),
                                     localized_message(E_UNSUPPORTED_RESTIC_VERSION, _restic_version.version()),

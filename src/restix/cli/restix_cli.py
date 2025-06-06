@@ -157,6 +157,7 @@ def cli_main():
             # Sonderfall Sicherungsziele anzeigen (resultiert nicht in einem restic-Befehl)
             show_targets(_restix_config.targets())
             sys.exit(0)
+        _action.set_config(_restix_config)
         # Prüfen, ob das Sicherungsziel existiert
         _target_alias = _action.target_alias()
         if _target_alias not in _restix_config.targets():
@@ -166,7 +167,7 @@ def cli_main():
             sys.exit(0)
         # restic-Version prüfen
         _warning = check_restic_for_action(_action)
-        if len(_warning) > 0:
+        if _warning is not None:
             print(_warning)
         # Zugangsdaten in die Aktion eintragen
         _options = None
@@ -181,7 +182,8 @@ def cli_main():
         # Prüfen, ob notwendige Optionen angegeben wurden
         _action.verify_mandatory_options()
         # Aktion ausführen
-        execute_restic_command(_action.to_restic_command(), TaskMonitor(), _action.is_potential_long_runner())
+        execute_restic_command(_action.to_restic_command(), TaskMonitor(),
+                               _action.is_potential_long_runner())
     except Exception as _e:
         print(localized_message(E_CLI_RESTIX_COMMAND_FAILED))
         print(f'> {_e}')

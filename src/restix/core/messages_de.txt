@@ -142,7 +142,7 @@ e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort
 # GUI Ausgaben
 i-gui-restix-info restix - Datensicherung auf restic-Basis
 i-gui-restix-link <a href='https://github.com/frsommer64/restix'>Webseite</a>
-i-gui-restix-copyright Copyright (c) 2025 Frank Sommer
+i-gui-restix-copyright Copyright (c) 2025 Frank Sommer, Irene Schmidt
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-confirm-remove {0} wirklich löschen ?
