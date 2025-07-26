@@ -23,10 +23,11 @@ e-mandatory-option-missing Mandatory option {0} not specified.
 e-no-snapshot-desc-from-restic Did not get snapshot description from restic.
 e-repo-does-not-exist restic repository {0} doesn't exist.
 e-restic-not-installed restic not installed. Command 'restic version' failed with: {0}
+e-restic-version-not-recognized Could not determine restic version from output '{0}' of command 'restic version'.
 e-restix-target-not-defined Alias for restic repository {0} is not configured.
 e-restix-var-not-defined Undefined variable {0} in configuration file.
 e-restore-dry-run-not-supported Installed restic version {0} does not support option '--dry-run' for restore commands.
-e-unsupported-restic-version Could not determine restic version from output '{0}' of command 'restic version'.
+e-unsupported-restic-version restic version {0} not supported, restix requires version 0.10 or higher.
 e-write-file-failed Error writing file {0}: {1}.
 i-dry-run-create-repo Will create repository {0}.
 i-overwrite-file Overwrite file {0} ?
@@ -141,7 +142,7 @@ e-restic-repo-wrong-password restic command {0} failed: wrong password.
 
 # GUI messages
 i-gui-restix-info restix - Backup and restore based on restic
-i-gui-restix-link <a href='https://github.com/frsommer64/restix'>Web site</a>
+i-gui-restix-link <a href='https://github.com/FrankSommer-64/restix'>Web site</a>
 i-gui-restix-copyright Copyright (c) 2025 Frank Sommer, Irene Schmidt
 i-gui-config-problem Problems in restix configuration detected:
 i-gui-config-warning Warnings in restix configuration detected:

@@ -23,10 +23,11 @@ e-mandatory-option-missing Notwendige Option {0} nicht angegeben.
 e-no-snapshot-desc-from-restic Keine Snapshot-Beschreibung von restic bekommen.
 e-repo-does-not-exist restic-Repository {0} existiert nicht.
 e-restic-not-installed restic ist nicht installiert. Der Befehl 'restic version' lieferte die Fehlermeldung: {0}
+e-restic-version-not-recognized restic-Version konnte nicht aus der Ausgabe '{0}' des 'restic version'-Befehls ermittelt werden.
 e-restix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.
 e-restore-dry-run-not-supported Die installierte restic-Version {0} unterstützt die Option '--dry-run' nicht für restore-Befehle.
-e-unsupported-restic-version restic-Version konnte nicht aus der Ausgabe '{0}' des 'restic version'-Befehls ermittelt werden.
+e-unsupported-restic-version restic-Version {0} wird nicht unterstützt, restix benötigt Version 0.10 oder höher.
 e-write-file-failed Fehler beim Schreiben der Datei {0}: {1}.
 i-dry-run-create-repo Werde Repository {0} anlegen.
 i-overwrite-file Soll die Datei {0} überschrieben werden ?
@@ -141,7 +142,7 @@ e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort
 
 # GUI Ausgaben
 i-gui-restix-info restix - Datensicherung auf restic-Basis
-i-gui-restix-link <a href='https://github.com/frsommer64/restix'>Webseite</a>
+i-gui-restix-link <a href='https://github.com/FrankSommer-64/restix'>Webseite</a>
 i-gui-restix-copyright Copyright (c) 2025 Frank Sommer, Irene Schmidt
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:

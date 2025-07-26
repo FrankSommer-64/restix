@@ -36,6 +36,8 @@
 Daten für alle restix-Aktionen.
 """
 
+from packaging.version import Version
+
 import datetime
 import os.path
 import platform
@@ -60,43 +62,43 @@ class ResticVersion:
         Konstruktor
         :param version: die ermittelte restic-Version
         """
-        self.__version = version
+        self.__version = Version(version)
 
     def version(self) -> str:
         """
         :returns: restic-Version
         """
-        return self.__version
+        return str(self.__version)
 
     def auto_create_supported(self) -> bool:
         """
         :returns: True, falls die restic-Version einen eigenen Fehlercode für nicht existierendes Repository liefert
         """
-        return self.__version >= '0.17'
+        return self.__version >= Version('0.17')
 
     def backup_dry_run_supported(self) -> bool:
         """
         :returns: True, falls die restic-Version die Option --dry-run für backup-Befehle unterstützt
         """
-        return self.__version >= '0.13'
+        return self.__version >= Version('0.13')
 
     def forget_dry_run_supported(self) -> bool:
         """
         :returns: True, falls die restic-Version die Option --dry-run für forget-Befehle unterstützt
         """
-        return self.__version >= '0.12.1'
+        return self.__version >= Version('0.12.1')
 
     def restore_dry_run_supported(self) -> bool:
         """
         :returns: True, falls die restic-Version die Option --dry-run für restore-Befehle unterstützt
         """
-        return self.__version >= '0.17'
+        return self.__version >= Version('0.17')
 
     def suitable_for_restix(self) -> bool:
         """
         :returns: True, falls die restic-Version für restix benutzt werden kann
         """
-        return self.__version >= '0.10'
+        return self.__version >= Version('0.10')
 
     @classmethod
     def from_version_command(cls, output: str) -> Self:
@@ -107,7 +109,7 @@ class ResticVersion:
         """
         _match = re.match(r'^restic\s+([\d.]+)\s.*$', output)
         if _match is None:
-            raise RestixException(E_UNSUPPORTED_RESTIC_VERSION, output.strip())
+            raise RestixException(E_RESTIC_VERSION_NOT_RECOGNIZED, output.strip())
         return ResticVersion(_match.group(1))
 
 

@@ -12,6 +12,7 @@ description = "Backup and restore system based on restic"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "packaging",
     "tomli",
     "tomli_w"
 ]

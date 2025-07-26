@@ -442,8 +442,8 @@ class AboutDialog(QDialog):
         Zeigt eine Lizenz-Datei an.
         :param license_file_name: Name der Lizenz-Datei
         """
-        _license_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath('.'))))
-        _license_file_path = os.path.join(_license_dir, license_file_name)
+        _license_dir = os.path.dirname(__file__)
+        _license_file_path = os.path.join(_license_dir, RESTIX_ASSETS_DIR, license_file_name)
         with open(_license_file_path, 'r') as _f:
             _contents = _f.read()
             _viewer = TextFileViewerDialog(self, L_LICENSE, _contents)
@@ -684,7 +684,7 @@ _URL_PYSIDE = 'https://wiki.qt.io/PySide6'
 _URL_TOMLI = 'https://github.com/hukkin/tomli'
 _URL_TOMLI_W = 'https://github.com/hukkin/tomli-w'
 
-_STYLE_RESTIX_IMAGE = f'border-image: url({RESTIX_ASSETS_DIR}:restix_icon.jpg)'
+_STYLE_RESTIX_IMAGE = f'border-image: url({RESTIX_ASSETS_DIR}:restix_logo.jpg)'
 _STYLE_INPUT_FIELD = 'background-color: #ffffcc'
 _STYLE_WHITE_BG = 'background-color: white'
 _STYLE_BOLD_TEXT = 'font-weight: bold'
