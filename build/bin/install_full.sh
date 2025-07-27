@@ -3,12 +3,12 @@
 # Installation for user only
 INSTALL_PATH=$HOME/apps/restix
 LINK_PATH=$HOME/bin
-DESKTOP_PATH=$HOME/Schreibtisch
+SHORTCUT_PATH=$HOME/.local/share/applications
 
 # System wide installation
 #INSTALL_PATH=/opt/restix
 #LINK_PATH=/usr/local/bin
-#DESKTOP_PATH=/usr/local/share/applications
+#SHORTCUT_PATH=/usr/local/share/applications
 
 
 if [ ! -d $INSTALL_PATH ]; then
@@ -31,8 +31,9 @@ else
   deactivate
 fi
 
-if [ -d $DESKTOP_PATH ]; then
-  cat grestix.desktop | sed -e s:$\{INSTALL_PATH\}:$INSTALL_PATH: > $DESKTOP_PATH/grestix.desktop
+if [ -d $SHORTCUT_PATH ]; then
+  cat grestix.desktop | sed -e s:$\{INSTALL_PATH\}:$INSTALL_PATH: > $SHORTCUT_PATH/grestix.desktop
+  cp restix-icon.png $INSTALL_PATH
 fi
 
 cat grestix | sed -e s:$\{INSTALL_PATH\}:$INSTALL_PATH: > $INSTALL_PATH/grestix
