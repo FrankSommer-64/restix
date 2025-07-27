@@ -68,6 +68,7 @@ fi
 /opt/restix/${WHEEL_FILE_NAME}
 /opt/restix/restix
 /opt/restix/grestix
+/opt/restix/restix-icon.png
 /usr/local/share/applications/grestix.desktop
 
 
