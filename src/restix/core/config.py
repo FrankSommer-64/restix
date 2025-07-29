@@ -79,7 +79,10 @@ class LocalConfig(dict):
         """
         :returns: Pfad des restic-Programms
         """
-        return self.get(CFG_PAR_RESTIC) or RESTIC_EXECUTABLE
+        _executable = self.get(CFG_PAR_RESTIC) or RESTIC_EXECUTABLE
+        _executable = _executable.replace(f'${{{CFG_VAR_HOME}}}', str(pathlib.Path.home()))
+        _executable = _executable.replace(f'${{{CFG_VAR_USER}}}', current_user())
+        return _executable
 
     def warnings(self) -> list[str]:
         """
@@ -312,6 +315,7 @@ def create_config_root() -> str:
         shutil.copy(os.path.join(_templates_path, RESTIX_CONFIG_FN), _config_path)
         with open(os.path.join(_templates_path, RESTIX_DEFAULT_INCLUDES_FN), 'r') as _includes_template:
             _contents = _includes_template.read()
+            _contents = _contents.replace(f'${{{CFG_VAR_HOME}}}', str(pathlib.Path.home()))
             _contents = _contents.replace(f'${{{CFG_VAR_USER}}}', current_user())
             with open(os.path.join(_config_path, RESTIX_DEFAULT_INCLUDES_FN), 'w') as _default_includes_file:
                 _default_includes_file.write(_contents)
