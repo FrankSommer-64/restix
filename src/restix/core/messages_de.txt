@@ -36,6 +36,7 @@ w-auto-create-not-supported Die installierte restic-Version {0} liefert keine de
 w-cant-dry-run-backup-without-repo Trockenlauf der Sicherung nicht möglich, da Repository {0} nicht existiert.
 
 # Konfiguration
+e-cfg-config-file-not-found Konfigurationsdatei {0} nicht gefunden.
 e-cfg-create-config-root-failed Konnte Konfigurationsverzeichnis {0} nicht anlegen: {1}.
 e-cfg-create-pgp-file-failed Konnte verschlüsselte Passwortdatei {0} nicht anlegen: {1}.
 e-cfg-custom-config-root-not-found Konfigurationsverzeichnis {0} aus Umgebungsvariable {1} nicht gefunden.
@@ -107,7 +108,9 @@ t-cli-help-snapshots Snapshots eines restic-Repositories anzeigen\n \
     Sicherungsziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-help-unlock restic-Repository entsperren\n \
     Befehl: restix unlock [Optionen] Sicherungsziel\n \
-    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n \
+    Optionen: --batch * restic Befehl ohne Bestätigung ausführen\n           \
+    --host Hostname * Repository des angegebenen Hosts entsperren\n           \
+    --year Jahr * Repository des angegeben Jahrs entsperren\n \
     Sicherungsziel: Aliasname aus der restix-Konfigurationsdatei
 t-cli-prompt-for-confirmation OK (j/n)?
 t-cli-restix-version restix-Version {0}
@@ -141,6 +144,8 @@ e-restic-repo-lock-failed restic-Befehl {0} fehlgeschlagen: Repository konnte ni
 e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort für das Repository.
 
 # GUI Ausgaben
+i-gui-complete-config-later Default-Konfiguration wurde erstellt.\n\
+Bitte die Konfiguration über Button Konfiguration in der restix Startseite vervollständigen.
 i-gui-restix-info restix - Datensicherung auf restic-Basis
 i-gui-restix-link <a href='https://github.com/FrankSommer-64/restix'>Webseite</a>
 i-gui-restix-copyright Copyright (c) 2025 Frank Sommer, Irene Schmidt
@@ -174,6 +179,7 @@ i-gui-restoring-all-data Stelle alle Daten aus Repository {0} wieder her.
 i-gui-restoring-all-data-to-path Kopiere alle Daten aus Repository {0} in Verzeichnis {1}.
 i-gui-restoring-some-data Stelle ausgewählte Daten aus Repository {0} wieder her.
 i-gui-restoring-some-data-to-path Kopiere alle ausgewählte aus Repository {0} in Verzeichnis {1}.
+i-gui-run-config-wizard Soll der Assistent für die Konfiguration gestartet werden ?
 i-gui-scope-exists Sicherungsumfang mit Alias '{0}' existiert bereits.
 i-gui-target-exists Sicherungsziel mit Alias '{0}' existiert bereits.
 i-gui-task-finished Hintergrund-Task beendet {0}.
@@ -268,6 +274,16 @@ l-menu-about Über restix
 l-menu-remove Löschen
 l-menu-rename Umbenennen...
 l-menu-user-manual Benutzerhandbuch
+l-wiz-button-back < Zurück
+l-wiz-button-cancel Abbrechen
+l-wiz-button-finish Fertig
+l-wiz-button-next Weiter >
+l-wiz-page-create-config-1-default Bitte auf Fertig klicken, wenn eine Default-Konfiguration erstellt werden soll.
+l-wiz-page-create-config-1-user Bitte auf Weiter klicken, wenn eine benutzerdefinierte Konfiguration erstellt werden soll.
+l-wiz-page-create-config-cancel Bitte auf Abbrechen klicken, um den Assistenten zu beenden.
+l-wiz-page-title-create-config-1 Soll eine Default-Konfiguration erstellt werden ?
+l-wiz-page-title-create-config-2 Auswahl des Sicherungsziels
+l-wiz-title-create-config Assistent für die initiale restix-Konfiguration
 
 # GUI Tooltips
 t-cancel-action Laufende Aktion abbrechen

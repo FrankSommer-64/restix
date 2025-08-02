@@ -1,8 +1,7 @@
 [[credentials]]
 alias = "default"
 comment = ""
-type = "file"
-value = "pw.txt"
+type = "prompt"
 
 [[scope]]
 alias = "default"
@@ -10,10 +9,3 @@ comment = ""
 includes = "default.list"
 excludes = ""
 ignores = []
-
-[[target]]
-alias = "USB-stick"
-comment = ""
-location = "/media/${USER}/BACKUPUSB/restix"
-scope = "default"
-credentials = "default"

@@ -107,7 +107,9 @@ t-cli-help-snapshots Show snapshots of a restic repository\n \
     Backup-target: Alias name from restix configuration file
 t-cli-help-unlock Remove stale lock from restic repository\n \
     Command: restix unlock [options] backup-target\n \
-    Options: --batch * execute restic command without confirmation\n \
+    Options: --batch * execute restic command without confirmation\n           \
+    --host hostname * Unlock repository for specified host\n           \
+    --year year * Unlock repository for specified year\n \
     Backup-target: Alias name from restix configuration file
 t-cli-prompt-for-confirmation OK (y/n)?
 t-cli-restix-version restix version {0}
@@ -268,6 +270,12 @@ l-menu-about About restix
 l-menu-remove Remove
 l-menu-rename Rename...
 l-menu-user-manual User manual...
+l-wiz-button-back < Back
+l-wiz-button-cancel Cancel
+l-wiz-button-finish Finish
+l-wiz-button-next Next >
+
+l-wiz-title-create-config Initial restix configuration wizard
 
 # GUI tooltips
 t-cancel-action Cancel current action

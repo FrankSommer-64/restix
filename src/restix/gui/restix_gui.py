@@ -36,18 +36,17 @@
 Hauptprogramm der restix GUI.
 """
 
-import os
 import sys
 
 from PySide6.QtCore import QDir
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from restix.core import RESTIX_ASSETS_DIR, RESTIX_CONFIG_FN
-from restix.core.messages import (localized_label, localized_message, I_GUI_CONFIG_PROBLEM, I_GUI_CONFIG_WARNING,
-                                  I_GUI_CREATE_CONFIG_ROOT, L_MBOX_TITLE_INFO, L_MBOX_TITLE_ERROR)
-from restix.core.config import config_root_path, create_config_root, LocalConfig
+from restix.core.messages import *
+from restix.core.config import config_root_path, LocalConfig
 from restix.core.restix_exception import RestixException
 from restix.gui.mainwindow import MainWindow
+from restix.gui.wizards import run_config_wizard
 
 
 def gui_main():
@@ -59,24 +58,34 @@ def gui_main():
         _images_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), RESTIX_ASSETS_DIR)
         QDir.addSearchPath(RESTIX_ASSETS_DIR, _images_path)
         app = QApplication(sys.argv)
-        try:
-            # Verzeichnis mit der restix-Konfiguration ermitteln
-            _config_root_path = config_root_path()
-        except RestixException as _e:
-            # kein Konfigurationsverzeichnis gefunden, Fehlermeldung anzeigen und anbieten, das Verzeichnis mit
-            # Standardeinstellungen anzulegen
+        # Prüfen, ob restix Konfiguration existiert
+        _config_root_path, _error_info = config_root_path()
+        _config_file_path = os.path.join(_config_root_path, RESTIX_CONFIG_FN)
+        if _error_info is None:
+            if not os.path.isfile(_config_file_path):
+                # Konfigurationsdatei existiert nicht
+                _error_info = localized_message(E_CFG_CONFIG_FILE_NOT_FOUND, _config_file_path)
+        if _error_info is not None:
+            # Konfigurationsverzeichnis existiert nicht, Assistent zum Anlegen einer initialen
+            # Konfiguration anbieten
             _buttons = QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
-            _text = localized_message(I_GUI_CREATE_CONFIG_ROOT)
-            _rc = _show_mbox(QMessageBox.Icon.Information, L_MBOX_TITLE_INFO, str(_e), _text, _buttons)
+            _rc = _show_mbox(QMessageBox.Icon.Information, L_MBOX_TITLE_INFO, _error_info,
+                             localized_message(I_GUI_RUN_CONFIG_WIZARD), _buttons)
             if _rc == QMessageBox.StandardButton.Cancel:
-                # Abbruch durch Benutzer
+                # kein Assistent gewünscht, Programm beenden
                 sys.exit(1)
-            # Konfigurationsverzeichnis anlegen
-            _config_root_path = create_config_root()
+            try:
+                # ggf. Konfigurationsverzeichnis anlegen und Assistent starten
+                os.makedirs(_config_root_path, 0o775, True)
+                run_config_wizard(_config_root_path)
+            except RestixException as _e:
+                _show_mbox(QMessageBox.Icon.Critical, L_MBOX_TITLE_ERROR, I_GUI_CONFIG_PROBLEM,
+                           str(_e), QMessageBox.StandardButton.Ok)
+                sys.exit(1)
 
         # lokale restix-Konfiguration einlesen
         try:
-            _restix_config = LocalConfig.from_file(os.path.join(_config_root_path, RESTIX_CONFIG_FN))
+            _restix_config = LocalConfig.from_file(_config_file_path)
             if _restix_config.has_warnings():
                 # beim Lesen der restix-Konfiguration gab es Probleme, Informationen dazu in einer Message-Box anzeigen
                 _show_mbox(QMessageBox.Icon.Information, L_MBOX_TITLE_INFO, I_GUI_CONFIG_WARNING,

@@ -273,55 +273,42 @@ class LocalConfig(dict):
         return element
 
 
-def config_root_path() -> str:
+def config_root_path() -> tuple[str, str | None]:
     """
-    Gibt das Wurzelverzeichnis der restix-Konfiguration zurück.
+    Gibt Informationen über das Wurzelverzeichnis der restix-Konfiguration zurück.
     Falls die Umgebungsvariable RESTIX_CONFIG_PATH definiert und ein Verzeichnis ist, wird dieses Verzeichnis
     zurückgegeben. Ansonsten wird das Standardverzeichnis '.config/restix' im Home-Verzeichnis des Users zurückgegeben.
-    :returns: Wurzelverzeichnis der restix-Konfiguration
-    :raises RestixException: Umgebungsvariable RESTIX_CONFIG_PATH ist definiert, aber kein Verzeichnis,
-                             oder Umgebungsvariable RESTIX_CONFIG_PATH ist **nicht** definiert und das
-                             Standardverzeichnis existiert nicht
+    Das zweite Element enthält im Fehlerfall Informationen, ansonsten ist es None.
+    :returns: restix-Konfigurationsverzeichnis, Fehlertext
     """
+    _error_info = None
     _config_path = os.environ.get(ENVA_RESTIX_CONFIG_PATH)
     if _config_path is not None:
         _config_path = full_path_of(_config_path)
         if not os.path.isdir(_config_path):
-            raise RestixException(E_CFG_CUSTOM_CONFIG_ROOT_NOT_FOUND, _config_path, ENVA_RESTIX_CONFIG_PATH)
-        return _config_path
+            _error_info = localized_message(E_CFG_CUSTOM_CONFIG_ROOT_NOT_FOUND, _config_path, ENVA_RESTIX_CONFIG_PATH)
+        return _config_path, _error_info
     _home_dir = os.path.expanduser('~')
     _config_path = os.path.join(_home_dir, *RESTIX_CONFIG_SUBDIR)
     if not os.path.isdir(_config_path):
-        raise RestixException(E_CFG_DEFAULT_CONFIG_ROOT_NOT_FOUND, _config_path)
-    return _config_path
+        _error_info = localized_message(E_CFG_DEFAULT_CONFIG_ROOT_NOT_FOUND, _config_path)
+    return _config_path, _error_info
 
 
-def create_config_root() -> str:
+def create_default_config(config_path: str):
     """
-    Erzeugt das restix-Konfigurationsverzeichnis.
-    Falls Umgebungsvariable RESTIX_CONFIG_PATH gesetzt ist, wird dieses als Verzeichnisname benutzt, ansonsten wird
-    das Verzeichnis $HOME/.config/restix erzeugt.
-    :returns: restix-Konfigurationsverzeichnis mit vollständigem Pfad.
+    Erzeugt eine Default-Konfiguration.
+    :param config_path: restix-Konfigurationsverzeichnis.
     :raises RestixException: falls das Erstellen fehlschlägt
     """
-    _config_path = os.environ.get(ENVA_RESTIX_CONFIG_PATH)
-    if _config_path is None:
-        _config_path = os.path.join(os.path.expanduser('~'), *RESTIX_CONFIG_SUBDIR)
-    _config_path = full_path_of(_config_path)
     try:
-        os.makedirs(_config_path, 0o755, True)
+        os.makedirs(config_path, 0o755, True)
         _source_path = pathlib.Path(__file__).parent.resolve()
         _templates_path = os.path.abspath(os.path.join(_source_path, '..', RESTIX_TEMPLATES_DIR))
-        shutil.copy(os.path.join(_templates_path, RESTIX_CONFIG_FN), _config_path)
-        with open(os.path.join(_templates_path, RESTIX_DEFAULT_INCLUDES_FN), 'r') as _includes_template:
-            _contents = _includes_template.read()
-            _contents = _contents.replace(f'${{{CFG_VAR_HOME}}}', str(pathlib.Path.home()))
-            _contents = _contents.replace(f'${{{CFG_VAR_USER}}}', current_user())
-            with open(os.path.join(_config_path, RESTIX_DEFAULT_INCLUDES_FN), 'w') as _default_includes_file:
-                _default_includes_file.write(_contents)
+        shutil.copy(os.path.join(_templates_path, RESTIX_CONFIG_FN), config_path)
+        shutil.copy(os.path.join(_templates_path, RESTIX_DEFAULT_INCLUDES_FN), config_path)
     except OSError as _e:
-        raise RestixException(E_CFG_CREATE_CONFIG_ROOT_FAILED, _config_path, str(_e))
-    return _config_path
+        raise RestixException(E_CFG_CREATE_CONFIG_ROOT_FAILED, config_path, str(_e))
 
 
 def validate_config(data: dict, file_path: str) -> list[str]:

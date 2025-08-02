@@ -71,7 +71,8 @@ def read_restix_config_file(action: RestixAction) -> LocalConfig:
     _year_opt = action.option(OPTION_YEAR)
     if _year_opt is not None:
         _vars[CFG_VAR_YEAR] = _year_opt
-    _local_config = LocalConfig.from_file(os.path.join(config_root_path(), RESTIX_CONFIG_FN))
+    _config_root_path, _error_info = config_root_path()
+    _local_config = LocalConfig.from_file(os.path.join(_config_root_path, RESTIX_CONFIG_FN))
     return _local_config.for_cli(_vars)
 
 

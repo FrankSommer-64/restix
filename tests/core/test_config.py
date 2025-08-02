@@ -58,19 +58,25 @@ class TestConfig(unittest.TestCase):
         Testet die Ermittlung des restix-Konfigurationsverzeichnisses.
         """
         # existierendes Default-Verzeichnis
-        self.assertEqual(os.path.join(Path.home(), *RESTIX_CONFIG_SUBDIR), config_root_path())
+        _path, _info = config_root_path()
+        self.assertEqual(os.path.join(Path.home(), *RESTIX_CONFIG_SUBDIR), _path)
+        self.assertIsNone(_info)
         # existierendes benutzerdefiniertes Verzeichnis
         _custom_root = TestConfig.unit_test_home()
         os.environ[ENVA_RESTIX_CONFIG_PATH] = _custom_root
-        self.assertEqual(_custom_root, config_root_path())
+        _path, _info = config_root_path()
+        self.assertEqual(_custom_root, _path)
+        self.assertIsNone(_info)
         # nicht existierendes benutzerdefiniertes Verzeichnis
         os.environ[ENVA_RESTIX_CONFIG_PATH] = os.path.join(Path.home(), 'nonexistent')
-        self.assertRaises(RestixException, config_root_path)
+        _path, _info = config_root_path()
+        self.assertIsNotNone(_info)
         # nicht existierendes Default-Verzeichnis
         _orig_home_dir = os.environ['HOME']
         try:
             os.environ['HOME'] = os.path.join(Path.home(), 'nonexistent')
-            self.assertRaises(RestixException, config_root_path)
+            _path, _info = config_root_path()
+            self.assertIsNotNone(_info)
         finally:
             os.environ['HOME'] = _orig_home_dir
             del os.environ[ENVA_RESTIX_CONFIG_PATH]
