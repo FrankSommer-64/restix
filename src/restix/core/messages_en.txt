@@ -38,6 +38,7 @@ w-auto-create-not-supported Installed restic version {0} does not provide detail
 w-cant-dry-run-backup-without-repo Dry run for backup action not possible, repository {0} doesn't exist.
 
 # configuration
+e-cfg-config-file-not-found Configuration file {0} not found.
 e-cfg-create-config-root-failed Could not create configuration directory {0}: {1}.
 e-cfg-create-pgp-file-failed Could not create encrypted password file {0}: {1}.
 e-cfg-custom-config-root-not-found Configuration directory {0} specified by environment variable {1} not found.
@@ -145,13 +146,11 @@ e-restic-repo-lock-failed restic command {0} failed: could not lock repository.
 e-restic-repo-wrong-password restic command {0} failed: wrong password.
 
 # GUI messages
-i-gui-restix-info restix - Backup and restore based on restic
-i-gui-restix-link <a href='https://github.com/FrankSommer-64/restix'>Web site</a>
-i-gui-restix-copyright Copyright (c) 2025 Frank Sommer, Irene Schmidt
+i-gui-complete-config-later Default configuration created.\n\
+Please complete configuration using button Configuration on restix start page.
 i-gui-config-problem Problems in restix configuration detected:
 i-gui-config-warning Warnings in restix configuration detected:
 i-gui-confirm-remove Are you sure to remove {0} ?
-i-gui-create-config-root x
 i-gui-creating-repo Create restic repository {0}.
 i-gui-credential-exists Credentials with alias name '{0}' already exist.
 i-gui-data-restored Data restored from repository {0}.
@@ -173,11 +172,15 @@ i-gui-pyside-info Qt GUI library
 i-gui-pyside-link <a href='https://wiki.qt.io/PySide6'>Web site</a>
 i-gui-repo-created Successfully created restic repository {0}.
 i-gui-repo-unlocked Successfully unlocked restic repository {0}.
+i-gui-restix-copyright Copyright (c) 2025 Frank Sommer, Irene Schmidt
+i-gui-restix-info restix - Backup and restore based on restic
+i-gui-restix-link <a href='https://github.com/FrankSommer-64/restix'>Web site</a>
 i-gui-restore-path-is-not-dir Restore target path {0} is not a directory.
 i-gui-restoring-all-data Restoring all data from repository {0}.
 i-gui-restoring-all-data-to-path Restoring all data from repository {0} to directory {1}.
 i-gui-restoring-some-data Restoring selected data from repository {0} .
 i-gui-restoring-some-data-to-path Restoring selected data from repository {0} to directory {1}.
+i-gui-run-config-wizard Start wizard to create initial restix configuration ?
 i-gui-scope-exists Scope with alias name '{0}' already exists.
 i-gui-target-exists Backup target with alias name '{0}' already exists.
 i-gui-task-finished Background task finished {0}.
@@ -221,6 +224,7 @@ l-ignores Ignored elements
 l-info Info
 l-libraries Used libraries
 l-license License
+l-local-target Local target...
 l-location Location
 l-maintenance Maintenance
 l-mandatory-snapshot * Snapshot
@@ -325,6 +329,12 @@ t-opt-rst-restore-scope-full Restore all data from snapshot
 t-opt-rst-restore-scope-some Restore selected data from snapshot
 t-opt-rst-snapshot Select snapshot to use for restore
 t-opt-rst-year Select year, if you want to restore data from a former year
+
+# wizard texts
+t-wiz-target-desc-info Please enter name and eventually description for target. \
+Name must contain letter, digit, dot, underscore and dash characters only.
+t-wiz-target-location-info If target is available locally, please select it using the button, \
+external mediums must be connected to the computer. Enter remote URL in the text field otherwise.
 
 # GUI errors
 e-gui-no-snapshot-selected No snapshot selected

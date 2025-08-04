@@ -37,8 +37,10 @@ Assistenten für die restix GUI.
 """
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import (QDialog, QLabel, QLineEdit, QMessageBox, QPushButton, QSizePolicy,
-                               QStyle, QVBoxLayout, QWizard, QWizardPage, QFormLayout, QGridLayout)
+                               QStyle, QVBoxLayout, QWizard, QWizardPage, QFormLayout, QGridLayout,
+                               QFileDialog)
 
 from restix.core import *
 from restix.core.config import create_default_config
@@ -48,7 +50,7 @@ from restix.gui import *
 
 class CreateConfigWizardStartPage(QWizardPage):
     """
-    Erste Seite des Konfigurations-Assistenten.
+    Erste Seite des Assistenten für die restix-Konfiguration.
     Fragt ab, ob eine Default-Konfiguration oder eine benutzerdefinierte Konfiguration erzeugt werden soll.
     """
     def __init__(self):
@@ -67,7 +69,7 @@ class CreateConfigWizardStartPage(QWizardPage):
 
 class CreateConfigWizardTargetPage(QWizardPage):
     """
-    Zweite Seite des Konfigurations-Assistenten.
+    Zweite Seite des Assistenten für die restix-Konfiguration.
     Festlegen des Sicherungsziels.
     """
     def __init__(self):
@@ -77,43 +79,46 @@ class CreateConfigWizardTargetPage(QWizardPage):
         super().__init__()
         self.setTitle(localized_label(L_WIZ_PAGE_TITLE_CREATE_CONFIG_2))
         _layout = QGridLayout(self)
-        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
+                                   WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        _tooltip = localized_label(T_CFG_TARGET_ALIAS)
-        _alias_label = QLabel(localized_label(L_ALIAS))
-        _alias_label.setToolTip(_tooltip)
-        _layout.addWidget(_alias_label, 0, 0)
-        self.alias_text = QLineEdit()
-        self.alias_text.setStyleSheet(TEXT_FIELD_STYLE)
-        self.alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.alias_text.setToolTip(_tooltip)
-        _layout.addWidget(self.alias_text, 0, 1)
-        _tooltip = localized_label(T_CFG_TARGET_COMMENT)
-        _comment_label = QLabel(localized_label(L_COMMENT))
-        _comment_label.setToolTip(_tooltip)
-        _layout.addWidget(_comment_label, 1, 0)
-        self.comment_text = QLineEdit()
-        self.comment_text.setStyleSheet(TEXT_FIELD_STYLE)
-        self.comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.comment_text.setToolTip(_tooltip)
-        _layout.addWidget(self.comment_text, 1, 1)
-        # TODO Button für Verzeichnis-Auswahl
-        _tooltip = localized_label(T_CFG_TARGET_LOCATION)
-        _location_label = QLabel(localized_label(L_LOCATION))
-        _location_label.setToolTip(_tooltip)
-        _layout.addWidget(_location_label, 2, 0)
-        self.location_text = QLineEdit()
-        self.location_text.setStyleSheet(TEXT_FIELD_STYLE)
-        self.location_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.location_text.setToolTip(_tooltip)
-        _layout.addWidget(self.location_text, 2, 1)
-        self.registerField('target.alias*', self.alias_text)
-        self.registerField('target.comment', self.comment_text)
+        # oberer Teil Name und Beschreibung
+        _desc_info = QLabel(localized_label(T_WIZ_TARGET_DESC_INFO), wordWrap=True)
+        _desc_info.setStyleSheet(CAPTION_STYLE)
+        _layout.addWidget(_desc_info, 0, 0, 1, 2)
+        _alias_label, _alias_text = _text_input(L_ALIAS, r'[\p{L}0-9._-]+')
+        _layout.addWidget(_alias_label, 1, 0)
+        _layout.addWidget(_alias_text, 1, 1)
+        _comment_label, _comment_text = _text_input(L_COMMENT)
+        _layout.addWidget(_comment_label, 2, 0)
+        _layout.addWidget(_comment_text, 2, 1)
+        # unterer Teil Ort
+        _location_info = QLabel(localized_label(T_WIZ_TARGET_LOCATION_INFO), wordWrap=True)
+        _location_info.setStyleSheet(CAPTION_STYLE)
+        _layout.addWidget(_location_info, 3, 0, 1, 2)
+        self.__location_button = QPushButton(localized_label(L_LOCAL_TARGET))
+        self.__location_button.clicked.connect(self._select_local_target)
+        _layout.addWidget(self.__location_button, 4, 0)
+        self.__location_text = QLineEdit()
+        self.__location_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.__location_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        _layout.addWidget(self.__location_text, 4, 1)
+        self.registerField(f'{_FIELD_TARGET_ALIAS}*', _alias_text)
+        self.registerField(_FIELD_TARGET_COMMENT, _comment_text)
+        self.registerField(f'{_FIELD_TARGET_LOCATION}*', self.__location_text)
+
+    def _select_local_target(self):
+        """
+        Wird aufgerufen, wenn der Button zur Auswahl eines lokalen Ziels aufgerufen wird.
+        """
+        _dir = QFileDialog.getExistingDirectory(self, localized_label(L_SELECT))
+        if len(_dir) > 0:
+            self.__location_text.setText(_dir)
 
 
 class CreateConfigWizardCredentialsPage(QWizardPage):
     """
-    Dritte Seite des Konfigurations-Assistenten.
+    Dritte Seite des Assistenten für die restix-Konfiguration.
     Festlegen der Zugangsdaten.
     """
     def __init__(self):
@@ -156,7 +161,7 @@ class CreateConfigWizardCredentialsPage(QWizardPage):
 
 class CreateConfigWizardScopePage(QWizardPage):
     """
-    Vierte Seite des Konfigurations-Assistenten.
+    Vierte Seite des Assistenten für die restix-Konfiguration.
     Festlegen des Sicherungsumfangs.
     """
     def __init__(self):
@@ -213,7 +218,8 @@ class CreateConfigWizard(QWizard):
         self.setButtonText(QWizard.WizardButton.NextButton, localized_label(L_WIZ_BUTTON_NEXT))
         self.setButtonText(QWizard.WizardButton.FinishButton, localized_label(L_WIZ_BUTTON_FINISH))
         self.addPage(CreateConfigWizardStartPage())
-        self.addPage(CreateConfigWizardTargetPage())
+        self.__target_page = CreateConfigWizardTargetPage()
+        self.addPage(self.__target_page)
         self.addPage(CreateConfigWizardCredentialsPage())
         self.addPage(CreateConfigWizardScopePage())
         self.currentIdChanged.connect(self.page_changed)
@@ -223,6 +229,17 @@ class CreateConfigWizard(QWizard):
         Wird aufgerufen, wenn eine andere Seite des Assistenten aufgerufen wird
         """
         self.default_config_requested = self.default_config_requested and page_id <= 0
+
+    def fields(self) -> dict:
+        """
+        :return: vom Benutzer eingegebene Werte
+        """
+        _fields = {}
+        if not self.default_config_requested:
+            _fields[_FIELD_TARGET_ALIAS] = self.__target_page.field(_FIELD_TARGET_ALIAS)
+            _fields[_FIELD_TARGET_COMMENT] = self.__target_page.field(_FIELD_TARGET_COMMENT)
+            _fields[_FIELD_TARGET_LOCATION] = self.__target_page.field(_FIELD_TARGET_LOCATION)
+        return _fields
 
 
 def run_config_wizard(config_root_path: str):
@@ -234,10 +251,26 @@ def run_config_wizard(config_root_path: str):
     """
     _wizard = CreateConfigWizard(config_root_path)
     if _wizard.exec() == QDialog.DialogCode.Accepted:
+        print(_wizard.fields())
         if _wizard.default_config_requested:
             create_default_config(config_root_path)
             QMessageBox.information(None, localized_label(L_MBOX_TITLE_INFO),
                                     localized_message(I_GUI_COMPLETE_CONFIG_LATER),
                                     QMessageBox.StandardButton.Ok)
     else:
+        print(_wizard.fields())
         print('Abbruch')
+
+def _text_input(label_id, allowed_chars=None) -> tuple[QLabel, QLineEdit]:
+    _label = QLabel(localized_label(label_id))
+    _text = QLineEdit()
+    _text.setStyleSheet(TEXT_FIELD_STYLE)
+    _text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+    if allowed_chars is not None:
+        _text.setValidator(QRegularExpressionValidator(allowed_chars))
+    return _label, _text
+
+
+_FIELD_TARGET_ALIAS = 'target.alias'
+_FIELD_TARGET_COMMENT = 'target.comment'
+_FIELD_TARGET_LOCATION = 'target.location'

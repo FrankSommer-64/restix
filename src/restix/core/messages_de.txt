@@ -148,13 +148,9 @@ e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort
 # GUI Ausgaben
 i-gui-complete-config-later Default-Konfiguration wurde erstellt.\n\
 Bitte die Konfiguration über Button Konfiguration in der restix Startseite vervollständigen.
-i-gui-restix-info restix - Datensicherung auf restic-Basis
-i-gui-restix-link <a href='https://github.com/FrankSommer-64/restix'>Webseite</a>
-i-gui-restix-copyright Copyright (c) 2025 Frank Sommer, Irene Schmidt
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-confirm-remove {0} wirklich löschen ?
-i-gui-create-config-root Konfigurationsverzeichnis anlegen ?
 i-gui-creating-repo Erzeuge restic-Repository {0}.
 i-gui-credential-exists Zugriffsdaten mit Alias '{0}' existieren bereits.
 i-gui-data-restored Daten aus Repository {0} wiederhergestellt.
@@ -176,6 +172,9 @@ i-gui-pyside-info Qt GUI-Bibliothek
 i-gui-pyside-link <a href='https://wiki.qt.io/PySide6'>Webseite</a>
 i-gui-repo-created restic-Repository {0} erfolgreich angelegt.
 i-gui-repo-unlocked restic-Repository {0} erfolgreich entsperrt.
+i-gui-restix-info restix - Datensicherung auf restic-Basis
+i-gui-restix-link <a href='https://github.com/FrankSommer-64/restix'>Webseite</a>
+i-gui-restix-copyright Copyright (c) 2025 Frank Sommer, Irene Schmidt
 i-gui-restore-path-is-not-dir Zielpfad für die Wiederherstellung {0} ist kein Verzeichnis.
 i-gui-restoring-all-data Stelle alle Daten aus Repository {0} wieder her.
 i-gui-restoring-all-data-to-path Kopiere alle Daten aus Repository {0} in Verzeichnis {1}.
@@ -225,6 +224,7 @@ l-ignores Ignorierte Elemente
 l-info Info
 l-libraries Verwendete Bibliotheken
 l-license Lizenz
+l-local-target Lokales Ziel...
 l-location Ort
 l-maintenance Wartung
 l-mandatory-snapshot * Snapshot
@@ -329,6 +329,13 @@ t-opt-rst-restore-scope-full alle gesicherten Daten wiederherstellen
 t-opt-rst-restore-scope-some ausgewählte Daten wiederherstellen
 t-opt-rst-snapshot Snapshot auswählen, aus dem die Dateien wiederhergestellt werden sollen
 t-opt-rst-year Bitte ggf. das Jahr auswählen, aus dem die Dateien wiederhergestellt werden sollen
+
+# Texte für Assistenten
+t-wiz-target-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für das Sicherungsziel eingeben. \
+Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
+t-wiz-target-location-info Falls auf das Sicherungsziel lokal zugegriffen werden kann, wählen Sie es \
+bitte über den Button aus, externe Datenträger müssen angeschlossen sein. Ansonsten geben Sie bitte \
+die URL im Textfeld ein.
 
 # GUI Fehler
 e-gui-no-snapshot-selected Kein Snapshot ausgewählt
