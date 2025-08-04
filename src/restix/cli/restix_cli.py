@@ -167,12 +167,12 @@ def cli_main():
         if not prompt_confirmation(_action):
             sys.exit(0)
         # restic-Version prüfen
-        _warning = check_restic_for_action(_action)
+        _credentials = _restix_config.credentials_for_target(_target_alias)
+        _warning = check_restic_for_action(_action, _credentials)
         if _warning is not None:
             print(_warning)
         # Zugangsdaten in die Aktion eintragen
         _options = None
-        _credentials = _restix_config.credentials_for_target(_target_alias)
         if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
             # Passwort einlesen
             _pw = getpass.getpass(localized_message(T_CLI_ENTER_PASSWORD))

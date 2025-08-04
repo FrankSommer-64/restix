@@ -147,8 +147,8 @@ class CredentialsDetailPane(QListView):
         _row_count = self.layout().rowCount()
         for _i in range(0, _row_count - self.__value_row):
             self.layout().removeRow(_row_count - _i - 1)
-        if credential_type == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
-            # Prompt braucht gar keine zusätzlichen Widgets
+        if credential_type in [CFG_VALUE_CREDENTIALS_TYPE_NONE, CFG_VALUE_CREDENTIALS_TYPE_PROMPT]:
+            # None und Prompt brauchen gar keine zusätzlichen Widgets
             self.__value_button = None
             self.__value_text = None
             return

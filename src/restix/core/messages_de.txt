@@ -20,9 +20,11 @@ e-invalid-snapshot-id Die angegebene Snapshot-ID {0} ist ungültig, Hexadezimalz
 e-invalid-year Die angegebene Jahreszahl {0} ist ungültig, vier Ziffern erforderlich.
 e-internal-error Interner Fehler: {0}.
 e-mandatory-option-missing Notwendige Option {0} nicht angegeben.
+e-no-password-not-supported Die installierte restic-Version {0} unterstützt die Option '--insecure-no-password' nicht.
 e-no-snapshot-desc-from-restic Keine Snapshot-Beschreibung von restic bekommen.
 e-repo-does-not-exist restic-Repository {0} existiert nicht.
 e-restic-not-installed restic ist nicht installiert. Der Befehl 'restic version' lieferte die Fehlermeldung: {0}
+e-restic-version-not-available restic-Version nicht verfügbar
 e-restic-version-not-recognized restic-Version konnte nicht aus der Ausgabe '{0}' des 'restic version'-Befehls ermittelt werden.
 e-restix-target-not-defined Alias für das restic-Repository {0} wurde nicht konfiguriert.
 e-restix-var-not-defined Variable {0} ist in der Konfigurationsdatei nicht definiert.

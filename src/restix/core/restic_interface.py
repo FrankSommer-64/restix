@@ -42,8 +42,9 @@ import subprocess
 from datetime import datetime
 
 from restix.core import *
-from restix.core.action import RestixAction, ResticVersion
+from restix.core.action import RestixAction
 from restix.core.messages import *
+from restix.core.restic_version import ResticVersion
 from restix.core.restix_exception import RestixException
 from restix.core.snapshot import Snapshot, SnapshotElement
 from restix.core.task import TaskMonitor, TaskResult
@@ -250,7 +251,6 @@ def execute_restic_command(cmd: list[str], task_monitor: TaskMonitor, potential_
 
 def determine_version(restic_executable: str) -> str:
     """
-    TODO benutzerdefiniertes restic executable
     Ermittelt die installierte restic-Version.
     :param restic_executable: Pfad zum restic-Programm
     :returns: Ausgabe des 'restic version'-Befehls.
@@ -356,17 +356,21 @@ def list_snapshot_elements(action: RestixAction) -> Snapshot:
     return _snapshot
 
 
-def check_restic_for_action(action: RestixAction) -> str | None:
+def check_restic_for_action(action: RestixAction, credentials: dict) -> str | None:
     """
     Prüft, ob die installierte restic-Version Probleme mit dem übergebenen Befehl hat.
     Entfernt ggf. nicht unterstützte Optionen aus dem restix-Befehl.
     :param action: restix-Befehl
+    :param credentials: Zugangsdaten für restic Repository
     :returns: lokalisierte Warnung, bei None gibt es keine Beanstandungen.
     :raises RestixException: falls restic nicht installiert ist oder die Version nicht unterstützt wird
     """
     _restic_version = ResticVersion.from_version_command(determine_version(action.restic_executable()))
     if not _restic_version.suitable_for_restix():
         raise RestixException(E_UNSUPPORTED_RESTIC_VERSION, _restic_version.version())
+    if credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_NONE and \
+        not _restic_version.empty_password_supported():
+        raise RestixException(E_NO_PASSWORD_NOT_SUPPORTED, _restic_version.version())
     if action.action_id() == ACTION_INIT:
         if action.option(OPTION_DRY_RUN):
             raise RestixException(E_INIT_DRY_RUN_NOT_SUPPORTED)

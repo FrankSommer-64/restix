@@ -36,8 +36,6 @@
 Daten für alle restix-Aktionen.
 """
 
-from packaging.version import Version
-
 import datetime
 import os.path
 import platform
@@ -51,66 +49,6 @@ from restix.core.config import LocalConfig
 from restix.core.messages import *
 from restix.core.restix_exception import RestixException
 from restix.core.util import current_user
-
-
-class ResticVersion:
-    """
-    Restic-Version mit Informationen über die unterstützte Funktionalität.
-    """
-    def __init__(self, version: str):
-        """
-        Konstruktor
-        :param version: die ermittelte restic-Version
-        """
-        self.__version = Version(version)
-
-    def version(self) -> str:
-        """
-        :returns: restic-Version
-        """
-        return str(self.__version)
-
-    def auto_create_supported(self) -> bool:
-        """
-        :returns: True, falls die restic-Version einen eigenen Fehlercode für nicht existierendes Repository liefert
-        """
-        return self.__version >= Version('0.17')
-
-    def backup_dry_run_supported(self) -> bool:
-        """
-        :returns: True, falls die restic-Version die Option --dry-run für backup-Befehle unterstützt
-        """
-        return self.__version >= Version('0.13')
-
-    def forget_dry_run_supported(self) -> bool:
-        """
-        :returns: True, falls die restic-Version die Option --dry-run für forget-Befehle unterstützt
-        """
-        return self.__version >= Version('0.12.1')
-
-    def restore_dry_run_supported(self) -> bool:
-        """
-        :returns: True, falls die restic-Version die Option --dry-run für restore-Befehle unterstützt
-        """
-        return self.__version >= Version('0.17')
-
-    def suitable_for_restix(self) -> bool:
-        """
-        :returns: True, falls die restic-Version für restix benutzt werden kann
-        """
-        return self.__version >= Version('0.10')
-
-    @classmethod
-    def from_version_command(cls, output: str) -> Self:
-        """
-        :param output: Ausgabe des restic-Befehls 'restic version'
-        :returns: restic-Version mit Informationen über die unterstützte Funktionalität.
-        :raises RestixException: falls die Version nicht erkannt wird
-        """
-        _match = re.match(r'^restic\s+([\d.]+)\s.*$', output)
-        if _match is None:
-            raise RestixException(E_RESTIC_VERSION_NOT_RECOGNIZED, output.strip())
-        return ResticVersion(_match.group(1))
 
 
 class RestixAction:
@@ -353,6 +291,11 @@ class RestixAction:
             _f.write(options.get(OPTION_PASSWORD))
             _f.close()
             self.set_option(OPTION_PASSWORD_FILE, _f.name, True)
+        elif _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_NONE:
+            _restic_version = local_config.restic_version()
+            if not _restic_version.empty_password_supported():
+                raise RestixException(E_NO_PASSWORD_NOT_SUPPORTED, _restic_version.version())
+            self.set_option(OPTION_NO_PASSWORD, True)
         # eventuell die angegebenen Optionen übernehmen
         if options is not None:
             for _k, _v in options.items():

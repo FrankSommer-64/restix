@@ -40,8 +40,8 @@ from copy import deepcopy
 
 from PySide6.QtWidgets import QDialog, QMainWindow, QMessageBox
 
-from restix.core.action import ResticVersion
 from restix.core.restic_interface import determine_version
+from restix.core.restic_version import ResticVersion
 from restix.core.restix_exception import RestixException
 from restix.core.config import LocalConfig
 from restix.core.messages import *
@@ -78,6 +78,7 @@ class MainWindow(QMainWindow):
                                     localized_message(E_UNSUPPORTED_RESTIC_VERSION, _restic_version.version()),
                                     QMessageBox.StandardButton.Ok)
                 self.close()
+            self.__config.set_restic_version(_restic_version)
         except RestixException as _e:
             QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
             self.close()

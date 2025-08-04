@@ -49,6 +49,7 @@ import tomli_w
 
 from restix.core import *
 from restix.core.messages import *
+from restix.core.restic_version import ResticVersion
 from restix.core.restix_exception import RestixException
 from restix.core.util import current_user, full_path_of
 
@@ -66,6 +67,7 @@ class LocalConfig(dict):
         """
         super().__init__()
         self.__file_path = file_path
+        self.__restic_version = None
         self.__warnings = warnings
         self.update(toml_data.items())
 
@@ -83,6 +85,21 @@ class LocalConfig(dict):
         _executable = _executable.replace(f'${{{CFG_VAR_HOME}}}', str(pathlib.Path.home()))
         _executable = _executable.replace(f'${{{CFG_VAR_USER}}}', current_user())
         return _executable
+
+    def restic_version(self) -> ResticVersion:
+        """
+        :returns: Version des lokal installierten restic-Programms
+        :raises RestixException: falls keine Versions-Information verfügbar ist
+        """
+        if self.__restic_version is None:
+            raise RestixException(E_INTERNAL_ERROR, localized_message(E_RESTIC_VERSION_NOT_AVAILABLE))
+        return self.__restic_version
+
+    def set_restic_version(self, version: ResticVersion):
+        """
+        :param version: Version des lokal installierten restic-Programms
+        """
+        self.__restic_version = version
 
     def warnings(self) -> list[str]:
         """
