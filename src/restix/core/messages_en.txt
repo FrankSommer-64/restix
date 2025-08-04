@@ -274,7 +274,13 @@ l-wiz-button-back < Back
 l-wiz-button-cancel Cancel
 l-wiz-button-finish Finish
 l-wiz-button-next Next >
-
+l-wiz-page-create-config-1-default Click Finish to create a default configuration.
+l-wiz-page-create-config-1-user Click Next to create a user defined configuration.
+l-wiz-page-create-config-cancel Click Cancel to terminate the wizard.
+l-wiz-page-title-create-config-1 Create default configuration ?
+l-wiz-page-title-create-config-2 Define backup target
+l-wiz-page-title-create-config-3 Define credentials
+l-wiz-page-title-create-config-4 Define backup scope
 l-wiz-title-create-config Initial restix configuration wizard
 
 # GUI tooltips

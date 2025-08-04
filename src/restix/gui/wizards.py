@@ -36,14 +36,14 @@
 Assistenten für die restix GUI.
 """
 
-from PySide6.QtWidgets import (QDialog, QLabel,
-                               QMessageBox, QPushButton, QSizePolicy, QStyle, QTextEdit,
-                               QVBoxLayout, QWidget, QCheckBox,
-                               QWizard, QWizardPage)
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QDialog, QLabel, QLineEdit, QMessageBox, QPushButton, QSizePolicy,
+                               QStyle, QVBoxLayout, QWizard, QWizardPage, QFormLayout, QGridLayout)
 
 from restix.core import *
 from restix.core.config import create_default_config
 from restix.core.messages import *
+from restix.gui import *
 
 
 class CreateConfigWizardStartPage(QWizardPage):
@@ -58,17 +58,17 @@ class CreateConfigWizardStartPage(QWizardPage):
         super().__init__()
         self.setTitle(localized_label(L_WIZ_PAGE_TITLE_CREATE_CONFIG_1))
         self.setFinalPage(True)
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_1_DEFAULT), wordWrap=True))
-        layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_1_USER), wordWrap=True))
-        layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_CANCEL), wordWrap=True))
-        self.setLayout(layout)
+        _layout = QVBoxLayout()
+        _layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_1_DEFAULT), wordWrap=True))
+        _layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_1_USER), wordWrap=True))
+        _layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_CANCEL), wordWrap=True))
+        self.setLayout(_layout)
 
 
 class CreateConfigWizardTargetPage(QWizardPage):
     """
     Zweite Seite des Konfigurations-Assistenten.
-    Auswahl des Sicherungsziels.
+    Festlegen des Sicherungsziels.
     """
     def __init__(self):
         """
@@ -76,11 +76,124 @@ class CreateConfigWizardTargetPage(QWizardPage):
         """
         super().__init__()
         self.setTitle(localized_label(L_WIZ_PAGE_TITLE_CREATE_CONFIG_2))
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_1_DEFAULT), wordWrap=True))
-        layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_1_USER), wordWrap=True))
-        layout.addWidget(QLabel(localized_label(L_WIZ_PAGE_CREATE_CONFIG_CANCEL), wordWrap=True))
-        self.setLayout(layout)
+        _layout = QGridLayout(self)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        _tooltip = localized_label(T_CFG_TARGET_ALIAS)
+        _alias_label = QLabel(localized_label(L_ALIAS))
+        _alias_label.setToolTip(_tooltip)
+        _layout.addWidget(_alias_label, 0, 0)
+        self.alias_text = QLineEdit()
+        self.alias_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.alias_text.setToolTip(_tooltip)
+        _layout.addWidget(self.alias_text, 0, 1)
+        _tooltip = localized_label(T_CFG_TARGET_COMMENT)
+        _comment_label = QLabel(localized_label(L_COMMENT))
+        _comment_label.setToolTip(_tooltip)
+        _layout.addWidget(_comment_label, 1, 0)
+        self.comment_text = QLineEdit()
+        self.comment_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.comment_text.setToolTip(_tooltip)
+        _layout.addWidget(self.comment_text, 1, 1)
+        # TODO Button für Verzeichnis-Auswahl
+        _tooltip = localized_label(T_CFG_TARGET_LOCATION)
+        _location_label = QLabel(localized_label(L_LOCATION))
+        _location_label.setToolTip(_tooltip)
+        _layout.addWidget(_location_label, 2, 0)
+        self.location_text = QLineEdit()
+        self.location_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.location_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.location_text.setToolTip(_tooltip)
+        _layout.addWidget(self.location_text, 2, 1)
+        self.registerField('target.alias*', self.alias_text)
+        self.registerField('target.comment', self.comment_text)
+
+
+class CreateConfigWizardCredentialsPage(QWizardPage):
+    """
+    Dritte Seite des Konfigurations-Assistenten.
+    Festlegen der Zugangsdaten.
+    """
+    def __init__(self):
+        """
+        Konstruktor.
+        """
+        super().__init__()
+        self.setTitle(localized_label(L_WIZ_PAGE_TITLE_CREATE_CONFIG_3))
+        # TODO GridLayout
+        _layout = QFormLayout(self)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        _tooltip = localized_label(T_CFG_TARGET_ALIAS)
+        _alias_label = QLabel(localized_label(L_ALIAS))
+        _alias_label.setToolTip(_tooltip)
+        self.__alias_text = QLineEdit()
+        self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.__alias_text.setToolTip(_tooltip)
+        _layout.addRow(_alias_label, self.__alias_text)
+        _tooltip = localized_label(T_CFG_TARGET_COMMENT)
+        _comment_label = QLabel(localized_label(L_COMMENT))
+        _comment_label.setToolTip(_tooltip)
+        self.__comment_text = QLineEdit()
+        self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.__comment_text.setToolTip(_tooltip)
+        _layout.addRow(_comment_label, self.__comment_text)
+        # TODO Button für Verzeichnis-Auswahl
+        _tooltip = localized_label(T_CFG_TARGET_LOCATION)
+        _location_label = QLabel(localized_label(L_LOCATION))
+        _location_label.setToolTip(_tooltip)
+        self.__location_text = QLineEdit()
+        self.__location_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.__location_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.__location_text.setToolTip(_tooltip)
+        _layout.addRow(_location_label, self.__location_text)
+        self.setLayout(_layout)
+
+
+class CreateConfigWizardScopePage(QWizardPage):
+    """
+    Vierte Seite des Konfigurations-Assistenten.
+    Festlegen des Sicherungsumfangs.
+    """
+    def __init__(self):
+        """
+        Konstruktor.
+        """
+        super().__init__()
+        self.setTitle(localized_label(L_WIZ_PAGE_TITLE_CREATE_CONFIG_4))
+        # TODO GridLayout
+        _layout = QFormLayout(self)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
+        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        _tooltip = localized_label(T_CFG_TARGET_ALIAS)
+        _alias_label = QLabel(localized_label(L_ALIAS))
+        _alias_label.setToolTip(_tooltip)
+        self.__alias_text = QLineEdit()
+        self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.__alias_text.setToolTip(_tooltip)
+        _layout.addRow(_alias_label, self.__alias_text)
+        _tooltip = localized_label(T_CFG_TARGET_COMMENT)
+        _comment_label = QLabel(localized_label(L_COMMENT))
+        _comment_label.setToolTip(_tooltip)
+        self.__comment_text = QLineEdit()
+        self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.__comment_text.setToolTip(_tooltip)
+        _layout.addRow(_comment_label, self.__comment_text)
+        # TODO Button für Verzeichnis-Auswahl
+        _tooltip = localized_label(T_CFG_TARGET_LOCATION)
+        _location_label = QLabel(localized_label(L_LOCATION))
+        _location_label.setToolTip(_tooltip)
+        self.__location_text = QLineEdit()
+        self.__location_text.setStyleSheet(TEXT_FIELD_STYLE)
+        self.__location_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.__location_text.setToolTip(_tooltip)
+        _layout.addRow(_location_label, self.__location_text)
 
 
 class CreateConfigWizard(QWizard):
@@ -101,6 +214,8 @@ class CreateConfigWizard(QWizard):
         self.setButtonText(QWizard.WizardButton.FinishButton, localized_label(L_WIZ_BUTTON_FINISH))
         self.addPage(CreateConfigWizardStartPage())
         self.addPage(CreateConfigWizardTargetPage())
+        self.addPage(CreateConfigWizardCredentialsPage())
+        self.addPage(CreateConfigWizardScopePage())
         self.currentIdChanged.connect(self.page_changed)
 
     def page_changed(self, page_id):

@@ -219,6 +219,8 @@ L_WIZ_PAGE_CREATE_CONFIG_1_USER = 'l-wiz-page-create-config-1-user'
 L_WIZ_PAGE_CREATE_CONFIG_CANCEL = 'l-wiz-page-create-config-cancel'
 L_WIZ_PAGE_TITLE_CREATE_CONFIG_1 = 'l-wiz-page-title-create-config-1'
 L_WIZ_PAGE_TITLE_CREATE_CONFIG_2 = 'l-wiz-page-title-create-config-2'
+L_WIZ_PAGE_TITLE_CREATE_CONFIG_3 = 'l-wiz-page-title-create-config-3'
+L_WIZ_PAGE_TITLE_CREATE_CONFIG_4 = 'l-wiz-page-title-create-config-4'
 L_WIZ_TITLE_CREATE_CONFIG = 'l-wiz-title-create-config'
 
 # GUI labels

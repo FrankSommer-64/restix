@@ -282,7 +282,9 @@ l-wiz-page-create-config-1-default Bitte auf Fertig klicken, wenn eine Default-K
 l-wiz-page-create-config-1-user Bitte auf Weiter klicken, wenn eine benutzerdefinierte Konfiguration erstellt werden soll.
 l-wiz-page-create-config-cancel Bitte auf Abbrechen klicken, um den Assistenten zu beenden.
 l-wiz-page-title-create-config-1 Soll eine Default-Konfiguration erstellt werden ?
-l-wiz-page-title-create-config-2 Auswahl des Sicherungsziels
+l-wiz-page-title-create-config-2 Sicherungsziel festlegen
+l-wiz-page-title-create-config-3 Zugangsdaten festlegen
+l-wiz-page-title-create-config-4 Sicherungsumfang festlegen
 l-wiz-title-create-config Assistent für die initiale restix-Konfiguration
 
 # GUI Tooltips
