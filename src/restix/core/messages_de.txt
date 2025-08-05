@@ -283,11 +283,13 @@ l-wiz-button-finish Fertig
 l-wiz-button-next Weiter >
 l-wiz-page-create-config-1-default Bitte auf Fertig klicken, wenn eine Default-Konfiguration erstellt werden soll.
 l-wiz-page-create-config-1-user Bitte auf Weiter klicken, wenn eine benutzerdefinierte Konfiguration erstellt werden soll.
+l-wiz-page-create-config-5-scope Bitte auf den Button Sicherungsumfang klicken, um die Elemente für die Sicherung auszuwählen.
 l-wiz-page-create-config-cancel Bitte auf Abbrechen klicken, um den Assistenten zu beenden.
 l-wiz-page-title-create-config-1 Soll eine Default-Konfiguration erstellt werden ?
 l-wiz-page-title-create-config-2 Sicherungsziel festlegen
 l-wiz-page-title-create-config-3 Zugangsdaten festlegen
 l-wiz-page-title-create-config-4 Sicherungsumfang festlegen
+l-wiz-page-title-create-config-5 Ein- und auszuschließende Elemente für die Sicherung festlegen
 l-wiz-title-create-config Assistent für die initiale restix-Konfiguration
 
 # GUI Tooltips
@@ -341,6 +343,10 @@ t-wiz-credentials-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung fü
 Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
 t-wiz-credentials-pw-info Bitte wählen Sie den gewünschten Typ der Zugangsdaten aus der Auswahlliste.\
 Dann bitte das Passwort im Textfeld eingeben.
+t-wiz-scope-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für den Sicherungsumfang eingeben.\
+Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
+t-wiz-scope-ignores-info Bitte Muster für Elemente eingeben, die beim Backup ignoriert werden sollen.\
+Die Muster müssen durch Kommata getrennt werden.
 t-wiz-target-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für das Sicherungsziel eingeben.\
 Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
 t-wiz-target-location-info Falls auf das Sicherungsziel lokal zugegriffen werden kann, wählen Sie es\

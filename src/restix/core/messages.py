@@ -218,11 +218,13 @@ L_WIZ_BUTTON_FINISH = 'l-wiz-button-finish'
 L_WIZ_BUTTON_NEXT = 'l-wiz-button-next'
 L_WIZ_PAGE_CREATE_CONFIG_1_DEFAULT = 'l-wiz-page-create-config-1-default'
 L_WIZ_PAGE_CREATE_CONFIG_1_USER = 'l-wiz-page-create-config-1-user'
+L_WIZ_PAGE_CREATE_CONFIG_5_SCOPE = 'l-wiz-page-create-config-5-scope'
 L_WIZ_PAGE_CREATE_CONFIG_CANCEL = 'l-wiz-page-create-config-cancel'
 L_WIZ_PAGE_TITLE_CREATE_CONFIG_1 = 'l-wiz-page-title-create-config-1'
 L_WIZ_PAGE_TITLE_CREATE_CONFIG_2 = 'l-wiz-page-title-create-config-2'
 L_WIZ_PAGE_TITLE_CREATE_CONFIG_3 = 'l-wiz-page-title-create-config-3'
 L_WIZ_PAGE_TITLE_CREATE_CONFIG_4 = 'l-wiz-page-title-create-config-4'
+L_WIZ_PAGE_TITLE_CREATE_CONFIG_5 = 'l-wiz-page-title-create-config-5'
 L_WIZ_TITLE_CREATE_CONFIG = 'l-wiz-title-create-config'
 
 # GUI labels
@@ -335,6 +337,8 @@ T_OPT_RST_YEAR = 't-opt-rst-year'
 # Wizard texts
 T_WIZ_CREDENTIALS_DESC_INFO = 't-wiz-credentials-desc-info'
 T_WIZ_CREDENTIALS_PW_INFO = 't-wiz-credentials-pw-info'
+T_WIZ_SCOPE_DESC_INFO = 't-wiz-scope-desc-info'
+T_WIZ_SCOPE_IGNORES_INFO = 't-wiz-scope-ignores-info'
 T_WIZ_TARGET_DESC_INFO = 't-wiz-target-desc-info'
 T_WIZ_TARGET_LOCATION_INFO = 't-wiz-target-location-info'
 

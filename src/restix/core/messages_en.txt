@@ -288,6 +288,7 @@ l-wiz-page-title-create-config-1 Create default configuration ?
 l-wiz-page-title-create-config-2 Define backup target
 l-wiz-page-title-create-config-3 Define credentials
 l-wiz-page-title-create-config-4 Define backup scope
+l-wiz-page-title-create-config-5 Define files to include in backups
 l-wiz-title-create-config Initial restix configuration wizard
 
 # GUI tooltips
@@ -337,6 +338,10 @@ t-opt-rst-snapshot Select snapshot to use for restore
 t-opt-rst-year Select year, if you want to restore data from a former year
 
 # wizard texts
+t-wiz-scope-desc-info Please enter name and eventually description for backup scope. \
+Name must contain letter, digit, dot, underscore and dash characters only.
+t-wiz-scope-ignores-info Please enter pattern(s) for elements to ignore in backups. \
+Separate patterns by comma.
 t-wiz-target-desc-info Please enter name and eventually description for target. \
 Name must contain letter, digit, dot, underscore and dash characters only.
 t-wiz-target-location-info If target is available locally, please select it using the button, \
