@@ -166,6 +166,7 @@ i-gui-local-config-changed restix-Konfiguration wurde verändert.
 i-gui-no-credential-type-specified Kein Zugriffsdaten-Typ ausgewählt.
 i-gui-no-includes-specified Keine zu sichernden Elemente ausgewählt.
 i-gui-no-name-specified Kein Name angegeben.
+i-gui-no-password-specified Kein Passwort angegeben.
 i-gui-no-snapshot-selected Kein Snapshot ausgewählt
 i-gui-no-target-selected Kein Sicherungsziel ausgewählt
 i-gui-pyside-info Qt GUI-Bibliothek
@@ -297,6 +298,11 @@ t-cfg-credential-alias Aliasname der Zugangsdaten
 t-cfg-credential-password Passwort
 t-cfg-credential-type Art der Zugriffsdaten
 t-cfg-credential-file-name Name der Datei mit dem Passwort
+t-cfg-credential-value-file Passwort wird im Klartext in einer Datei gespeichert
+t-cfg-credential-value-none kein Passwort, ungeschützte Datensicherung
+t-cfg-credential-value-pgp Passwort wird PGP-verschlüsselt in einer Datei gespeichert
+t-cfg-credential-value-prompt Passwort muss bei jeder Aktion eingegeben werden
+t-cfg-credential-value-text Passwort wird im Klartext in der Konfigurationsdatei gespeichert
 t-cfg-pgp-ascii-armor Anhaken, falls die Datei im ASCII-Armor-Format erzeugt werden soll, ansonsten wird das Binärformat verwendet. \
 Bei ASCII-Armor-Format bekommt die Datei die Endung '.asc', beim Binärformat '.pgp'
 t-cfg-pgp-email E-Mail-Adresse für den PGP-Schlüssel eingeben
@@ -331,11 +337,15 @@ t-opt-rst-snapshot Snapshot auswählen, aus dem die Dateien wiederhergestellt we
 t-opt-rst-year Bitte ggf. das Jahr auswählen, aus dem die Dateien wiederhergestellt werden sollen
 
 # Texte für Assistenten
-t-wiz-target-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für das Sicherungsziel eingeben. \
+t-wiz-credentials-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für die Zugangsdaten eingeben.\
 Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
-t-wiz-target-location-info Falls auf das Sicherungsziel lokal zugegriffen werden kann, wählen Sie es \
-bitte über den Button aus, externe Datenträger müssen angeschlossen sein. Ansonsten geben Sie bitte \
-die URL im Textfeld ein.
+t-wiz-credentials-pw-info Bitte wählen Sie den gewünschten Typ der Zugangsdaten aus der Auswahlliste.\
+Dann bitte das Passwort im Textfeld eingeben.
+t-wiz-target-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für das Sicherungsziel eingeben.\
+Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
+t-wiz-target-location-info Falls auf das Sicherungsziel lokal zugegriffen werden kann, wählen Sie es\
+bitte über den Button Lokales Ziel aus, externe Datenträger müssen angeschlossen sein. Ansonsten geben Sie bitte\
+die URL direkt im Textfeld ein.
 
 # GUI Fehler
 e-gui-no-snapshot-selected Kein Snapshot ausgewählt

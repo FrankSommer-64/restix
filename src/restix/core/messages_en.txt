@@ -166,6 +166,7 @@ i-gui-local-config-changed restix configuration has been changed.
 i-gui-no-credential-type-specified No credentials type selected.
 i-gui-no-includes-specified No files to include in backup selected.
 i-gui-no-name-specified No alias name specified.
+i-gui-no-password-specified No password specified.
 i-gui-no-snapshot-selected No snapshot selected
 i-gui-no-target-selected No backup target selected
 i-gui-pyside-info Qt GUI library
@@ -297,6 +298,11 @@ t-cfg-credential-alias Alias name for credentials
 t-cfg-credential-password Password
 t-cfg-credential-type Type of credentials
 t-cfg-credential-file-name File name containing restic password
+t-cfg-credential-value-file Plain password stored in a file
+t-cfg-credential-value-none No password, insecure backup
+t-cfg-credential-value-pgp PGP encrypted password stored in a file
+t-cfg-credential-value-prompt Password needs to be typed in upon every action
+t-cfg-credential-value-text Plain password stored in restix configuration file
 t-cfg-pgp-ascii-armor Check, if file shall be created in ASCII armor format, otherwise binary format is used. \
 An ASCII armor formatted file gets extension '.asc', a binary formatted file extension '.pgp'
 t-cfg-pgp-email Enter email address for PGP key

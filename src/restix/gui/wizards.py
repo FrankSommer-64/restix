@@ -39,8 +39,8 @@ Assistenten für die restix GUI.
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import (QDialog, QLabel, QLineEdit, QMessageBox, QPushButton, QSizePolicy,
-                               QStyle, QVBoxLayout, QWizard, QWizardPage, QFormLayout, QGridLayout,
-                               QFileDialog)
+                               QVBoxLayout, QWizard, QWizardPage, QFormLayout, QGridLayout,
+                               QFileDialog, QComboBox)
 
 from restix.core import *
 from restix.core.config import create_default_config
@@ -51,7 +51,8 @@ from restix.gui import *
 class CreateConfigWizardStartPage(QWizardPage):
     """
     Erste Seite des Assistenten für die restix-Konfiguration.
-    Fragt ab, ob eine Default-Konfiguration oder eine benutzerdefinierte Konfiguration erzeugt werden soll.
+    Fragt ab, ob eine Default-Konfiguration oder eine benutzerdefinierte Konfiguration
+    erzeugt werden soll.
     """
     def __init__(self):
         """
@@ -86,7 +87,7 @@ class CreateConfigWizardTargetPage(QWizardPage):
         _desc_info = QLabel(localized_label(T_WIZ_TARGET_DESC_INFO), wordWrap=True)
         _desc_info.setStyleSheet(CAPTION_STYLE)
         _layout.addWidget(_desc_info, 0, 0, 1, 2)
-        _alias_label, _alias_text = _text_input(L_ALIAS, r'[\p{L}0-9._-]+')
+        _alias_label, _alias_text = _text_input(L_ALIAS, _ALIAS_CHAR_SET)
         _layout.addWidget(_alias_label, 1, 0)
         _layout.addWidget(_alias_text, 1, 1)
         _comment_label, _comment_text = _text_input(L_COMMENT)
@@ -127,36 +128,55 @@ class CreateConfigWizardCredentialsPage(QWizardPage):
         """
         super().__init__()
         self.setTitle(localized_label(L_WIZ_PAGE_TITLE_CREATE_CONFIG_3))
-        # TODO GridLayout
-        _layout = QFormLayout(self)
-        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
+        _layout = QGridLayout(self)
+        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
+                                   WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        _tooltip = localized_label(T_CFG_TARGET_ALIAS)
-        _alias_label = QLabel(localized_label(L_ALIAS))
-        _alias_label.setToolTip(_tooltip)
-        self.__alias_text = QLineEdit()
-        self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
-        self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.__alias_text.setToolTip(_tooltip)
-        _layout.addRow(_alias_label, self.__alias_text)
-        _tooltip = localized_label(T_CFG_TARGET_COMMENT)
-        _comment_label = QLabel(localized_label(L_COMMENT))
-        _comment_label.setToolTip(_tooltip)
-        self.__comment_text = QLineEdit()
-        self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
-        self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.__comment_text.setToolTip(_tooltip)
-        _layout.addRow(_comment_label, self.__comment_text)
-        # TODO Button für Verzeichnis-Auswahl
-        _tooltip = localized_label(T_CFG_TARGET_LOCATION)
-        _location_label = QLabel(localized_label(L_LOCATION))
-        _location_label.setToolTip(_tooltip)
-        self.__location_text = QLineEdit()
-        self.__location_text.setStyleSheet(TEXT_FIELD_STYLE)
-        self.__location_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self.__location_text.setToolTip(_tooltip)
-        _layout.addRow(_location_label, self.__location_text)
-        self.setLayout(_layout)
+        # oberer Teil Name und Beschreibung
+        _desc_info = QLabel(localized_label(T_WIZ_CREDENTIALS_DESC_INFO), wordWrap=True)
+        _desc_info.setStyleSheet(CAPTION_STYLE)
+        _layout.addWidget(_desc_info, 0, 0, 1, 2)
+        _alias_label, _alias_text = _text_input(L_ALIAS, _ALIAS_CHAR_SET)
+        _layout.addWidget(_alias_label, 1, 0)
+        _layout.addWidget(_alias_text, 1, 1)
+        _comment_label, _comment_text = _text_input(L_COMMENT)
+        _layout.addWidget(_comment_label, 2, 0)
+        _layout.addWidget(_comment_text, 2, 1)
+        # unterer Teil Passwort
+        _pw_info = QLabel(localized_label(T_WIZ_CREDENTIALS_PW_INFO), wordWrap=True)
+        _pw_info.setStyleSheet(CAPTION_STYLE)
+        _layout.addWidget(_pw_info, 3, 0, 1, 2)
+        _type_label = QLabel(localized_label(L_TYPE))
+        _type_combo = QComboBox()
+        _type_combo.setMinimumWidth(MIN_COMBO_WIDTH)
+        _type_combo.setStyleSheet(CONFIG_COMBO_BOX_STYLE)
+        for _i, _type in enumerate(CFG_CREDENTIAL_TYPES):
+            _tooltip = localized_label(_CREDENTIAL_TYPE_TOOLTIPS[_type])
+            _type_combo.addItem(_type)
+            _type_combo.setItemData(_i, _tooltip, Qt.ItemDataRole.ToolTipRole)
+        _type_combo.setCurrentIndex(-1)
+        _layout.addWidget(_type_label, 4, 0)
+        _layout.addWidget(_type_combo, 4, 1)
+        _pw_label, _pw_text = _text_input(L_PASSWORD, None, QLineEdit.EchoMode.Password)
+        _layout.addWidget(_pw_label, 5, 0)
+        _layout.addWidget(_pw_text, 5, 1)
+        self.registerField(f'{_FIELD_CREDENTIALS_ALIAS}*', _alias_text)
+        self.registerField(_FIELD_CREDENTIALS_COMMENT, _comment_text)
+        self.registerField(f'{_FIELD_CREDENTIALS_TYPE}*', _type_combo)
+        self.registerField(f'{_FIELD_CREDENTIALS_VALUE}', _pw_text)
+
+    def validatePage(self, /) -> bool:
+        """
+        Prüfen, ob Passwort eingegeben wurde, falls es erforderlich ist.
+        :return:
+        """
+        if self.field(_FIELD_CREDENTIALS_TYPE) != CFG_VALUE_CREDENTIALS_TYPE_NONE and \
+            len(self.field(_FIELD_CREDENTIALS_VALUE)) == 0:
+                QMessageBox.information(self, localized_label(L_MBOX_TITLE_INFO),
+                                        localized_message(I_GUI_NO_PASSWORD_SPECIFIED),
+                                        QMessageBox.StandardButton.Ok)
+                return False
+        return super().validatePage()
 
 
 class CreateConfigWizardScopePage(QWizardPage):
@@ -204,13 +224,13 @@ class CreateConfigWizardScopePage(QWizardPage):
 class CreateConfigWizard(QWizard):
     """
     Assistent zum Anlegen der initialen restix-Konfiguration.
-    :param config_root_path: Verzeichnis, in der die restix Konfiguration angelegt werden soll.
     """
-    def __init__(self, config_root_path: str):
+    def __init__(self):
         """
         Konstruktor.
         """
         super().__init__()
+        self.setDefaultProperty("QWizardComboBox", "currentText", "currentTextChanged");
         self.default_config_requested = True
         self.setWindowTitle(localized_label(L_WIZ_TITLE_CREATE_CONFIG))
         self.setButtonText(QWizard.WizardButton.BackButton, localized_label(L_WIZ_BUTTON_BACK))
@@ -249,7 +269,7 @@ def run_config_wizard(config_root_path: str):
     :raises RestixException: falls der Assistent abgebrochen wird oder die Konfiguration nicht
     erzeugt werden kann
     """
-    _wizard = CreateConfigWizard(config_root_path)
+    _wizard = CreateConfigWizard()
     if _wizard.exec() == QDialog.DialogCode.Accepted:
         print(_wizard.fields())
         if _wizard.default_config_requested:
@@ -261,9 +281,17 @@ def run_config_wizard(config_root_path: str):
         print(_wizard.fields())
         print('Abbruch')
 
-def _text_input(label_id, allowed_chars=None) -> tuple[QLabel, QLineEdit]:
+
+def _text_input(label_id, allowed_chars=None, echo_mode=QLineEdit.EchoMode.Normal) -> tuple[QLabel, QLineEdit]:
+    """
+    Erzeugt ein Label und ein Texteingabefeld.
+    :param label_id: Resource-ID des Label-Texts
+    :param allowed_chars: optional erlaubte Zeichen im Textfeld
+    :param echo_mode: optional Echo-Mode bei der Texteingabe
+    :return: Label und Texteingabefeld
+    """
     _label = QLabel(localized_label(label_id))
-    _text = QLineEdit()
+    _text = QLineEdit(echoMode=echo_mode)
     _text.setStyleSheet(TEXT_FIELD_STYLE)
     _text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
     if allowed_chars is not None:
@@ -271,6 +299,19 @@ def _text_input(label_id, allowed_chars=None) -> tuple[QLabel, QLineEdit]:
     return _label, _text
 
 
+_ALIAS_CHAR_SET = r'[\p{L}0-9._-]+'
+_FIELD_CREDENTIALS_ALIAS = 'credentials.alias'
+_FIELD_CREDENTIALS_COMMENT = 'credentials.comment'
+_FIELD_CREDENTIALS_TYPE = 'credentials.type'
+_FIELD_CREDENTIALS_VALUE = 'credentials.value'
 _FIELD_TARGET_ALIAS = 'target.alias'
 _FIELD_TARGET_COMMENT = 'target.comment'
 _FIELD_TARGET_LOCATION = 'target.location'
+
+_CREDENTIAL_TYPE_TOOLTIPS = {
+    CFG_VALUE_CREDENTIALS_TYPE_FILE: T_CFG_CREDENTIAL_VALUE_FILE,
+    CFG_VALUE_CREDENTIALS_TYPE_NONE: T_CFG_CREDENTIAL_VALUE_NONE,
+    CFG_VALUE_CREDENTIALS_TYPE_PGP: T_CFG_CREDENTIAL_VALUE_PGP,
+    CFG_VALUE_CREDENTIALS_TYPE_PROMPT: T_CFG_CREDENTIAL_VALUE_PROMPT,
+    CFG_VALUE_CREDENTIALS_TYPE_TEXT: T_CFG_CREDENTIAL_VALUE_TEXT
+}
