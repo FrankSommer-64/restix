@@ -66,10 +66,10 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         self.__check_status_map = {}
         for _element in self.__excludes:
             # Ausgeschlossene Elemente sind immer ohne Haken
-            self.__check_status_map[_element] = Qt.CheckState.Unchecked
+            self.__check_status_map[_element] = Qt.CheckState.Unchecked.value
         for _element in self.__includes:
             # Eingeschlossene Elemente bekommen einen Haken
-            self.__check_status_map[_element] = Qt.CheckState.Checked
+            self.__check_status_map[_element] = Qt.CheckState.Checked.value
         self._initialize_partially_check_states()
         self.__ignore_patterns = CheckBoxFileSystemModel._regex_patterns_for(ignores)
         self.setFilter(QDir.Filter.AllEntries | QDir.Filter.NoDotAndDotDot | QDir.Filter.Hidden)
@@ -88,11 +88,15 @@ class CheckBoxFileSystemModel(QFileSystemModel):
 
     def flags(self, index: QModelIndex | QPersistentModelIndex, /) -> Qt.ItemFlag:
         """
-        Fügt den angezeigten Elementen eine Checkbox hinzu.
+        Erlaubt für alle angezeigten Elemente ausser dem Wurzelverzeichnis das Bearbeiten der
+        Checkbox vor dem Element-Namen.
         :param index: Index des Elements
         :returns: Flags für das Element
         """
-        return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
+        _flags = super().flags(index)
+        if index.isValid() and index.column() == 0 and index.parent().isValid():
+            _flags |= Qt.ItemFlag.ItemIsUserCheckable
+        return _flags
 
     def update_element_status(self, index: QModelIndex | QPersistentModelIndex, status: int):
         """
@@ -101,22 +105,21 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :param index: Index des Elements
         :param status: neuer Checkbox-Status
         """
-        if not index.isValid():
+        _parent = index.parent()
+        if not index.isValid() or not _parent.isValid():
             return
         _file_path = self.filePath(index)
-        _check_status = Qt.CheckState(status)
         # Checkbox-Status im internen Mapping aktualisieren
-        if self.__check_status_map.get(_file_path) != _check_status:
-            self.__check_status_map[_file_path] = _check_status
-        _parent = index.parent()
-        _parent_status = None if not _parent.isValid() else self.data(_parent, Qt.ItemDataRole.CheckStateRole)
-        if _check_status == Qt.CheckState.Checked:
+        if self.__check_status_map.get(_file_path) != status:
+            self.__check_status_map[_file_path] = status
+        _parent_status = self.data(_parent, Qt.ItemDataRole.CheckStateRole)
+        if status == Qt.CheckState.Checked.value:
             CheckBoxFileSystemModel._remove_from_scope_list(self.__excludes, _file_path)
-            if _parent_status != Qt.CheckState.Checked:
+            if _parent_status != Qt.CheckState.Checked.value:
                 CheckBoxFileSystemModel._add_to_scope_list(self.__includes, _file_path)
-        if _check_status == Qt.CheckState.Unchecked:
+        if status == Qt.CheckState.Unchecked:
             CheckBoxFileSystemModel._remove_from_scope_list(self.__includes, _file_path)
-            if _parent_status == Qt.CheckState.Checked:
+            if _parent_status == Qt.CheckState.Checked.value:
                 CheckBoxFileSystemModel._add_to_scope_list(self.__excludes, _file_path)
 
     def data(self, index: QModelIndex | QPersistentModelIndex, role = Qt.ItemDataRole.DisplayRole):
@@ -129,10 +132,12 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         """
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
             # Checkbox-Status
-            if not index.isValid() or self._element_or_ancestor_in_ignore_list(index):
+            _parent_index = index.parent()
+            if not index.isValid() or not _parent_index.isValid() \
+                    or self._element_or_ancestor_in_ignore_list(index):
                 # Element oder eines der übergeordneten ist in der Ignore-Liste, dann kann das Element nicht
                 # angehakt werden
-                return Qt.CheckState.Unchecked
+                return Qt.CheckState.Unchecked.value
             # Checkbox-Status des Elements aus dem internen Dictionary holen
             _status = self.__check_status_map.get(self.filePath(index))
             if _status is not None:
@@ -141,10 +146,10 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             # Element ist nicht im internen Dictionary enthalten.
             # Es wird der Checkbox-Status des Parents zurückgegeben, falls dieser "checked" oder "unchecked" ist.
             # Ansonsten wird "unchecked" zurückgegeben.
-            _parent_status = self.__check_status_map.get(self.filePath(index.parent()))
+            _parent_status = self.__check_status_map.get(self.filePath(_parent_index))
             if _parent_status is None:
-                return self.data(index.parent(), Qt.ItemDataRole.CheckStateRole)
-            return Qt.CheckState.Unchecked if _parent_status == Qt.CheckState.PartiallyChecked else _parent_status
+                return self.data(_parent_index, Qt.ItemDataRole.CheckStateRole)
+            return Qt.CheckState.Unchecked.value if _parent_status == Qt.CheckState.PartiallyChecked.value else _parent_status
         if role == Qt.ItemDataRole.ForegroundRole and index.column() == 0:
             # Vordergrundfarbe
             if self._element_or_ancestor_in_ignore_list(index):
@@ -167,7 +172,7 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         if not index.isValid():
             return False
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
-            # Checkbox-Status
+            # Checkbox-Status, value wird als int übergeben (nicht als Qt.CheckState !)
             if self._element_or_ancestor_in_ignore_list(index):
                 # Element oder eines der übergeordneten Elemente ist in der Liste der zu ignorierenden Elemente,
                 # Checkbox-Status kann nicht geändert werden
@@ -190,13 +195,13 @@ class CheckBoxFileSystemModel(QFileSystemModel):
                     _child = index.sibling(_row, 0)
                     if _child == index:
                         continue
-                    if self.data(_child, Qt.ItemDataRole.CheckStateRole) != Qt.CheckState.Unchecked:
+                    if self.data(_child, Qt.ItemDataRole.CheckStateRole) != Qt.CheckState.Unchecked.value:
                         _was_last_checked_elem = False
                         break
                 if _was_last_checked_elem:
                     _parent_index = index.parent()
                     if _parent_index.isValid():
-                        self.setData(_parent_index, Qt.CheckState.Unchecked, Qt.ItemDataRole.CheckStateRole)
+                        self.setData(_parent_index, Qt.CheckState.Unchecked.value, Qt.ItemDataRole.CheckStateRole)
             # alle Nachkommen des Elements auf den gleichen Checkbox-Status setzen
             for row in range(self.rowCount(index)):
                 self.setData(self.index(row, 0, index), value, Qt.ItemDataRole.CheckStateRole)
@@ -211,7 +216,7 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :returns: True, falls das Element oder ein übergeordnetes in der Liste der zu ignorierenden Elemente
                   enthalten ist
         """
-        if not index.isValid():
+        if not index.isValid() or not index.parent().isValid():
             return False
         _item_file_name = self.fileName(index)
         for _pattern in self.__ignore_patterns:
@@ -228,9 +233,9 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         _parent_index = index.parent()
         if not _parent_index.isValid():
             return True
-        if self.data(_parent_index, Qt.ItemDataRole.CheckStateRole) == Qt.CheckState.Checked:
+        if self.data(_parent_index, Qt.ItemDataRole.CheckStateRole) == Qt.CheckState.Checked.value:
             return False
-        elif self.data(_parent_index, Qt.ItemDataRole.CheckStateRole) == Qt.CheckState.PartiallyChecked:
+        elif self.data(_parent_index, Qt.ItemDataRole.CheckStateRole) == Qt.CheckState.PartiallyChecked.value:
             return True
         return self._all_ancestors_unchecked(_parent_index)
 
@@ -243,8 +248,10 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         _parent_index = index.parent()
         if _parent_index.isValid():
             _parent_status = self.data(_parent_index, Qt.ItemDataRole.CheckStateRole)
-            if _parent_status == Qt.CheckState.Unchecked:
-                self.setData(_parent_index, Qt.CheckState.PartiallyChecked, Qt.ItemDataRole.CheckStateRole)
+            if _parent_status == Qt.CheckState.Unchecked.value:
+                self.setData(_parent_index, Qt.CheckState.PartiallyChecked.value, Qt.ItemDataRole.CheckStateRole)
+                self.dataChanged.emit(_parent_index, _parent_index, Qt.ItemDataRole.CheckStateRole)
+
 
     def _initialize_partially_check_states(self):
         """
@@ -261,8 +268,8 @@ class CheckBoxFileSystemModel(QFileSystemModel):
                 if _part in self.__excludes:
                     continue
                 _current_status = self.__check_status_map.get(_part)
-                if _current_status is None or _current_status == Qt.CheckState.Unchecked:
-                    self.__check_status_map[_part] = Qt.CheckState.PartiallyChecked
+                if _current_status is None or _current_status == Qt.CheckState.Unchecked.value:
+                    self.__check_status_map[_part] = Qt.CheckState.PartiallyChecked.value
 
     @classmethod
     def _add_to_scope_list(cls, scope_list: list[str], file_path: str):
