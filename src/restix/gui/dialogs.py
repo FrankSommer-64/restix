@@ -548,12 +548,14 @@ class PgpFileDialog(QDialog):
     """
     Dialog zum Erzeugen einer PGP-verschlüsselten Passwort-Datei.
     """
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, full_data: bool = True):
         """
         Konstruktor.
         :param parent: das übergeordnete Widget
+        :param full_data: zeigt an, ob Dateiname und Passwort abgefragt werden sollen
         """
         super().__init__(parent)
+        self.__full_data = full_data
         self.__file_name = ''
         self.__password = ''
         self.__email = ''
@@ -565,20 +567,21 @@ class PgpFileDialog(QDialog):
         self.setStyleSheet(_STYLE_WHITE_BG)
         _layout = QGridLayout(self)
         _layout.setSpacing(DEFAULT_SPACING)
-        _file_name_tooltip = localized_label(T_CFG_PGP_FILE_NAME)
-        _file_name_label = QLabel(localized_label(L_FILE_NAME))
-        _file_name_label.setToolTip(_file_name_tooltip)
-        _layout.addWidget(_file_name_label, 0, 0)
-        self.__file_name_text = QLineEdit('')
-        self.__file_name_text.setToolTip(_file_name_tooltip)
-        _layout.addWidget(self.__file_name_text, 0, 1)
-        _password_tooltip = localized_label(T_CFG_PGP_PASSWORD)
-        _password_label = QLabel(localized_label(L_PASSWORD))
-        _password_label.setToolTip(_password_tooltip)
-        _layout.addWidget(_password_label, 1, 0)
-        self.__password_text = QLineEdit('', echoMode=QLineEdit.EchoMode.Password)
-        self.__password_text.setToolTip(_password_tooltip)
-        _layout.addWidget(self.__password_text, 1, 1)
+        if full_data:
+            _file_name_tooltip = localized_label(T_CFG_PGP_FILE_NAME)
+            _file_name_label = QLabel(localized_label(L_FILE_NAME))
+            _file_name_label.setToolTip(_file_name_tooltip)
+            _layout.addWidget(_file_name_label, 0, 0)
+            self.__file_name_text = QLineEdit('')
+            self.__file_name_text.setToolTip(_file_name_tooltip)
+            _layout.addWidget(self.__file_name_text, 0, 1)
+            _password_tooltip = localized_label(T_CFG_PGP_PASSWORD)
+            _password_label = QLabel(localized_label(L_PASSWORD))
+            _password_label.setToolTip(_password_tooltip)
+            _layout.addWidget(_password_label, 1, 0)
+            self.__password_text = QLineEdit('', echoMode=QLineEdit.EchoMode.Password)
+            self.__password_text.setToolTip(_password_tooltip)
+            _layout.addWidget(self.__password_text, 1, 1)
         _email_tooltip = localized_label(T_CFG_PGP_EMAIL)
         _email_label = QLabel(localized_label(L_EMAIL))
         _email_label.setToolTip(_email_tooltip)
@@ -610,9 +613,10 @@ class PgpFileDialog(QDialog):
         """
         Wird aufgerufen, wenn der Benutzer den "OK"-Button geklickt hat.
         """
-        self.__file_name = self.__file_name_text.text()
+        if self.__full_data:
+            self.__file_name = self.__file_name_text.text()
+            self.__password = self.__password_text.text()
         self.__email = self.__email_text.text()
-        self.__password = self.__password_text.text()
         self.__ascii_armor_format = self.__ascii_armor_format_checkbox.isChecked()
         self.accept()
 

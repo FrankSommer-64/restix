@@ -43,6 +43,7 @@ import os.path
 import pathlib
 import re
 import shutil
+import tempfile
 
 import tomli
 import tomli_w
@@ -51,7 +52,7 @@ from restix.core import *
 from restix.core.messages import *
 from restix.core.restic_version import ResticVersion
 from restix.core.restix_exception import RestixException
-from restix.core.util import current_user, full_path_of
+from restix.core.util import current_user, full_path_of, shell_cmd
 
 
 class LocalConfig(dict):
@@ -270,6 +271,19 @@ class LocalConfig(dict):
             raise RestixException(E_CFG_READ_FILE_FAILED, file_path, e)
 
     @classmethod
+    def from_toml(cls: Self, data: dict, file_path: str) -> Self:
+        """
+        Erzeugt die lokale restix-Konfiguration aus TOML-Daten.
+        :param data: TOML-Daten
+        :param file_path: Name der Konfigurationsdatei mit vollständigem Pfad
+        :returns: lokale restix-Konfiguration.
+        :raises RestixException: falls das Dictionary nicht verarbeitet werden kann
+        """
+        _warnings = validate_config(data, file_path)
+        _cfg = LocalConfig(data, file_path, _warnings)
+        return _cfg
+
+    @classmethod
     def replace_variables(cls: Self, element: dict|list|str, variables: dict) -> dict|list|str:
         """
         Ersetzt Variablen in String-Werten des Elements
@@ -310,6 +324,26 @@ def config_root_path() -> tuple[str, str | None]:
     if not os.path.isdir(_config_path):
         _error_info = localized_message(E_CFG_DEFAULT_CONFIG_ROOT_NOT_FOUND, _config_path)
     return _config_path, _error_info
+
+def create_pgp_file(file_path: str, password: str, email: str, ascii_flag: bool):
+    """
+    Erzeugt ein PGP-verschlüsseltes Passwort in der angegebenen Datei.
+    :param file_path: Dateiname inklusive Pfad
+    :param password: zu verschlüsselndes Passwort
+    :param email: E-Mail-Adresse für den PGP-Schlüssel
+    :param ascii_flag: zeigt an, ob Armor- oder Binärformat verwendet werden soll
+    """
+    with tempfile.NamedTemporaryFile('w') as _f:
+        _f.write(password)
+        _f.flush()
+        _cmd = ['gpg', '--recipient', email, '-o', file_path]
+        if ascii_flag:
+            _cmd.append('-a')
+        _cmd.extend(['--encrypt', _f.name])
+        _rc, _stdout, _stderr = shell_cmd(_cmd)
+        if _rc != 0:
+            _reason = os.linesep.join([_stderr, _stdout])
+            raise RestixException(E_CFG_CREATE_PGP_FILE_FAILED, file_path, _reason)
 
 
 def create_default_config(config_path: str):

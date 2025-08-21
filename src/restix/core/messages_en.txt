@@ -39,6 +39,7 @@ w-cant-dry-run-backup-without-repo Dry run for backup action not possible, repos
 
 # configuration
 e-cfg-config-file-not-found Configuration file {0} not found.
+e-cfg-config-wizard-aborted Configuration wizard aborted.
 e-cfg-create-config-root-failed Could not create configuration directory {0}: {1}.
 e-cfg-create-pgp-file-failed Could not create encrypted password file {0}: {1}.
 e-cfg-custom-config-root-not-found Configuration directory {0} specified by environment variable {1} not found.

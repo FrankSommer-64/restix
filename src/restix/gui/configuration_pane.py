@@ -35,7 +35,6 @@
 """
 GUI-Bereich für die restix-Konfiguration.
 """
-import tempfile
 from typing import Callable
 
 from PySide6.QtCore import Qt, QAbstractListModel, QPoint
@@ -45,9 +44,9 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QFormLayout, QGroupBox, QHBox
 
 from restix.core import *
 from restix.core.restix_exception import RestixException
-from restix.core.config import LocalConfig
+from restix.core.config import LocalConfig, create_pgp_file
 from restix.core.messages import *
-from restix.core.util import relative_config_path_of, full_config_path_of, shell_cmd
+from restix.core.util import relative_config_path_of, full_config_path_of
 from restix.gui import *
 from restix.gui.dialogs import PgpFileDialog
 from restix.gui.editors import ScopeEditor
@@ -209,17 +208,7 @@ class CredentialsDetailPane(QListView):
                 if _rc != QMessageBox.StandardButton.Yes:
                     return
                 os.remove(_file_path)
-            with tempfile.NamedTemporaryFile('w') as _f:
-                _f.write(_pwd)
-                _f.flush()
-                _cmd = ['gpg', '--recipient', _email, '-o', _file_path]
-                if _ascii_flag:
-                    _cmd.append('-a')
-                _cmd.extend(['--encrypt', _f.name])
-                _rc, _stdout, _stderr = shell_cmd(_cmd)
-                if _rc != 0:
-                    _reason = os.linesep.join([_stderr, _stdout])
-                    raise RestixException(E_CFG_CREATE_PGP_FILE_FAILED, _file_path, _reason)
+                create_pgp_file(_file_path, _pwd, _email, _ascii_flag)
                 self.__value_button.setText(_file_name)
         except OSError | RestixException as _e:
             QMessageBox.critical(self, L_MBOX_TITLE_ERROR, str(_e), QMessageBox.StandardButton.Ok)

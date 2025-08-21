@@ -39,6 +39,7 @@ w-cant-dry-run-backup-without-repo Trockenlauf der Sicherung nicht möglich, da 
 
 # Konfiguration
 e-cfg-config-file-not-found Konfigurationsdatei {0} nicht gefunden.
+e-cfg-config-wizard-aborted Konfigurations-Assistent abgebrochen.
 e-cfg-create-config-root-failed Konnte Konfigurationsverzeichnis {0} nicht anlegen: {1}.
 e-cfg-create-pgp-file-failed Konnte verschlüsselte Passwortdatei {0} nicht anlegen: {1}.
 e-cfg-custom-config-root-not-found Konfigurationsverzeichnis {0} aus Umgebungsvariable {1} nicht gefunden.

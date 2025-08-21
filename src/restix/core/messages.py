@@ -84,6 +84,7 @@ W_CANT_DRY_RUN_BACKUP_WITHOUT_REPO = 'w-cant-dry-run-backup-without-repo'
 
 # Fehlermeldungen zur Konfiguration
 E_CFG_CONFIG_FILE_NOT_FOUND = 'e-cfg-config-file-not-found'
+E_CFG_CONFIG_WIZARD_ABORTED = 'e-cfg-config-wizard-aborted'
 E_CFG_CREATE_CONFIG_ROOT_FAILED = 'e-cfg-create-config-root-failed'
 E_CFG_CREATE_PGP_FILE_FAILED = 'e-cfg-create-pgp-file-failed'
 E_CFG_CUSTOM_CONFIG_ROOT_NOT_FOUND = 'e-cfg-custom-config-root-not-found'

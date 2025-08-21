@@ -43,10 +43,12 @@ from PySide6.QtWidgets import (QDialog, QLabel, QLineEdit, QMessageBox, QPushBut
                                QFileDialog, QComboBox)
 
 from restix.core import *
-from restix.core.config import create_default_config
+from restix.core.config import create_default_config, LocalConfig, create_pgp_file
 from restix.core.messages import *
+from restix.core.restix_exception import RestixException
 from restix.core.util import relative_config_path_of
 from restix.gui import *
+from restix.gui.dialogs import PgpFileDialog
 from restix.gui.editors import ScopeEditor
 
 
@@ -80,8 +82,8 @@ class CreateConfigWizardLastPage(QWizardPage):
         :param config_root_path: Verzeichnis, in der die restix Konfiguration angelegt werden soll.
         """
         super().__init__()
-        self.includes_file_path = None
-        self.excludes_file_path = None
+        self.includes_file_path = os.path.join(config_root_path, f'{self.field(_FIELD_SCOPE_ALIAS)}.includes')
+        self.excludes_file_path = os.path.join(config_root_path, f'{self.field(_FIELD_SCOPE_ALIAS)}.excludes')
         self.__config_root_path = config_root_path
         self.setTitle(localized_label(L_WIZ_PAGE_TITLE_CREATE_CONFIG_5))
         self.setFinalPage(True)
@@ -101,10 +103,10 @@ class CreateConfigWizardLastPage(QWizardPage):
         if _editor.exec() != QDialog.DialogCode.Accepted:
             return
         _editor_includes_file_name, _editor_excludes_file_name = _editor.scope_files()
-        self.__includes_file_name = relative_config_path_of(_editor_includes_file_name,
-                                                            self.__config_root_path)
-        self.__excludes_file_name = relative_config_path_of(_editor_excludes_file_name,
-                                                            self.__config_root_path)
+        self.includes_file_path = relative_config_path_of(_editor_includes_file_name,
+                                                          self.__config_root_path)
+        self.excludes_file_path = relative_config_path_of(_editor_excludes_file_name,
+                                                          self.__config_root_path)
 
 
 class CreateConfigWizardInputPage(QWizardPage):
@@ -249,6 +251,7 @@ class CreateConfigWizard(QWizard):
         :param config_root_path: Verzeichnis, in der die restix Konfiguration angelegt werden soll.
         """
         super().__init__()
+        self.__config_root_path = config_root_path
         self.default_config_requested = True
         self.setWindowTitle(localized_label(L_WIZ_TITLE_CREATE_CONFIG))
         self.setButtonText(QWizard.WizardButton.BackButton, localized_label(L_WIZ_BUTTON_BACK))
@@ -260,7 +263,8 @@ class CreateConfigWizard(QWizard):
         self.addPage(self.__target_page)
         self.addPage(CreateConfigWizardCredentialsPage())
         self.addPage(CreateConfigWizardScopePage())
-        self.addPage(CreateConfigWizardLastPage(config_root_path))
+        self.__last_page = CreateConfigWizardLastPage(config_root_path)
+        self.addPage(self.__last_page)
         self.currentIdChanged.connect(self.page_changed)
 
     def page_changed(self, page_id):
@@ -269,16 +273,45 @@ class CreateConfigWizard(QWizard):
         """
         self.default_config_requested = self.default_config_requested and page_id <= 0
 
-    def fields(self) -> dict:
+    def user_data(self) -> dict:
         """
         :return: vom Benutzer eingegebene Werte
         """
-        _fields = {}
-        if not self.default_config_requested:
-            _fields[_FIELD_TARGET_ALIAS] = self.__target_page.field(_FIELD_TARGET_ALIAS)
-            _fields[_FIELD_TARGET_COMMENT] = self.__target_page.field(_FIELD_TARGET_COMMENT)
-            _fields[_FIELD_TARGET_LOCATION] = self.__target_page.field(_FIELD_TARGET_LOCATION)
-        return _fields
+        _credentials_type = self.field(_FIELD_CREDENTIALS_TYPE)
+        _credentials_value = self.field(_FIELD_CREDENTIALS_VALUE)
+        _credentials = {CFG_PAR_ALIAS: self.field(_FIELD_CREDENTIALS_ALIAS),
+                        CFG_PAR_COMMENT: self.field(_FIELD_CREDENTIALS_COMMENT),
+                        CFG_PAR_TYPE: _credentials_type}
+        if _credentials_type == CFG_VALUE_CREDENTIALS_TYPE_FILE:
+            _credentials[CFG_PAR_VALUE] = _DEFAULT_PW_FILE_NAME
+            _pw_file_path = os.path.join(self.__config_root_path, _DEFAULT_PW_FILE_NAME)
+            with open(_pw_file_path, 'w') as _f:
+                _f.write(_credentials_value)
+        elif _credentials_type == CFG_VALUE_CREDENTIALS_TYPE_PGP:
+            _dlg = PgpFileDialog(self, False)
+            if _dlg.exec() ==  QDialog.DialogCode.Accepted:
+                _, _, _email, _ascii_flag = _dlg.data_for_file_creation()
+                _file_name = f'{_DEFAULT_PGP_FILE_NAME}.asc' if _ascii_flag else f'{_DEFAULT_PGP_FILE_NAME}.gpg'
+                _file_path = os.path.join(self.__config_root_path, _file_name)
+                create_pgp_file(_file_path, _credentials_value, _email, _ascii_flag)
+                _credentials[CFG_PAR_VALUE] = _file_name
+            else:
+                raise RestixException(E_CFG_CONFIG_WIZARD_ABORTED)
+        _scope = {CFG_PAR_ALIAS: self.field(_FIELD_SCOPE_ALIAS),
+                  CFG_PAR_COMMENT: self.field(_FIELD_SCOPE_COMMENT),
+                  CFG_PAR_INCLUDES: self.__last_page.includes_file_path}
+        if self.__last_page.excludes_file_path is not None:
+            _credentials[CFG_PAR_EXCLUDES] = self.__last_page.excludes_file_path
+        _scope_ignores = self.field(_FIELD_SCOPE_IGNORES)
+        if _scope_ignores is not None:
+            _credentials[CFG_PAR_IGNORES] = _scope_ignores
+        _target = {CFG_PAR_ALIAS: self.field(_FIELD_TARGET_ALIAS),
+                   CFG_PAR_COMMENT: self.field(_FIELD_TARGET_COMMENT),
+                   CFG_PAR_LOCATION: self.field(_FIELD_TARGET_LOCATION),
+                   CFG_PAR_SCOPE: self.field(_FIELD_SCOPE_ALIAS),
+                   CFG_PAR_CREDENTIALS: self.field(_FIELD_CREDENTIALS_ALIAS)}
+        return {CFG_GROUP_CREDENTIALS: [_credentials], CFG_GROUP_SCOPE: [_scope],
+                CFG_GROUP_TARGET: [_target]}
 
 
 def run_config_wizard(config_root_path: str):
@@ -290,15 +323,20 @@ def run_config_wizard(config_root_path: str):
     """
     _wizard = CreateConfigWizard(config_root_path)
     if _wizard.exec() == QDialog.DialogCode.Accepted:
-        print(_wizard.fields())
         if _wizard.default_config_requested:
+            # Standard-Konfiguration erzeugen
             create_default_config(config_root_path)
-            QMessageBox.information(None, localized_label(L_MBOX_TITLE_INFO),
-                                    localized_message(I_GUI_COMPLETE_CONFIG_LATER),
-                                    QMessageBox.StandardButton.Ok)
+        else:
+            # benutzerdefinierte Konfiguration erzeugen
+            _config_file_path = os.path.join(config_root_path, RESTIX_CONFIG_FN)
+            _cfg = LocalConfig.from_toml(_wizard.user_data(), _config_file_path)
+            _cfg.to_file(_config_file_path)
+        QMessageBox.information(None, localized_label(L_MBOX_TITLE_INFO),
+                                localized_message(I_GUI_COMPLETE_CONFIG_LATER),
+                                QMessageBox.StandardButton.Ok)
     else:
-        print(_wizard.fields())
-        print('Abbruch')
+        # Assistent abgebrochen
+        raise RestixException(E_CFG_CONFIG_WIZARD_ABORTED)
 
 
 def _text_input(label_id, allowed_chars=None, echo_mode=QLineEdit.EchoMode.Normal) -> tuple[QLabel, QLineEdit]:
@@ -319,6 +357,8 @@ def _text_input(label_id, allowed_chars=None, echo_mode=QLineEdit.EchoMode.Norma
 
 
 _ALIAS_CHAR_SET = r'[\p{L}0-9._-]+'
+_DEFAULT_PGP_FILE_NAME = 'pw.pgp'
+_DEFAULT_PW_FILE_NAME = 'pw.txt'
 _FIELD_CREDENTIALS_ALIAS = 'credentials.alias'
 _FIELD_CREDENTIALS_COMMENT = 'credentials.comment'
 _FIELD_CREDENTIALS_TYPE = 'credentials.type'
