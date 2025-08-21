@@ -123,14 +123,17 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             return Qt.CheckState.Unchecked.value
         if role == Qt.ItemDataRole.ForegroundRole and index.column() == 0:
             # Vordergrundfarbe
-            if self._element_or_ancestor_ignored(self.filePath(index)):
-                # Element selbst oder übergeordnetes Element ist in der Ignore-Liste,
-                # Name in Violett anzeigen
-                return QColorConstants.DarkMagenta
-            if self._element_or_ancestor_excluded(self.filePath(index)):
-                # Element selbst oder übergeordnetes Element ist in der Excludes-Liste,
-                # Name in Rot anzeigen
+            _element_path = self.filePath(index)
+            if not index.parent().isValid() or self._element_or_ancestor_ignored(_element_path):
+                # Root-Element oder ignoriertes Element
+                return QColorConstants.LightGray
+            if self._element_or_ancestor_excluded(_element_path):
+                # Element selbst oder übergeordnetes Element ist in der Excludes-Liste
                 return QColorConstants.DarkRed
+            if _element_path in self.__includes:
+                # Element ist in der Includes-Liste
+                return QColorConstants.DarkGreen
+            return QColorConstants.Black
         # alles andere an die Basisklasse weiterreichen
         return super().data(index, role)
 
