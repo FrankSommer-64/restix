@@ -206,6 +206,7 @@ l-configuration Configuration
 l-create-encrypted-file Create encrypted password file
 l-credentials Credentials
 l-current-alias Current alias name
+l-default-alias-name default
 l-dismiss Dismiss changes
 l-do-backup Start backup
 l-do-init-repo Create repository
@@ -284,6 +285,7 @@ l-wiz-button-finish Finish
 l-wiz-button-next Next >
 l-wiz-page-create-config-1-default Click Finish to create a default configuration.
 l-wiz-page-create-config-1-user Click Next to create a user defined configuration.
+l-wiz-page-create-config-5-scope Please click Scope button to select all elements for the backup.
 l-wiz-page-create-config-cancel Click Cancel to terminate the wizard.
 l-wiz-page-title-create-config-1 Create default configuration ?
 l-wiz-page-title-create-config-2 Define backup target
@@ -339,8 +341,8 @@ t-opt-rst-snapshot Select snapshot to use for restore
 t-opt-rst-year Select year, if you want to restore data from a former year
 
 # wizard texts
-t-wiz-scope-desc-info Please enter name and eventually description for backup scope. \
-Name must contain letter, digit, dot, underscore and dash characters only.
+t-wiz-credentials-pw-info Please select desired credentials type from drop down list,\
+then enter password into the text field.
 t-wiz-scope-ignores-info Please enter pattern(s) for elements to ignore in backups. \
 Separate patterns by comma.
 t-wiz-target-desc-info Please enter name and eventually description for target. \

@@ -38,7 +38,7 @@ Hauptprogramm der restix GUI.
 
 import sys
 
-from PySide6.QtCore import QDir
+from PySide6.QtCore import QDir, QTranslator, QLocale, QLibraryInfo
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from restix.core import RESTIX_ASSETS_DIR, RESTIX_CONFIG_FN
@@ -58,6 +58,12 @@ def gui_main():
         _images_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), RESTIX_ASSETS_DIR)
         QDir.addSearchPath(RESTIX_ASSETS_DIR, _images_path)
         app = QApplication(sys.argv)
+        # Lokalisierung für die System-Widgets installieren
+        _system_locale = QLocale.languageToCode(QLocale.system().language())
+        _tr_path = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
+        _qt_translator = QTranslator(app)
+        if _qt_translator.load(f'qt_{_system_locale}', directory=_tr_path):
+            app.installTranslator(_qt_translator)
         # Prüfen, ob restix Konfiguration existiert
         _config_root_path, _error_info = config_root_path()
         _config_file_path = os.path.join(_config_root_path, RESTIX_CONFIG_FN)
@@ -68,7 +74,7 @@ def gui_main():
         if _error_info is not None:
             # Konfigurationsverzeichnis existiert nicht, Assistent zum Anlegen einer initialen
             # Konfiguration anbieten
-            _buttons = QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
+            _buttons = QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
             _rc = _show_mbox(QMessageBox.Icon.Information, L_MBOX_TITLE_INFO, _error_info,
                              localized_message(I_GUI_RUN_CONFIG_WIZARD), _buttons)
             if _rc == QMessageBox.StandardButton.Cancel:

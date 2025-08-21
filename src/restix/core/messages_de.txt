@@ -147,8 +147,8 @@ e-restic-repo-lock-failed restic-Befehl {0} fehlgeschlagen: Repository konnte ni
 e-restic-repo-wrong-password restic-Befehl {0} fehlgeschlagen: Falsches Passwort für das Repository.
 
 # GUI Ausgaben
-i-gui-complete-config-later Default-Konfiguration wurde erstellt.\n\
-Bitte die Konfiguration über Button Konfiguration in der restix Startseite vervollständigen.
+i-gui-complete-config-later Standard-Konfiguration wurde erstellt.\n\
+Die Konfiguration kann über Button Konfiguration in der restix Startseite vervollständigt werden.
 i-gui-config-problem Es wurden Probleme in der restix-Konfiguration erkannt:
 i-gui-config-warning Es wurden Warnungen in der restix-Konfiguration erkannt:
 i-gui-confirm-remove {0} wirklich löschen ?
@@ -206,6 +206,7 @@ l-configuration Konfiguration
 l-create-encrypted-file Verschlüsselte Passwort-Datei erzeugen
 l-credentials Zugangsdaten
 l-current-alias Aktueller Aliasname
+l-default-alias-name standard
 l-dismiss Änderungen verwerfen
 l-do-backup Sicherung starten
 l-do-init-repo Repository anlegen
@@ -282,16 +283,16 @@ l-wiz-button-back < Zurück
 l-wiz-button-cancel Abbrechen
 l-wiz-button-finish Fertig
 l-wiz-button-next Weiter >
-l-wiz-page-create-config-1-default Bitte auf Fertig klicken, wenn eine Default-Konfiguration erstellt werden soll.
+l-wiz-page-create-config-1-default Bitte auf Fertig klicken, wenn eine Standard-Konfiguration erstellt werden soll.
 l-wiz-page-create-config-1-user Bitte auf Weiter klicken, wenn eine benutzerdefinierte Konfiguration erstellt werden soll.
 l-wiz-page-create-config-5-scope Bitte auf den Button Sicherungsumfang klicken, um die Elemente für die Sicherung auszuwählen.
 l-wiz-page-create-config-cancel Bitte auf Abbrechen klicken, um den Assistenten zu beenden.
-l-wiz-page-title-create-config-1 Soll eine Default-Konfiguration erstellt werden ?
+l-wiz-page-title-create-config-1 Soll eine Standard-Konfiguration erstellt werden ?
 l-wiz-page-title-create-config-2 Sicherungsziel festlegen
 l-wiz-page-title-create-config-3 Zugangsdaten festlegen
 l-wiz-page-title-create-config-4 Sicherungsumfang festlegen
 l-wiz-page-title-create-config-5 Ein- und auszuschließende Elemente für die Sicherung festlegen
-l-wiz-title-create-config Assistent für die initiale restix-Konfiguration
+l-wiz-title-create-config Assistent für die erste restix-Konfiguration
 
 # GUI Tooltips
 t-cancel-action Laufende Aktion abbrechen
@@ -340,19 +341,15 @@ t-opt-rst-snapshot Snapshot auswählen, aus dem die Dateien wiederhergestellt we
 t-opt-rst-year Bitte ggf. das Jahr auswählen, aus dem die Dateien wiederhergestellt werden sollen
 
 # Texte für Assistenten
-t-wiz-credentials-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für die Zugangsdaten eingeben.\
-Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
-t-wiz-credentials-pw-info Bitte wählen Sie den gewünschten Typ der Zugangsdaten aus der Auswahlliste.\
+t-wiz-credentials-pw-info Bitte den gewünschten Typ der Zugangsdaten aus der Auswahlliste wählen.\
 Dann bitte das Passwort im Textfeld eingeben.
-t-wiz-scope-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für den Sicherungsumfang eingeben.\
-Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
 t-wiz-scope-ignores-info Bitte Muster für Elemente eingeben, die beim Backup ignoriert werden sollen.\
 Die Muster müssen durch Kommata getrennt werden.
 t-wiz-target-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für das Sicherungsziel eingeben.\
 Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
-t-wiz-target-location-info Falls auf das Sicherungsziel lokal zugegriffen werden kann, wählen Sie es\
-bitte über den Button Lokales Ziel aus, externe Datenträger müssen angeschlossen sein. Ansonsten geben Sie bitte\
-die URL direkt im Textfeld ein.
+t-wiz-target-location-info Falls auf das Sicherungsziel lokal zugegriffen werden kann, bitte dieses\
+über den Button Lokales Ziel auswählen, externe Datenträger müssen angeschlossen sein. Ansonsten bitte\
+die URL direkt im Textfeld eingeben.
 
 # GUI Fehler
 e-gui-no-snapshot-selected Kein Snapshot ausgewählt
