@@ -374,7 +374,7 @@ def _text_input(label_id, allowed_chars=None, echo_mode=QLineEdit.EchoMode.Norma
 
 
 _ALIAS_CHAR_SET = r'[\p{L}0-9._-]+'
-_DEFAULT_PGP_FILE_NAME = 'pw.pgp'
+_DEFAULT_PGP_FILE_NAME = 'pw'
 _DEFAULT_PW_FILE_NAME = 'pw.txt'
 _FIELD_CREDENTIALS_TYPE = 'credentials.type'
 _FIELD_CREDENTIALS_VALUE = 'credentials.value'

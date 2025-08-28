@@ -9,3 +9,10 @@ comment = ""
 includes = "default.list"
 excludes = ""
 ignores = []
+
+[[target]]
+alias = "default"
+comment = ""
+scope = "default"
+credentials = "default"
+location = "/media/${USER}/usbstick"
