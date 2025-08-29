@@ -208,8 +208,8 @@ class CredentialsDetailPane(QListView):
                 if _rc != QMessageBox.StandardButton.Yes:
                     return
                 os.remove(_file_path)
-                create_pgp_file(_file_path, _pwd, _email, _ascii_flag)
-                self.__value_button.setText(_file_name)
+            create_pgp_file(_file_path, _pwd, _email, _ascii_flag)
+            self.__value_button.setText(_file_name)
         except OSError | RestixException as _e:
             QMessageBox.critical(self, L_MBOX_TITLE_ERROR, str(_e), QMessageBox.StandardButton.Ok)
 
