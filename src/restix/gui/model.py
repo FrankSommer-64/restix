@@ -149,25 +149,20 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :returns: True, falls die Eigenschaft geändert wurde
         """
         if role == Qt.ItemDataRole.CheckStateRole and index.column() == 0:
-            print(f'setData {self.filePath(index)} value={value}')
             # Checkbox-Status, value wird als int übergeben (nicht als Qt.CheckState !)
             if not index.isValid() or not index.parent().isValid():
-                print('setData invalid index not accepted')
                 return False
             _element_path = self.filePath(index)
             if self._element_or_ancestor_ignored(_element_path):
                 # Element oder übergeordnetes Element in der Liste der zu ignorierenden Elemente,
                 # Checkbox-Status immer unchecked
-                print('setData element or ancestor is ignored')
                 return value == Qt.CheckState.Unchecked.value
             if value == Qt.CheckState.Checked.value:
                 if self._ancestor_excluded(_element_path):
                     # übergeordnetes Element in der Liste der auszuschliessenden Elemente,
                     # Element kann nicht angehakt werden
-                    print('setData ancestor is excluded')
                     return False
                 if _element_path in self.__excludes:
-                    print('setData element removed from excludes')
                     CheckBoxFileSystemModel._remove_from_scope_list(self.__excludes, _element_path)
                 CheckBoxFileSystemModel._add_to_scope_list(self.__includes, _element_path)
                 self._update_tree(index)
@@ -175,6 +170,7 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             if value == Qt.CheckState.Unchecked.value:
                 if _element_path in self.__includes:
                     CheckBoxFileSystemModel._remove_from_scope_list(self.__includes, _element_path)
+                    self._remove_excludes_under(_element_path)
                     self._update_tree(index)
                     return True
                 CheckBoxFileSystemModel._add_to_scope_list(self.__excludes, _element_path)
@@ -297,15 +293,12 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         """
         if CheckBoxFileSystemModel._element_or_ancestor_in(scope_list, file_path):
             # Element oder übergeordnetes Element schon in der Liste
-            print(f'_add_to_scope_list ignored {file_path}, element or parent already in list')
             return
         if os.path.isdir(file_path):
             # Element ist ein Verzeichnis, ggf. alle Elemente unterhalb aus der Liste entfernen
             _elements_to_remove = [_f for _f in scope_list if _f.startswith(file_path)]
             for _e in _elements_to_remove:
-                print(f'_add_to_scope_list removed {_e}')
                 scope_list.remove(_e)
-        print(f'_add_to_scope_list added {file_path}')
         scope_list.add(file_path)
 
     @classmethod
@@ -316,8 +309,16 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :param file_path: vollständiger Pfad des Elements
         """
         if file_path in scope_list:
-            print(f'_remove_from_scope_list {file_path}')
             scope_list.remove(file_path)
+
+    def _remove_excludes_under(self, file_path: str):
+        """
+        Entfernt alle Elemente aus den Excludes, die Nachkommen des angegebenen Elements sind.
+        :param file_path: vollständiger Pfad des Elements
+        """
+        for _exclude in list(self.__excludes):
+            if _exclude.startswith(file_path):
+                self.__excludes.remove(_exclude)
 
     @classmethod
     def _regex_patterns_for(cls, patterns: list[str]) -> list[re.Pattern]:
