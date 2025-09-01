@@ -230,7 +230,6 @@ l-license Lizenz
 l-local-target Lokales Ziel...
 l-location Ort
 l-maintenance Wartung
-l-mandatory-snapshot * Snapshot
 l-new Neu...
 l-new-alias Neuer Aliasname
 l-ok OK
@@ -249,6 +248,7 @@ l-search Suchen
 l-select Auswählen
 l-select-elements Elemente auswählen
 l-show-all-elements Alle Elemente anzeigen
+l-snapshot Snapshot
 l-some einzelne Datei(en)
 l-target Sicherungs-Ziel
 l-targets Sicherungs-Ziele
