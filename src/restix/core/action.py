@@ -65,7 +65,8 @@ class RestixAction:
         self.__target_alias = target_alias
         self.__local_config = None
         self.__options = {OPTION_HOST: platform.node(), OPTION_YEAR: str(datetime.date.today().year),
-                          OPTION_USER: current_user(), OPTION_DRY_RUN: False, OPTION_BATCH: False}
+                          OPTION_HOME: os.path.expanduser('~'), OPTION_USER: current_user(),
+                          OPTION_DRY_RUN: False, OPTION_BATCH: False}
         self.__temp_files = []
 
     def action_id(self) -> str:
