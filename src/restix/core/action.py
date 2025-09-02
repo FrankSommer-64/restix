@@ -269,6 +269,10 @@ class RestixAction:
         :param local_config: restix-Konfiguration
         :param options: ggf. zusätzliche Optionen
         """
+        # eventuell die angegebenen Optionen übernehmen
+        if options is not None:
+            for _k, _v in options.items():
+                self.set_option(_k, _v)
         # restic-Repository setzen
         _target = local_config.targets().get(self.target_alias())
         if _target is None:
@@ -297,10 +301,6 @@ class RestixAction:
             if not _restic_version.empty_password_supported():
                 raise RestixException(E_NO_PASSWORD_NOT_SUPPORTED, _restic_version.version())
             self.set_option(OPTION_NO_PASSWORD, True)
-        # eventuell die angegebenen Optionen übernehmen
-        if options is not None:
-            for _k, _v in options.items():
-                self.set_option(_k, _v)
 
     def set_scope_options(self, scope: dict):
         """

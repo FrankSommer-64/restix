@@ -80,10 +80,12 @@ class RestoreOptionsPane(QGroupBox):
         _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__host_text = create_text(_layout, L_HOST, T_OPT_RST_HOST)
         self.__host_text.setText(platform.node())
+        self.__host_text.editingFinished.connect(self._host_edited)
         _current_year = datetime.datetime.now().year
         self.__year_combo = create_combo(_layout, L_YEAR, T_OPT_RST_YEAR)
         self.__year_combo.addItems([str(_y) for _y in range(_current_year, _current_year - PAST_YEARS_COUNT, -1)])
         self.__year_combo.setCurrentIndex(0)
+        self.__year_combo.currentIndexChanged.connect(self._year_selected)
         self.__snapshot_combo = create_combo(_layout, L_SNAPSHOT, T_OPT_RST_SNAPSHOT)
         self.__restore_path_selector = create_dir_selector(_layout, L_RESTORE_PATH, T_OPT_RST_RESTORE_PATH)
         _scope_row = _layout.rowCount()
@@ -100,17 +102,12 @@ class RestoreOptionsPane(QGroupBox):
         _layout.addWidget(_select_some_button, _scope_row+1, 2)
         self.__dry_run_option = create_checkbox(_layout, L_DRY_RUN, T_OPT_RST_DRY_RUN, False)
 
-    def clear_snapshot_combo(self):
-        """
-        Leert die Combo-Box zur Auswahl eines Snapshots.
-        """
-        self.__snapshot_combo.clear()
-
     def fill_snapshot_combo(self, snapshots: list[str]):
         """
         Befüllt die Combo-Box zur Auswahl eines Snapshots mit den übergebenen Daten.
         :param snapshots: Daten aller Snapshots
         """
+        self.__snapshot_combo.clear()
         self.__snapshot_combo.addItems(snapshots)
         for _i, _snapshot in enumerate(snapshots):
             _snapshot_id = _snapshot.split(' ')[0]
@@ -150,22 +147,38 @@ class RestoreOptionsPane(QGroupBox):
         if target is None:
             return
         try:
-            self.clear_snapshot_combo()
             self.__target_alias = target[CFG_PAR_ALIAS]
-            _options = None
-            _credentials = self.__local_config.credentials_for_target(self.__target_alias)
-            if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
-                # Passwort einlesen
-                _pw_dlg = PasswordDialog(self)
-                if _pw_dlg.exec() == QDialog.DialogCode.Accepted:
-                    self.__pw = _pw_dlg.password()
-                    _options = {OPTION_PASSWORD: self.__pw}
-            _snapshots_action = RestixAction.for_action_id(ACTION_SNAPSHOTS, target[CFG_PAR_ALIAS],
-                                                           self.__local_config, _options)
-            _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
-            _combo_data = [_s.combo_label() for _s in _snapshots]
-            _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
-            self.fill_snapshot_combo(_combo_data)
+            _snapshots = self._determine_snapshots()
+            self.fill_snapshot_combo(_snapshots)
+        except RestixException as _e:
+            QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR),
+                                 localized_message(E_RESTIC_CALL_FAILED, ACTION_SNAPSHOTS, str(_e)),
+                                 QMessageBox.StandardButton.Ok)
+
+    def _year_selected(self, index: int):
+        """
+        Wird aufgerufen, wenn der Benutzer das Jahr geändert hat
+        :param index: Index der Jahreszahl in der Auswahlliste
+        """
+        if index < 0:
+            return
+        try:
+            _snapshots = self._determine_snapshots()
+            self.fill_snapshot_combo(_snapshots)
+        except RestixException as _e:
+            QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR),
+                                 localized_message(E_RESTIC_CALL_FAILED, ACTION_SNAPSHOTS, str(_e)),
+                                 QMessageBox.StandardButton.Ok)
+
+    def _host_edited(self):
+        """
+        Wird aufgerufen, wenn der Benutzer den Hostnamen geändert hat
+        """
+        if len(self.__host_text.text()) == 0:
+            return
+        try:
+            _snapshots = self._determine_snapshots()
+            self.fill_snapshot_combo(_snapshots)
         except RestixException as _e:
             QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR),
                                  localized_message(E_RESTIC_CALL_FAILED, ACTION_SNAPSHOTS, str(_e)),
@@ -191,6 +204,28 @@ class RestoreOptionsPane(QGroupBox):
         if _snapshot_viewer.exec() != QDialog.DialogCode.Accepted:
             return
         self.__selected_elements = _snapshot_viewer.selected_elements()
+
+    def _determine_snapshots(self) -> list[str]:
+        """
+        Ermittelt die Snapshots in einem restic-Repository.
+        :returns: alle Snapshots im Repository für den aktuellen Benutzer, Jahr und Host
+        """
+        _year = self.__year_combo.currentText()
+        _host = self.__host_text.text()
+        _options = {OPTION_YEAR: _year, OPTION_HOST: _host}
+        _credentials = self.__local_config.credentials_for_target(self.__target_alias)
+        if _credentials.get(CFG_PAR_TYPE) == CFG_VALUE_CREDENTIALS_TYPE_PROMPT:
+            # Passwort einlesen
+            _pw_dlg = PasswordDialog(self)
+            if _pw_dlg.exec() == QDialog.DialogCode.Accepted:
+                self.__pw = _pw_dlg.password()
+                _options[OPTION_PASSWORD] = self.__pw
+        _snapshots_action = RestixAction.for_action_id(ACTION_SNAPSHOTS, self.__target_alias,
+                                                       self.__local_config, _options)
+        _snapshots = determine_snapshots(_snapshots_action, TaskMonitor(None, True))
+        _combo_data = [_s.combo_label() for _s in _snapshots]
+        _combo_data.insert(0, RESTIC_SNAPSHOT_LATEST)
+        return _combo_data
 
 
 class RestorePane(ResticActionPane):

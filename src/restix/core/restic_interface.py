@@ -292,10 +292,9 @@ def determine_snapshots(action: RestixAction, task_monitor: TaskMonitor) -> list
         _time = _element.get(JSON_ATTR_TIME)
         _snapshot = Snapshot(_snapshot_id, datetime.fromisoformat(_time), '')
         _tags = _element.get(JSON_ATTR_TAGS)
-        if _tags is None:
-            continue
-        for _tag in _tags:
-            _snapshot.add_tag(_tag)
+        if _tags is not None:
+            for _tag in _tags:
+                _snapshot.add_tag(_tag)
         _snapshots.append(_snapshot)
     return _snapshots
 
