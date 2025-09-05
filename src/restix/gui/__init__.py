@@ -33,6 +33,9 @@
 # -----------------------------------------------------------------------------------------------
 
 
+# Verzeichnis-Trenner innerhalb von Qt
+Q_SEP = '/'
+
 # Style für die Buttons zum Starten einer Aktion
 ACTION_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
 

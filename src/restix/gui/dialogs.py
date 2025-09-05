@@ -319,7 +319,7 @@ class AboutDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(localized_label(L_DLG_TITLE_ABOUT))
         _parent_rect = parent.contentsRect()
-        self.setGeometry(_parent_rect.x() + _ABOUT_DIALOG_OFFSET, _parent_rect.y() + _RESTIX_IMAGE_SIZE,
+        self.setGeometry(_parent_rect.x() + _ABOUT_DIALOG_OFFSET, _parent_rect.y() + _ABOUT_DIALOG_OFFSET,
                          _ABOUT_DIALOG_WIDTH, _ABOUT_DIALOG_HEIGHT)
         self.setStyleSheet(_STYLE_WHITE_BG)
         _dlg_layout = QGridLayout(self)
@@ -649,15 +649,15 @@ def exception_box(icon, reason, question, buttons, default_button):
 
 
 _ABOUT_DIALOG_HEIGHT = 480
-_ABOUT_DIALOG_OFFSET = 80
+_ABOUT_DIALOG_OFFSET = 40
 _ABOUT_DIALOG_WIDTH = 800
 _RESTIX_IMAGE_SIZE = 192
 _RESTIX_IMAGE_SPACING = 16
 _PASSWORD_DIALOG_HEIGHT = 240
 _PASSWORD_DIALOG_OFFSET = 80
 _PASSWORD_DIALOG_WIDTH = 360
-_PDF_VIEWER_HEIGHT = 720
-_PDF_VIEWER_OFFSET = 10
+_PDF_VIEWER_HEIGHT = 600
+_PDF_VIEWER_OFFSET = 40
 _PDF_VIEWER_WIDTH = 640
 _PGP_FILE_DIALOG_HEIGHT = 240
 _PGP_FILE_DIALOG_OFFSET = 80
@@ -665,9 +665,6 @@ _PGP_FILE_DIALOG_WIDTH = 360
 _SAVE_DIALOG_HEIGHT = 240
 _SAVE_DIALOG_OFFSET = 80
 _SAVE_DIALOG_WIDTH = 360
-_SCOPE_EDITOR_HEIGHT = 720
-_SCOPE_EDITOR_OFFSET = 10
-_SCOPE_EDITOR_WIDTH = 1200
 _SNAPSHOT_VIEWER_HEIGHT = 720
 _SNAPSHOT_VIEWER_OFFSET = 10
 _SNAPSHOT_VIEWER_WIDTH = 640

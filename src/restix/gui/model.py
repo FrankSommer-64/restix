@@ -47,6 +47,7 @@ from PySide6.QtWidgets import QFileSystemModel
 
 from restix.core import *
 from restix.core.config import LocalConfig
+from restix.gui import Q_SEP
 
 
 class CheckBoxFileSystemModel(QFileSystemModel):
@@ -61,8 +62,8 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :param ignores: zu ignorierende Dateien und Verzeichnisse
         """
         super().__init__()
-        self.__includes = set([_f.rstrip(os.sep) for _f in includes])
-        self.__excludes = set([_f.rstrip(os.sep) for _f in excludes])
+        self.__includes = set([_f.rstrip(Q_SEP) for _f in includes])
+        self.__excludes = set([_f.rstrip(Q_SEP) for _f in excludes])
         self.__ignore_patterns = CheckBoxFileSystemModel._regex_patterns_for(ignores)
         self.setFilter(QDir.Filter.AllEntries | QDir.Filter.NoDotAndDotDot | QDir.Filter.Hidden)
 
@@ -218,7 +219,7 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :returns: True, falls das Element selbst oder ein übergeordnetes Element
                   in der Liste der zu ignorierenden Elemente enthalten ist
         """
-        _element_path_parts = file_path.split(os.sep)
+        _element_path_parts = file_path.split(Q_SEP)
         if len(_element_path_parts[1]) == 0:
             # File-System-Root
             return False
@@ -272,14 +273,14 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :returns: True, falls das Element selbst oder ein übergeordnetes Element
                   in der excludes-Liste enthalten ist
         """
-        _element_path_parts = file_path.split(os.sep)
+        _element_path_parts = file_path.split(Q_SEP)
         if len(_element_path_parts[1]) == 0:
             # File-System-Root
             return False
         _part = ''
         _parts = _element_path_parts[1:] if include_element else _element_path_parts[1:-1]
         for _p in _parts:
-            _part = f'{_part}{os.sep}{_p}'
+            _part = f'{_part}{Q_SEP}{_p}'
             if _part in internal_list:
                 return True
         return False
