@@ -462,7 +462,7 @@ class MessageTable(dict):
         if not os.path.isfile(_msgs_file_path):
             raise RuntimeError(_EMSG_INST_CORRUPT.format(_EMSG_NO_MSG_FILE_FOUND))
         try:
-            with open(_msgs_file_path, 'r') as f:
+            with open(_msgs_file_path, mode='r', encoding='utf-8') as f:
                 _msgs = f.read()
             return MessageTable(_msgs)
         except IOError as e:

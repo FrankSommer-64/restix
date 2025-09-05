@@ -44,7 +44,7 @@ import tomli_w
 from typing import Callable
 
 from PySide6 import QtCore
-from PySide6.QtCore import qVersion, Qt
+from PySide6.QtCore import qVersion, Qt, QUrl
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (QDialog, QFileDialog, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
@@ -303,7 +303,7 @@ class PdfViewerDialog(QDialog):
         _view_settings = _web_view.settings()
         _view_settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
         _view_settings.setAttribute(QWebEngineSettings.WebAttribute.PdfViewerEnabled, True)
-        _web_view.load(f'file://{file_path}')
+        _web_view.load(QUrl.fromLocalFile(file_path))
         _dlg_layout.addWidget(_web_view)
 
 

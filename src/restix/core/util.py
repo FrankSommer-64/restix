@@ -36,9 +36,9 @@
 Hilfsfunktionen für restix.
 """
 
+import locale
 import os
 import platform
-import pwd
 import re
 import subprocess
 
@@ -119,35 +119,11 @@ def platform_locale() -> str:
     """
     # noinspection PyBroadException
     try:
+        _locale_code, _encoding = locale.getlocale()
         _operating_system = platform.system().lower()
-        if _operating_system == OS_LINUX:
-            _rc, _stdout, _stderr = shell_cmd(['locale'])
-            if _rc == 0:
-                _m = re.search(r'.*LANG=(\w+).*', _stdout, re.DOTALL)
-                if _m is not None:
-                    _v = _m.group(1)
-                    if len(_v) >= 2:
-                        return _v[:2].lower()
-                _m = re.search(r'.*LANGUAGE=(\w+).*', _stdout, re.DOTALL)
-                if _m is not None:
-                    _v = _m.group(1)
-                    if len(_v) >= 2:
-                        return _v[:2].lower()
-        elif _operating_system == OS_WINDOWS:
-            _rc, _stdout, _stderr = shell_cmd(['systeminfo'])
-            if _rc == 0:
-                _m = re.search(r'.*System\s+Locale:\s+(\w+).*', _stdout, re.DOTALL)
-                if _m is not None:
-                    _v = _m.group(1)
-                    if len(_v) >= 2:
-                        return _v[:2].lower()
-        else:
-            _v = os.environ.get(ENVA_LANG)
-            if _v is not None and len(_v) >= 2:
-                return _v[:2].lower()
-            _v = os.environ.get(ENVA_LANGUAGE)
-            if _v is not None and len(_v) >= 2:
-                return _v[:2].lower()
+        if _operating_system == OS_WINDOWS:
+            locale.setlocale(locale.LC_ALL, f'{_locale_code}.utf-8')
+        return _locale_code[:2].lower()
     except Exception:
         pass
     return DEFAULT_LOCALE
@@ -160,7 +136,11 @@ def current_user() -> str:
     """
     _operating_system = platform.system().lower()
     if _operating_system == OS_LINUX:
+        import pwd
         return pwd.getpwuid(os.getuid()).pw_name
+    elif _operating_system == OS_WINDOWS:
+        import win32api
+        return win32api.GetUserName()
     _raise_exception(_E_OS_NOT_SUPPORTED)
 
 

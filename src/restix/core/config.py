@@ -221,8 +221,9 @@ class LocalConfig(dict):
         if _output_file_path is None:
             raise RestixException(E_FILE_NAME_MISSING)
         try:
-            with open(_output_file_path, 'wb') as _f:
-                tomli_w.dump(self, _f)
+            _toml_data = tomli_w.dumps(self)
+            with open(_output_file_path, mode='w', encoding='utf-8') as _f:
+                _f.write(_toml_data)
         except IOError | OSError as _e:
             raise RestixException(E_WRITE_FILE_FAILED, _output_file_path, str(_e))
 
@@ -247,7 +248,7 @@ class LocalConfig(dict):
         _file_contents = ''
         _file_path = os.path.abspath(file_path)
         try:
-            with open(_file_path, 'r') as _f:
+            with open(_file_path, mode='r', encoding='utf-8') as _f:
                 _file_contents = _f.read()
         except Exception as e:
             raise RestixException(E_CFG_READ_FILE_FAILED, _file_path, e)

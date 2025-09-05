@@ -15,7 +15,8 @@ dependencies = [
     "PySide6 == 6.9.0",
     "packaging",
     "tomli",
-    "tomli_w"
+    "tomli_w",
+    "pywin32; platform_system == 'Windows'"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
