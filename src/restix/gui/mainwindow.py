@@ -36,9 +36,7 @@
 Hauptfenster der restix GUI.
 """
 
-from copy import deepcopy
-
-from PySide6.QtWidgets import QDialog, QMainWindow, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QMessageBox
 
 from restix.core.restic_interface import determine_version
 from restix.core.restic_version import ResticVersion
@@ -47,7 +45,6 @@ from restix.core.config import LocalConfig
 from restix.core.messages import *
 from restix.gui import SMALL_CONTENT_MARGIN, MIN_MAIN_WIN_HEIGHT, MIN_MAIN_WIN_WIDTH
 from restix.gui.central_pane import CentralPane
-from restix.gui.dialogs import SaveConfigDialog
 from restix.gui.settings import GuiSettings
 
 
@@ -61,16 +58,6 @@ class MainWindow(QMainWindow):
         :param local_config: lokale restix-Konfiguration
         """
         super().__init__()
-        self.__config = local_config
-        self.__original_config = deepcopy(local_config)
-        self.__settings = GuiSettings.from_file()
-        self.setMinimumSize(MIN_MAIN_WIN_WIDTH, MIN_MAIN_WIN_HEIGHT)
-        self.setGeometry(self.__settings.win_geometry())
-        self.setWindowTitle(localized_label(L_MAIN_WIN_TITLE))
-        self.setCentralWidget(CentralPane(self, local_config, self.__settings))
-        self.layout().setContentsMargins(SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN,
-                                         SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
-        self.layout().update()
         try:
             _restic_version = ResticVersion.from_version_command(determine_version(local_config.restic_executable()))
             if not _restic_version.suitable_for_restix():
@@ -78,23 +65,31 @@ class MainWindow(QMainWindow):
                                     localized_message(E_UNSUPPORTED_RESTIC_VERSION, _restic_version.version()),
                                     QMessageBox.StandardButton.Ok)
                 self.close()
-            self.__config.set_restic_version(_restic_version)
+            local_config.set_restic_version(_restic_version)
         except RestixException as _e:
             QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
             self.close()
+        self.__settings = GuiSettings.from_file()
+        self.setMinimumSize(MIN_MAIN_WIN_WIDTH, MIN_MAIN_WIN_HEIGHT)
+        self.setGeometry(self.__settings.win_geometry())
+        self.setWindowTitle(localized_label(L_MAIN_WIN_TITLE))
+        self.__central_pane = CentralPane(self, local_config, self.__settings)
+        self.setCentralWidget(self.__central_pane)
+        self.layout().setContentsMargins(SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN,
+                                         SMALL_CONTENT_MARGIN, SMALL_CONTENT_MARGIN)
+        self.layout().update()
 
     def save_settings(self):
         """
         Speichert die lokale restix-Konfiguration und die GUI-Einstellungen in einer Datei.
         """
-        if self.__original_config != self.__config:
-            _dlg = SaveConfigDialog(self)
-            if _dlg.exec() == QDialog.DialogCode.Accepted:
-                try:
-                    self.__config.to_file(_dlg.save_as_file_path())
-                except RestixException as _e:
-                    QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR), str(_e),
-                                         QMessageBox.StandardButton.Ok)
+        self.__central_pane.save_config()
+        self._save_gui_settings()
+
+    def _save_gui_settings(self):
+        """
+        Speichert die GUI-Einstellungen in einer Datei.
+        """
         self.__settings.set_win_geometry(self.rect())
         try:
             self.__settings.save()

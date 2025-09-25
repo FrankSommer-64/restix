@@ -36,18 +36,22 @@
 Zentraler Arbeitsbereich der restix GUI.
 """
 
+from copy import deepcopy
+
 import os.path
 
 from PySide6.QtCore import QPoint
-from PySide6.QtWidgets import QApplication, QMenu, QSizePolicy, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (QApplication, QDialog, QMenu, QMessageBox, QSizePolicy,
+                               QVBoxLayout, QWidget)
 
 from restix.core import *
 from restix.core.config import LocalConfig
 from restix.core.messages import *
+from restix.core.restix_exception import RestixException
 from restix.gui import *
 from restix.gui.backup_pane import BackupPane
 from restix.gui.configuration_pane import ConfigurationPane
-from restix.gui.dialogs import AboutDialog, PdfViewerDialog
+from restix.gui.dialogs import AboutDialog, PdfViewerDialog, SaveConfigDialog
 from restix.gui.maintenance_pane import MaintenancePane
 from restix.gui.model import ConfigModelFactory
 from restix.gui.panes import ActionSelectionPane
@@ -67,7 +71,8 @@ class CentralPane(QWidget):
         :param gui_settings: GUI-Einstellungen des Benutzers
         """
         super().__init__(parent)
-        self.__local_config = local_config
+        self.__config = local_config
+        self.__original_config = deepcopy(local_config)
         self.__gui_settings = gui_settings
         self.__model_factory = ConfigModelFactory(local_config)
         self.__layout = QVBoxLayout(self)
@@ -88,23 +93,43 @@ class CentralPane(QWidget):
         self.__layout.addWidget(_welcome_pane)
         self.__work_pane = _welcome_pane
 
+    def save_config(self):
+        """
+        Speichert die lokale restix-Konfiguration, falls sie geändert wurde.
+        """
+        if self.__original_config != self.__config:
+            _dlg = SaveConfigDialog(self)
+            if _dlg.exec() == QDialog.DialogCode.Accepted:
+                try:
+                    self.__config.to_file(_dlg.save_as_file_path())
+                except RestixException as _e:
+                    QMessageBox.critical(self, localized_label(L_MBOX_TITLE_ERROR), str(_e),
+                                         QMessageBox.StandardButton.Ok)
+                    return
+                self.__original_config = deepcopy(self.__config)
+            else:
+                self.__config = deepcopy(self.__original_config)
+
     def _backup_selected(self):
         """
         Zeigt die GUI-Bereiche für Backup an.
         """
-        self._activate_pane(BackupPane(self, self.__local_config, self.__gui_settings), L_BACKUP)
+        self.save_config()
+        self._activate_pane(BackupPane(self, self.__config, self.__gui_settings), L_BACKUP)
 
     def _restore_selected(self):
         """
         Zeigt die GUI-Bereiche für Restore an.
         """
-        self._activate_pane(RestorePane(self, self.__local_config, self.__gui_settings), L_RESTORE)
+        self.save_config()
+        self._activate_pane(RestorePane(self, self.__config, self.__gui_settings), L_RESTORE)
 
     def _maintenance_selected(self):
         """
         Zeigt die GUI-Bereiche für Wartung an.
         """
-        self._activate_pane(MaintenancePane(self, self.__local_config, self.__gui_settings), L_MAINTENANCE)
+        self.save_config()
+        self._activate_pane(MaintenancePane(self, self.__config, self.__gui_settings), L_MAINTENANCE)
 
     def _config_selected(self):
         """
@@ -118,6 +143,7 @@ class CentralPane(QWidget):
         :param mouse_x: X-Position des Mausklicks
         :param mouse_y: Y-Position des Mausklicks
         """
+        self.save_config()
         _context_menu = QMenu(self)
         _context_menu.setStyleSheet(INFO_CONTEXT_MENU_STYLE)
         _context_menu.setContentsMargins(DEFAULT_CONTENT_MARGIN, DEFAULT_CONTENT_MARGIN,

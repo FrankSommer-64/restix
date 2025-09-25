@@ -67,10 +67,10 @@ class CredentialsDetailPane(QListView):
         super().__init__(parent)
         self.__config_path = config_dir_path
         self.setStyleSheet(CONFIG_LIST_VIEW_STYLE)
-        _layout = QFormLayout(self)
-        _layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
-                                   WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
-        _layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.__layout = QFormLayout(self)
+        self.__layout.setContentsMargins(WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN,
+                                         WIDE_CONTENT_MARGIN, WIDE_CONTENT_MARGIN)
+        self.__layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         if include_alias:
             _alias_label = QLabel(localized_label(L_ALIAS))
             _alias_label.setToolTip(localized_label(T_CFG_CREDENTIAL_ALIAS))
@@ -78,7 +78,7 @@ class CredentialsDetailPane(QListView):
             self.__alias_text.setStyleSheet(TEXT_FIELD_STYLE)
             self.__alias_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
             self.__alias_text.setToolTip(localized_label(T_CFG_CREDENTIAL_ALIAS))
-            _layout.addRow(_alias_label, self.__alias_text)
+            self.__layout.addRow(_alias_label, self.__alias_text)
             self.__value_row = 3
         else:
             self.__alias_text = None
@@ -89,7 +89,7 @@ class CredentialsDetailPane(QListView):
         self.__comment_text.setStyleSheet(TEXT_FIELD_STYLE)
         self.__comment_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.__comment_text.setToolTip(localized_label(T_CFG_CREDENTIAL_COMMENT))
-        _layout.addRow(_comment_label, self.__comment_text)
+        self.__layout.addRow(_comment_label, self.__comment_text)
         _type_label = QLabel(localized_label(L_TYPE))
         _type_label.setToolTip(localized_label(T_CFG_CREDENTIAL_TYPE))
         self.__type_combo = QComboBox()
@@ -100,7 +100,7 @@ class CredentialsDetailPane(QListView):
             self.__type_combo.addItem(_type, _i)
         self.__type_combo.setCurrentIndex(-1)
         self.__type_combo.currentIndexChanged.connect(self._type_changed)
-        _layout.addRow(_type_label, self.__type_combo)
+        self.__layout.addRow(_type_label, self.__type_combo)
         self.__value_text = None
         self.__value_button = None
 
@@ -143,9 +143,9 @@ class CredentialsDetailPane(QListView):
         :param value: Dateiname oder Passwort
         """
         # Zeilen, die nicht für jeden Credential-Typ vorhanden sind, löschen
-        _row_count = self.layout().rowCount()
+        _row_count = self.__layout.rowCount()
         for _i in range(0, _row_count - self.__value_row):
-            self.layout().removeRow(_row_count - _i - 1)
+            self.__layout.removeRow(_row_count - _i - 1)
         if credential_type in [CFG_VALUE_CREDENTIALS_TYPE_NONE, CFG_VALUE_CREDENTIALS_TYPE_PROMPT]:
             # None und Prompt brauchen gar keine zusätzlichen Widgets
             self.__value_button = None
@@ -162,7 +162,7 @@ class CredentialsDetailPane(QListView):
             self.__value_text.setEchoMode(QLineEdit.EchoMode.Password)
             self.__value_text.setText(value)
             self.__value_text.setToolTip(_tooltip)
-            self.layout().addRow(_value_label, self.__value_text)
+            self.__layout.addRow(_value_label, self.__value_text)
             return
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_FILE or credential_type == CFG_VALUE_CREDENTIALS_TYPE_PGP:
             # Passwort-Datei und PGP benötigen die Datei mit dem Passwort
@@ -172,14 +172,14 @@ class CredentialsDetailPane(QListView):
             self.__value_button = QPushButton(value)
             self.__value_button.clicked.connect(self._select_password_file)
             self.__value_button.setToolTip(_tooltip)
-            self.layout().addRow(_value_label, self.__value_button)
+            self.__layout.addRow(_value_label, self.__value_button)
         if credential_type == CFG_VALUE_CREDENTIALS_TYPE_PGP:
             # PGP hat zusätzlich noch einen Button zum Erzeugen einer verschlüsselten Datei mit dem Passwort
             _create_encrypted_file_label = QLabel('')
             _create_encrypted_file_button = QPushButton(localized_label(L_CREATE_ENCRYPTED_FILE))
             _create_encrypted_file_button.clicked.connect(self._create_encrypted_file)
             _create_encrypted_file_button.setToolTip(localized_label(localized_label(T_CFG_CREATE_ENCRYPTED_FILE)))
-            self.layout().addRow(_create_encrypted_file_label, _create_encrypted_file_button)
+            self.__layout.addRow(_create_encrypted_file_label, _create_encrypted_file_button)
 
     def _select_password_file(self):
         """
