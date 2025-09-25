@@ -39,6 +39,7 @@ Models der restix-Konfiguration zur Nutzung in der GUI.
 import os.path
 import re
 
+from pathlib import PurePath
 from typing import Any
 
 from PySide6.QtCore import Qt, QAbstractItemModel, QAbstractListModel, QDir, QModelIndex, QPersistentModelIndex
@@ -105,15 +106,16 @@ class CheckBoxFileSystemModel(QFileSystemModel):
                 # Filesystem-Root ist immer unchecked
                 return Qt.CheckState.Unchecked.value
             _element_path = self.filePath(index)
-            if self._element_or_ancestor_ignored(_element_path):
+            _path_parts = PurePath(_element_path).parts
+            if self._element_or_ancestor_ignored(_path_parts):
                 # Element selbst oder übergeordnetes Element ist in der Ignore-Liste,
                 # dann hat das Element immer den Status Unchecked
                 return Qt.CheckState.Unchecked.value
-            if self._element_or_ancestor_excluded(_element_path):
+            if self._element_or_ancestor_excluded(_path_parts):
                 # Element selbst oder übergeordnetes Element ist in der Excludes-Liste,
                 # dann hat das Element den Status Unchecked
                 return Qt.CheckState.Unchecked.value
-            if self._element_or_ancestor_included(_element_path):
+            if self._element_or_ancestor_included(_path_parts):
                 # Element selbst oder übergeordnetes Element ist in der Includes-Liste,
                 # dann hat das Element den Status Checked
                 return Qt.CheckState.Checked.value
@@ -125,10 +127,11 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         if role == Qt.ItemDataRole.ForegroundRole and index.column() == 0:
             # Vordergrundfarbe
             _element_path = self.filePath(index)
-            if not index.parent().isValid() or self._element_or_ancestor_ignored(_element_path):
+            _path_parts = PurePath(_element_path).parts
+            if not index.parent().isValid() or self._element_or_ancestor_ignored(_path_parts):
                 # Root-Element oder ignoriertes Element
                 return QColorConstants.LightGray
-            if self._element_or_ancestor_excluded(_element_path):
+            if self._element_or_ancestor_excluded(_path_parts):
                 # Element selbst oder übergeordnetes Element ist in der Excludes-Liste
                 return QColorConstants.DarkRed
             if _element_path in self.__includes:
@@ -154,12 +157,13 @@ class CheckBoxFileSystemModel(QFileSystemModel):
             if not index.isValid() or not index.parent().isValid():
                 return False
             _element_path = self.filePath(index)
-            if self._element_or_ancestor_ignored(_element_path):
+            _path_parts = PurePath(_element_path).parts
+            if self._element_or_ancestor_ignored(_path_parts):
                 # Element oder übergeordnetes Element in der Liste der zu ignorierenden Elemente,
                 # Checkbox-Status immer unchecked
                 return value == Qt.CheckState.Unchecked.value
             if value == Qt.CheckState.Checked.value:
-                if self._ancestor_excluded(_element_path):
+                if self._ancestor_excluded(_path_parts):
                     # übergeordnetes Element in der Liste der auszuschliessenden Elemente,
                     # Element kann nicht angehakt werden
                     return False
@@ -213,44 +217,43 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         self.dataChanged.emit(_top_index, _bottom_index, Qt.ItemDataRole.CheckStateRole)
         self.dataChanged.emit(_top_index, _bottom_index, Qt.ItemDataRole.ForegroundRole)
 
-    def _element_or_ancestor_ignored(self, file_path: str) -> bool:
+    def _element_or_ancestor_ignored(self, path_parts: tuple[str, ...]) -> bool:
         """
-        :param file_path: vollständiger Pfad des Elements
+        :param path_parts: alle Teile des vollständigen Element-Pfads
         :returns: True, falls das Element selbst oder ein übergeordnetes Element
                   in der Liste der zu ignorierenden Elemente enthalten ist
         """
-        _element_path_parts = file_path.split(Q_SEP)
-        if len(_element_path_parts[1]) == 0:
+        if len(path_parts) == 1:
             # File-System-Root
             return False
-        for _p in _element_path_parts[1:]:
+        for _p in path_parts[1:]:
             for _pattern in self.__ignore_patterns:
                 if _pattern.fullmatch(_p):
                     return True
         return False
 
-    def _ancestor_excluded(self, file_path: str) -> bool:
+    def _ancestor_excluded(self, path_parts: tuple[str, ...]) -> bool:
         """
-        :param file_path: vollständiger Pfad des Elements
+        :param path_parts: alle Teile des vollständigen Element-Pfads
         :returns: True, falls ein übergeordnetes Element in der excludes-Liste enthalten ist
         """
-        return CheckBoxFileSystemModel._element_or_ancestor_in(self.__excludes, file_path, False)
+        return CheckBoxFileSystemModel._element_or_ancestor_in(self.__excludes, path_parts, False)
 
-    def _element_or_ancestor_excluded(self, file_path: str) -> bool:
+    def _element_or_ancestor_excluded(self, path_parts: tuple[str, ...]) -> bool:
         """
-        :param file_path: vollständiger Pfad des Elements
+        :param path_parts: alle Teile des vollständigen Element-Pfads
         :returns: True, falls das Element selbst oder ein übergeordnetes Element
                   in der excludes-Liste enthalten ist
         """
-        return CheckBoxFileSystemModel._element_or_ancestor_in(self.__excludes, file_path)
+        return CheckBoxFileSystemModel._element_or_ancestor_in(self.__excludes, path_parts)
 
-    def _element_or_ancestor_included(self, file_path: str) -> bool:
+    def _element_or_ancestor_included(self, path_parts: tuple[str, ...]) -> bool:
         """
-        :param file_path: vollständiger Pfad des Elements
+        :param path_parts: alle Teile des vollständigen Element-Pfads
         :returns: True, falls das Element selbst oder ein übergeordnetes Element
                   in der includes-Liste enthalten ist
         """
-        return CheckBoxFileSystemModel._element_or_ancestor_in(self.__includes, file_path)
+        return CheckBoxFileSystemModel._element_or_ancestor_in(self.__includes, path_parts)
 
     def _descendant_included(self, file_path: str) -> bool:
         """
@@ -266,22 +269,23 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         return False
 
     @classmethod
-    def _element_or_ancestor_in(cls, internal_list: set[str], file_path: str,
+    def _element_or_ancestor_in(cls, internal_list: set[str], path_parts: tuple[str, ...],
                                 include_element: bool = True) -> bool:
         """
-        :param file_path: vollständiger Pfad des Elements
+        :param internal_list: interne Liste, gegen die das Element geprüft werden soll.
+        :param path_parts: alle Teile des vollständigen Element-Pfads
+        :param include_element: vollständiger Pfad des Elements
         :returns: True, falls das Element selbst oder ein übergeordnetes Element
-                  in der excludes-Liste enthalten ist
+                  in der internen Liste enthalten ist
         """
-        _element_path_parts = file_path.split(Q_SEP)
-        if len(_element_path_parts[1]) == 0:
+        if len(path_parts) == 1:
             # File-System-Root
             return False
-        _part = ''
-        _parts = _element_path_parts[1:] if include_element else _element_path_parts[1:-1]
+        _ancestor_path = path_parts[0].rstrip(Q_SEP)
+        _parts = path_parts[1:] if include_element else path_parts[1:-1]
         for _p in _parts:
-            _part = f'{_part}{Q_SEP}{_p}'
-            if _part in internal_list:
+            _ancestor_path = f'{_ancestor_path}{Q_SEP}{_p}'
+            if _ancestor_path in internal_list:
                 return True
         return False
 
@@ -292,7 +296,8 @@ class CheckBoxFileSystemModel(QFileSystemModel):
         :param scope_list: Exclude- oder Include-Liste
         :param file_path: vollständiger Pfad des Elements
         """
-        if CheckBoxFileSystemModel._element_or_ancestor_in(scope_list, file_path):
+        _path_parts = PurePath(file_path).parts
+        if CheckBoxFileSystemModel._element_or_ancestor_in(scope_list, _path_parts):
             # Element oder übergeordnetes Element schon in der Liste
             return
         if os.path.isdir(file_path):

@@ -39,12 +39,13 @@ Hauptprogramm der restix GUI.
 import sys
 
 from PySide6.QtCore import QDir, QTranslator, QLocale, QLibraryInfo
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtWidgets import QApplication, QMessageBox, QStyleFactory
 
 from restix.core import RESTIX_ASSETS_DIR, RESTIX_CONFIG_FN
 from restix.core.messages import *
 from restix.core.config import config_root_path, LocalConfig
 from restix.core.restix_exception import RestixException
+from restix.gui import PREFERRED_STYLES
 from restix.gui.mainwindow import MainWindow
 from restix.gui.wizards import run_config_wizard
 
@@ -58,6 +59,9 @@ def gui_main():
         _images_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), RESTIX_ASSETS_DIR)
         QDir.addSearchPath(RESTIX_ASSETS_DIR, _images_path)
         app = QApplication(sys.argv)
+        _app_style = _preferred_style()
+        if _app_style is not None:
+            app.setStyle(_app_style)
         # Lokalisierung für die System-Widgets installieren
         _system_locale = QLocale.languageToCode(QLocale.system().language())
         _tr_path = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
@@ -130,6 +134,17 @@ def _show_mbox(icon: QMessageBox.Icon, title_id: str, text_id: str, info_text: s
     _mbox.setInformativeText(info_text)
     _mbox.setStandardButtons(buttons)
     return _mbox.exec()
+
+
+def _preferred_style() -> str|None:
+    """
+    :return: bevorzugter Qt-Style für die Applikation
+    """
+    _available_styles = QStyleFactory.keys()
+    for _style in PREFERRED_STYLES:
+        if _style in _available_styles:
+            return _style
+    return None
 
 
 if __name__ == "__main__":

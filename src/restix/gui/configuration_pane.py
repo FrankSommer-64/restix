@@ -669,7 +669,7 @@ class ScopeDetailPane(QListView):
             _data[CFG_PAR_EXCLUDES] = self.__excludes_file_name
         _ignores_list = self.__ignores_list.toPlainText()
         if len(_ignores_list) > 0:
-            _data[CFG_PAR_IGNORES] = _ignores_list.split(os.sep)
+            _data[CFG_PAR_IGNORES] = _ignores_list.split(Q_LINESEP)
         return _data
 
     def set_data(self, scope_data: dict):
@@ -687,13 +687,14 @@ class ScopeDetailPane(QListView):
         if _ignores is not None:
             for _ignore_pattern in _ignores:
                 self.__ignores_list.append(_ignore_pattern)
+        self.__ignores_list.verticalScrollBar().setValue(0)
 
     def _edit_files_n_dirs(self):
         """
         Wird aufgerufen, wenn der Benutzer den "Editieren"-Button klickt.
         Startet den Scope-Editor zur Auswahl ein- und auszuschließender Dateien und Verzeichnisse.
         """
-        _ignores = self.__ignores_list.toPlainText().split(os.linesep)
+        _ignores = self.__ignores_list.toPlainText().split(Q_LINESEP)
         _scope_editor = ScopeEditor(self, self.__config_path, self.__includes_file_name, self.__excludes_file_name,
                                     _ignores)
         if _scope_editor.exec() != QDialog.DialogCode.Accepted:

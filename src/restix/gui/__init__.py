@@ -33,8 +33,14 @@
 # -----------------------------------------------------------------------------------------------
 
 
+# Zeilen-Trenner innerhalb von Qt
+Q_LINESEP = '\n'
+
 # Verzeichnis-Trenner innerhalb von Qt
 Q_SEP = '/'
+
+# Bevorzugte Qt Styles
+PREFERRED_STYLES = ('windowsvista', 'Fusion')
 
 # Style für die Buttons zum Starten einer Aktion
 ACTION_BUTTON_STYLE = 'background-color: green; color: white; font-weight: bold'
