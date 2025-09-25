@@ -10,6 +10,9 @@
 
 !pragma warning error all
 !include LogicLib.nsh
+!include StrFunc.nsh
+${StrRep}
+${StrStr}
 
 InstallDir "$PROGRAMFILES64\restix"
 OutFile restix_install.exe
@@ -63,6 +66,12 @@ LangString CreateVenvFailed ${LANG_GERMAN} "Fehler beim Erzeugen von Python virt
 LangString PrepareVenvFailed ${LANG_ENGLISH} "Could not install restix library to Python virtual environment"
 LangString PrepareVenvFailed ${LANG_GERMAN} "Fehler beim Installieren der restix-Bibliothek in Python virtual environment"
 
+LangString Python3Required ${LANG_ENGLISH} "Python 3 required. Local python is:"
+LangString Python3Required ${LANG_GERMAN} "Python Version 3 erforderlich. Lokal installiert ist:"
+
+LangString Python3_10Required ${LANG_ENGLISH} "At least Python 3.10 required. Local python is:"
+LangString Python3_10Required ${LANG_GERMAN} "Python Version 3.10 oder höher erforderlich. Lokal installiert ist:"
+
 LangString CommandExecutionFailed ${LANG_ENGLISH} "Error executing command "
 LangString CommandExecutionFailed ${LANG_GERMAN} "Fehler beim Ausführen des Befehls "
 
@@ -87,10 +96,7 @@ Section !$(Sec1Name) sec1
 	Call createStarterScript
 	Push $wheelFile
 	Call createPythonVenv
-	EnVar::SetHKLM
-	EnVar::AddValue "PATH" "$INSTDIR;"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\restix" "DisplayName" "Restix"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\restix" "UninstallString" "$\"$INSTDIR\uninstall_restix.exe$\""
+	Call addRegistryEntries
 	WriteUninstaller $INSTDIR\uninstall_restix.exe
 SectionEnd
 
@@ -104,11 +110,7 @@ Section ""
 		Call createStarterScript
 		Push "restix_core-${VERSION}-py3-none-any.whl"
 		Call createPythonVenv
-		EnVar::SetHKLM
-		EnVar::AddValue "PATH" "$INSTDIR;"
-		WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\restix" "DisplayName" "Restix"
-		WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\restix" "QuietUninstallString" '"$INSTDIR\uninstall_restix.exe" /S'
-		WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\restix" "UninstallString" '"$INSTDIR\uninstall_restix.exe"'
+		Call addRegistryEntries
 		WriteUninstaller $INSTDIR\uninstall_restix.exe
 	${EndIf}
 SectionEnd
@@ -192,8 +194,7 @@ FunctionEnd
 # Parameter: Python wheel für restix (core/full).
 Function createPythonVenv
     Pop $0
-	Push "python --version"
-	Call execAndAbortOnFail
+	Call checkPython
 	MessageBox MB_OK "$(CreatePyVenvMsg)"
 	StrCpy $actScript "$INSTDIR\.venv\Scripts\activate.bat"
 	StrCpy $deactScript "$INSTDIR\.venv\Scripts\deactivate.bat"
@@ -205,6 +206,45 @@ Function createPythonVenv
 	Call execAndAbortOnFail
 	Push '"$actScript" && pip3 install "$INSTDIR\$0" && "$deactScript"'
 	Call execAndAbortOnFail
+FunctionEnd
+
+# Schreibt die nötigen Informationen für ein Uninstall per Systemsteuerung in die Registry.
+Function addRegistryEntries
+	EnVar::SetHKLM
+	EnVar::AddValue "PATH" "$INSTDIR;"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\restix" "DisplayName" "Restix"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\restix" "QuietUninstallString" '"$INSTDIR\uninstall_restix.exe" /S'
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\restix" "UninstallString" '"$INSTDIR\uninstall_restix.exe"'
+FunctionEnd
+
+# Prüft, ob lokal Python mindesens in Version 3.10 vorhanden ist und bricht die Installation bei Misserfolg ab.
+Function checkPython
+	nsExec::ExecToStack "python --version"
+	Pop $9
+	Pop $8
+	${If} $9 != 0
+		Push "$(PythonNotFound)$\r$\n$8"
+		Call abortInstaller
+	${EndIf}
+	# $8 enthält "python x.y.z"
+	${StrStr} $9 $8 "python 3."
+	${If} $9 == ""
+		Push "$(Python3Required)$\r$\n$8"
+		Call abortInstaller
+	${EndIf}
+	${StrRep} $9 $8 "python 3." ""
+	# $9 enthält "y.z"
+	StrLen $7 $9
+	${If} $7 < 2
+		Push "$(Python3_10Required)$\r$\n$8"
+		Call abortInstaller
+	${EndIf}
+	StrCpy $7 $9 2
+	StrCpy $6 $7 1 1
+	${If} $6 == "."
+		Push "$(Python3_10Required)$\r$\n$8"
+		Call abortInstaller
+	${EndIf}
 FunctionEnd
 
 # Führt einen Windows-Befehl aus und bricht die Installation bei Misserfolg ab.
