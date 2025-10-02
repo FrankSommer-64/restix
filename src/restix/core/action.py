@@ -324,7 +324,7 @@ class RestixAction:
             _f = tempfile.NamedTemporaryFile('wt', delete=False)
             for _item in _ignores:
                 _f.write(f'{_item}{os.linesep}')
-            if _excludes_file_name is not None:
+            if _excludes_file_name is not None and len(_excludes_file_name) > 0:
                 with open(self._full_filename_of(_excludes_file_name), 'r') as _exclude_file:
                     _excludes = _exclude_file.readlines()
                 _f.writelines(_excludes)

@@ -15,7 +15,7 @@ ${StrRep}
 ${StrStr}
 
 InstallDir $LocalAppData\Programs\restix
-OutFile restix_install_local.exe
+OutFile install_restix_${VERSION}_local.exe
 RequestExecutionLevel user
 XPStyle on
 
@@ -38,8 +38,8 @@ LicenseData restix_license.txt
 # =============================================================================
 # Lokalisierte String-Konstanten
 # =============================================================================
-LangString Name ${LANG_ENGLISH} "restix"
-LangString Name ${LANG_GERMAN} "restix"
+LangString Name ${LANG_ENGLISH} "restix ${VERSION}"
+LangString Name ${LANG_GERMAN} "restix ${VERSION}"
 Name $(Name)
 
 LangString ^ComponentsText ${LANG_ENGLISH} "restix components"
@@ -54,8 +54,8 @@ LangString CreatePyVenvMsg ${LANG_GERMAN} "Erzeuge Python virtual environment.$\
 LangString FileWriteFailed ${LANG_ENGLISH} "Could not write file "
 LangString FileWriteFailed ${LANG_GERMAN} "Kein Schreibzugriff für Datei "
 
-LangString PythonNotFound ${LANG_ENGLISH} "$(NAME) requires Python"
-LangString PythonNotFound ${LANG_GERMAN} "$(NAME) benötigt Python"
+LangString PythonNotFound ${LANG_ENGLISH} "Restix requires Python"
+LangString PythonNotFound ${LANG_GERMAN} "Restix benötigt Python"
 
 LangString CreateDirFailed ${LANG_ENGLISH} "Could not create directory"
 LangString CreateDirFailed ${LANG_GERMAN} "Fehler beim Anlegen von Verzeichnis"

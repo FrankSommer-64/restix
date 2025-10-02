@@ -5,7 +5,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/FrankSommer-64/restix">
-    <img src="images/restix.png" alt="Logo" width="128" height="128">
+    <img src="restix-icon.png" alt="Logo" width="128" height="128">
   </a>
 
 <h3 align="center">Restix</h3>
@@ -49,11 +49,13 @@ Restix has been tested on Linux Mint 22, Fedora 42 and Windows 11.
 Binary installation:
 
 1. Download appropriate installation package for your system
+1. Verify package integrity
 1. Install the package with administrator privileges
 
 Manual installation (Linux only):
 
 1. Download restix package for manual installation
+1. Verify package integrity
 1. Extract package into temporary directory
 1. Open installation script in an editor an adjust path variables according to your needs
 1. Save installation script
@@ -76,11 +78,9 @@ Command line interface for automated tasks is also available. Examples:
 
 ## Roadmap
 
-- v0.9.5 system tested command line interface
-- v0.9.6 GUI usability improvements
-- v0.9.7 system tested GUI
-- v0.9.8 Windows support
-- v1.0 full documentation and manuals
+- v0.9.7 GUI usability improvements
+- v0.9.8 system tested GUI
+- v1.0 system tested command line interface
 
 See [open issues](https://github.com/FrankSommer-64/restix/issues) for a full list of proposed features (and known issues).
 

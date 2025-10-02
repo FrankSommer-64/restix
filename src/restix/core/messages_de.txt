@@ -275,17 +275,17 @@ l-main-win-title restix
 l-mbox-title-error Fehler
 l-mbox-title-info Information
 l-mbox-title-warning Warnung
-l-menu-about Über restix
+l-menu-about Über restix...
 l-menu-remove Löschen
 l-menu-rename Umbenennen...
-l-menu-user-manual Benutzerhandbuch
+l-menu-user-manual Benutzerhandbuch...
 l-wiz-button-back < Zurück
 l-wiz-button-cancel Abbrechen
 l-wiz-button-finish Fertig
 l-wiz-button-next Weiter >
 l-wiz-page-create-config-1-default Bitte auf Fertig klicken, wenn eine Standard-Konfiguration erstellt werden soll.
 l-wiz-page-create-config-1-user Bitte auf Weiter klicken, wenn eine benutzerdefinierte Konfiguration erstellt werden soll.
-l-wiz-page-create-config-5-scope Bitte auf den Button Sicherungsumfang klicken, um die Elemente für die Sicherung auszuwählen.
+l-wiz-page-create-config-5-scope Bitte auf den Button Sicherungs-Umfang klicken, um die Elemente für die Sicherung auszuwählen.
 l-wiz-page-create-config-cancel Bitte auf Abbrechen klicken, um den Assistenten zu beenden.
 l-wiz-page-title-create-config-1 Soll eine Standard-Konfiguration erstellt werden ?
 l-wiz-page-title-create-config-2 Sicherungsziel festlegen
@@ -346,7 +346,7 @@ Dann bitte das Passwort im Textfeld eingeben.
 t-wiz-scope-ignores-info Bitte Muster für Elemente eingeben, die beim Backup ignoriert werden sollen.\
 Die Muster müssen durch Kommata getrennt werden.
 t-wiz-target-desc-info Bitte einen Namen und ggf. eine Kurzbeschreibung für das Sicherungsziel eingeben.\
-Der Name darf nur aus Buchstaben, Ziffern, Punkt, Unterstrich und Minuszeichen bestehen.
+Der Name darf nur aus Buchstaben, Ziffern, Unterstrich und Minuszeichen bestehen.
 t-wiz-target-location-info Falls auf das Sicherungsziel lokal zugegriffen werden kann, bitte dieses\
 über den Button Lokales Ziel auswählen, externe Datenträger müssen angeschlossen sein. Ansonsten bitte\
 die URL direkt im Textfeld eingeben.

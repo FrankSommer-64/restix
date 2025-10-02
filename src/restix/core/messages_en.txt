@@ -275,7 +275,7 @@ l-main-win-title restix
 l-mbox-title-error Error
 l-mbox-title-info Information
 l-mbox-title-warning Warning
-l-menu-about About restix
+l-menu-about About restix...
 l-menu-remove Remove
 l-menu-rename Rename...
 l-menu-user-manual User manual...
@@ -285,7 +285,7 @@ l-wiz-button-finish Finish
 l-wiz-button-next Next >
 l-wiz-page-create-config-1-default Click Finish to create a default configuration.
 l-wiz-page-create-config-1-user Click Next to create a user defined configuration.
-l-wiz-page-create-config-5-scope Please click Scope button to select all elements for the backup.
+l-wiz-page-create-config-5-scope Please click Backup scope button to select all elements for the backup.
 l-wiz-page-create-config-cancel Click Cancel to terminate the wizard.
 l-wiz-page-title-create-config-1 Create default configuration ?
 l-wiz-page-title-create-config-2 Define backup target
@@ -346,9 +346,9 @@ then enter password into the text field.
 t-wiz-scope-ignores-info Please enter pattern(s) for elements to ignore in backups. \
 Separate patterns by comma.
 t-wiz-target-desc-info Please enter name and eventually description for target. \
-Name must contain letter, digit, dot, underscore and dash characters only.
+Name must contain letter, digit, underscore and dash characters only.
 t-wiz-target-location-info If target is available locally, please select it using the button, \
-external mediums must be connected to the computer. Enter remote URL in the text field otherwise.
+external media must be connected to the computer. Enter remote URL in the text field otherwise.
 
 # GUI errors
 e-gui-no-snapshot-selected No snapshot selected
