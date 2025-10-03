@@ -93,9 +93,11 @@ class RestoreOptionsPane(QGroupBox):
         self.__full_radio = QRadioButton(localized_label(L_FULL))
         self.__full_radio.setToolTip(localized_label(T_OPT_RST_RESTORE_SCOPE_FULL))
         self.__full_radio.setChecked(True)
+        self.__full_radio.toggled.connect(self._scope_radios_toggled)
         _layout.addWidget(self.__full_radio, _scope_row, 1)
         self.__some_radio = QRadioButton(localized_label(L_SOME))
         self.__some_radio.setToolTip(localized_label(T_OPT_RST_RESTORE_SCOPE_SOME))
+        self.__some_radio.toggled.connect(self._scope_radios_toggled)
         _layout.addWidget(self.__some_radio, _scope_row+1, 1)
         _select_some_button = QPushButton(localized_label(L_SELECT))
         _select_some_button.clicked.connect(self._scope_button_clicked)
@@ -112,6 +114,12 @@ class RestoreOptionsPane(QGroupBox):
         for _i, _snapshot in enumerate(snapshots):
             _snapshot_id = _snapshot.split(' ')[0]
             self.__snapshot_combo.setItemData(_i, _snapshot_id)
+
+    def some_restore_selected(self) -> bool:
+        """
+        :returns: True, falls nur ausgewählte Elemente aus der Sicherung zurückgeholt werden sollen
+        """
+        return self.__some_radio.isChecked()
 
     def selected_options(self) -> dict:
         """
@@ -137,7 +145,15 @@ class RestoreOptionsPane(QGroupBox):
         """
         :returns: ausgewählter Pfad für die Wiederherstellung
         """
-        return self.__restore_path_selector.text()
+        __restore_path = self.__restore_path_selector.selected_path()
+        return os.path.abspath(os.sep) if __restore_path is None else __restore_path
+
+    def _scope_radios_toggled(self):
+        """
+        Wird aufgerufen, wenn sich der Zustand der Radio-Buttons für den Restore-Umfang ändert.
+        """
+        if self.__full_radio.isChecked():
+            self.__selected_elements = None
 
     def target_selected(self, target: dict):
         """
@@ -258,19 +274,23 @@ class RestorePane(ResticActionPane):
             _options = self.__options_pane.selected_options()
             if _pw is not None:
                 _options[OPTION_PASSWORD] = _pw
+            _restic_version = self.restix_config.restic_version()
+            if _options.get(OPTION_DRY_RUN) and not _restic_version.restore_dry_run_supported():
+                raise RestixException(E_RESTORE_DRY_RUN_NOT_SUPPORTED, _restic_version.version())
             _restore_action = RestixAction.for_action_id(ACTION_RESTORE, self.selected_target[CFG_PAR_ALIAS],
                                                          self.restix_config, _options)
             _restore_action.set_option(OPTION_SNAPSHOT, _options.get(OPTION_SNAPSHOT))
             _restore_path = self.__options_pane.selected_restore_path()
-            if _restore_path is None:
-                _restore_action.set_option(OPTION_RESTORE_PATH, os.sep)
+            if os.path.isdir(_restore_path):
+                _restore_action.set_option(OPTION_RESTORE_PATH, _restore_path)
             else:
-                if os.path.isdir(_restore_path):
-                    _restore_action.set_option(OPTION_RESTORE_PATH, _restore_path)
-                else:
-                    raise RestixException(I_GUI_RESTORE_PATH_IS_NOT_DIR, _restore_path)
-            _selected_elements = self.__options_pane.selected_elements()
-            if _selected_elements is not None and len(_selected_elements) > 0:
+                raise RestixException(I_GUI_RESTORE_PATH_IS_NOT_DIR, _restore_path)
+            if self.__options_pane.some_restore_selected():
+                if not _restic_version.restore_include_file_supported():
+                    raise RestixException(E_RESTORE_INCLUDE_NOT_SUPPORTED, _restic_version.version())
+                _selected_elements = self.__options_pane.selected_elements()
+                if _selected_elements is None or len(_selected_elements) > 0:
+                    raise RestixException(E_RESTORE_NOTHING_SELECTED)
                 _f = tempfile.NamedTemporaryFile('wt', delete=False)
                 for _element in _selected_elements:
                     _f.write(f'{_element}{os.linesep}')
@@ -279,6 +299,7 @@ class RestorePane(ResticActionPane):
             self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
         except RestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
+            self.button_pane.action_stopped()
             return
         QThreadPool.globalInstance().start(self.__worker)
 

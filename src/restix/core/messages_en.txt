@@ -29,6 +29,9 @@ e-restic-version-not-recognized Could not determine restic version from output '
 e-restix-target-not-defined Alias for restic repository {0} is not configured.
 e-restix-var-not-defined Undefined variable {0} in configuration file.
 e-restore-dry-run-not-supported Installed restic version {0} does not support option '--dry-run' for restore commands.
+e-restore-include-not-supported Installed restic version {0} does not support option '--include-file' for restore commands. \
+Only full restore possible.
+e-restore-nothing-selected No files selected.
 e-unsupported-restic-version restic version {0} not supported, restix requires version 0.10 or higher.
 e-write-file-failed Error writing file {0}: {1}.
 i-dry-run-create-repo Will create repository {0}.

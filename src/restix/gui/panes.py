@@ -270,6 +270,12 @@ class DirectorySelector(QPushButton):
         self.__selected_path = None
         self.clicked.connect(self._clicked)
 
+    def selected_path(self) -> str | None:
+        """
+        :returns: ausgewähltes Verzeichnis; None, falls nichts ausgewählt wurde
+        """
+        return self.__selected_path
+
     def _clicked(self):
         """
         Wird aufgerufen, wenn der Button geklickt wurde.

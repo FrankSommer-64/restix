@@ -100,19 +100,22 @@ class BackupPane(ResticActionPane):
         _ok, _pw = super().start_button_clicked()
         if not _ok:
             return
-        _options = self.__options_pane.selected_options()
-        if _pw is not None:
-            _options[OPTION_PASSWORD] = _pw
-        _restic_version = self.restix_config.restic_version()
-        if _options.get(OPTION_AUTO_CREATE) and not _restic_version.auto_create_supported():
-            _msg = localized_message(W_AUTO_CREATE_NOT_SUPPORTED, _restic_version.version())
-            self.message_pane.show_message(SEVERITY_WARNING, _msg)
-            del _options[OPTION_AUTO_CREATE]
-        _backup_action = RestixAction.for_action_id(ACTION_BACKUP, self.selected_target[CFG_PAR_ALIAS],
-                                                    self.restix_config, _options)
-        self.__worker = Worker.for_action(_backup_action)
-        self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
-        QThreadPool.globalInstance().start(self.__worker)
+        try:
+            _options = self.__options_pane.selected_options()
+            if _pw is not None:
+                _options[OPTION_PASSWORD] = _pw
+            _restic_version = self.restix_config.restic_version()
+            if _options.get(OPTION_AUTO_CREATE) and not _restic_version.auto_create_supported():
+                _msg = localized_message(W_AUTO_CREATE_NOT_SUPPORTED, _restic_version.version())
+                self.message_pane.show_message(SEVERITY_WARNING, _msg)
+                del _options[OPTION_AUTO_CREATE]
+            _backup_action = RestixAction.for_action_id(ACTION_BACKUP, self.selected_target[CFG_PAR_ALIAS],
+                                                        self.restix_config, _options)
+            self.__worker = Worker.for_action(_backup_action)
+            self.__worker.connect_signals(self.handle_progress, self.handle_finish, self.handle_result, self.handle_error)
+            QThreadPool.globalInstance().start(self.__worker)
+        except BaseException:
+            self.button_pane.action_stopped()
 
     def cancel_button_clicked(self):
         """

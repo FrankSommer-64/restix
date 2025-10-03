@@ -91,6 +91,12 @@ class ResticVersion:
         """
         return self.__version >= Version('0.17')
 
+    def restore_include_file_supported(self) -> bool:
+        """
+        :returns: True, falls die restic-Version die Option --include-file für restore-Befehle unterstützt
+        """
+        return self.__version >= Version('0.17')
+
     def suitable_for_restix(self) -> bool:
         """
         :returns: True, falls die restic-Version für restix benutzt werden kann

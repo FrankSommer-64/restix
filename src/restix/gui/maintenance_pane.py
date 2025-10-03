@@ -129,6 +129,7 @@ class MaintenancePane(ResticActionPane):
                                           self.handle_error)
         except RestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
+            self.button_pane.action_stopped()
             return
         QThreadPool.globalInstance().start(self.__worker)
 
@@ -148,6 +149,7 @@ class MaintenancePane(ResticActionPane):
                                           self.handle_error)
         except RestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
+            self.button_pane.action_stopped()
             return
         QThreadPool.globalInstance().start(self.__worker)
 
@@ -171,6 +173,7 @@ class MaintenancePane(ResticActionPane):
                                           self.handle_error)
         except RestixException as _e:
             QMessageBox.information(self, localized_label(L_MBOX_TITLE_ERROR), str(_e), QMessageBox.StandardButton.Ok)
+            self.button_pane.action_stopped()
             return
         QThreadPool.globalInstance().start(self.__worker)
 
