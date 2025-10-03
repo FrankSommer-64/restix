@@ -103,6 +103,11 @@ class BackupPane(ResticActionPane):
         _options = self.__options_pane.selected_options()
         if _pw is not None:
             _options[OPTION_PASSWORD] = _pw
+        _restic_version = self.restix_config.restic_version()
+        if _options.get(OPTION_AUTO_CREATE) and not _restic_version.auto_create_supported():
+            _msg = localized_message(W_AUTO_CREATE_NOT_SUPPORTED, _restic_version.version())
+            self.message_pane.show_message(SEVERITY_WARNING, _msg)
+            del _options[OPTION_AUTO_CREATE]
         _backup_action = RestixAction.for_action_id(ACTION_BACKUP, self.selected_target[CFG_PAR_ALIAS],
                                                     self.restix_config, _options)
         self.__worker = Worker.for_action(_backup_action)
