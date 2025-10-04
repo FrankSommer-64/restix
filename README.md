@@ -46,15 +46,27 @@ Restix has been tested on Linux Mint 22, Fedora 42 and Windows 11.
 
 ### Installation
 
-Binary installation:
+Binary installation (Linux deb):
 
-1. Download appropriate installation package for your system
+1. Download restix-0.9.6.deb for full functionality, restix-core-0.9.6.deb lacks the GUI
 1. Verify package integrity
-1. Install the package with administrator privileges
+1. Install the package using apt with administrator privileges
+
+Binary installation (Linux rpm):
+
+1. Download restix-0.9.6-1.fc42.noarch.rpm for full functionality, restix_core-0.9.6-1.fc42.noarch.rpm lacks the GUI
+1. Verify package integrity
+1. Install the package using dnf with administrator privileges
+
+Binary installation (Windows):
+
+1. Download install_restix_0.9.6.exe for system-wide installation, install_restix_0.9.6_local.exe for installation per user
+1. Verify package integrity
+1. Run the installer, administrator privileges needed for system-wide installation
 
 Manual installation (Linux only):
 
-1. Download restix package for manual installation
+1. Download restix package restix-0.9.6-custom.zip for manual installation
 1. Verify package integrity
 1. Extract package into temporary directory
 1. Open installation script in an editor an adjust path variables according to your needs
@@ -74,6 +86,8 @@ Command line interface for automated tasks is also available. Examples:
 - Initialize repository: ```restix init usbstick-a```
 - Unlock repository: ```restix unlock usbstick-a```
 - List snapshots: ```restix snapshots usbstick-a```
+- Show snapshot contents: ```restix ls --snapshot latest usbstick-a```
+- Search element: ```restix find --pattern *.conf usbstick-a```
 
 
 ## Roadmap
